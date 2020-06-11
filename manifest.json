@@ -1,0 +1,54 @@
+{
+	"manifest_version": 2,
+	"name": "Betabur Login",
+	"version": "0.9.7.5",
+	"description": "Helps logging in with all the alts on beta.avabur.com",
+
+	"applications": {
+		"gecko": {
+			"id": "betaburloginID@example.com"
+		}
+	},
+
+	"icons": {
+		"60": "images/betaburlogin.png"
+	},
+
+	"content_scripts": [
+		{
+			"matches": [
+				"https://*.avabur.com/",
+				"https://*.avabur.com/?expired=1",
+				"https://beta.avabur.com/game"
+			],
+			"js": [
+				"js/jquery-3.4.1.min.js",
+				"js/content.js"
+			]
+		}
+	],
+	
+	"background": {
+		"scripts": ["js/background.js"]
+	},
+	
+	"options_ui": {
+		"page": "html/options.html",
+		"open_in_tab": true
+	},
+	
+	"browser_action": {
+		"default_icon": {
+			"60": "images/betaburlogin.png"
+		},
+		"default_title": "Betabur Login 2",
+		"default_popup": "html/browser_action.html"
+	},
+
+	"permissions": [
+		"storage",
+		"tabs",
+		"cookies",
+		"contextualIdentities"
+	]
+}
