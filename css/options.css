@@ -71,7 +71,7 @@ input {
 }
 
 #optionsPage table {
-	width: 24em;
+	width: 26em;
 	margin-top: 2em;
 }
 
@@ -113,12 +113,12 @@ input {
 }
 
 .warning:hover::after {
-	color: indianRed;
+	color: IndianRed;
 	background-color: FloralWhite;
 }
 
 .info:hover::after {
-	color: indianRed;
+	color: CadetBlue;
 	background-color: FloralWhite;
 }
 

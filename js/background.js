@@ -114,7 +114,7 @@ function login() {
 		}
 		return str
 	}
-	function login(i, username) {
+	function sendLogin(i, username) {
 		logins[i].postMessage({
 			text: "login",
 			username: username,
@@ -125,9 +125,9 @@ function login() {
 		})
 	}
 	
-	login(0, vars.mainAccount)
+	sendLogin(0, vars.mainAccount)
 	for (let i = 1; i <= vars.altsNumber; i++) {
-		login(i, vars.altBaseName+romanize(i))
+		sendLogin(i, vars.altBaseName+romanize(i))
 	}
 }
 
@@ -192,7 +192,7 @@ async function getVars() {
 				}
 			]
 		}
-		browser.storage.sync.set(vars)
+		await browser.storage.sync.set(vars)
 	}
 	updateVars()
 }
@@ -241,13 +241,15 @@ function sendCurrency(name) {
 	sendMessage({text: "send currency", recipient: name})
 }
 
-function updateVars() {
-	if (typeof vars.version !== "int") { //reset if too old
-		browser.storage.sync.set({})
+async function updateVars() {
+	if (typeof vars.version !== "number") { //reset if too old
+		console.log("reset vars - too old")
+		await browser.storage.sync.clear()
 		getVars()
 		return
 	}
 	if (vars.version < 2) {
+		console.log("update vars from versions before 2")
 		vars.mainUsername = ""
 		browser.storage.sync.set(vars)
 	}

@@ -11,10 +11,12 @@ Firefox addon to allow automation in [Avabur's beta server](https://beta.avabur.
 * Automatic harvestron.
 * Automatic crafting.
 * Automatic events.
-* Add custom CSS style.
 * Remove the "effects info" box.
 
-Currently, most of the automation features are toggable. In the far future, I plan to allow toggling on/off all the features.
+##### Plans:
+* Add custom CSS style.
+* Currently, most of the automation features are toggable. Allow on/off toggling for all features.
+* Make keepUsernameVisible actually work
 
 
 ###### Notes:
