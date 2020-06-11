@@ -46,7 +46,6 @@ function deabbreviateNumber (input) {
 }
 
 async function fillFields() {
-	//there is an event called storage.onChanged...
 	vars = await browser.storage.sync.get()
 	
 	$("#mainAccountName")	.val(vars.mainAccount)
