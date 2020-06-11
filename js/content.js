@@ -430,8 +430,8 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	$(document).on("roa-ws:craft", checkCraftingQueue)
 
 	//auto event. originally taken from: https://github.com/dragonminja24/betaburCheats/raw/master/betaburCheatsHeavyWeight.js
-	let commandChannel = 3203, //debugging channel
-	//let commandChannel = 3202, //"production" channel"
+	//let commandChannel = 3203, //debugging channel
+	let commandChannel = 3202, //"production" channel"
 		mainCharacter		= "michaelts",
 		getTrade			= [
 			["michaeltsI"], 				//food
