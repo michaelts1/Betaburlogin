@@ -8,6 +8,7 @@
  * Add info tooltips next to input fields in options.html
  * Retry auto-login
  * Auto event + Stop joining events due to old messages sent when loading the page
+ * Updating old versions of vars
  */
 
 "use strict"

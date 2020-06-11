@@ -144,7 +144,7 @@ async function getVars() {
 	//if not set, create with default settings
 	if (Object.keys(vars).length === 0) {
 		vars = {
-			version 			: 3,
+			version 			: 2,
 			doQuests 			: true,
 			doBuildingAndHarvy	: true,
 			doCraftQueue 		: true,
@@ -242,42 +242,15 @@ function sendCurrency(name) {
 }
 
 function updateVars() {
-	if (vars.version < 2) { //reset if too old
+	if (typeof vars.version !== "int") { //reset if too old
 		browser.storage.sync.set({})
 		getVars()
+		return
 	}
-	if (vars.version === 2) {
+	if (vars.version < 2) {
 		vars.mainUsername = ""
 		browser.storage.sync.set(vars)
 	}
 }
 
 console.log("background script finished compiling")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
