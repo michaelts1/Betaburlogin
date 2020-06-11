@@ -14,7 +14,7 @@ Firefox addon to allow automation in [Avabur's beta server](https://beta.avabur.
 * Add custom CSS style.
 * Remove the "effects info" box.
 
-Currently, most of the automation features are toggable. In the future, I plan to allow toggling on/off all the features.
+Currently, most of the automation features are toggable. In the far future, I plan to allow toggling on/off all the features.
 
 
 ###### Notes:
