@@ -19,5 +19,5 @@ Currently, most of the automation features are toggable. In the far future, I pl
 
 ###### Notes:
 1. This addon Requires Container Tabs.
-2. Currently, No documentation is available.
+2. For now, you will probably have to edit the code to be able to use it for your alts. No documentation is available, sorry.
 3. Editing the code to run this addon on the live server will get you banned.
