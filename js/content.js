@@ -1,10 +1,7 @@
 /*~~~Ideas list:~~~
- * Use await instead of nested setTimeout in betabot
- * Auto event: 	Find a way to read messages behind ToA (using mutationObserver?)
- * 				Stop joining events due to old messages sent when loading the page
+ * Auto event: Find a way to read messages behind ToA (using mutationObserver?)
  * Spawn gems for all alts
  * Build specific house item instead of shortest
- * Use mainAccount for isAlt (currently using static "michaelts")
  *
  *~~~Needs Testing:~~~
  * 
@@ -14,46 +11,44 @@
 var port
 let url = window.location.href
 
-if ( /^https:\/\/www.avabur.com\/\??e?x?p?i?r?e?d?=?1?$/.test(url) ) { //only run on main login page
+if ( /^https:\/\/www.avabur.com\/\??e?x?p?i?r?e?d?=?1?$/.test(url) ) { //live login page
 	port = browser.runtime.connect({name: "live"})
 	$("#login_notification").html(`<button id="openAltTabs">open all alt tabs</button>`)
 	$("#openAltTabs").click( () => {port.postMessage({text: "open alt tabs"}) })
 }
 
-if ( /^https:\/\/beta.avabur.com\/\??e?x?p?i?r?e?d?=?1?$/.test(url) ) { //only run on beta login page
+if ( /^https:\/\/beta.avabur.com\/\??e?x?p?i?r?e?d?=?1?$/.test(url) ) { //beta login page
 	port = browser.runtime.connect({name: "login"})
 
 	function login(username, password) {
-		console.log(password)
 		$("#acctname").val(username)
 		$("#password").val(password)
 		$("#login").click()
 
 		setTimeout( () => {
-			if ( $("#login_notification").text() === "Your location is making too many requests too quickly. Try again later.") {
+			if ( $("#login_notification").text() === "Your location is making too many requests too quickly.  Try again later.") {
 				login(username, password)
 			}
 		}, 7500)
 	}
 	port.onMessage.addListener( message => {
 		if (message.text === "login") {
-			console.log(message)
 			login(message.username, message.password)
 		}
 	})
-	$("#login_notification").html(`<button id="loginAlts">login all</button>`)
+	$("#login_notification").html(`<button id="loginAlts">login all alts</button>`)
 	$("#loginAlts").click( () => {port.postMessage({text: "requesting login"}) })
 }
 
-if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //only run on beta game page
+if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	let port2, // used for communicating with the page
 		username = $("#username").text(),
 		vars 	 = undefined,
 		isAlt 	 = undefined
 
-	//forbid the extension from running on certain alts:
-	let forbiddenAlts = [/*"michaelts", "michaeltsI","michaeltsII", "michaeltsIII", "michaeltsIV", "michaeltsV", "michaeltsVI"*/]
-	if (forbiddenAlts.includes(username)) throw `ERROR: one of ${forbiddenAlts}`
+	/*//forbid the extension from running on certain alts:
+	let forbiddenAlts = ["michaelts", "michaeltsI","michaeltsII", "michaeltsIII", "michaeltsIV", "michaeltsV", "michaeltsVI"]
+	if (forbiddenAlts.includes(username)) throw `ERROR: one of ${forbiddenAlts}`*/
 
 	//connect to background script:
 	port = browser.runtime.connect({name: username})
@@ -71,11 +66,10 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //only run on beta game p
 	}
 
 	//get vars from sync storage:
-	function getVars() {//using a promise because i need to use .then()
+	function getVars() {//using a promise because i need to be able to use .then()
 		return new Promise( async resolve => {
 			vars = await browser.storage.sync.get()
-			isAlt = username !== "michaelts"
-			//isAlt = username !== vars.mainAccount
+			isAlt = username !== vars.mainUsername
 			resolve()
 		})
 	}
@@ -435,9 +429,9 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //only run on beta game p
 	$(document).on("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults)
 	$(document).on("roa-ws:craft", checkCraftingQueue)
 
-	//auto event. downloadURL: https://github.com/dragonminja24/betaburCheats/raw/master/betaburCheatsHeavyWeight.js
-	//let eventCommandChannel = 3203,
-	let eventCommandChannel = 3202,
+	//auto event. originally taken from: https://github.com/dragonminja24/betaburCheats/raw/master/betaburCheatsHeavyWeight.js
+	//let commandChannel = 3203, //debugging channel
+	let commandChannel = 3202, //"production" channel"
 		mainCharacter		= "michaelts",
 		getTrade			= [
 			["michaeltsI"], 				//food
@@ -458,7 +452,6 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //only run on beta game p
 		mainTrade 			= 0, // 0 = food , 1 = wood , 2 = iron , 3 = stone , 4 = craft , 5 = carve
 		eventLimiter 		= 0,
 		carvingChanger 		= 0,
-		bossChanger 		= 0,
 		eventID 			= null,
 		mainEvent 			= false,
 		msgID				= undefined
@@ -494,43 +487,26 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //only run on beta game p
 			$(".bossFight.btn.btn-primary")[0].click()
 		}
 
-		if(!isAlt){
-			if(time.includes("02m") && bossChanger === 0){
-				bossChanger = 1
-				$(".bossFight.btn.btn-primary")[0].click()
-			}
-		}
-
-		if(time.includes("01m")){
-			if(isAlt && !mainEvent){
+		if(time.includes("02m")) {
+			if ( !isAlt || (isAlt && !mainEvent) ){
 				$(".bossFight.btn.btn-primary")[0].click()
 			}
 			$("#eventCountdown").unbind()
 			carvingChanger = 0
-			bossChanger = 0
 			mainEvent = false
 		}
 	}
 
-	async function joinEvent(){
-		await delay(4000)
-		if(eventLimiter === 0){
-			let msgs = $("li[data-channel="+eventCommandChannel+"]"),
-				msg = undefined,
-				msgContent = undefined
+	async function joinEvent(msg){
+		await delay(vars.startActionsDelay)
+		
+		if (eventLimiter === 0){
+			if ( parseInt($(msg).attr("data-channel")) !== commandChannel ) return
 
-			if(msgs.length > 0){
-				//to get last message, we use length-1
-				msg = msgs[msgs.length-1].innerText
-				msgID = msgs[msgs.length-1].id
-				msgContent = null
-			}
+			let msgContent = $(msg).text().match(/\[[^:]+\] [A-z]*: (.*)/)[1]
+			msgID = $(msg).attr("id")
 
-			if(msg != null){
-				msgContent = msg.match(/\[[^:]+\] [A-z]*: (.*)/)[1]
-			}
-
-			if(msgContent !== null && msgID !== eventID){
+			if (msgContent !== null && msgID !== eventID){
 				eventLimiter += 1
 				if(msgContent === "InitEvent" || msgContent === "MainEvent"){
 					mainEvent = false
@@ -544,20 +520,22 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //only run on beta game p
 					$("#eventCountdown").bind("DOMSubtreeModified", changeTrade)
 				}
 			}
-			await delay(5000)
+			await delay(vars.startActionsDelay)
 			eventLimiter = 0
 		}
 	}
 
 	let observerChat = new MutationObserver( mutations => {
-		mutations.forEach(async function(mutation) {
-			joinEvent()
-		})
+		let msg = mutations[mutations.length-1].addedNodes
+		msg = msg[msg.length-1]
+		joinEvent(msg)
 	})
 
 	$(document).one("roa-ws:motd", () => {
-		observerChat.observe( document.querySelector("#chatMessageList"), {attributes: true, childList: true, characterData: true} )
-	})
+		setTimeout( () => {
+			observerChat.observe( document.querySelector("#chatMessageList"), {attributes: true, childList: true, characterData: true} )
+		}, 5000)
+	}) //start after a delay to avoid being triggered by old messages
 
 	//custom style:
 	if ($("#betabot-css")[0] === undefined) {

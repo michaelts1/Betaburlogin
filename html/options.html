@@ -21,22 +21,46 @@
 				<tr>
 					<td>
 						Main account login name
+						<span class="info" aria-tooltip="Info" data-tooltip="The name you use to log in.&#13;&#10;Might be different than your in-game username."></span>
 					</td>
 					<td>
-						<input id="mainAccountName" pattern="^[A-z\d]{3,20}$" placeholder="Main account name" size=15>
+						<input id="mainAccountName" pattern="^[A-z\d]{3,20}$" placeholder="Main account login name" size="15">
+					</td>
+				</tr>
+				<tr>
+					<td>
+						Main account in-game name
+						<span class="info" aria-tooltip="Info" data-tooltip="Your in-game username.&#13;&#10;Might be different than the name you use to log in.&#13;&#10;Case sensitive."></span>
+					</td>
+					<td>
+						<input id="mainUsername" pattern="^[A-z\d]{3,20}$" placeholder="Main account in-game name" size="15">
 					</td>
 				</tr>
 				<tr>
 					<td>
 						Number of alts
+						<span class="info" aria-tooltip="Info" data-tooltip="Number of alts, not including main account."></span>
 					</td>
 					<td>
 						<input id="altsNumber" pattern="^\d{1,3}$" placeholder="Number of alts" size=15>
 					</td>
 				</tr>
-				<tr class="altRelated">
+				<tr>
+					<!--
 					<td>
-						Alt base name
+						Select login method
+					</td>
+					<td>
+						<select>
+							<option value="roman" selected="selected">Roman numerals</option>
+							<option value="latin">Latin numerals</option>
+							<option value="unique">Unique names</option>
+						</select>
+					</td>
+					-->
+					<td>
+						Alts base name
+						<span class="info" aria-tooltip="Info" data-tooltip="The base name for your alts.&#13;&#10;For example, if your alts are &quot;michaeltsi&quot; and &quot;michaeltsii&quot; then the base name is &quot;michaelts&quot;."></span>
 					</td>
 					<td>
 						<input id="altName" pattern="^[A-z\d]{3,20}$" placeholder="Alt base name" size=15>
@@ -45,7 +69,7 @@
 				<tr>
 					<td>
 						login password
-						<span class="warning" aria-tooltip="warning" data-tooltip="Warning: Password is saved in plain text! Make sure it's different from passwords you use on other services, including live!"></span>
+						<span class="warning" aria-tooltip="warning" data-tooltip="Warning:&#13;&#10;The password is saved in plain text!&#13;&#10;Make sure it's different from passwords you use on other services, including live!"></span>
 					</td>
 					<td>
 						<input id="loginPass" pattern="^.+" type="password" placeholder="Password" size=15>
@@ -54,6 +78,7 @@
 				<tr>
 					<td>
 						Minimum crafting queue
+						<span class="info" aria-tooltip="Info" data-tooltip="If there are less items in the queue than this number, it will be automatically filled."></span>
 					</td>
 					<td>
 						<input id="minCraftingQueue" pattern="^\d+$" placeholder="Minimum queue" size=15>
@@ -62,6 +87,7 @@
 				<tr>
 					<td>
 						Daily crystals amount
+						<span class="info" aria-tooltip="Info" data-tooltip="How many crystals will be bought every day."></span>
 					</td>
 					<td>
 						<input id="dailyCrystals" pattern="^\d+$" placeholder="Crystals amount" size=15>

@@ -114,7 +114,7 @@ function login() {
 		}
 		return str
 	}
-	function login(i, username) {
+	function sendLogin(i, username) {
 		logins[i].postMessage({
 			text: "login",
 			username: username,
@@ -125,9 +125,9 @@ function login() {
 		})
 	}
 	
-	login(0, vars.mainAccount)
+	sendLogin(0, vars.mainAccount)
 	for (let i = 1; i <= vars.altsNumber; i++) {
-		login(i, vars.altBaseName+romanize(i))
+		sendLogin(i, vars.altBaseName+romanize(i))
 	}
 }
 
@@ -144,7 +144,7 @@ async function getVars() {
 	//if not set, create with default settings
 	if (Object.keys(vars).length === 0) {
 		vars = {
-			version 			: "0.9.7.5",
+			version 			: 2,
 			doQuests 			: true,
 			doBuildingAndHarvy	: true,
 			doCraftQueue 		: true,
@@ -154,6 +154,7 @@ async function getVars() {
 			startActionsDelay 	: 1000,
 			minCraftingQueue 	: 5,
 			mainAccount 		: "",
+			mainUsername 		: "",
 			altsNumber 			: 0,
 			altBaseName 		: "",
 			loginPassword 		: "",
@@ -191,8 +192,9 @@ async function getVars() {
 				}
 			]
 		}
-		browser.storage.sync.set(vars)
+		await browser.storage.sync.set(vars)
 	}
+	updateVars()
 }
 getVars()
 
@@ -237,6 +239,20 @@ function jumpMobs(number) {
 //send currency:
 function sendCurrency(name) {
 	sendMessage({text: "send currency", recipient: name})
+}
+
+async function updateVars() {
+	if (typeof vars.version !== "number") { //reset if too old
+		console.log("reset vars - too old")
+		await browser.storage.sync.clear()
+		getVars()
+		return
+	}
+	if (vars.version < 2) {
+		console.log("update vars from versions before 2")
+		vars.mainUsername = ""
+		browser.storage.sync.set(vars)
+	}
 }
 
 console.log("background script finished compiling")

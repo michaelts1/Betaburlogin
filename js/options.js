@@ -46,10 +46,10 @@ function deabbreviateNumber (input) {
 }
 
 async function fillFields() {
-	//there is an event called storage.onChanged...
 	vars = await browser.storage.sync.get()
 	
 	$("#mainAccountName")	.val(vars.mainAccount)
+	$("#mainUsername")		.val(vars.mainUsername)
 	$("#altsNumber")		.val(vars.altsNumber)
 	$("#altName")			.val(vars.altBaseName)
 	$("#loginPass")			.val(vars.loginPassword)
@@ -67,12 +67,13 @@ async function fillFields() {
 
 async function saveChanges() {
 	try {
-		vars.mainAccount = $("#mainAccountName").val()
-		vars.altsNumber = parseInt($("#altsNumber").val())
-		vars.altBaseName = $("#altName").val()
-		vars.loginPassword = $("#loginPass").val()
+		vars.mainAccount 	  = $("#mainAccountName").val()
+		vars.mainUsername 	  = $("#mainUsername").val()
+		vars.altsNumber 	  = parseInt($("#altsNumber").val())
+		vars.altBaseName 	  = $("#altName").val()
+		vars.loginPassword 	  = $("#loginPass").val()
 		vars.minCraftingQueue = parseInt($("#minCraftingQueue").val())
-		vars.dailyCrystals = parseInt($("#dailyCrystals").val())
+		vars.dailyCrystals 	  = parseInt($("#dailyCrystals").val())
 
 		for (let i = 0; i < vars.currencySend.length; i++) {
 			let keepAmount = $(`#${vars.currencySend[i].name}Keep`).val()
