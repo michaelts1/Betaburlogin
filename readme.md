@@ -23,3 +23,4 @@ Firefox addon to allow automation in [Avabur's beta server](https://beta.avabur.
 1. This addon Requires Container Tabs.
 2. For now, you will probably have to edit the code to be able to use it for your alts. No documentation is available, sorry.
 3. Editing the code to run this addon on the live server will get you banned.
+
