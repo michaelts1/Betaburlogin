@@ -1,5 +1,4 @@
 /*~~~To Do:~~~
- * Auto event: Find a way to read messages behind ToA (using mutationObserver?)
  * Spawn gems for all alts
  *
  *~~~Needs Testing:~~~
@@ -452,7 +451,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 
 	//auto event. based on: https://github.com/dragonminja24/betaburCheats/raw/master/betaburCheatsHeavyWeight.js
 	//let commandChannel = 3203, //debugging channel
-	let commandChannel = 3202, //"production" channel"
+	let commandChannel = 3202, //"production" channel
 		mainCharacter		= "michaelts",
 		getTrade			= [
 			["michaeltsI"], 				//food
@@ -518,16 +517,11 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 		}
 	}
 
-	async function joinEvent(msg){
+	async function joinEvent(msgContent, msgID){
 		await delay(vars.startActionsDelay)
-		
+
 		if (eventLimiter === 0){
-			if ( parseInt($(msg).attr("data-channel")) !== commandChannel ) return
-
-			let msgContent = $(msg).text().match(/\[[^:]+\] [A-z]*: (.*)/)[1]
-			msgID = $(msg).attr("id")
-
-			if (msgContent !== null && msgID !== eventID){
+			if (msgID !== eventID){
 				eventLimiter += 1
 				if(msgContent === "InitEvent" || msgContent === "MainEvent"){
 					mainEvent = false
@@ -545,18 +539,14 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 			eventLimiter = 0
 		}
 	}
-
-	let observerChat = new MutationObserver( mutations => {
-		let msg = mutations[mutations.length-1].addedNodes
-		msg = msg[msg.length-1]
-		joinEvent(msg)
-	})
-
-	$(document).one("roa-ws:motd", () => {
-		setTimeout( () => {
-			observerChat.observe( document.querySelector("#chatMessageList"), {attributes: true, childList: true, characterData: true} )
-		}, 5000)
-	}) //start after a delay to avoid being triggered by old messages
+	
+	setTimeout( () => { //is setTimeout needed?
+		$(document).on("roa-ws:message", (e,d) => {
+			if (d.c_id === commandChannel) {
+				joinEvent(d.m, d.m_id)
+			}
+		})
+	}, 10000) //start after a delay to avoid being triggered by old messages
 
 	//custom style:
 	if ($("#betabot-css")[0] === undefined) {
