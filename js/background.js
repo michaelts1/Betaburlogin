@@ -118,9 +118,6 @@ function login() {
 		logins[i].postMessage({
 			text: "login",
 			username: username,
-			//warning: password is saved in plain text!
-			//make sure it is different from passwords
-			//you use for other services, inculding live!
 			password: vars.loginPassword
 		})
 	}
