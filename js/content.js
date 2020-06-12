@@ -1,10 +1,7 @@
-/*~~~Ideas list:~~~
- * Auto event: Find a way to read messages behind ToA (using mutationObserver?)
+/*~~~To Do:~~~
  * Spawn gems for all alts
- * Build specific house item instead of shortest
  *
  *~~~Needs Testing:~~~
- * 
  */
 
 "use strict"
@@ -44,7 +41,8 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	let port2, // used for communicating with the page
 		username = $("#username").text(),
 		vars 	 = undefined,
-		isAlt 	 = undefined
+		isAlt 	 = undefined,
+		betabotCooldown = false
 
 	/*//forbid the extension from running on certain alts:
 	let forbiddenAlts = ["michaelts", "michaeltsI","michaeltsII", "michaeltsIII", "michaeltsIV", "michaeltsV", "michaeltsVI"]
@@ -266,7 +264,19 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 		}
 	})
 
-	//Betabot courtesy of @Batosi:
+	//Betabot based on @Batosi's bot:
+	
+	//add option to build a specific item:
+	if ($("#selectBuild")[0] === undefined) {
+		$( $("div > #allHouseUpgrades")[0].parentNode ).after(`
+		<div id="selectBuild" class="col-md-12 mt10">
+			<input id="customBuild" type="checkbox">
+			<label for="customBuild"><a>Build a specific item:</a></label>
+			<input id="itemId" placeholder="item id" type="text" size="3" pattern="^\\d*$">
+		</div>
+		`)
+	}
+
 	function autoBuyCrys(){
 		if (vars.dailyCrystals === 0) return
 		vars.actionsPending = true
@@ -285,7 +295,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	}
 	setInterval(autoBuyCrys, 1000*60*60*24) //once a day
 	
-	let finishQuest = (event, data) => {
+	let finishQuest = () => {
 		setTimeout(() => {
 			$(`input.completeQuest[data-questtype=${vars.questCompleting}]`).click() //complete the quest
 			$(document).one("roa-ws:page:quests", () => {
@@ -303,9 +313,13 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 		}, vars.startActionsDelay)
 	}
 
-	let selectBuild = (event, data) => {
+	let selectBuild = () => {
 		setTimeout(() => {
-			if ($("#houseRoomCanBuild").is(":visible")) { //if new room is available, build it
+			let itemId = parseInt($("#itemId").val())
+			if ($("#customBuild").is(":checked") && itemId > 0) {
+				$(document).one("roa-ws:page:house_all_builds", itemId, customBuild)
+				setTimeout(() => { $("#allHouseUpgrades")[0].click() }, vars.buttonDelay)
+			} else if ($("#houseRoomCanBuild").is(":visible")) { //if new room is available, build it
 				$(document).one("roa-ws:page:house_build_room", itemBuilding)
 				setTimeout(() => { $("#houseBuildRoom")[0].click() }, vars.buttonDelay)
 			} else if ($("#houseQuickBuildList li:first .houseViewRoom").length === 1) { //if new item is available, build it
@@ -313,19 +327,26 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 				setTimeout(() => { $("#houseQuickBuildList li:first .houseViewRoom")[0].click() }, vars.buttonDelay)
 			} else { //else, upgrade existing item
 				$(document).one("roa-ws:page:house_room_item", upgradeItem)
-				setTimeout(() => {$("#houseQuickBuildList li:first .houseViewRoomItem")[0].click()}, vars.buttonDelay)
+				setTimeout(() => { $("#houseQuickBuildList li:first .houseViewRoomItem")[0].click() }, vars.buttonDelay)
 			}
 		}, vars.startActionsDelay)
 	}
 
-	let buildItem = (event, data) => {
+	let customBuild = event => {
+		$(document).one("roa-ws:page:house_room_item", upgradeItem)
+		setTimeout(() => {
+			$(`#modal2Content a[data-itemtype=${event.data}]`)[0].click()
+		}, vars.buttonDelay)
+	}
+
+	let buildItem = () => {
 		setTimeout(() => {
 			$(document).one("roa-ws:page:house_build_room_item", itemBuilding)
 			setTimeout(() => { $("#houseBuildRoomItem").click() }, vars.buttonDelay)
 		}, vars.startActionsDelay)
 	}
 
-	let upgradeItem = (event, data) => {
+	let upgradeItem = () => {
 		setTimeout(() => {
 			if ($("#houseRoomItemUpgradeTier").is(":visible")) { //if tier upgrade is available, upgrade it
 				$(document).one("roa-ws:page:house_room_item_upgrade_tier", itemBuilding)
@@ -337,7 +358,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 		}, vars.startActionsDelay)
 	}
 
-	let itemBuilding = (event, data) => {
+	let itemBuilding = () => {
 		$("#confirmOverlay > a.red").click() //if there is confirmation layer, close it.
 		setTimeout(() => {
 			vars.actionsPending = false
@@ -345,7 +366,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 		}, vars.startActionsDelay)
 	}
 
-	let startHarvestron = (event, data) => {
+	let startHarvestron = () => {
 		$("#houseHarvestingJobStart").click()
 		setTimeout(itemBuilding, vars.buttonDelay)
 	}
@@ -371,8 +392,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 			})
 		}
 	}
-
-	let betabotCooldown = false
+	
 	let checkResults = (event, data) => {
 		data = data.results.p
 
@@ -429,9 +449,9 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	$(document).on("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults)
 	$(document).on("roa-ws:craft", checkCraftingQueue)
 
-	//auto event. originally taken from: https://github.com/dragonminja24/betaburCheats/raw/master/betaburCheatsHeavyWeight.js
+	//auto event. based on: https://github.com/dragonminja24/betaburCheats/raw/master/betaburCheatsHeavyWeight.js
 	//let commandChannel = 3203, //debugging channel
-	let commandChannel = 3202, //"production" channel"
+	let commandChannel = 3202, //"production" channel
 		mainCharacter		= "michaelts",
 		getTrade			= [
 			["michaeltsI"], 				//food
@@ -497,16 +517,11 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 		}
 	}
 
-	async function joinEvent(msg){
+	async function joinEvent(msgContent, msgID){
 		await delay(vars.startActionsDelay)
-		
+
 		if (eventLimiter === 0){
-			if ( parseInt($(msg).attr("data-channel")) !== commandChannel ) return
-
-			let msgContent = $(msg).text().match(/\[[^:]+\] [A-z]*: (.*)/)[1]
-			msgID = $(msg).attr("id")
-
-			if (msgContent !== null && msgID !== eventID){
+			if (msgID !== eventID){
 				eventLimiter += 1
 				if(msgContent === "InitEvent" || msgContent === "MainEvent"){
 					mainEvent = false
@@ -524,18 +539,14 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 			eventLimiter = 0
 		}
 	}
-
-	let observerChat = new MutationObserver( mutations => {
-		let msg = mutations[mutations.length-1].addedNodes
-		msg = msg[msg.length-1]
-		joinEvent(msg)
-	})
-
-	$(document).one("roa-ws:motd", () => {
-		setTimeout( () => {
-			observerChat.observe( document.querySelector("#chatMessageList"), {attributes: true, childList: true, characterData: true} )
-		}, 5000)
-	}) //start after a delay to avoid being triggered by old messages
+	
+	setTimeout( () => { //is setTimeout needed?
+		$(document).on("roa-ws:message", (e,d) => {
+			if (d.c_id === commandChannel) {
+				joinEvent(d.m, d.m_id)
+			}
+		})
+	}, 10000) //start after a delay to avoid being triggered by old messages
 
 	//custom style:
 	if ($("#betabot-css")[0] === undefined) {
@@ -548,7 +559,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 			}
 
 			#sendMeCurrency a {
-				text-decoration:none;
+				text-decoration: none;
 				line-height: 10px;
 				padding: 3px;
 			}
@@ -566,10 +577,6 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 				padding: 6.5px;
 			}
 
-			.navSection li {
-				line-height: 25px;
-			}
-
 			#areaContent {
 				height: 354px;
 			}
@@ -578,8 +585,17 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 				font-size: 0.95em;
 			}
 
+			.navSection li {
+				line-height: 25px;
+			}
+
 			.RQ-quest-estimate {
 				font-size: 1em;
+			}
+
+			#customBuild + label > a {
+				text-decoration: none;
+				padding: 3px;
 			}
 		`
 		$(elm2).attr("id", "betabot-css")
