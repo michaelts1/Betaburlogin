@@ -519,7 +519,6 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 
 	async function joinEvent(msgContent, msgID){
 		await delay(vars.startActionsDelay)
-
 		if (eventLimiter === 0){
 			if (msgID !== eventID){
 				eventLimiter += 1
@@ -540,7 +539,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 		}
 	}
 	
-	setTimeout( () => { //is setTimeout needed?
+	setTimeout( () => {
 		$(document).on("roa-ws:message", (e,d) => {
 			if (d.c_id === commandChannel) {
 				joinEvent(d.m, d.m_id)
