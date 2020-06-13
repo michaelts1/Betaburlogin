@@ -97,7 +97,7 @@ async function openTabs() {
 				cookieStoreId: contexts[i].cookieStoreId,
 				url: "https://beta.avabur.com"
 			})
-		}, 500*i)
+		}, 500*(i+1))
 	}
 }
 
