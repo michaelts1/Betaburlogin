@@ -70,8 +70,18 @@ input {
 	border-radius: 0.4em;
 }
 
+select {
+	margin: 0.25em;
+	font-size: 11pt;
+	padding: 0.5em;
+	border: 1px solid silver;
+	background-color: Beige;
+	color: LightSeaGreen;
+	border-radius: 0.4em;
+}
+
 #optionsPage table {
-	width: 26em;
+	width: 26.5em;
 	margin-top: 2em;
 }
 
@@ -96,11 +106,11 @@ input {
 	background-image: url("../images/warning.svg");
 }
 
-.info {
+.info, #currencySendInfo {
 	background-image: url("../images/info.svg");
 }
 
-.warning:hover::after, .info:hover::after {
+.warning:hover::after, .info:hover::after, #currencySendInfo:hover::after {
 	white-space: pre-line;
 	content: attr(data-tooltip);
 	position: absolute;
@@ -117,9 +127,21 @@ input {
 	background-color: FloralWhite;
 }
 
-.info:hover::after {
+.info:hover::after, #currencySendInfo:hover::after {
 	color: CadetBlue;
 	background-color: FloralWhite;
+}
+
+#currencySendInfo {
+	position: relative;
+	width: 1.4em;
+	height: 1.4em;
+	display: inline-block;
+	vertical-align: middle;
+	font-size: 13pt;
+	font-weight: normal;
+	font-family: sans-serif;
+	text-align: left
 }
 
 /* buttons */

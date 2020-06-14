@@ -104,12 +104,32 @@ function updatePrice() {
 	$("#dailyCrystalsPrice").text(abbreviateNumber(price(number)))
 }
 
+function displayAltFields() {
+	let value = $("#altNameType").val()
+	if (value === "") {
+		$("#altsNumber").hide()
+		$("#altsBaseName").hide()
+		$("#altsUniqueNames").hide()
+	} else if (value === "roman" || value === "romanCaps") {
+		$("#altsNumber").show()
+		$("#altsBaseName").show()
+		$("#altsUniqueNames").hide()
+	} else if (value === "unique") {
+		$("#altsNumber").hide()
+		$("#altsBaseName").hide()
+		$("#altsUniqueNames").show()
+	}
+}
 
 $(fillFields)
+$(displayAltFields)
+$("#altNameType").on("input", displayAltFields)
 
 $("#saveChanges").click(saveChanges)
 $("#cancelChanges").click(fillFields)
 $("#dailyCrystals").on("input", updatePrice)
+
+
 
 browser.storage.onChanged.addListener( changes => {
 	for (change in Object.getOwnPropertyNames(changes)) {
