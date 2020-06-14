@@ -1,12 +1,12 @@
 "use strict"
 
-//communication with content pages:
-var	live, //those are the ports
+var	live, //those will store the ports
 	main,
 	alts = [],
 	logins = [],
-	//this will store the settings
-	vars = undefined
+	//those will store the settings
+	vars = undefined,
+	version = 3
 
 browser.runtime.onConnect.addListener( port => {
 	console.log(port.name, " connected")
@@ -89,7 +89,7 @@ browser.runtime.onConnect.addListener( port => {
 
 //open tabs:
 async function openTabs() {
-	let contexts = await browser.contextualIdentities.query({})//get all containers
+	let contexts = await browser.contextualIdentities.query({}) //get all containers
 	browser.tabs.create({url: "https://beta.avabur.com"})
 	for (let i = 0; i < contexts.length; i++) { //and open them
 		setTimeout( () => {
@@ -103,17 +103,6 @@ async function openTabs() {
 
 //login all alts:
 function login() {
-	function romanize(num) {
-		if (num === 0) return ""
-		let roman = {v: 5, iv: 4, i: 1}
-		let str = ""
-		for (let key of Object.keys(roman)) {
-			let q = Math.floor(num / roman[key])
-			num -= q * roman[key]
-			str += key.repeat(q)
-		}
-		return str
-	}
 	function sendLogin(i, username) {
 		logins[i].postMessage({
 			text: "login",
@@ -121,10 +110,28 @@ function login() {
 			password: vars.loginPassword
 		})
 	}
-	
-	sendLogin(0, vars.mainAccount)
-	for (let i = 1; i <= vars.altsNumber; i++) {
-		sendLogin(i, vars.altBaseName+romanize(i))
+
+	if (vars.pattern === "roman" || vars.pattern === "romanCaps") {
+		function romanize(num, caps) {
+			if (num === 0) return ""
+			let roman = caps ? {L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1} : {l: 50, xl: 40, x: 10, ix: 9, v: 5, iv: 4, i: 1} //use upper case if caps is true, otherwise don't
+			let str = ""
+			for (let key of Object.keys(roman)) {
+				let q = Math.floor(num / roman[key])
+				num -= q * roman[key]
+				str += key.repeat(q)
+			}
+			return str
+		}
+		sendLogin(0, vars.mainAccount)
+		for (let i = 1; i <= vars.altsNumber; i++) {
+			sendLogin(i, vars.altBaseName+romanize(i, vars.pattern === "romanCaps")) //`vars.pattern === "romanCaps"` returns true if we should use caps and false if we shouldn't
+		}
+	} else if (vars.pattern === "unique") {
+		sendLogin(0, vars.mainAccount)
+		for (let i = 0; i < vars.namesList.length; i++) {
+			sendLogin(i+1, vars.namesList[i])
+		}
 	}
 }
 
@@ -141,7 +148,7 @@ async function getVars() {
 	//if not set, create with default settings
 	if (Object.keys(vars).length === 0) {
 		vars = {
-			version 			: 2,
+			version 			: version,
 			doQuests 			: true,
 			doBuildingAndHarvy	: true,
 			doCraftQueue 		: true,
@@ -150,12 +157,14 @@ async function getVars() {
 			questCompleting 	: null,
 			startActionsDelay 	: 1000,
 			minCraftingQueue 	: 5,
+			dailyCrystals	 	: 50,
 			mainAccount 		: "",
 			mainUsername 		: "",
+			loginPassword 		: "",
+			pattern 			: "",
 			altsNumber 			: 0,
 			altBaseName 		: "",
-			loginPassword 		: "",
-			dailyCrystals	 	: 50,
+			namesList 			: [],
 			currencySend : [
 				{
 					name 			: "crystals",
@@ -239,6 +248,9 @@ function sendCurrency(name) {
 }
 
 async function updateVars() {
+	if (vars.version === version) {
+		return
+	}
 	if (typeof vars.version !== "number") { //reset if too old
 		console.log("reset vars - too old")
 		await browser.storage.sync.clear()
@@ -248,8 +260,14 @@ async function updateVars() {
 	if (vars.version < 2) {
 		console.log("update vars from versions before 2")
 		vars.mainUsername = ""
-		browser.storage.sync.set(vars)
+		
 	}
+	if (vars.version < 3) {
+		vars.pattern = ""
+		vars.namesList = []
+	}
+	vars.version = version
+	browser.storage.sync.set(vars)
 }
 
 console.log("background script finished compiling")

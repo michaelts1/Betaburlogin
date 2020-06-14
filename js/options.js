@@ -3,6 +3,9 @@ var vars
 function abbreviateNumber(num) {
 	let round = num => Math.round(num*1000)/1000
 	
+	if(num >= 1000000000000000) {
+		return round(num/1000000000000000)+"Q"
+	}
 	if(num >= 1000000000000) {
 		return round(num/1000000000000)+"T"
 	}
@@ -49,12 +52,14 @@ async function fillFields() {
 	vars = await browser.storage.sync.get()
 	
 	$("#mainAccountName")	.val(vars.mainAccount)
-	$("#mainUsername")		.val(vars.mainUsername)
-	$("#altsNumber")		.val(vars.altsNumber)
-	$("#altName")			.val(vars.altBaseName)
-	$("#loginPass")			.val(vars.loginPassword)
+	$("#mainUsername") 		.val(vars.mainUsername)
+	$("#loginPass") 		.val(vars.loginPassword)
 	$("#minCraftingQueue")	.val(vars.minCraftingQueue)
-	$("#dailyCrystals")		.val(vars.dailyCrystals)
+	$("#dailyCrystals") 	.val(vars.dailyCrystals)
+	$("#altNameType") 		.val(vars.pattern)
+	$("#altsNumber") 		.val(vars.altsNumber)
+	$("#altName") 			.val(vars.altBaseName)
+	$("#namesList") 		.val(vars.nameList.join())
 	
 	for (currency of vars.currencySend) {
 		$(`#${currency.name}Keep`).val(abbreviateNumber(currency.keepAmount))
@@ -69,11 +74,13 @@ async function saveChanges() {
 	try {
 		vars.mainAccount 	  = $("#mainAccountName").val()
 		vars.mainUsername 	  = $("#mainUsername").val()
-		vars.altsNumber 	  = parseInt($("#altsNumber").val())
-		vars.altBaseName 	  = $("#altName").val()
 		vars.loginPassword 	  = $("#loginPass").val()
 		vars.minCraftingQueue = parseInt($("#minCraftingQueue").val())
 		vars.dailyCrystals 	  = parseInt($("#dailyCrystals").val())
+		vars.pattern 		  = $("#altNameType").val(vars.pattern)
+		vars.altsNumber 	  = parseInt($("#altsNumber").val())
+		vars.altBaseName 	  = $("#altName").val()
+		vars.nameList 		  = $("#namesList").val().split(',')
 
 		for (let i = 0; i < vars.currencySend.length; i++) {
 			let keepAmount = $(`#${vars.currencySend[i].name}Keep`).val()
