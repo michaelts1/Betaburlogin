@@ -107,15 +107,15 @@ function updatePrice() {
 function displayAltFields() {
 	let value = $("#altNameType").val()
 	if (value === "") {
-		$("#altsNumber").hide()
+		$("#number").hide()
 		$("#altsBaseName").hide()
 		$("#altsUniqueNames").hide()
 	} else if (value === "roman" || value === "romanCaps") {
-		$("#altsNumber").show()
+		$("#number").show()
 		$("#altsBaseName").show()
 		$("#altsUniqueNames").hide()
 	} else if (value === "unique") {
-		$("#altsNumber").hide()
+		$("#number").hide()
 		$("#altsBaseName").hide()
 		$("#altsUniqueNames").show()
 	}
