@@ -59,12 +59,16 @@ async function fillFields() {
 	$("#altNameType") 		.val(vars.pattern)
 	$("#altsNumber") 		.val(vars.altsNumber)
 	$("#altName") 			.val(vars.altBaseName)
-	$("#namesList") 		.val(vars.nameList.join())
+	$("#namesList") 		.val(vars.nameList.join(", "))
 	
 	for (currency of vars.currencySend) {
 		$(`#${currency.name}Keep`).val(abbreviateNumber(currency.keepAmount))
 		$(`#${currency.name}Keep`).prop("title", currency.keepAmount)
 		$(`#${currency.name}Send`).prop("checked", currency.send)
+	}
+
+	for (trade of Object.keys(vars.tradesList)) {
+		$("#"+trade).val(vars.tradesList[trade])
 	}
 	
 	updatePrice()
@@ -72,6 +76,9 @@ async function fillFields() {
 
 async function saveChanges() {
 	try {
+		if ($("#settings")[0].reportValidity() === false) {
+			throw "Form is invalid"
+		}
 		vars.mainAccount 	  = $("#mainAccountName").val()
 		vars.mainUsername 	  = $("#mainUsername").val()
 		vars.loginPassword 	  = $("#loginPass").val()
@@ -80,14 +87,18 @@ async function saveChanges() {
 		vars.pattern 		  = $("#altNameType").val(vars.pattern)
 		vars.altsNumber 	  = parseInt($("#altsNumber").val())
 		vars.altBaseName 	  = $("#altName").val()
-		vars.nameList 		  = $("#namesList").val().split(',')
+		vars.nameList 		  = $("#namesList").val().split(', ')
 
 		for (let i = 0; i < vars.currencySend.length; i++) {
 			let keepAmount = $(`#${vars.currencySend[i].name}Keep`).val()
 			vars.currencySend[i].keepAmount = deabbreviateNumber(keepAmount)
 			vars.currencySend[i].send = $(`#${vars.currencySend[i].name}Send`).prop("checked")
 		}
-		
+
+		for (trade of Object.keys(vars.tradesList)) {
+			vars.tradesList[trade] = $("#"+trade).val().split(", ")
+		}
+
 		await browser.storage.sync.set(vars)
 		fillFields()
 		
@@ -96,12 +107,12 @@ async function saveChanges() {
 			$("#formButtonsOutput").text("")
 		}, 1000)
 	}
-	catch (e) {
-		$("#formButtonsOutput").text("Error occured")
+	catch (error) {
+		$("#formButtonsOutput").text("Error:", error)
 		setTimeout( () => {
 			$("#formButtonsOutput").text("")
 		}, 1000)
-		console.error(e)
+		console.error(error)
 	}
 }
 
@@ -131,12 +142,9 @@ function displayAltFields() {
 $(fillFields)
 $(displayAltFields)
 $("#altNameType").on("input", displayAltFields)
-
 $("#saveChanges").click(saveChanges)
 $("#cancelChanges").click(fillFields)
 $("#dailyCrystals").on("input", updatePrice)
-
-
 
 browser.storage.onChanged.addListener( changes => {
 	for (change in Object.getOwnPropertyNames(changes)) {

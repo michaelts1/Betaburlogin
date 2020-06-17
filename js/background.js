@@ -6,7 +6,7 @@ var	live, //those will store the ports
 	logins = [],
 	//those will store the settings
 	vars = undefined,
-	version = 3
+	version = 4
 
 browser.runtime.onConnect.addListener( port => {
 	console.log(port.name, " connected")
@@ -165,7 +165,7 @@ async function getVars() {
 			altsNumber 			: 0,
 			altBaseName 		: "",
 			namesList 			: [],
-			currencySend : [
+			currencySend 		: [
 				{
 					name 			: "crystals",
 					send 			: true,
@@ -196,7 +196,15 @@ async function getVars() {
 					minimumAmount 	: 100,
 					keepAmount 		: 0
 				}
-			]
+			],
+			tradesList : {
+				fishing 	 : [],
+				woodcutting  : [],
+				mining 		 : [],
+				stonecutting : [],
+				crafting 	 : [],
+				carving 	 : []
+			}
 		}
 		await browser.storage.sync.set(vars)
 	}
@@ -266,8 +274,19 @@ async function updateVars() {
 		vars.pattern = ""
 		vars.namesList = []
 	}
+	if (vars.version < 4) {
+		vars.tradesList = {
+			fishing 	 : [],
+			woodcutting  : [],
+			mining 		 : [],
+			stonecutting : [],
+			crafting 	 : [],
+			carving 	 : []
+		}
+	}
+
 	vars.version = version
 	browser.storage.sync.set(vars)
 }
 
-console.log("background script finished compiling")
+console.log("background script finished evaluating")

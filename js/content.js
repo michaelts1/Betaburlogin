@@ -1,7 +1,9 @@
 /*~~~To Do:~~~
  * Spawn gems for all alts
- *
+ * Make cancel changes button functional
  *~~~Needs Testing:~~~
+ * New login thechniques
+ * Auto event for custom alt names
  */
 
 "use strict"
@@ -44,7 +46,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 		isAlt 	 = undefined,
 		betabotCooldown = false
 
-	/*//forbid the extension from running on certain alts:
+	/*forbid the extension from running on certain alts:
 	let forbiddenAlts = ["michaelts", "michaeltsI","michaeltsII", "michaeltsIII", "michaeltsIV", "michaeltsV", "michaeltsVI"]
 	if (forbiddenAlts.includes(username)) throw `ERROR: one of ${forbiddenAlts}`*/
 
@@ -449,10 +451,9 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	$(document).on("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults)
 	$(document).on("roa-ws:craft", checkCraftingQueue)
 
-	//auto event. based on: https://github.com/dragonminja24/betaburCheats/raw/master/betaburCheatsHeavyWeight.js
+	//auto event. orginally taken from: https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js
 	//let commandChannel = 3203, //debugging channel
 	let commandChannel = 3202, //"production" channel
-		mainCharacter		= "michaelts",
 		getTrade			= [
 			["michaeltsI"], 				//food
 			["michaeltsII", "michaeltsVI"], //wood
@@ -461,20 +462,20 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 			["michaelts"], 					//craft
 			[] 								//carve
 		],
-		buttonList 			= [
-			$(".bossHarvest.btn")[4], //food
-			$(".bossHarvest.btn")[5], //wood
-			$(".bossHarvest.btn")[6], //iron
-			$(".bossHarvest.btn")[7], //stone
-			$(".bossCraft.btn")[0],   //craft
-			$(".bossCarve.btn")[0]    //carve
-		],
 		mainTrade 			= 0, // 0 = food , 1 = wood , 2 = iron , 3 = stone , 4 = craft , 5 = carve
 		eventLimiter 		= 0,
-		carvingChanger 		= 0,
+		carvingChanged 		= false,
 		eventID 			= null,
-		mainEvent 			= false,
-		msgID				= undefined
+		mainEvent 			= false
+
+	const buttonList = [
+		$(".bossHarvest.btn")[4], //food
+		$(".bossHarvest.btn")[5], //wood
+		$(".bossHarvest.btn")[6], //iron
+		$(".bossHarvest.btn")[7], //stone
+		$(".bossCraft.btn")[0],   //craft
+		$(".bossCarve.btn")[0]    //carve
+	]
 
 	function delay(time){
 		return new Promise((resolve,reject) => {
@@ -502,8 +503,8 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 		let time = $("#eventCountdown")[0].innerText,
 			bossCarvingTier = $("#currentBossCarvingTier")[0].innerText
 
-		if(bossCarvingTier > 2500 && carvingChanger === 0 && !mainEvent){
-			++carvingChanger
+		if(bossCarvingTier > 2500 && !carvingChanged && !mainEvent){
+			carvingChanged = true
 			$(".bossFight.btn.btn-primary")[0].click()
 		}
 
@@ -512,7 +513,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 				$(".bossFight.btn.btn-primary")[0].click()
 			}
 			$("#eventCountdown").unbind()
-			carvingChanger = 0
+			carvingChanged = false
 			mainEvent = false
 		}
 	}
@@ -588,10 +589,6 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 				line-height: 25px;
 			}
 
-			.RQ-quest-estimate {
-				font-size: 1em;
-			}
-
 			#customBuild + label > a {
 				text-decoration: none;
 				padding: 3px;
@@ -606,4 +603,4 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	}
 }
 
-console.log("betaburlogin finished compiling")
+console.log("betaburlogin finished evaluating")
