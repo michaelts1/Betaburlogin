@@ -1,6 +1,10 @@
 /*~~~To Do:~~~
  * Spawn gems for all alts
  * Make cancel changes button functional
+ * Add custom CSS style.
+ * Allow on/off toggling for all features.
+ * Make keepUsernameVisible actually work
+
  *~~~Needs Testing:~~~
  * New login thechniques
  * Auto event for custom alt names
