@@ -180,6 +180,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	function wire(target) {
 		if (target === username) return
 		let sendMessage = `/wire ${target}`
+
 		for (let currency of vars.currencySend) {
 			if (currency.send === false) continue
 

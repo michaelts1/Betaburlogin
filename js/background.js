@@ -195,7 +195,31 @@ async function getVars() {
 					send 			: true,
 					minimumAmount 	: 100,
 					keepAmount 		: 0
-				}
+				}/*,
+				{
+					name 			: "food",
+					send 			: true,
+					minimumAmount 	: 100,
+					keepAmount 		: 1000000
+				},
+				{
+					name 			: "wood",
+					send 			: true,
+					minimumAmount 	: 100,
+					keepAmount 		: 1000000
+				},
+				{
+					name 			: "iron",
+					send 			: true,
+					minimumAmount 	: 100,
+					keepAmount 		: 1000000
+				},
+				{
+					name 			: "stone",
+					send 			: true,
+					minimumAmount 	: 100,
+					keepAmount 		: 1000000
+				}*/
 			],
 			tradesList : {
 				fishing 	 : [],
