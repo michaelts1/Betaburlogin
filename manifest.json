@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Betabur Login",
-	"version": "0.9.7.8",
+	"version": "0.9.8.0",
 	"description": "Helps logging in with all the alts on beta.avabur.com",
 
 	"applications": {

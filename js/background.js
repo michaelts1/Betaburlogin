@@ -6,10 +6,12 @@ var	live, //those will store the ports
 	logins = [],
 	//those will store the settings
 	vars = undefined,
-	version = 4
+	varsVersion = 5
 
-browser.runtime.onConnect.addListener( port => {
+browser.runtime.onConnect.addListener(async port => {
 	console.log(port.name, " connected")
+	let mainUsername = (await browser.storage.sync.get("mainUsername")).mainUsername
+
 	//if live login
 	if (port.name === "live") {
 		live = port
@@ -29,7 +31,7 @@ browser.runtime.onConnect.addListener( port => {
 		})
 	}
 	//if beta main
-	else if (port.name === "michaelts") {
+	else if (port.name === mainUsername) {
 		main = port
 	}
 	//if beta alt
@@ -61,7 +63,7 @@ browser.runtime.onConnect.addListener( port => {
 			}
 		})
 	}
-	
+
 	//when a port disconnects, forget it
 	port.onDisconnect.addListener( () => {
 		if (port.name === "live") {
@@ -73,7 +75,7 @@ browser.runtime.onConnect.addListener( port => {
 				logins.splice(index, 1)
 			}
 		}
-		else if (port.name === "michaelts") {
+		else if (port.name === mainUsername) {
 			main = undefined
 		}
 		else {
@@ -83,7 +85,6 @@ browser.runtime.onConnect.addListener( port => {
 			}
 		}
 		console.log(port.name, " disconnected!")
-		//console.log(main,alts)
 	})
 })
 
@@ -137,9 +138,31 @@ function login() {
 
 //send message to alts:
 function sendMessage(message, users=alts.concat(main)) {
+	console.log(users)
 	for (let user of users) {
 		user.postMessage(message)
 	}
+}
+
+//spawn gems:
+function spawnGem(type, splice, tier, amount) {
+	sendMessage({
+		text  : "spawn gems",
+		type  : type,
+		splice: splice,
+		tier  : tier,
+		amount: amount
+	}, alts)
+}
+
+//jump mobs:
+function jumpMobs(number) {
+	sendMessage({text: "jump mobs", number: number}, alts)
+}
+
+//send currency:
+function sendCurrency(name) {
+	sendMessage({text: "send currency", recipient: name})
 }
 
 //get settings from storage:
@@ -148,7 +171,7 @@ async function getVars() {
 	//if not set, create with default settings
 	if (Object.keys(vars).length === 0) {
 		vars = {
-			version 			: version,
+			version 			: varsVersion,
 			doQuests 			: true,
 			doBuildingAndHarvy	: true,
 			doCraftQueue 		: true,
@@ -195,31 +218,31 @@ async function getVars() {
 					send 			: true,
 					minimumAmount 	: 100,
 					keepAmount 		: 0
-				}/*,
+				},
 				{
 					name 			: "food",
 					send 			: true,
 					minimumAmount 	: 100,
-					keepAmount 		: 1000000
+					keepAmount 		: 10000000
 				},
 				{
 					name 			: "wood",
 					send 			: true,
 					minimumAmount 	: 100,
-					keepAmount 		: 1000000
+					keepAmount 		: 10000000
 				},
 				{
 					name 			: "iron",
 					send 			: true,
 					minimumAmount 	: 100,
-					keepAmount 		: 1000000
+					keepAmount 		: 10000000
 				},
 				{
 					name 			: "stone",
 					send 			: true,
 					minimumAmount 	: 100,
-					keepAmount 		: 1000000
-				}*/
+					keepAmount 		: 10000000
+				}
 			],
 			tradesList : {
 				fishing 	 : [],
@@ -236,51 +259,8 @@ async function getVars() {
 }
 getVars()
 
-//change settings:
-async function setKey(key, value) {
-	//set setting
-	vars[key] = value
-	await browser.storage.sync.set(vars)
-}
-
-//list changes in console:
-browser.storage.onChanged.addListener( changes => {
-	let values = Object.values(changes),
-		keys   = Object.keys(changes)
-
-	for (let i = 0; i < Object.values(changes).length; i++) {
-		if (Array.isArray(values[i].oldValue)) {
-			continue
-		}
-		if (values[i].oldValue != values[i].newValue) {
-			console.log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
-		}
-	}
-})
-
-//spawn gems:
-function spawnGem(type, splice, tier, amount) {
-	sendMessage({
-		text  : "spawn gems",
-		type  : type,
-		splice: splice,
-		tier  : tier,
-		amount: amount
-	}, alts)
-}
-
-//jump mobs:
-function jumpMobs(number) {
-	sendMessage({text: "jump mobs", number: number}, alts)
-}
-
-//send currency:
-function sendCurrency(name) {
-	sendMessage({text: "send currency", recipient: name})
-}
-
 async function updateVars() {
-	if (vars.version === version) {
+	if (vars.version === varsVersion) {
 		return
 	}
 	if (typeof vars.version !== "number") { //reset if too old
@@ -308,9 +288,39 @@ async function updateVars() {
 			carving 	 : []
 		}
 	}
+	if (vars.version < 5) {
+		for (let trade of ["food", "wood", "iron", "stone"]) {
+			vars.currencySend.push({
+				name : trade,
+				send : true,
+				minimumAmount : 100,
+				keepAmount : 10000000
+			})
+		}
+	}
 
 	vars.version = version
 	browser.storage.sync.set(vars)
 }
+
+//change settings:
+async function setKey(key, value) {
+	//set setting
+	vars[key] = value
+	await browser.storage.sync.set(vars)
+}
+
+browser.storage.onChanged.addListener( changes => {
+	getVars()
+	//list changes in console:
+	let values = Object.values(changes),
+		keys   = Object.keys(changes)
+
+	for (let i = 0; i < Object.values(changes).length; i++) {
+		if (values[i].oldValue !== values[i].newValue) {
+			console.log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
+		}
+	}
+})
 
 console.log("background script finished evaluating")

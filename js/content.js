@@ -1,13 +1,14 @@
 /*~~~To Do:~~~
+ * Add custom CSS style
  * Spawn gems for all alts
- * Make cancel changes button functional
- * Add custom CSS style.
- * Allow on/off toggling for all features.
+ * Automatic wiring (once every hour?)
+ * Allow on/off toggling for all features
  * Make keepUsernameVisible actually work
-
+ * Reformat options page, it's too long currently
+ * Use optional chaining in checkResults quest section
+ * Move root "if" statements contents to their own functions
+ * 
  *~~~Needs Testing:~~~
- * New login thechniques
- * Auto event for custom alt names
  */
 
 "use strict"
@@ -44,11 +45,12 @@ if ( /^https:\/\/beta.avabur.com\/\??e?x?p?i?r?e?d?=?1?$/.test(url) ) { //beta l
 }
 
 if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
-	let port2, // used for communicating with the page
-		username = $("#username").text(),
-		vars 	 = undefined,
-		isAlt 	 = undefined,
-		betabotCooldown = false
+	let port2, // used for communicating with the background page
+		username 		= $("#username").text(),
+		vars 	 		= undefined,
+		isAlt 	 		= undefined,
+		betabotCooldown = false,
+		mainTrade 		= null
 
 	/*forbid the extension from running on certain alts:
 	let forbiddenAlts = ["michaelts", "michaeltsI","michaeltsII", "michaeltsIII", "michaeltsIV", "michaeltsV", "michaeltsVI"]
@@ -74,6 +76,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 		return new Promise( async resolve => {
 			vars = await browser.storage.sync.get()
 			isAlt = username !== vars.mainUsername
+			mainTrade = getTrade()
 			resolve()
 		})
 	}
@@ -457,52 +460,37 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	$(document).on("roa-ws:craft", checkCraftingQueue)
 
 	//auto event. orginally taken from: https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js
-	//let commandChannel = 3203, //debugging channel
-	let commandChannel = 3202, //"production" channel
-		getTrade			= [
-			["michaeltsI"], 				//food
-			["michaeltsII", "michaeltsVI"], //wood
-			["michaeltsIII", "michaeltsV"], //iron
-			["michaeltsIV"],				//stone
-			["michaelts"], 					//craft
-			[] 								//carve
-		],
-		mainTrade 			= 0, // 0 = food , 1 = wood , 2 = iron , 3 = stone , 4 = craft , 5 = carve
-		eventLimiter 		= 0,
-		carvingChanged 		= false,
-		eventID 			= null,
-		mainEvent 			= false
+	let	eventLimiter 	= 0,
+		carvingChanged 	= false,
+		eventID 		= null,
+		mainEvent 		= false
 
-	const buttonList = [
-		$(".bossHarvest.btn")[4], //food
-		$(".bossHarvest.btn")[5], //wood
-		$(".bossHarvest.btn")[6], //iron
-		$(".bossHarvest.btn")[7], //stone
-		$(".bossCraft.btn")[0],   //craft
-		$(".bossCarve.btn")[0]    //carve
-	]
+	//const CHANNEL = 3203 //debugging channel
+	const CHANNEL = 3202 //"production" channel
+	const BUTTONS = {
+		battle 		: $(".bossFight.btn.btn-primary")[0],
+		fishing 	: $(".bossHarvest.btn")[4],
+		woodcutting : $(".bossHarvest.btn")[5],
+		mining 		: $(".bossHarvest.btn")[6],
+		stonecutting : $(".bossHarvest.btn")[7],
+		crafting 	: $(".bossCraft.btn")[0],
+		carving 	: $(".bossCarve.btn")[0]
+	}
 
 	function delay(time){
-		return new Promise((resolve,reject) => {
-			setTimeout( resolve , time )
+		return new Promise( resolve => {
+			setTimeout(resolve, time)
 		})
 	}
 
-	function assignTrade(){
-		let pointer = 0,
-			found = false
-		for (let list of getTrade) {
-			if (found) break
-			for (let element of list) {
-				if(username === element){
-					mainTrade = pointer
-					found = true
-				}
+	function getTrade() {
+		for (let trade of Object.keys(vars.tradesList)) {
+			if (vars.tradesList[trade].includes(username)) {
+				return trade
 			}
-			pointer += 1
 		}
+		return "carving"
 	}
-	assignTrade()
 
 	function changeTrade(){
 		let time = $("#eventCountdown")[0].innerText,
@@ -510,12 +498,12 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 
 		if(bossCarvingTier > 2500 && !carvingChanged && !mainEvent){
 			carvingChanged = true
-			$(".bossFight.btn.btn-primary")[0].click()
+			BUTTONS.battle.click()
 		}
 
 		if(time.includes("02m")) {
 			if ( !isAlt || (isAlt && !mainEvent) ){
-				$(".bossFight.btn.btn-primary")[0].click()
+				BUTTONS.battle.click()
 			}
 			$("#eventCountdown").unbind()
 			carvingChanged = false
@@ -526,16 +514,16 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	async function joinEvent(msgContent, msgID){
 		await delay(vars.startActionsDelay)
 		if (eventLimiter === 0){
-			if (msgID !== eventID){
+			if(msgContent === "InitEvent" || msgContent === "MainEvent"){
 				eventLimiter += 1
-				if(msgContent === "InitEvent" || msgContent === "MainEvent"){
+				if (msgID !== eventID){	
 					mainEvent = false
 					if(msgContent === "MainEvent"){
 						mainEvent = true
 					}
 					eventID = msgID
 
-					buttonList[mainTrade].click()
+					BUTTONS[mainTrade].click()
 					await delay(70000)
 					$("#eventCountdown").bind("DOMSubtreeModified", changeTrade)
 				}
@@ -546,9 +534,9 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	}
 	
 	setTimeout( () => {
-		$(document).on("roa-ws:message", (e,d) => {
-			if (d.c_id === commandChannel) {
-				joinEvent(d.m, d.m_id)
+		$(document).on("roa-ws:message", (event, data) => {
+			if (data.c_id === CHANNEL) {
+				joinEvent(data.m, data.m_id)
 			}
 		})
 	}, 10000) //start after a delay to avoid being triggered by old messages
