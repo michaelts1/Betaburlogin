@@ -65,12 +65,6 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
 	})
 
-	//set vars:
-	function setVar(key, value) {
-		vars[key] = value
-		port.postMessage({text:"setKey", key: key, value: value})
-	}
-
 	//get vars from sync storage:
 	function getVars() {//using a promise because i need to be able to use .then()
 		return new Promise( async resolve => {
@@ -220,7 +214,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	}
 	$("#sendMeCurrency").click( () => {port.postMessage({text:"requesting currency"}) })
 
-	//RoA-WS courtesy of @Reltorakii:
+	//RoA-WS. Taken from: https://github.com/edvordo/RoA-WSHookUp/blob/master/RoA-WSHookUp.user.js
 	//re-inject the script
 	if ($("#betabot-ws")[0] !== undefined) $("#betabot-ws").remove()
 
@@ -275,9 +269,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	})
 
 	//Betabot based on @Batosi's bot:
-	
-	//add option to build a specific item:
-	if ($("#selectBuild")[0] === undefined) {
+	if ($("#selectBuild")[0] === undefined) { //add option to build a specific item
 		$( $("div > #allHouseUpgrades")[0].parentNode ).after(`
 		<div id="selectBuild" class="col-md-12 mt10">
 			<input id="customBuild" type="checkbox">
@@ -459,11 +451,12 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	$(document).on("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults)
 	$(document).on("roa-ws:craft", checkCraftingQueue)
 
-	//auto event. orginally taken from: https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js
+	//auto event. Based on: https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js
 	let	eventLimiter 	= 0,
 		carvingChanged 	= false,
 		eventID 		= null,
-		mainEvent 		= false
+		mainEvent 		= false,
+		motdRecieved 	= false
 
 	//const CHANNEL = 3203 //debugging channel
 	const CHANNEL = 3202 //"production" channel
@@ -534,12 +527,23 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	}
 	
 	setTimeout( () => {
-		$(document).on("roa-ws:message", (event, data) => {
+		$(document).on("roa-ws:message", async (event, data) => {
 			if (data.c_id === CHANNEL) {
-				joinEvent(data.m, data.m_id)
+				delay(vars.startActionsDelay)
+				/* wait to see if the message is recieved together with a message of the day,
+				which means it was only sent due to a chat reconnection, and we should not join the event. */
+				if (motdRecieved === false) {
+					joinEvent(data.m, data.m_id)
+				}
 			}
 		})
-	}, 10000) //start after a delay to avoid being triggered by old messages
+	}, 20000) //start after a delay to avoid being triggered by old messages
+
+	$(document).on("roa-ws:motd", async (event, data) => {
+		motdRecieved = true //needed to avoid joining events after chat reconnections
+		delay(vars.startActionsDelay * 5)
+		motdRecieved = false
+	})
 
 	//custom style:
 	if ($("#betabot-css")[0] === undefined) {
@@ -571,7 +575,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 			}
 
 			#areaContent {
-				height: 354px;
+				height: 352px;
 			}
 
 			#questInfo {

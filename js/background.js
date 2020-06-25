@@ -138,7 +138,6 @@ function login() {
 
 //send message to alts:
 function sendMessage(message, users=alts.concat(main)) {
-	console.log(users)
 	for (let user of users) {
 		user.postMessage(message)
 	}
