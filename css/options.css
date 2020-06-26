@@ -1,7 +1,12 @@
 /* general */
+:root {
+	--body-font-size: 13pt;
+	--tooltip-background-color: FloralWhite;
+}
+
 body {
 	font-family: sans-serif;
-	font-size: 13pt;
+	font-size: var(--body-font-size);
 	background-color: Beige;
 	color: DarkSlateGray;
 }
@@ -44,6 +49,26 @@ h2 {
 	text-align: center;
 }
 
+input {
+	margin: 0.25em;
+	font-size: 11pt;
+	padding: 0.5em;
+	border: 1px solid silver;
+	background-color: Beige;
+	color: LightSeaGreen;
+	border-radius: 0.4em;
+}
+
+select {
+	margin: 0.25em;
+	font-size: 11pt;
+	padding: 0.5em;
+	border: 1px solid silver;
+	background-color: Beige;
+	color: LightSeaGreen;
+	border-radius: 0.4em;
+}
+
 /* tables */
 table, th, td {
 	border: 2px solid LightSteelBlue;
@@ -57,33 +82,32 @@ table {
 
 td {
 	padding-right: 0.5em;
-	padding-left: 0.25em;
+	padding-left: 0.5em;
 }
-
-input {
-	margin: 0.25em;
-	font-size: 11pt;
-	padding: 0.5em;
-	border: 1px solid silver;
-	background-color: Beige;
-	color: LightSeaGreen;
-	border-radius: 0.4em;
-}
-
 #optionsPage table {
+	table-layout: fixed;
 	width: 26em;
 	margin-top: 2em;
 }
 
-#secondTableFirstColumn {
-	width: 10%;
-}
+#col_1_1 {width: 60%;}
+#col_1_2 {width: 40%;}
+
+#col_2_1 {width: 10%;}
+#col_2_2 {width: 45%;}
+#col_2_3 {width: 45%;}
+
+#col_3_1 {width: 43%;}
+#col_3_2 {width: 57%;}
+
+#col_4_1 {width: 42%;}
+#col_4_2 {width: 58%;}
 
 .checkboxtd {
 	text-align: center;
 }
 
-/* warning and info tooltips */
+/* tooltips */
 .warning, .info {
 	position: relative;
 	width: 1.25em;
@@ -96,11 +120,23 @@ input {
 	background-image: url("../images/warning.svg");
 }
 
-.info {
+.info, .titleInfo {
 	background-image: url("../images/info.svg");
 }
 
-.warning:hover::after, .info:hover::after {
+.titleInfo {
+	position: relative;
+	width: 1.4em;
+	height: 1.4em;
+	display: inline-block;
+	vertical-align: middle;
+	font-size: var(--body-font-size);
+	font-weight: normal;
+	font-family: sans-serif;
+	text-align: left;
+}
+
+.warning:hover::after, .info:hover::after, .titleInfo:hover::after,	 [data-tooltip]:hover::after{
 	white-space: pre-line;
 	content: attr(data-tooltip);
 	position: absolute;
@@ -108,18 +144,30 @@ input {
 	left: -127.5px;
 	min-width: 255px;
 	padding: 0.5em;
+	background-color: var(--tooltip-background-color);;
 	border: 1px silver solid;
 	border-radius: 0.75em;
 }
 
 .warning:hover::after {
 	color: IndianRed;
-	background-color: FloralWhite;
 }
 
-.info:hover::after {
+.info:hover::after, .titleInfo:hover::after {
 	color: CadetBlue;
-	background-color: FloralWhite;
+}
+
+.required {
+	color: red;
+	position: relative;
+}
+
+.required[data-tooltip] {
+	border-bottom: 1px dotted black;
+}
+
+.required:hover::after {
+	color: goldenrod;
 }
 
 /* buttons */
@@ -128,7 +176,8 @@ input {
 	justify-content: center;
 }
 
-.button {
+button {
+	font-size: var(--body-font-size);
 	cursor: pointer;
 	display: inline-flex;
 	height: 40px;
@@ -145,14 +194,12 @@ input {
 	overflow: hidden;
 }
 
-.button a {
-	color: DarkGray;
-	text-decoration: none;
+button span {
 	position: relative;
 	transition: all .5s ease-Out;
 }
 
-.button:hover a {
+button:hover span {
 	color: DarkSlateGray;
 }
 
@@ -169,7 +216,7 @@ input {
 	left: 70px;
 }
 
-.button:hover #circle {
+button:hover #circle {
 	width: 200%;
 	height: 500%;
 	opacity: 1;

@@ -1,6 +1,13 @@
 /*~~~To Do:~~~
+ * Add custom CSS style
  * Spawn gems for all alts
- *
+ * Automatic wiring (once every hour?)
+ * Allow on/off toggling for all features
+ * Make keepUsernameVisible actually work
+ * Reformat options page, it's too long currently
+ * Use optional chaining in checkResults quest section
+ * Move root "if" statements contents to their own functions
+ * 
  *~~~Needs Testing:~~~
  */
 
@@ -38,13 +45,14 @@ if ( /^https:\/\/beta.avabur.com\/\??e?x?p?i?r?e?d?=?1?$/.test(url) ) { //beta l
 }
 
 if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
-	let port2, // used for communicating with the page
-		username = $("#username").text(),
-		vars 	 = undefined,
-		isAlt 	 = undefined,
-		betabotCooldown = false
+	let port2, // used for communicating with the background page
+		username 		= $("#username").text(),
+		vars 	 		= undefined,
+		isAlt 	 		= undefined,
+		betabotCooldown = false,
+		mainTrade 		= null
 
-	/*//forbid the extension from running on certain alts:
+	/*forbid the extension from running on certain alts:
 	let forbiddenAlts = ["michaelts", "michaeltsI","michaeltsII", "michaeltsIII", "michaeltsIV", "michaeltsV", "michaeltsVI"]
 	if (forbiddenAlts.includes(username)) throw `ERROR: one of ${forbiddenAlts}`*/
 
@@ -57,17 +65,12 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
 	})
 
-	//set vars:
-	function setVar(key, value) {
-		vars[key] = value
-		port.postMessage({text:"setKey", key: key, value: value})
-	}
-
 	//get vars from sync storage:
 	function getVars() {//using a promise because i need to be able to use .then()
 		return new Promise( async resolve => {
 			vars = await browser.storage.sync.get()
 			isAlt = username !== vars.mainUsername
+			mainTrade = getTrade()
 			resolve()
 		})
 	}
@@ -178,6 +181,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	function wire(target) {
 		if (target === username) return
 		let sendMessage = `/wire ${target}`
+
 		for (let currency of vars.currencySend) {
 			if (currency.send === false) continue
 
@@ -210,7 +214,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	}
 	$("#sendMeCurrency").click( () => {port.postMessage({text:"requesting currency"}) })
 
-	//RoA-WS courtesy of @Reltorakii:
+	//RoA-WS. Taken from: https://github.com/edvordo/RoA-WSHookUp/blob/master/RoA-WSHookUp.user.js
 	//re-inject the script
 	if ($("#betabot-ws")[0] !== undefined) $("#betabot-ws").remove()
 
@@ -265,9 +269,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	})
 
 	//Betabot based on @Batosi's bot:
-	
-	//add option to build a specific item:
-	if ($("#selectBuild")[0] === undefined) {
+	if ($("#selectBuild")[0] === undefined) { //add option to build a specific item
 		$( $("div > #allHouseUpgrades")[0].parentNode ).after(`
 		<div id="selectBuild" class="col-md-12 mt10">
 			<input id="customBuild" type="checkbox">
@@ -449,70 +451,55 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	$(document).on("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults)
 	$(document).on("roa-ws:craft", checkCraftingQueue)
 
-	//auto event. based on: https://github.com/dragonminja24/betaburCheats/raw/master/betaburCheatsHeavyWeight.js
-	//let commandChannel = 3203, //debugging channel
-	let commandChannel = 3202, //"production" channel
-		mainCharacter		= "michaelts",
-		getTrade			= [
-			["michaeltsI"], 				//food
-			["michaeltsII", "michaeltsVI"], //wood
-			["michaeltsIII", "michaeltsV"], //iron
-			["michaeltsIV"],				//stone
-			["michaelts"], 					//craft
-			[] 								//carve
-		],
-		buttonList 			= [
-			$(".bossHarvest.btn")[4], //food
-			$(".bossHarvest.btn")[5], //wood
-			$(".bossHarvest.btn")[6], //iron
-			$(".bossHarvest.btn")[7], //stone
-			$(".bossCraft.btn")[0],   //craft
-			$(".bossCarve.btn")[0]    //carve
-		],
-		mainTrade 			= 0, // 0 = food , 1 = wood , 2 = iron , 3 = stone , 4 = craft , 5 = carve
-		eventLimiter 		= 0,
-		carvingChanger 		= 0,
-		eventID 			= null,
-		mainEvent 			= false,
-		msgID				= undefined
+	//auto event. Based on: https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js
+	let	eventLimiter 	= 0,
+		carvingChanged 	= false,
+		eventID 		= null,
+		mainEvent 		= false,
+		motdRecieved 	= false
+
+	//const CHANNEL = 3203 //debugging channel
+	const CHANNEL = 3202 //"production" channel
+	const BUTTONS = {
+		battle 		: $(".bossFight.btn.btn-primary")[0],
+		fishing 	: $(".bossHarvest.btn")[4],
+		woodcutting : $(".bossHarvest.btn")[5],
+		mining 		: $(".bossHarvest.btn")[6],
+		stonecutting : $(".bossHarvest.btn")[7],
+		crafting 	: $(".bossCraft.btn")[0],
+		carving 	: $(".bossCarve.btn")[0]
+	}
 
 	function delay(time){
-		return new Promise((resolve,reject) => {
-			setTimeout( resolve , time )
+		return new Promise( resolve => {
+			setTimeout(resolve, time)
 		})
 	}
 
-	function assignTrade(){
-		let pointer = 0,
-			found = false
-		for (let list of getTrade) {
-			if (found) break
-			for (let element of list) {
-				if(username === element){
-					mainTrade = pointer
-					found = true
-				}
+	function getTrade() {
+		for (let trade of Object.keys(vars.tradesList)) {
+			if (vars.tradesList[trade].includes(username)) {
+				return trade
 			}
-			pointer += 1
 		}
+		return "carving"
 	}
-	assignTrade()
 
 	function changeTrade(){
 		let time = $("#eventCountdown")[0].innerText,
 			bossCarvingTier = $("#currentBossCarvingTier")[0].innerText
 
-		if(bossCarvingTier > 2500 && carvingChanger === 0 && !mainEvent){
-			++carvingChanger
-			$(".bossFight.btn.btn-primary")[0].click()
+		if(bossCarvingTier > 2500 && !carvingChanged && !mainEvent){
+			carvingChanged = true
+			BUTTONS.battle.click()
 		}
 
 		if(time.includes("02m")) {
 			if ( !isAlt || (isAlt && !mainEvent) ){
-				$(".bossFight.btn.btn-primary")[0].click()
+				BUTTONS.battle.click()
 			}
 			$("#eventCountdown").unbind()
-			carvingChanger = 0
+			carvingChanged = false
 			mainEvent = false
 		}
 	}
@@ -520,16 +507,16 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	async function joinEvent(msgContent, msgID){
 		await delay(vars.startActionsDelay)
 		if (eventLimiter === 0){
-			if (msgID !== eventID){
+			if(msgContent === "InitEvent" || msgContent === "MainEvent"){
 				eventLimiter += 1
-				if(msgContent === "InitEvent" || msgContent === "MainEvent"){
+				if (msgID !== eventID){	
 					mainEvent = false
 					if(msgContent === "MainEvent"){
 						mainEvent = true
 					}
 					eventID = msgID
 
-					buttonList[mainTrade].click()
+					BUTTONS[mainTrade].click()
 					await delay(70000)
 					$("#eventCountdown").bind("DOMSubtreeModified", changeTrade)
 				}
@@ -540,12 +527,23 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	}
 	
 	setTimeout( () => {
-		$(document).on("roa-ws:message", (e,d) => {
-			if (d.c_id === commandChannel) {
-				joinEvent(d.m, d.m_id)
+		$(document).on("roa-ws:message", async (event, data) => {
+			if (data.c_id === CHANNEL) {
+				delay(vars.startActionsDelay)
+				/* wait to see if the message is recieved together with a message of the day,
+				which means it was only sent due to a chat reconnection, and we should not join the event. */
+				if (motdRecieved === false) {
+					joinEvent(data.m, data.m_id)
+				}
 			}
 		})
-	}, 10000) //start after a delay to avoid being triggered by old messages
+	}, 20000) //start after a delay to avoid being triggered by old messages
+
+	$(document).on("roa-ws:motd", async (event, data) => {
+		motdRecieved = true //needed to avoid joining events after chat reconnections
+		delay(vars.startActionsDelay * 5)
+		motdRecieved = false
+	})
 
 	//custom style:
 	if ($("#betabot-css")[0] === undefined) {
@@ -577,7 +575,7 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 			}
 
 			#areaContent {
-				height: 354px;
+				height: 352px;
 			}
 
 			#questInfo {
@@ -586,10 +584,6 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 
 			.navSection li {
 				line-height: 25px;
-			}
-
-			.RQ-quest-estimate {
-				font-size: 1em;
 			}
 
 			#customBuild + label > a {
@@ -606,4 +600,4 @@ if ( /^https:\/\/beta.avabur.com\/game$/.test(url) ) { //beta game page
 	}
 }
 
-console.log("betaburlogin finished compiling")
+console.log("betaburlogin finished evaluating")

@@ -1,15 +1,17 @@
 "use strict"
 
-//communication with content pages:
-var	live, //those are the ports
+var	live, //those will store the ports
 	main,
 	alts = [],
 	logins = [],
-	//this will store the settings
-	vars = undefined
+	//those will store the settings
+	vars = undefined,
+	varsVersion = 5
 
-browser.runtime.onConnect.addListener( port => {
+browser.runtime.onConnect.addListener(async port => {
 	console.log(port.name, " connected")
+	let mainUsername = (await browser.storage.sync.get("mainUsername")).mainUsername
+
 	//if live login
 	if (port.name === "live") {
 		live = port
@@ -29,7 +31,7 @@ browser.runtime.onConnect.addListener( port => {
 		})
 	}
 	//if beta main
-	else if (port.name === "michaelts") {
+	else if (port.name === mainUsername) {
 		main = port
 	}
 	//if beta alt
@@ -61,7 +63,7 @@ browser.runtime.onConnect.addListener( port => {
 			}
 		})
 	}
-	
+
 	//when a port disconnects, forget it
 	port.onDisconnect.addListener( () => {
 		if (port.name === "live") {
@@ -73,7 +75,7 @@ browser.runtime.onConnect.addListener( port => {
 				logins.splice(index, 1)
 			}
 		}
-		else if (port.name === "michaelts") {
+		else if (port.name === mainUsername) {
 			main = undefined
 		}
 		else {
@@ -83,13 +85,12 @@ browser.runtime.onConnect.addListener( port => {
 			}
 		}
 		console.log(port.name, " disconnected!")
-		//console.log(main,alts)
 	})
 })
 
 //open tabs:
 async function openTabs() {
-	let contexts = await browser.contextualIdentities.query({})//get all containers
+	let contexts = await browser.contextualIdentities.query({}) //get all containers
 	browser.tabs.create({url: "https://beta.avabur.com"})
 	for (let i = 0; i < contexts.length; i++) { //and open them
 		setTimeout( () => {
@@ -97,23 +98,12 @@ async function openTabs() {
 				cookieStoreId: contexts[i].cookieStoreId,
 				url: "https://beta.avabur.com"
 			})
-		}, 500*i)
+		}, 500*(i+1))
 	}
 }
 
 //login all alts:
 function login() {
-	function romanize(num) {
-		if (num === 0) return ""
-		let roman = {v: 5, iv: 4, i: 1}
-		let str = ""
-		for (let key of Object.keys(roman)) {
-			let q = Math.floor(num / roman[key])
-			num -= q * roman[key]
-			str += key.repeat(q)
-		}
-		return str
-	}
 	function sendLogin(i, username) {
 		logins[i].postMessage({
 			text: "login",
@@ -121,10 +111,28 @@ function login() {
 			password: vars.loginPassword
 		})
 	}
-	
-	sendLogin(0, vars.mainAccount)
-	for (let i = 1; i <= vars.altsNumber; i++) {
-		sendLogin(i, vars.altBaseName+romanize(i))
+
+	if (vars.pattern === "roman" || vars.pattern === "romanCaps") {
+		function romanize(num, caps) {
+			if (num === 0) return ""
+			let roman = caps ? {L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1} : {l: 50, xl: 40, x: 10, ix: 9, v: 5, iv: 4, i: 1} //use upper case if caps is true, otherwise don't
+			let str = ""
+			for (let key of Object.keys(roman)) {
+				let q = Math.floor(num / roman[key])
+				num -= q * roman[key]
+				str += key.repeat(q)
+			}
+			return str
+		}
+		sendLogin(0, vars.mainAccount)
+		for (let i = 1; i <= vars.altsNumber; i++) {
+			sendLogin(i, vars.altBaseName+romanize(i, vars.pattern === "romanCaps")) //`vars.pattern === "romanCaps"` returns true if we should use caps and false if we shouldn't
+		}
+	} else if (vars.pattern === "unique") {
+		sendLogin(0, vars.mainAccount)
+		for (let i = 0; i < vars.namesList.length; i++) {
+			sendLogin(i+1, vars.namesList[i])
+		}
 	}
 }
 
@@ -135,13 +143,34 @@ function sendMessage(message, users=alts.concat(main)) {
 	}
 }
 
+//spawn gems:
+function spawnGem(type, splice, tier, amount) {
+	sendMessage({
+		text  : "spawn gems",
+		type  : type,
+		splice: splice,
+		tier  : tier,
+		amount: amount
+	}, alts)
+}
+
+//jump mobs:
+function jumpMobs(number) {
+	sendMessage({text: "jump mobs", number: number}, alts)
+}
+
+//send currency:
+function sendCurrency(name) {
+	sendMessage({text: "send currency", recipient: name})
+}
+
 //get settings from storage:
 async function getVars() {
 	vars = await browser.storage.sync.get()
 	//if not set, create with default settings
 	if (Object.keys(vars).length === 0) {
 		vars = {
-			version 			: 2,
+			version 			: varsVersion,
 			doQuests 			: true,
 			doBuildingAndHarvy	: true,
 			doCraftQueue 		: true,
@@ -150,13 +179,15 @@ async function getVars() {
 			questCompleting 	: null,
 			startActionsDelay 	: 1000,
 			minCraftingQueue 	: 5,
+			dailyCrystals	 	: 50,
 			mainAccount 		: "",
 			mainUsername 		: "",
+			loginPassword 		: "",
+			pattern 			: "",
 			altsNumber 			: 0,
 			altBaseName 		: "",
-			loginPassword 		: "",
-			dailyCrystals	 	: 50,
-			currencySend : [
+			namesList 			: [],
+			currencySend 		: [
 				{
 					name 			: "crystals",
 					send 			: true,
@@ -186,8 +217,40 @@ async function getVars() {
 					send 			: true,
 					minimumAmount 	: 100,
 					keepAmount 		: 0
+				},
+				{
+					name 			: "food",
+					send 			: true,
+					minimumAmount 	: 100,
+					keepAmount 		: 10000000
+				},
+				{
+					name 			: "wood",
+					send 			: true,
+					minimumAmount 	: 100,
+					keepAmount 		: 10000000
+				},
+				{
+					name 			: "iron",
+					send 			: true,
+					minimumAmount 	: 100,
+					keepAmount 		: 10000000
+				},
+				{
+					name 			: "stone",
+					send 			: true,
+					minimumAmount 	: 100,
+					keepAmount 		: 10000000
 				}
-			]
+			],
+			tradesList : {
+				fishing 	 : [],
+				woodcutting  : [],
+				mining 		 : [],
+				stonecutting : [],
+				crafting 	 : [],
+				carving 	 : []
+			}
 		}
 		await browser.storage.sync.set(vars)
 	}
@@ -195,50 +258,10 @@ async function getVars() {
 }
 getVars()
 
-//change settings:
-async function setKey(key, value) {
-	//set setting
-	vars[key] = value
-	await browser.storage.sync.set(vars)
-}
-
-//list changes in console:
-browser.storage.onChanged.addListener( changes => {
-	let values = Object.values(changes),
-		keys   = Object.keys(changes)
-
-	for (let i = 0; i < Object.values(changes).length; i++) {
-		if (Array.isArray(values[i].oldValue)) {
-			continue
-		}
-		if (values[i].oldValue != values[i].newValue) {
-			console.log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
-		}
-	}
-})
-
-//spawn gems:
-function spawnGem(type, splice, tier, amount) {
-	sendMessage({
-		text  : "spawn gems",
-		type  : type,
-		splice: splice,
-		tier  : tier,
-		amount: amount
-	}, alts)
-}
-
-//jump mobs:
-function jumpMobs(number) {
-	sendMessage({text: "jump mobs", number: number}, alts)
-}
-
-//send currency:
-function sendCurrency(name) {
-	sendMessage({text: "send currency", recipient: name})
-}
-
 async function updateVars() {
+	if (vars.version === varsVersion) {
+		return
+	}
 	if (typeof vars.version !== "number") { //reset if too old
 		console.log("reset vars - too old")
 		await browser.storage.sync.clear()
@@ -248,8 +271,55 @@ async function updateVars() {
 	if (vars.version < 2) {
 		console.log("update vars from versions before 2")
 		vars.mainUsername = ""
-		browser.storage.sync.set(vars)
+		
 	}
+	if (vars.version < 3) {
+		vars.pattern = ""
+		vars.namesList = []
+	}
+	if (vars.version < 4) {
+		vars.tradesList = {
+			fishing 	 : [],
+			woodcutting  : [],
+			mining 		 : [],
+			stonecutting : [],
+			crafting 	 : [],
+			carving 	 : []
+		}
+	}
+	if (vars.version < 5) {
+		for (let trade of ["food", "wood", "iron", "stone"]) {
+			vars.currencySend.push({
+				name : trade,
+				send : true,
+				minimumAmount : 100,
+				keepAmount : 10000000
+			})
+		}
+	}
+
+	vars.version = version
+	browser.storage.sync.set(vars)
 }
 
-console.log("background script finished compiling")
+//change settings:
+async function setKey(key, value) {
+	//set setting
+	vars[key] = value
+	await browser.storage.sync.set(vars)
+}
+
+browser.storage.onChanged.addListener( changes => {
+	getVars()
+	//list changes in console:
+	let values = Object.values(changes),
+		keys   = Object.keys(changes)
+
+	for (let i = 0; i < Object.values(changes).length; i++) {
+		if (values[i].oldValue !== values[i].newValue) {
+			console.log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
+		}
+	}
+})
+
+console.log("background script finished evaluating")

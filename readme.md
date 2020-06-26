@@ -13,12 +13,6 @@ Firefox addon to allow automation in [Avabur's beta server](https://beta.avabur.
 * Automatic events.
 * Remove the "effects info" box.
 
-##### Plans:
-* Add custom CSS style.
-* Currently, most of the automation features are toggable. Allow on/off toggling for all features.
-* Make keepUsernameVisible actually work
-
-
 ###### Notes:
 1. This addon Requires Container Tabs.
 2. For now, you will probably have to edit the code to be able to use it for your alts. No documentation is available, sorry.

@@ -3,6 +3,9 @@ var vars
 function abbreviateNumber(num) {
 	let round = num => Math.round(num*1000)/1000
 	
+	if(num >= 1000000000000000) {
+		return round(num/1000000000000000)+"Q"
+	}
 	if(num >= 1000000000000) {
 		return round(num/1000000000000)+"T"
 	}
@@ -45,56 +48,85 @@ function deabbreviateNumber (input) {
 	return num * scales[scale]
 }
 
+function displayMessage(message, time=2000) {
+	$("#formButtonsOutput").text(message)
+	setTimeout( () => {
+		$("#formButtonsOutput").text("")
+	}, time)
+}
+
 async function fillFields() {
 	vars = await browser.storage.sync.get()
 	
 	$("#mainAccountName")	.val(vars.mainAccount)
-	$("#mainUsername")		.val(vars.mainUsername)
-	$("#altsNumber")		.val(vars.altsNumber)
-	$("#altName")			.val(vars.altBaseName)
-	$("#loginPass")			.val(vars.loginPassword)
+	$("#mainUsername") 		.val(vars.mainUsername)
+	$("#loginPass") 		.val(vars.loginPassword)
 	$("#minCraftingQueue")	.val(vars.minCraftingQueue)
-	$("#dailyCrystals")		.val(vars.dailyCrystals)
+	$("#dailyCrystals") 	.val(vars.dailyCrystals)
+	$("#altNameType") 		.val(vars.pattern)
+	$("#altsNumber") 		.val(vars.altsNumber)
+	$("#altName") 			.val(vars.altBaseName)
+	$("#namesList") 		.val(vars.namesList.join(", "))
 	
-	for (currency of vars.currencySend) {
+	for (let currency of vars.currencySend) {
 		$(`#${currency.name}Keep`).val(abbreviateNumber(currency.keepAmount))
 		$(`#${currency.name}Keep`).prop("title", currency.keepAmount)
 		$(`#${currency.name}Send`).prop("checked", currency.send)
 	}
+
+	for (let trade of Object.keys(vars.tradesList)) {
+		$("#"+trade).val(vars.tradesList[trade].join(", "))
+	}
 	
 	updatePrice()
+	displayAltFields()
 }
 
 async function saveChanges() {
 	try {
+		if ($("#settings")[0].reportValidity() === false) {
+			throw "Form is invalid"
+		}
+
 		vars.mainAccount 	  = $("#mainAccountName").val()
 		vars.mainUsername 	  = $("#mainUsername").val()
-		vars.altsNumber 	  = parseInt($("#altsNumber").val())
-		vars.altBaseName 	  = $("#altName").val()
 		vars.loginPassword 	  = $("#loginPass").val()
 		vars.minCraftingQueue = parseInt($("#minCraftingQueue").val())
 		vars.dailyCrystals 	  = parseInt($("#dailyCrystals").val())
+		vars.pattern 		  = $("#altNameType").val()
+		vars.altsNumber 	  = parseInt($("#altsNumber").val())
+		vars.altBaseName 	  = $("#altName").val()
+		vars.namesList 		  = $("#namesList").val().split(', ')
 
 		for (let i = 0; i < vars.currencySend.length; i++) {
 			let keepAmount = $(`#${vars.currencySend[i].name}Keep`).val()
 			vars.currencySend[i].keepAmount = deabbreviateNumber(keepAmount)
 			vars.currencySend[i].send = $(`#${vars.currencySend[i].name}Send`).prop("checked")
 		}
-		
+
+		for (trade of Object.keys(vars.tradesList)) {
+			vars.tradesList[trade] = $("#"+trade).val().split(", ")
+		}
+
 		await browser.storage.sync.set(vars)
 		fillFields()
-		
-		$("#formButtonsOutput").text("Changes saved")
-		setTimeout( () => {
-			$("#formButtonsOutput").text("")
-		}, 1000)
+
+		displayMessage("Changes saved")
 	}
-	catch (e) {
-		$("#formButtonsOutput").text("Error occured")
-		setTimeout( () => {
-			$("#formButtonsOutput").text("")
-		}, 1000)
-		console.error(e)
+	catch (error) {
+		displayMessage("Error: "+error.message)
+		console.error(error)
+	}
+}
+
+function cancelChanges() {
+	try {
+		fillFields()
+		displayMessage("Cancelled changes")
+	}
+	catch (error) {
+		displayMessage("Error: "+error.message)
+		console.error(error)
 	}
 }
 
@@ -104,11 +136,27 @@ function updatePrice() {
 	$("#dailyCrystalsPrice").text(abbreviateNumber(price(number)))
 }
 
+function displayAltFields() {
+	let value = $("#altNameType").val()
+	if (value === "") {
+		$("#number").hide()
+		$("#altsBaseName").hide()
+		$("#altsUniqueNames").hide()
+	} else if (value === "roman" || value === "romanCaps") {
+		$("#number").show()
+		$("#altsBaseName").show()
+		$("#altsUniqueNames").hide()
+	} else if (value === "unique") {
+		$("#number").hide()
+		$("#altsBaseName").hide()
+		$("#altsUniqueNames").show()
+	}
+}
 
 $(fillFields)
-
+$("#altNameType").on("input", displayAltFields)
 $("#saveChanges").click(saveChanges)
-$("#cancelChanges").click(fillFields)
+$("#cancelChanges").click(cancelChanges)
 $("#dailyCrystals").on("input", updatePrice)
 
 browser.storage.onChanged.addListener( changes => {
