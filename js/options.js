@@ -68,6 +68,8 @@ async function fillFields() {
 	$("#altName") 			.val(vars.altBaseName)
 	$("#namesList") 		.val(vars.namesList.join(", "))
 	
+	$("#autoWire").prop("checked", vars.autoWire)
+	
 	for (let currency of vars.currencySend) {
 		$(`#${currency.name}Keep`).val(abbreviateNumber(currency.keepAmount))
 		$(`#${currency.name}Keep`).prop("title", currency.keepAmount)
@@ -97,6 +99,7 @@ async function saveChanges() {
 		vars.altsNumber 	  = parseInt($("#altsNumber").val())
 		vars.altBaseName 	  = $("#altName").val()
 		vars.namesList 		  = $("#namesList").val().split(', ')
+		vars.autoWire 		  = $("#autoWire").prop("checked")
 
 		for (let i = 0; i < vars.currencySend.length; i++) {
 			let keepAmount = $(`#${vars.currencySend[i].name}Keep`).val()
@@ -134,6 +137,7 @@ function updatePrice() {
 	let price = n => (n * (2 * 2000000 + (n - 1) * 1000000)) / 2
 	let number = parseInt($("#dailyCrystals").val())
 	$("#dailyCrystalsPrice").text(abbreviateNumber(price(number)))
+	$("#dailyCrystalsPrice").prop("title", price(number))
 }
 
 function displayAltFields() {

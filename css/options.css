@@ -50,7 +50,6 @@ h2 {
 }
 
 input {
-	margin: 0.25em;
 	font-size: 11pt;
 	padding: 0.5em;
 	border: 1px solid silver;
@@ -81,9 +80,11 @@ table {
 }
 
 td {
+	height: 2.7em;
 	padding-right: 0.5em;
 	padding-left: 0.5em;
 }
+
 #optionsPage table {
 	table-layout: fixed;
 	width: 26em;
