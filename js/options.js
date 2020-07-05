@@ -24,14 +24,12 @@ function abbreviateNumber(num) {
 function deabbreviateNumber (input) {
 	if (typeof input !== "string") return input
 
-	let regex = /^([0-9,.]+)(k|m|b|t)?$/gi,
+	let regex = /^([0-9,.]+)(k|m|b|t|q)?$/gi,
 		parts = regex.exec(input),
 		numPart = parts[1],
 		scale = (parts[2] || "").toUpperCase()
 
-	if (!scale) {
-		return input
-	}
+	if (!scale) return input
 
 	let num = parseFloat(numPart.replace(/[^0-9.]/g, "")),
 		scales = {
@@ -39,19 +37,20 @@ function deabbreviateNumber (input) {
 			M: 1000000,
 			B: 1000000000,
 			T: 1000000000000,
+			Q: 1000000000000000,
 		}
 
-	if (!scales[scale]) {
-		return input
-	}
+	if (!scales[scale]) return input
 
 	return num * scales[scale]
 }
 
-function displayMessage(message, time=2000) {
+function displayMessage(message, time=2500) {
 	$("#formButtonsOutput").text(message)
+	$("#formButtonsOutput").fadeIn(250)
+
 	setTimeout( () => {
-		$("#formButtonsOutput").text("")
+		$("#formButtonsOutput").fadeOut(750, () => {$("#formButtonsOutput").text("")} )
 	}, time)
 }
 
@@ -137,7 +136,7 @@ function updatePrice() {
 	let price = n => (n * (2 * 2000000 + (n - 1) * 1000000)) / 2
 	let number = parseInt($("#dailyCrystals").val())
 	$("#dailyCrystalsPrice").text(abbreviateNumber(price(number)))
-	$("#dailyCrystalsPrice").prop("title", price(number))
+	$("#dailyCrystals + div").prop("title", Intl.NumberFormat().format(price(number)) )
 }
 
 function displayAltFields() {

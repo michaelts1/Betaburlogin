@@ -5,11 +5,8 @@
  * Reformat options page, it's too long currently (use pseudo tabs?)
  * 
  *~~~Needs Testing:~~~
- * Automatic wiring (once every hour?)
- * Make keepUsernameVisible actually work
- * options page daily crystals price title
- * Move root "if" statements contents to their own functions
- * Do not start new quests/harvestron jobs if cancelled manually
+ * Live/Beta login
+ * Do not start new harvestron jobs if cancelled manually
  */
 
 "use strict"
@@ -27,13 +24,19 @@ else if (/beta.avabur.com\/game/.test(url)) {
 }
 
 function liveLogin() {
-	port = browser.runtime.connect({ name: "live" })
+	port = browser.runtime.connect({name: "live"})
 	$("#login_notification").html(`<button id="openAltTabs">open all alt tabs</button>`)
 	$("#openAltTabs").click(() => { port.postMessage({text: "open alt tabs"}) })
 }
 
 function betaLogin() {
-	port = browser.runtime.connect({ name: "login" })
+	port = browser.runtime.connect({name: "login"})
+
+	port.onMessage.addListener(message => {
+		if (message.text === "login") {
+			login(message.username, message.password)
+		}
+	})
 
 	function login(username, password) {
 		$("#acctname").val(username)
@@ -46,29 +49,30 @@ function betaLogin() {
 			}
 		}, 7500)
 	}
-	port.onMessage.addListener(message => {
-		if (message.text === "login") {
-			login(message.username, message.password)
-		}
-	})
+
 	$("#login_notification").html(`<button id="loginAlts">login all alts</button>`)
 	$("#loginAlts").click(() => { port.postMessage({text: "requesting login"}) })
 }
 
-function betaGame() {
+async function betaGame() {
 	let port2,
-		username = $("#username").text(),
-		vars = undefined,
-		isAlt = undefined,
+		vars 			= await browser.storage.sync.get(),
+		username 		= $("#username").text(),
+		isAlt 			= username !== vars.mainUsername,
 		betabotCooldown = false,
-		mainTrade = null,
-		autoWireID = null
+		mainTrade 		= getTrade(),
+		autoWireID 		= vars.autoWire ? setInterval(wire, 60 * 60 * 1000, vars.mainUsername) : null
+	
+	async function refreshVars() {
+		vars = await browser.storage.sync.get()
+		isAlt = username !== vars.mainUsername
+		mainTrade = getTrade()
+		autoWireID = vars.autoWire ? setInterval(wire, 60 * 60 * 1000, vars.mainUsername) : clearInterval(autoWireID)
+	}
+	browser.storage.onChanged.addListener(refreshVars)
 
-    /*forbid the extension from running on certain alts:
-    let forbiddenAlts = ["michaelts", "michaeltsI","michaeltsII", "michaeltsIII", "michaeltsIV", "michaeltsV", "michaeltsVI"]
-    if (forbiddenAlts.includes(username)) throw `ERROR: one of ${forbiddenAlts}`*/
 	//connect to background script:
-	port = browser.runtime.connect({ name: username })
+	port = browser.runtime.connect({name: username})
 	port.onMessage.addListener(message => {
 		if (message.text === "send currency")
 			wire(message.recipient)
@@ -80,23 +84,7 @@ function betaGame() {
 			spawnGems(message.tier, message.type, message.splice, message.amount)
 	})
 
-	//get vars from sync storage:
-	function getVars() {
-		return new Promise(async (resolve) => {
-			vars = await browser.storage.sync.get()
-			isAlt = username !== vars.mainUsername
-			mainTrade = getTrade()
 
-			if (vars.autoSend) {
-				autoWireID = setInterval( () => {wire(vars.mainUsername)}, 60 * 60 * 1000) //send once every hour
-			}
-			else {
-				clearInterval(autoWireID)
-			}
-			resolve()
-		})
-	}
-	browser.storage.onChanged.addListener(getVars)
 
 	function jumpMobs(number) {
 		setTimeout(() => {
@@ -146,9 +134,7 @@ function betaGame() {
 	}
 
 	//only run on alts:
-	getVars().then(() => {
-		if (!isAlt)
-			return
+	if (isAlt) {
 		//jump mobs:
 		if ($("#betabotMobJump")[0] === undefined) {
 			$("#autoEnemy").after(`
@@ -170,7 +156,6 @@ function betaGame() {
 			port.postMessage({text: "move to mob", number: number})
 		})
 
-        /*
         //spawn gems:
         $(document).on("roa-ws:modalContent", (e, d) => {
             if (d.title === "Spawn Gems") {
@@ -190,19 +175,22 @@ function betaGame() {
                     })
                 })
             }
-        })*/
-	})
+        })
+	}
 
 	//make it easier to see what alt it is:
-	let keepUsernameVisible = new MutationObserver( () => {
+	function appendName() {
 		if ($("#roomName").text().search(username) === -1) {
 			$("#roomName").append(`: <span id="clearUsername">${username}</span>`)
 		}
-	})
-	/*setTimeout(() => { */keepUsernameVisible.observe($("#roomName")[0], { attributes: true, childList: true, subtree: true })/* }, 1000)*/
+	}
+	let keepUsernameVisible = new MutationObserver(appendName)
+	keepUsernameVisible.observe($("#roomName")[0], { attributes: true, childList: true, subtree: true })
+	appendName()
 
 	//make it easier to send currency:
 	function wire(target) {
+		console.log(0)
 		if (target === username)
 			return
 		let sendMessage = `/wire ${target}`

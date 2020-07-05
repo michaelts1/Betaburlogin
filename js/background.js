@@ -298,7 +298,7 @@ async function updateVars() {
 		vars.autoWire = false
 	}
 
-	vars.version = version
+	vars.version = varsVersion
 	browser.storage.sync.set(vars)
 }
 

@@ -80,9 +80,12 @@ table {
 }
 
 td {
+	padding: 0.25em;
+}
+
+#optionsPage td {
 	height: 2.7em;
-	padding-right: 0.5em;
-	padding-left: 0.5em;
+	padding: 0 0.5em
 }
 
 #optionsPage table {
@@ -183,9 +186,7 @@ button {
 	display: inline-flex;
 	height: 40px;
 	width: 150px;
-	margin-top: 2em;
-	margin-right: 0.5em;
-	margin-left: 0.5em;
+	margin: 2em 0.5em 0;
 	border: 2px solid DarkGray;
 	color: DarkGray;
 	background-color: OldLace;
