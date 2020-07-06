@@ -67,7 +67,12 @@ async function betaGame() {
 		vars = await browser.storage.sync.get()
 		isAlt = username !== vars.mainUsername
 		mainTrade = getTrade()
-		autoWireID = vars.autoWire ? setInterval(wire, 60 * 60 * 1000, vars.mainUsername) : clearInterval(autoWireID)
+		if (autoWireID && !vars.autoWire) {
+			clearInterval(autoWireID)
+			autoWireID = null
+		} else if (!autoWireID && vars.autoWire) {
+			autoWireID = setInterval(wire, 60 * 60 * 1000, vars.mainUsername)
+		}
 	}
 	browser.storage.onChanged.addListener(refreshVars)
 
@@ -190,7 +195,6 @@ async function betaGame() {
 
 	//make it easier to send currency:
 	function wire(target) {
-		console.log(0)
 		if (target === username)
 			return
 		let sendMessage = `/wire ${target}`
