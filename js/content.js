@@ -2,11 +2,11 @@
  * Add custom CSS style
  * Spawn gems for all alts
  * Allow on/off toggling for all features
+ * Allow users to specify what container tabs to use
+ * Do not start new quests/harvestron jobs if cancelled manually
  * Reformat options page, it's too long currently (use pseudo tabs?)
  * 
  *~~~Needs Testing:~~~
- * Live/Beta login
- * Do not start new harvestron jobs if cancelled manually
  */
 
 "use strict"
@@ -286,6 +286,7 @@ async function betaGame() {
 
 	//Betabot based on @Batosi's bot:
 	
+	/*
 	//when the user cancels a quest or harvestron, disable doQuests or doBuildingAndHarvy to avoid starting them again
 	$(document).on("roa-ws:page:quest_forfeit", () => {
 		if (vars.doQuests) {
@@ -298,7 +299,7 @@ async function betaGame() {
 			vars.doBuildingAndHarvy = false
 			setTimeout( () => {vars.doBuildingAndHarvy = true}, 6500)
 		}
-	})
+	})*/
 	
 	//add option to build a specific item
 	if ($("#selectBuild")[0] === undefined) {
@@ -451,17 +452,17 @@ async function betaGame() {
 
 		if (vars.doQuests) { //Quests
 			if (data.bq_info2) {
-				if (data.bq_info2.c >= data.bq_info2.r) {
+				if (data.bq_info2?.c >= data.bq_info2.r) {
 					vars.questCompleting = "kill"
 				}
 			}
 			if (data.tq_info2) {
-				if (data.tq_info2.c >= data.tq_info2.r) {
+				if (data.tq_info2?.c >= data.tq_info2.r) {
 					vars.questCompleting = "tradeskill"
 				}
 			}
 			if (data.pq_info2) {
-				if (data.pq_info2.c >= data.pq_info2.r) {
+				if (data.pq_info2?.c >= data.pq_info2.r) {
 					vars.questCompleting = "profession"
 				}
 			}
@@ -577,7 +578,7 @@ async function betaGame() {
 				}
 			}
 		})
-	}, 20000) //start after a delay to avoid being triggered by old messages
+	}, 30000) //start after a delay to avoid being triggered by old messages
 
 	//avoid joining events after chat reconnections
 	$(document).on("roa-ws:motd", async (event, data) => {
