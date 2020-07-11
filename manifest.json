@@ -41,7 +41,7 @@
 		"default_icon": {
 			"60": "images/betaburlogin.png"
 		},
-		"default_title": "Betabur Login 2",
+		"default_title": "Betabur Login",
 		"default_popup": "html/browser_action.html"
 	},
 

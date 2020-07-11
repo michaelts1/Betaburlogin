@@ -2,11 +2,12 @@
  * Add custom CSS style
  * Spawn gems for all alts
  * Allow on/off toggling for all features
+ * Add option to select auto wire frequnecy
  * Allow users to specify what container tabs to use
- * Do not start new quests/harvestron jobs if cancelled manually
  * Reformat options page, it's too long currently (use pseudo tabs?)
  * 
  *~~~Needs Testing:~~~
+ * Do not start new quests/harvestron jobs if cancelled manually
  */
 
 "use strict"
@@ -155,7 +156,7 @@ async function betaGame() {
 			port.postMessage({text: "move to mob", number: number})
 		})
 
-        //spawn gems:
+        /*//spawn gems:
         $(document).on("roa-ws:modalContent", (e, d) => {
             if (d.title === "Spawn Gems") {
                 if ($("#betabotSpawnGem")[0] === undefined) {
@@ -174,7 +175,7 @@ async function betaGame() {
                     })
                 })
             }
-        })
+        })*/
 	}
 
 	//make it easier to see what alt it is:
@@ -243,7 +244,7 @@ async function betaGame() {
 	$(elm).attr("id", "betabot-ws")
 	document.head.appendChild(elm)
 
-	function onMessage(event) {
+	function roaWS(event) {
 		let data = event.data
 		var etype = "roa-ws:"
 		for (var i = 0; i < data.length; i++) {
@@ -276,26 +277,29 @@ async function betaGame() {
 		//make sure we are connecting to the right port!
 		if (origin === "https://beta.avabur.com" && data === "betabot-ws message") {
 			port2 = message.originalEvent.ports[0]
-			port2.onmessage = onMessage
+			port2.onmessage = roaWS
 		}
 	})
 
 	//Betabot based on @Batosi's bot:
 
-	/*
 	//when the user cancels a quest or harvestron, disable doQuests or doBuildingAndHarvy to avoid starting them again
 	$(document).on("roa-ws:page:quest_forfeit", () => {
 		if (vars.doQuests) {
 			vars.doQuests = false
-			setTimeout( () => {vars.doQuests = true}, 6500)
+			setTimeout( () => {
+				vars.doQuests = (await browser.storage.sync.get("doQuests")).doQuests
+			}, 60000)
 		}
 	})
 	$(document).on("roa-ws:page:house_harvest_job_cancel", () => {
 		if (vars.doBuildingAndHarvy) {
 			vars.doBuildingAndHarvy = false
-			setTimeout( () => {vars.doBuildingAndHarvy = true}, 6500)
+			setTimeout( () => {
+				vars.doBuildingAndHarvy = (await browser.storage.sync.get("doQuests")).doBuildingAndHarvy
+			}, 60000)
 		}
-	})*/
+	})
 
 	//add option to build a specific item
 	if ($("#selectBuild")[0] === undefined) {
