@@ -2,7 +2,7 @@ var vars
 
 function abbreviateNumber(num) {
 	let round = num => Math.round(num*1000)/1000
-	
+
 	if(num >= 1000000000000000) {
 		return round(num/1000000000000000)+"Q"
 	}
@@ -56,7 +56,7 @@ function displayMessage(message, time=2500) {
 
 async function fillFields() {
 	vars = await browser.storage.sync.get()
-	
+
 	$("#mainAccountName")	.val(vars.mainAccount)
 	$("#mainUsername") 		.val(vars.mainUsername)
 	$("#loginPass") 		.val(vars.loginPassword)
@@ -66,9 +66,9 @@ async function fillFields() {
 	$("#altsNumber") 		.val(vars.altsNumber)
 	$("#altName") 			.val(vars.altBaseName)
 	$("#namesList") 		.val(vars.namesList.join(", "))
-	
+
 	$("#autoWire").prop("checked", vars.autoWire)
-	
+
 	for (let currency of vars.currencySend) {
 		$(`#${currency.name}Keep`).val(abbreviateNumber(currency.keepAmount))
 		$(`#${currency.name}Keep`).prop("title", currency.keepAmount)
@@ -78,7 +78,7 @@ async function fillFields() {
 	for (let trade of Object.keys(vars.tradesList)) {
 		$("#"+trade).val(vars.tradesList[trade].join(", "))
 	}
-	
+
 	updatePrice()
 	displayAltFields()
 }

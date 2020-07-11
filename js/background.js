@@ -47,7 +47,7 @@ browser.runtime.onConnect.addListener(async port => {
 				spawnGem(message.type, message.splice, message.tier, message.amount)
 			}
 		})
-		
+
 	}
 	//if beta account
 	if (port.name !== "live" || port.name !== "login") {
@@ -268,7 +268,6 @@ async function updateVars() {
 	if (vars.version < 2) {
 		console.log("update vars from versions before 2")
 		vars.mainUsername = ""
-		
 	}
 	if (vars.version < 3) {
 		vars.pattern = ""

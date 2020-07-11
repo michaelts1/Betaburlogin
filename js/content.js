@@ -33,9 +33,7 @@ function betaLogin() {
 	port = browser.runtime.connect({name: "login"})
 
 	port.onMessage.addListener(message => {
-		if (message.text === "login") {
-			login(message.username, message.password)
-		}
+		if (message.text === "login") login(message.username, message.password)
 	})
 
 	function login(username, password) {
@@ -62,7 +60,7 @@ async function betaGame() {
 		betabotCooldown = false,
 		mainTrade 		= getTrade(),
 		autoWireID 		= vars.autoWire ? setInterval(wire, 60 * 60 * 1000, vars.mainUsername) : null
-	
+
 	async function refreshVars() {
 		vars = await browser.storage.sync.get()
 		isAlt = username !== vars.mainUsername
@@ -79,14 +77,10 @@ async function betaGame() {
 	//connect to background script:
 	port = browser.runtime.connect({name: username})
 	port.onMessage.addListener(message => {
-		if (message.text === "send currency")
-			wire(message.recipient)
-		if (message.text === "jump mobs")
-			jumpMobs(message.number)
-		if (message.text === "buy crystals now")
-			autoBuyCrys()
-		if (message.text === "spawn gems")
-			spawnGems(message.tier, message.type, message.splice, message.amount)
+		if (message.text === "send currency") wire(message.recipient)
+		if (message.text === "jump mobs") jumpMobs(message.number)
+		if (message.text === "buy crystals now") autoBuyCrys()
+		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
 	})
 
 
@@ -195,13 +189,12 @@ async function betaGame() {
 
 	//make it easier to send currency:
 	function wire(target) {
-		if (target === username)
-			return
+		if (target === username) return
+
 		let sendMessage = `/wire ${target}`
 
 		for (let currency of vars.currencySend) {
-			if (currency.send === false)
-				continue
+			if (currency.send === false) continue
 
 			let amount = $(`.${currency.name}`).attr("title").replace(/,/g, ""),
 				sellable = $(`.${currency.name}`).attr("data-personal").replace(/,/g, ""),
@@ -234,8 +227,7 @@ async function betaGame() {
 
 	//RoA-WS. Taken from: https://github.com/edvordo/RoA-WSHookUp/blob/master/RoA-WSHookUp.user.js
 	//re-inject the script
-	if ($("#betabot-ws")[0] !== undefined)
-		$("#betabot-ws").remove()
+	if ($("#betabot-ws")[0] !== undefined) $("#betabot-ws").remove()
 
 	let elm = document.createElement("script")
 	elm.innerHTML = `
@@ -279,8 +271,8 @@ async function betaGame() {
 	}
 
 	$(window).on("message", message => {
-		let origin = message.originalEvent.origin,
-			data = message.originalEvent.data
+		let origin 	= message.originalEvent.origin,
+			data 	= message.originalEvent.data
 		//make sure we are connecting to the right port!
 		if (origin === "https://beta.avabur.com" && data === "betabot-ws message") {
 			port2 = message.originalEvent.ports[0]
@@ -289,7 +281,7 @@ async function betaGame() {
 	})
 
 	//Betabot based on @Batosi's bot:
-	
+
 	/*
 	//when the user cancels a quest or harvestron, disable doQuests or doBuildingAndHarvy to avoid starting them again
 	$(document).on("roa-ws:page:quest_forfeit", () => {
@@ -304,7 +296,7 @@ async function betaGame() {
 			setTimeout( () => {vars.doBuildingAndHarvy = true}, 6500)
 		}
 	})*/
-	
+
 	//add option to build a specific item
 	if ($("#selectBuild")[0] === undefined) {
 		$($("div > #allHouseUpgrades")[0].parentNode).after(`
@@ -318,8 +310,8 @@ async function betaGame() {
 
 	//buy crystals every 24 hours
 	function autoBuyCrys() {
-		if (vars.dailyCrystals === 0)
-			return
+		if (vars.dailyCrystals === 0) return
+
 		vars.actionsPending = true
 		setTimeout(() => { $("#premiumShop").click() }, vars.startActionsDelay)
 		$(document).one("roa-ws:page:boosts", () => {
@@ -418,8 +410,8 @@ async function betaGame() {
 	}
 
 	let checkCraftingQueue = (event, data) => {
-		if (vars.actionsPending || !vars.doCraftQueue)
-			return
+		if (vars.actionsPending || !vars.doCraftQueue) return
+
 		if (data.results.a.cq < vars.minCraftingQueue) {
 			vars.actionsPending = true
 			setTimeout(() => {
@@ -447,7 +439,7 @@ async function betaGame() {
 		if (data.autos_remaining < 5 && !betabotCooldown) { //Stamina
 			$("#replenishStamina").click()
 			betabotCooldown = true
-			setTimeout(() => { betabotCooldown = false }, 2500)
+			setTimeout(() => {betabotCooldown = false}, 2500)
 			return
 		}
 
@@ -496,22 +488,22 @@ async function betaGame() {
 	$(document).on("roa-ws:craft", checkCraftingQueue)
 
 	//auto event. Based on: https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js
-	let eventLimiter = 0,
-		carvingChanged = false,
-		eventID = null,
-		mainEvent = false,
-		motdRecieved = false
+	let eventLimiter 	= 0,
+		eventID 		= null,
+		carvingChanged 	= false,
+		mainEvent 		= false,
+		motdRecieved 	= false
 
 	//const CHANNEL = 3203 //debugging channel
 	const CHANNEL = 3202 //"production" channel
 	const BUTTONS = {
-		battle: $(".bossFight.btn.btn-primary")[0],
-		fishing: $(".bossHarvest.btn")[4],
-		woodcutting: $(".bossHarvest.btn")[5],
-		mining: $(".bossHarvest.btn")[6],
-		stonecutting: $(".bossHarvest.btn")[7],
-		crafting: $(".bossCraft.btn")[0],
-		carving: $(".bossCarve.btn")[0]
+		battle: 		$(".bossFight.btn.btn-primary")[0],
+		fishing: 		$(".bossHarvest.btn")[4],
+		woodcutting: 	$(".bossHarvest.btn")[5],
+		mining: 		$(".bossHarvest.btn")[6],
+		stonecutting: 	$(".bossHarvest.btn")[7],
+		crafting: 		$(".bossCraft.btn")[0],
+		carving: 		$(".bossCarve.btn")[0]
 	}
 
 	function delay(time) {
@@ -586,7 +578,7 @@ async function betaGame() {
 
 	//avoid joining events after chat reconnections
 	$(document).on("roa-ws:motd", async (event, data) => {
-		motdRecieved = true 
+		motdRecieved = true
 		delay(vars.startActionsDelay * 5)
 		motdRecieved = false
 	})

@@ -2,11 +2,10 @@ var vars
 
 async function getVars() {
 	vars = await browser.storage.sync.get()
-	
+
 	$("#doQuests")			.prop("checked", vars.doQuests)
 	$("#doBuildingAndHarvy").prop("checked", vars.doBuildingAndHarvy)
 	$("#doCraftQueue")		.prop("checked", vars.doCraftQueue)
-	
 }
 
 async function toggle(data) {
