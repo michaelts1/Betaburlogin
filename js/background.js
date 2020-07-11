@@ -6,7 +6,7 @@ var	live, //those will store the ports
 	logins = [],
 	//those will store the settings
 	vars = undefined,
-	varsVersion = 5
+	varsVersion = 6
 
 browser.runtime.onConnect.addListener(async port => {
 	console.log(port.name, " connected")
@@ -56,10 +56,6 @@ browser.runtime.onConnect.addListener(async port => {
 			if (message.text === "requesting currency") {
 				console.log(`${port.name} requested currency`)
 				sendCurrency(port.name)
-			}
-			//update settings
-			if (message.text === "setKey") {
-				setKey(message.key, message.value)
 			}
 		})
 	}
@@ -171,20 +167,21 @@ async function getVars() {
 	if (Object.keys(vars).length === 0) {
 		vars = {
 			version 			: varsVersion,
+			startActionsDelay 	: 1000,
+			buttonDelay 		: 500,
+			dailyCrystals	 	: 50,
+			minCraftingQueue 	: 5,
+			altsNumber 			: 0,
 			doQuests 			: true,
 			doBuildingAndHarvy	: true,
 			doCraftQueue 		: true,
 			actionsPending 		: false,
-			buttonDelay 		: 500,
+			autoWire 			: false,
 			questCompleting 	: null,
-			startActionsDelay 	: 1000,
-			minCraftingQueue 	: 5,
-			dailyCrystals	 	: 50,
 			mainAccount 		: "",
 			mainUsername 		: "",
 			loginPassword 		: "",
 			pattern 			: "",
-			altsNumber 			: 0,
 			altBaseName 		: "",
 			namesList 			: [],
 			currencySend 		: [
@@ -297,16 +294,12 @@ async function updateVars() {
 			})
 		}
 	}
+	if (vars.version < 6) {
+		vars.autoWire = false
+	}
 
-	vars.version = version
+	vars.version = varsVersion
 	browser.storage.sync.set(vars)
-}
-
-//change settings:
-async function setKey(key, value) {
-	//set setting
-	vars[key] = value
-	await browser.storage.sync.set(vars)
 }
 
 browser.storage.onChanged.addListener( changes => {
