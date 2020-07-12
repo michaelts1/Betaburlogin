@@ -89,10 +89,10 @@ async function saveChanges() {
 			let invalid = $(":invalid")[1], //get first invalid field
 				table = $(`table:has(#${invalid.id})`)[0].id //get containing table id
 			$(`#${table}TabButton`).click() //go to its tab
-			
-			displayMessage("Error: Form is invalid")
-			$("#settings")[0].reportValidity()
-			throw new Error("Form is invalid: First invalid field found is " + invalid)
+
+			console.error("Form is invalid: First invalid field found is " + invalid)
+			setTimeout(() => {$("#settings")[0].reportValidity()})
+			throw new Error("Form is invalid")
 		}
 
 		vars.mainAccount 	  = $("#mainAccountName").val()
