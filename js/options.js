@@ -92,7 +92,7 @@ async function saveChanges() {
 			
 			displayMessage("Error: Form is invalid")
 			$("#settings")[0].reportValidity()
-			console.error("Form is invalid: First invalid field found is", invalid)
+			throw new Error("Form is invalid: First invalid field found is " + invalid)
 		}
 
 		vars.mainAccount 	  = $("#mainAccountName").val()
