@@ -4,10 +4,10 @@
  * Allow on/off toggling for all features
  * Add option to select auto wire frequnecy
  * Allow users to specify what container tabs to use
- * Reformat options page, it's too long currently (use pseudo tabs?)
  * 
  *~~~Needs Testing:~~~
  * Do not start new quests/harvestron jobs if cancelled manually
+ * Reformat options page, it's too long currently (use pseudo tabs?)
  */
 
 "use strict"

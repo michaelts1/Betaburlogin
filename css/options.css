@@ -2,13 +2,29 @@
 :root {
 	--body-font-size: 13pt;
 	--tooltip-background-color: FloralWhite;
+	--background-color: Beige;
+	--input-border-color: Silver;
+	--input-text-color: LightSeaGreen;
+	--text-color: DarkSlateGray;
+	--button-color: DarkGray;
 }
 
 body {
 	font-family: sans-serif;
 	font-size: var(--body-font-size);
-	background-color: Beige;
-	color: DarkSlateGray;
+	background-color: var(--background-color);
+	color: var(--text-color);
+}
+
+#top {
+	position: fixed;
+	width: 100%;
+	top: 0;
+	left: 0;
+	margin: 0;
+	z-index: 99;
+	padding: 0.4em 0;
+	background-color: wheat;
 }
 
 h1, h2 {
@@ -23,6 +39,10 @@ h1 {
 
 h2 {
 	font-size: 15pt;
+}
+
+#settings {
+	margin-top: 10em
 }
 
 #optionsPage {
@@ -40,20 +60,20 @@ h2 {
 
 #dailyCrystals + div {
 	text-align: center;
-	color: LightSeaGreen;
+	color: var(--input-text-color);
 }
 
 #formButtonsOutput {
-	color: LightSeaGreen;
+	color: var(--input-text-color);
 	text-align: center;
 }
 
 input {
 	font-size: 11pt;
 	padding: 0.5em;
-	border: 1px solid silver;
-	background-color: Beige;
-	color: LightSeaGreen;
+	border: 1px solid var(--input-border-color);
+	background-color: var(--background-color);
+	color: var(--input-text-color);
 	border-radius: 0.4em;
 }
 
@@ -61,9 +81,9 @@ select {
 	margin: 0.25em;
 	font-size: 11pt;
 	padding: 0.5em;
-	border: 1px solid silver;
-	background-color: Beige;
-	color: LightSeaGreen;
+	border: 1px solid var(--input-border-color);
+	background-color: var(--background-color);
+	color: var(--input-text-color);
 	border-radius: 0.4em;
 }
 
@@ -143,12 +163,13 @@ td {
 	white-space: pre-line;
 	content: attr(data-tooltip);
 	position: absolute;
-	bottom: 1.75em;
+	top: 1.75em;
 	left: -127.5px;
+	z-index: 98;
 	min-width: 255px;
 	padding: 0.5em;
 	background-color: var(--tooltip-background-color);;
-	border: 1px silver solid;
+	border: 1px var(--input-border-color) solid;
 	border-radius: 0.75em;
 }
 
@@ -186,8 +207,8 @@ button {
 	height: 40px;
 	width: 150px;
 	margin: 2em 0.5em 0;
-	border: 2px solid DarkGray;
-	color: DarkGray;
+	border: 2px solid var(--button-color);
+	color: var(--button-color);
 	background-color: OldLace;
 	align-items: center;
 	justify-content: center;
@@ -201,7 +222,7 @@ button span {
 }
 
 button:hover span {
-	color: DarkSlateGray;
+	color: var(--text-color);
 }
 
 #circle {
@@ -210,7 +231,7 @@ button:hover span {
 	opacity: 0;
 	line-height: 40px;
 	border-radius: 50%;
-	background: DarkGray;
+	background: var(--button-color);
 	position: absolute;
 	transition: all .5s ease-Out;
 	top: 20px;
@@ -223,4 +244,32 @@ button:hover #circle {
 	opacity: 1;
 	top: -70px;
 	left: -70px;
+}
+
+/* tabs */
+#tabsButtons {
+	display: flex;
+	justify-content: center;
+	margin-left: -4em;
+}
+.tabButton {
+	padding: 0 2em;
+	text-align: center;
+	cursor: pointer;
+	font-size: 13pt;
+	border-style: solid;
+	border-width: 0 2px 0 0;
+	border-color: white
+}
+
+.tabButton.selected {
+	color: var(--button-color);
+}
+
+.tab {
+	display: none;
+}
+
+.tab.selected {
+	display: table;
 }

@@ -156,11 +156,27 @@ function displayAltFields() {
 	}
 }
 
+function changeTab(event) {
+	let tabID = event.target.id.replace("TabButton", "")
+
+	for (let tab of document.querySelectorAll(".tab")) {
+		tab.classList.remove("selected")
+	}
+	$(`#${tabID}`)[0].classList.add("selected")
+
+	for (let button of document.querySelectorAll(`.tabButton`)) {
+		button.classList.remove("selected")
+	}
+	$(`#${tabID}TabButton`)[0].classList.add("selected")
+
+}
+
 $(fillFields)
-$("#altNameType").on("input", displayAltFields)
+$(".tabButton").click(changeTab)
 $("#saveChanges").click(saveChanges)
 $("#cancelChanges").click(cancelChanges)
 $("#dailyCrystals").on("input", updatePrice)
+$("#altNameType").on("input", displayAltFields)
 
 browser.storage.onChanged.addListener( changes => {
 	for (change in Object.getOwnPropertyNames(changes)) {

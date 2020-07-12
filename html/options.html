@@ -7,10 +7,19 @@
 		<script src="../js/jquery-3.4.1.min.js"></script>
 	</head>
 	<body id="optionsPage">
-		<h1>Betabur Login Options Page</h1>
+		<div id="top">
+			<h1>Betabur Login Options Page</h1>
+			<div id="tabsButtons">
+				<div class="tabButton"></div>
+				<div id="generalTabButton" class="tabButton selected" data-tab="general">General</div>
+				<div id="wireTabButton" class="tabButton" data-tab="wire">Currency Send</div>
+				<div id="eventTabButton" class="tabButton" data-tab="event">Auto Event</div>
+				<div id="altTabButton" class="tabButton" data-tab="alt">Alts</div>
+			</div>
+		</div>
 
 		<form id="settings">
-			<table>
+			<table id="general" class="tab selected">
 				<colgroup>
 					<col id="col_1_1"> <!--first column in the first table-->
 					<col id="col_1_2"> <!--second column in the first table-->
@@ -72,7 +81,7 @@
 				</tbody>
 			</table>
 
-			<table>
+			<table id="wire" class="tab">
 				<colgroup>
 					<col id="col_2_1">
 					<col id="col_2_2">
@@ -197,7 +206,7 @@
 				</tbody>
 			</table>
 
-			<table>
+			<table id="event" class="tab">
 				<colgroup>
 					<col id="col_4_1">
 					<col id="col_4_2">
@@ -206,7 +215,7 @@
 					<th colspan="2">
 						<h2>
 							Auto Event Settings
-							<span class="titleInfo" aria-tooltip="Info" data-tooltip="Auto event controls.&#13;&#10;Enter the names, sperated with commas and spaces, in the input boxes corressponding to the relevant tradeskill on the right.&#13;&#10;&#13;&#10;For example, if you want your alts named &quot;altI&quot; and &quot;altII&quot; to fish in the event, enter &quot;altI, altII&quot; in the input box next to the word &quot;Fishing&quot;"></span>
+							<span class="titleInfo" aria-tooltip="Info" data-tooltip="Auto event controls.&#13;&#10;Enter the names, sperated with commas and spaces, in the input boxes to the right of the corresponding tradeskill.&#13;&#10;&#13;&#10;For example, if you want your alts named &quot;altI&quot; and &quot;altII&quot; to fish in the event, enter &quot;altI, altII&quot; in the input box next to the word &quot;Fishing&quot;"></span>
 						</h2>
 					</th>
 					<tr>
@@ -260,7 +269,7 @@
 				</tbody>
 			</table>
 
-			<table>
+			<table id="alt" class="tab">
 				<colgroup>
 					<col id="col_3_1">
 					<col id="col_3_2">
