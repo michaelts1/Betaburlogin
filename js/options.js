@@ -86,22 +86,28 @@ async function fillFields() {
 async function saveChanges() {
 	try {
 		if ($("#settings")[0].reportValidity() === false) {
-			throw "Form is invalid"
+			let invalid = $(":invalid")[1], //get first invalid field
+				table = $(`table:has(#${invalid.id})`)[0].id //get containing table id
+			$(`#${table}TabButton`).click() //go to its tab
+			
+			displayMessage("Error: Form is invalid")
+			$("#settings")[0].reportValidity()
+			console.error("Form is invalid: First invalid field found is", invalid)
 		}
 
 		vars.mainAccount 	  = $("#mainAccountName").val()
 		vars.mainUsername 	  = $("#mainUsername").val()
 		vars.loginPassword 	  = $("#loginPass").val()
-		vars.minCraftingQueue = parseInt($("#minCraftingQueue").val())
-		vars.dailyCrystals 	  = parseInt($("#dailyCrystals").val())
+		vars.minCraftingQueue = parseInt($("#minCraftingQueue").val()) || 0
+		vars.dailyCrystals 	  = parseInt($("#dailyCrystals").val()) || 0
 		vars.pattern 		  = $("#altNameType").val()
-		vars.altsNumber 	  = parseInt($("#altsNumber").val())
+		vars.altsNumber 	  = parseInt($("#altsNumber").val()) || 0
 		vars.altBaseName 	  = $("#altName").val()
 		vars.namesList 		  = $("#namesList").val().split(', ')
 		vars.autoWire 		  = $("#autoWire").prop("checked")
 
 		for (let i = 0; i < vars.currencySend.length; i++) {
-			let keepAmount = $(`#${vars.currencySend[i].name}Keep`).val()
+			let keepAmount = $(`#${vars.currencySend[i].name}Keep`).val() || 0
 			vars.currencySend[i].keepAmount = deabbreviateNumber(keepAmount)
 			vars.currencySend[i].send = $(`#${vars.currencySend[i].name}Send`).prop("checked")
 		}

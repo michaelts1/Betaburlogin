@@ -41,10 +41,6 @@ h2 {
 	font-size: 15pt;
 }
 
-#settings {
-	margin-top: 10em
-}
-
 #optionsPage {
 	padding-top: 10px;
 }
@@ -195,7 +191,9 @@ td {
 }
 
 /* buttons */
+
 #formButtons {
+	margin-top: 5em;
 	display: flex;
 	justify-content: center;
 }
