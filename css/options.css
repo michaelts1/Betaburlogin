@@ -41,6 +41,46 @@ h2 {
 	font-size: 15pt;
 }
 
+input, textarea {
+	font-size: 11pt;
+	padding: 0.5em;
+	border: 1px solid var(--input-border-color);
+	background-color: var(--background-color);
+	color: var(--input-text-color);
+	border-radius: 0.4em;
+}
+
+textarea {
+	color: DarkCyan;
+	background-color: var(--background-color);
+}
+
+
+select {
+	font-size: 11pt;
+	padding: 0.5em;
+	border: 1px solid var(--input-border-color);
+	background-color: var(--background-color);
+	color: var(--input-text-color);
+	border-radius: 0.4em;
+}
+
+.containerIcon {
+	width: 1em;
+	height: 1em;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+[name=containers], #containersCheckAll {
+	vertical-align: middle;
+}
+
+#CSSdiv {
+	margin: 0.5em;
+	display: grid;
+}
+
 #optionsPage {
 	padding-top: 10px;
 }
@@ -64,23 +104,12 @@ h2 {
 	text-align: center;
 }
 
-input {
-	font-size: 11pt;
-	padding: 0.5em;
-	border: 1px solid var(--input-border-color);
-	background-color: var(--background-color);
-	color: var(--input-text-color);
-	border-radius: 0.4em;
+#wireFrequency {
+	padding: 0.25em 0.1em 0.25em 0.25em;
 }
 
-select {
-	margin: 0.25em;
-	font-size: 11pt;
-	padding: 0.5em;
-	border: 1px solid var(--input-border-color);
-	background-color: var(--background-color);
-	color: var(--input-text-color);
-	border-radius: 0.4em;
+#dailyCrystals {
+	margin-top: 0.5em;
 }
 
 /* tables */
@@ -116,11 +145,14 @@ td {
 #col_2_2 {width: 45%;}
 #col_2_3 {width: 45%;}
 
-#col_3_1 {width: 43%;}
-#col_3_2 {width: 57%;}
+#col_3_1 {width: 42%;}
+#col_3_2 {width: 58%;}
 
-#col_4_1 {width: 42%;}
-#col_4_2 {width: 58%;}
+#col_4_1 {width: 43%;}
+#col_4_2 {width: 57%;}
+
+#col_5_1 {width: 40%;}
+#col_5_2 {width: 60%;}
 
 .checkboxtd {
 	text-align: center;
@@ -223,7 +255,7 @@ button:hover span {
 	color: var(--text-color);
 }
 
-#circle {
+.circle {
 	width: 0%;
 	height: 0%;
 	opacity: 0;
@@ -236,12 +268,17 @@ button:hover span {
 	left: 70px;
 }
 
-button:hover #circle {
+button:hover .circle {
 	width: 200%;
 	height: 500%;
 	opacity: 1;
 	top: -70px;
 	left: -70px;
+}
+
+#resetCSS {
+	margin: 0.5em 0.5em 0;
+	width: auto;
 }
 
 /* tabs */

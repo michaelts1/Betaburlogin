@@ -1,4 +1,6 @@
-var vars
+"use strict"
+
+var vars = null
 
 function abbreviateNumber(num) {
 	let round = num => Math.round(num*1000)/1000
@@ -56,18 +58,29 @@ function displayMessage(message, time=2500) {
 
 async function fillFields() {
 	vars = await browser.storage.sync.get()
+	if (browser.contextualIdentities === undefined) {
+		let disabled = ["containers", "alt", "wire"]
+		for (let table of disabled) {
+			$(`#${table}`).html("This feature requires Container Tabs.<br>Please enable Container tabs in Browser Options -&gt; Tabs -&gt; Enable Container Tabs, and reload the page.")
+		}
+	}
+	else {
+		fillContainers()
+	}
 
-	$("#mainAccountName")	.val(vars.mainAccount)
-	$("#mainUsername") 		.val(vars.mainUsername)
-	$("#loginPass") 		.val(vars.loginPassword)
-	$("#minCraftingQueue")	.val(vars.minCraftingQueue)
-	$("#dailyCrystals") 	.val(vars.dailyCrystals)
-	$("#altNameType") 		.val(vars.pattern)
-	$("#altsNumber") 		.val(vars.altsNumber)
 	$("#altName") 			.val(vars.altBaseName)
+	$("#loginPass") 		.val(vars.loginPassword)
 	$("#namesList") 		.val(vars.namesList.join(", "))
-
+	$("#customCSS") 		.val(vars.css.custom)
+	$("#altsNumber") 		.val(vars.altsNumber)
+	$("#altNameType") 		.val(vars.pattern)
+	$("#mainUsername") 		.val(vars.mainUsername)
+	$("#wireFrequency") 	.val(vars.wireFrequency)
+	$("#dailyCrystals") 	.val(vars.dailyCrystals)
+	$("#mainAccountName")	.val(vars.mainAccount)
+	$("#minCraftingQueue")	.val(vars.minCraftingQueue)
 	$("#autoWire").prop("checked", vars.autoWire)
+	$("#verbose").prop("checked", vars.verbose)
 
 	for (let currency of vars.currencySend) {
 		$(`#${currency.name}Keep`).val(abbreviateNumber(currency.keepAmount))
@@ -95,16 +108,20 @@ async function saveChanges() {
 			throw new Error("Form is invalid")
 		}
 
-		vars.mainAccount 	  = $("#mainAccountName").val()
-		vars.mainUsername 	  = $("#mainUsername").val()
-		vars.loginPassword 	  = $("#loginPass").val()
-		vars.minCraftingQueue = parseInt($("#minCraftingQueue").val()) || 0
-		vars.dailyCrystals 	  = parseInt($("#dailyCrystals").val()) || 0
-		vars.pattern 		  = $("#altNameType").val()
-		vars.altsNumber 	  = parseInt($("#altsNumber").val()) || 0
 		vars.altBaseName 	  = $("#altName").val()
+		vars.loginPassword 	  = $("#loginPass").val()
+		vars.css.custom 	  = $("#customCSS").val()
+		vars.pattern 		  = $("#altNameType").val()
+		vars.mainUsername 	  = $("#mainUsername").val()
+		vars.wireFrequency 	  = $("#wireFrequency").val()
+		vars.mainAccount 	  = $("#mainAccountName").val()
 		vars.namesList 		  = $("#namesList").val().split(', ')
+		vars.verbose  		  = $("#verbose").prop("checked")
 		vars.autoWire 		  = $("#autoWire").prop("checked")
+		vars.altsNumber 	  = parseInt($("#altsNumber").val()) || 0
+		vars.dailyCrystals 	  = parseInt($("#dailyCrystals").val()) || 0
+		vars.minCraftingQueue = parseInt($("#minCraftingQueue").val()) || 0
+		vars.containers 	  = $("[name=containers]:checked").get().map(e => e.id) //get id's of checked containers
 
 		for (let i = 0; i < vars.currencySend.length; i++) {
 			let keepAmount = $(`#${vars.currencySend[i].name}Keep`).val() || 0
@@ -112,7 +129,7 @@ async function saveChanges() {
 			vars.currencySend[i].send = $(`#${vars.currencySend[i].name}Send`).prop("checked")
 		}
 
-		for (trade of Object.keys(vars.tradesList)) {
+		for (let trade of Object.keys(vars.tradesList)) {
 			vars.tradesList[trade] = $("#"+trade).val().split(", ")
 		}
 
@@ -177,7 +194,59 @@ function changeTab(event) {
 
 }
 
+function resetCSS() {
+	$("#customCSS").val(
+`#areaContent {
+	height: 350px;
+}
+#questInfo {
+	font-size: 0.95em;
+}
+.navSection li {
+	line-height: 25px;
+}`)
+}
+
+async function fillContainers() {
+	let containers = await browser.contextualIdentities.query({}) //get all containers
+	if (containers.length === 0) { //if there are no containers, abort
+		$("#containers").text("No containers found")
+		return
+	}
+
+	if ($("[name=containers]").length === 0) { //only add checkboxes if they don't exist already
+		for (let container of containers) {
+			let name = container.name
+			$("#containers").append(`<input id="${name}" name="containers" type="checkbox"><span id="${name}Icon" class="containerIcon"></span><label for="${name}">${name}</label><br>`)
+			$(`#${name}Icon`).css({"background-color": container.color, "mask": `url(${container.iconUrl})`, "mask-size": "100%"})
+		}
+	}
+
+	$("#containers>input").click(toggleContainers) //add event listener to toggle select all checkbox when needed
+
+	for (let container of vars.containers) { //check all containers previously saved
+		$(`#${container}`).prop("checked", true)
+	}
+
+	if (vars.containers[0] === "betabot-default") { //if there were no changes to the default, check all
+		$("[name=containers]").prop("checked", true)
+	}
+
+	$("#containersCheckAll").prop("checked", $("[name=containers]").not(':checked').length === 0) //check if all other checkboxes are checked
+}
+
+function toggleContainers(event) {
+	if (event.target.id === "containersCheckAll") { //if select all was clicked, check all boxes
+		$("[name=containers]").prop("checked", $("#containersCheckAll").prop("checked"))
+	}
+	else if (event.target.name === "containers") { //else, check select all if needed
+		$("#containersCheckAll").prop("checked", $("[name=containers]").not(':checked').length === 0)
+	}
+
+}
+
 $(fillFields)
+$("#resetCSS").click(resetCSS)
 $(".tabButton").click(changeTab)
 $("#saveChanges").click(saveChanges)
 $("#cancelChanges").click(cancelChanges)

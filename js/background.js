@@ -1,12 +1,48 @@
 "use strict"
 
+const VARS_VERSION = 7,
+	ADDON_CSS =
+`#clearUsername {
+	font-size: 25px;
+	color: yellow;
+	line-height: 10px;
+}
+#sendMeCurrency a {
+	text-decoration: none;
+	line-height: 10px;
+	padding: 3px;
+}
+#betabotMobJumpButton {
+	font-size: 14px;
+	padding: 6.5px;
+}
+#sendMeCurrency {
+	margin-left: 10px
+}
+#betabotBuyCrys {
+	padding: 6.5px;
+}
+#customBuild + label > a {
+	text-decoration: none;
+	padding: 3px;
+}`,
+	CUSTOM_CSS =
+`#areaContent {
+	height: 350px;
+}
+#questInfo {
+	font-size: 0.95em;
+}
+.navSection li {
+	line-height: 25px;
+}`
+
 var	live, //those will store the ports
 	main,
 	alts = [],
 	logins = [],
 	//those will store the settings
-	vars = undefined,
-	varsVersion = 6
+	vars = null
 
 browser.runtime.onConnect.addListener(async port => {
 	console.log(port.name, " connected")
@@ -86,12 +122,13 @@ browser.runtime.onConnect.addListener(async port => {
 
 //open tabs:
 async function openTabs() {
-	let contexts = await browser.contextualIdentities.query({}) //get all containers
+	let containers = await browser.contextualIdentities.query({}) //get all containers
+	containers = containers.filter(e => vars.containers.includes(e.name)) //filter according to settings
 	browser.tabs.create({url: "https://beta.avabur.com"})
-	for (let i = 0; i < contexts.length; i++) { //and open them
+	for (let i = 0; i < vars.containers.length; i++) {
 		setTimeout( () => {
 			browser.tabs.create({
-				cookieStoreId: contexts[i].cookieStoreId,
+				cookieStoreId: containers[i].cookieStoreId,
 				url: "https://beta.avabur.com"
 			})
 		}, 500*(i+1))
@@ -166,17 +203,19 @@ async function getVars() {
 	//if not set, create with default settings
 	if (Object.keys(vars).length === 0) {
 		vars = {
-			version 			: varsVersion,
+			version 			: VARS_VERSION,
 			startActionsDelay 	: 1000,
 			buttonDelay 		: 500,
 			dailyCrystals	 	: 50,
 			minCraftingQueue 	: 5,
 			altsNumber 			: 0,
+			wireFrequency 		: 0,
 			doQuests 			: true,
 			doBuildingAndHarvy	: true,
 			doCraftQueue 		: true,
 			actionsPending 		: false,
 			autoWire 			: false,
+			verbose 			: false,
 			questCompleting 	: null,
 			mainAccount 		: "",
 			mainUsername 		: "",
@@ -184,7 +223,20 @@ async function getVars() {
 			pattern 			: "",
 			altBaseName 		: "",
 			namesList 			: [],
-			currencySend 		: [
+			containers 			: ["betabot-default"],
+			tradesList 			: {
+				fishing 	 : [],
+				woodcutting  : [],
+				mining 		 : [],
+				stonecutting : [],
+				crafting 	 : [],
+				carving 	 : []
+			},
+			css: {
+				addon : ADDON_CSS,
+				custom: CUSTOM_CSS
+			},
+			currencySend: [
 				{
 					name 			: "crystals",
 					send 			: true,
@@ -239,15 +291,7 @@ async function getVars() {
 					minimumAmount 	: 100,
 					keepAmount 		: 10000000
 				}
-			],
-			tradesList : {
-				fishing 	 : [],
-				woodcutting  : [],
-				mining 		 : [],
-				stonecutting : [],
-				crafting 	 : [],
-				carving 	 : []
-			}
+			]
 		}
 		await browser.storage.sync.set(vars)
 	}
@@ -256,7 +300,7 @@ async function getVars() {
 getVars()
 
 async function updateVars() {
-	if (vars.version === varsVersion) {
+	if (vars.version === VARS_VERSION) {
 		return
 	}
 	if (typeof vars.version !== "number") { //reset if too old
@@ -296,8 +340,21 @@ async function updateVars() {
 	if (vars.version < 6) {
 		vars.autoWire = false
 	}
+	if (vars.version < 7) {
+		vars.css = {
+			addon : ADDON_CSS,
+			custom: CUSTOM_CSS
+		},
+		vars.verbose = false
+		vars.containers = ["betabot-default"],
+		vars.wireFrequency = 60
+	}
 
-	vars.version = varsVersion
+	if (vars.css.addon !== ADDON_CSS) {
+		vars.css.addon = ADDON_CSS
+	}
+
+	vars.version = VARS_VERSION
 	browser.storage.sync.set(vars)
 }
 
