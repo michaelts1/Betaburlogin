@@ -1,4 +1,4 @@
-var vars
+let vars = null
 
 async function getVars() {
 	vars = await browser.storage.sync.get()
@@ -21,7 +21,7 @@ $("#settingsIcon").click( () => {
 	browser.runtime.openOptionsPage()
 })
 
-browser.storage.onChanged.addListener( changes => {
+browser.storage.onChanged.addListener(changes => {
 	for (change in Object.getOwnPropertyNames(changes)) {
 		if ( ["doQuests", "doBuildingAndHarvy", "doCraftQueue"].includes(change) ) {
 			getVars()

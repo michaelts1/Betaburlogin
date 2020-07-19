@@ -1,7 +1,7 @@
 "use strict"
 
-const VARS_VERSION = 7,
-	ADDON_CSS =
+const VARS_VERSION = 7
+const ADDON_CSS =
 `#clearUsername {
 	font-size: 25px;
 	color: yellow;
@@ -25,8 +25,8 @@ const VARS_VERSION = 7,
 #customBuild + label > a {
 	text-decoration: none;
 	padding: 3px;
-}`,
-	CUSTOM_CSS =
+}`
+const CUSTOM_CSS =
 `#areaContent {
 	height: 350px;
 }
@@ -37,12 +37,12 @@ const VARS_VERSION = 7,
 	line-height: 25px;
 }`
 
-var	live, //those will store the ports
-	main,
-	alts = [],
-	logins = [],
-	//those will store the settings
-	vars = null
+let live //those will store the ports
+let main
+let alts = []
+let logins = []
+
+let vars = null //this will store the settings
 
 browser.runtime.onConnect.addListener(async port => {
 	console.log(port.name, " connected")
@@ -51,7 +51,7 @@ browser.runtime.onConnect.addListener(async port => {
 	//if live login
 	if (port.name === "live") {
 		live = port
-		live.onMessage.addListener( message => {
+		live.onMessage.addListener(message => {
 			if (message.text === "open alt tabs") {
 				openTabs()
 			}
@@ -60,7 +60,7 @@ browser.runtime.onConnect.addListener(async port => {
 	//if beta login
 	else if (port.name === "login") {
 		logins.push(port)
-		port.onMessage.addListener( message => {
+		port.onMessage.addListener(message => {
 			if (message.text === "requesting login") {
 				login()
 			}
@@ -73,7 +73,7 @@ browser.runtime.onConnect.addListener(async port => {
 	//if beta alt
 	else {
 		alts.push(port)
-		port.onMessage.addListener( message => {
+		port.onMessage.addListener(message => {
 			if (message.text === "move to mob") {
 				console.log(`moving all alts to mob ${message.number}`)
 				jumpMobs(message.number)
@@ -87,7 +87,7 @@ browser.runtime.onConnect.addListener(async port => {
 	}
 	//if beta account
 	if (port.name !== "live" || port.name !== "login") {
-		port.onMessage.addListener( message => {
+		port.onMessage.addListener(message => {
 			//send currency
 			if (message.text === "requesting currency") {
 				console.log(`${port.name} requested currency`)
@@ -129,7 +129,7 @@ async function openTabs() {
 		setTimeout( () => {
 			browser.tabs.create({
 				cookieStoreId: containers[i].cookieStoreId,
-				url: "https://beta.avabur.com"
+				url: "https://beta.avabur.com",
 			})
 		}, 500*(i+1))
 	}
@@ -141,14 +141,22 @@ function login() {
 		logins[i].postMessage({
 			text: "login",
 			username: username,
-			password: vars.loginPassword
+			password: vars.loginPassword,
 		})
 	}
 
 	if (vars.pattern === "roman" || vars.pattern === "romanCaps") {
-		function romanize(num, caps) {
+		function romanize(num) {
 			if (num === 0) return ""
-			let roman = caps ? {L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1} : {l: 50, xl: 40, x: 10, ix: 9, v: 5, iv: 4, i: 1} //use upper case if caps is true, otherwise don't
+			let roman = {
+				I : 1,
+				IV: 4,
+				V : 5,
+				IX: 9,
+				X : 10,
+				XL: 40,
+				L : 50,
+			}
 			let str = ""
 			for (let key of Object.keys(roman)) {
 				let q = Math.floor(num / roman[key])
@@ -159,7 +167,7 @@ function login() {
 		}
 		sendLogin(0, vars.mainAccount)
 		for (let i = 1; i <= vars.altsNumber; i++) {
-			sendLogin(i, vars.altBaseName+romanize(i, vars.pattern === "romanCaps")) //`vars.pattern === "romanCaps"` returns true if we should use caps and false if we shouldn't
+			sendLogin(i, vars.altBaseName+romanize(i))
 		}
 	} else if (vars.pattern === "unique") {
 		sendLogin(0, vars.mainAccount)
@@ -183,7 +191,7 @@ function spawnGem(type, splice, tier, amount) {
 		type  : type,
 		splice: splice,
 		tier  : tier,
-		amount: amount
+		amount: amount,
 	}, alts)
 }
 
@@ -230,68 +238,68 @@ async function getVars() {
 				mining        : [],
 				stonecutting  : [],
 				crafting      : [],
-				carving       : []
+				carving       : [],
 			},
 			css: {
 				addon : ADDON_CSS,
-				custom: CUSTOM_CSS
+				custom: CUSTOM_CSS,
 			},
 			currencySend: [
 				{
 					name         : "crystals",
 					send         : true,
 					minimumAmount: 0,
-					keepAmount   : 0
+					keepAmount   : 0,
 				},
 				{
 					name         : "platinum",
 					send         : true,
 					minimumAmount: 100,
-					keepAmount   : 0
+					keepAmount   : 0,
 				},
 				{
 					name         : "gold",
 					send         : true,
 					minimumAmount: 10000,
-					keepAmount   : 0
+					keepAmount   : 0,
 				},
 				{
 					name         : "crafting_materials",
 					send         : true,
 					minimumAmount: 100,
-					keepAmount   : 0
+					keepAmount   : 0,
 				},
 				{
 					name         : "gem_fragments",
 					send         : true,
 					minimumAmount: 100,
-					keepAmount   : 0
+					keepAmount   : 0,
 				},
 				{
 					name         : "food",
 					send         : true,
 					minimumAmount: 100,
-					keepAmount   : 10000000
+					keepAmount   : 10000000,
 				},
 				{
 					name         : "wood",
 					send         : true,
 					minimumAmount: 100,
-					keepAmount   : 10000000
+					keepAmount   : 10000000,
 				},
 				{
 					name         : "iron",
 					send         : true,
 					minimumAmount: 100,
-					keepAmount   : 10000000
+					keepAmount   : 10000000,
 				},
 				{
 					name         : "stone",
 					send         : true,
 					minimumAmount: 100,
-					keepAmount   : 10000000
-				}
-			]
+					keepAmount   : 10000000,
+				},
+			],
 		}
 		await browser.storage.sync.set(vars)
 	}
@@ -319,12 +327,12 @@ async function updateVars() {
 	}
 	if (vars.version < 4) {
 		vars.tradesList = {
-			fishing 	 : [],
+			fishing      : [],
 			woodcutting  : [],
-			mining 		 : [],
+			mining       : [],
 			stonecutting : [],
-			crafting 	 : [],
-			carving 	 : []
+			crafting     : [],
+			carving      : [],
 		}
 	}
 	if (vars.version < 5) {
@@ -333,7 +341,7 @@ async function updateVars() {
 				name : trade,
 				send : true,
 				minimumAmount : 100,
-				keepAmount : 10000000
+				keepAmount : 10000000,
 			})
 		}
 	}
@@ -343,10 +351,10 @@ async function updateVars() {
 	if (vars.version < 7) {
 		vars.css = {
 			addon : ADDON_CSS,
-			custom: CUSTOM_CSS
+			custom: CUSTOM_CSS,
 		},
 		vars.verbose = false
-		vars.containers = ["betabot-default"],
+		vars.containers = ["betabot-default"]
 		vars.wireFrequency = 60
 	}
 
@@ -358,7 +366,7 @@ async function updateVars() {
 	browser.storage.sync.set(vars)
 }
 
-browser.storage.onChanged.addListener( changes => {
+browser.storage.onChanged.addListener(changes => {
 	getVars()
 	//list changes in console:
 	let values = Object.values(changes),

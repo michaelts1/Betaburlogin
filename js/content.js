@@ -15,14 +15,14 @@
 
 "use strict"
 
-var port = null,
-	url = window.location.href
+const HREF = window.location.href
+let port = null
 
-if (/www.avabur.com[\/?expird=1]*$/.test(url)) {
+if (/www.avabur.com[\/?expird=1]*$/.test(HREF)) {
 	liveLogin()
-} else if (/beta.avabur.com[\/?expird=1]*$/.test(url)) {
+} else if (/beta.avabur.com[\/?expird=1]*$/.test(HREF)) {
 	betaLogin()
-} else if (/beta.avabur.com\/game/.test(url)) {
+} else if (/beta.avabur.com\/game/.test(HREF)) {
 	betaGame()
 }
 
@@ -71,13 +71,13 @@ async function betaLogin() {
 }
 
 async function betaGame() {
-	let port2,
-		vars            = await browser.storage.sync.get(),
-		username        = $("#username").text(),
-		isAlt           = username !== vars.mainUsername,
-		betabotCooldown = false,
-		mainTrade       = getTrade(),
-		autoWireID      = vars.autoWire ? setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername) : null
+	let port2
+	let vars            = await browser.storage.sync.get()
+	let username        = $("#username").text()
+	let isAlt           = username !== vars.mainUsername
+	let betabotCooldown = false
+	let mainTrade       = getTrade()
+	let autoWireID      = vars.autoWire ? setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername) : null
 
 	if (vars.verbose) {
 		log("Starting up (Beta Game)\nUsername:", username, "Alt:", isAlt ? "yes" : "no", "\nEvent TS:", mainTrade, "\nAuto Wire:", autoWireID ? "on" : "off")
@@ -90,7 +90,7 @@ async function betaGame() {
 		isAlt = username !== vars.mainUsername
 		mainTrade = getTrade()
 
-		if (changes.hasOwnProperty("wireFrequency")) { //if wireFrequency has changed, reset autoWire
+		if (changes.wireFrequency != null) { //if wireFrequency has changed, reset autoWire
 			clearInterval(autoWireID)
 			autoWireID = null
 		}
@@ -183,8 +183,8 @@ async function betaGame() {
 		}
 		$("#betabotMobJumpButton").click(() => {
 			//:selected won't work here, since we want the last monster won, not the currently selected mob (do we?)
-			let number = parseInt($("#enemyList>option:selected"/*[selected]"*/).val()) + parseInt($("#betabotMobJumpNumber").val()),
-				maxNumber = parseInt($(`#enemyList>option:last-child`).val())
+			let number = parseInt($("#enemyList>option:selected"/*[selected]"*/).val()) + parseInt($("#betabotMobJumpNumber").val())
+			let maxNumber = parseInt($(`#enemyList>option:last-child`).val())
 			if (number > maxNumber) {
 				$("#areaName").text("the mob you chose is not in the list!")
 				return
@@ -208,7 +208,7 @@ async function betaGame() {
                         tier  : parseInt($("#spawnGemLevel").val()),
                         type  : parseInt($("#gemSpawnType").val()),
                         splice: parseInt($("#gemSpawnSpliceType").val()),
-                        amount: parseInt($("#gemSpawnCount").val())
+                        amount: parseInt($("#gemSpawnCount").val()),
                     }
 					port.postMessage(msg)
 					if (vars.verbose) log(`Requested to spawn ${msg.amount} level ${msg.tier*10} gems with type value of ${msg.type} and splice value of ${msg.splice}`)
@@ -238,9 +238,9 @@ async function betaGame() {
 		for (let currency of vars.currencySend) {
 			if (currency.send === false) continue
 
-			let amount = $(`.${currency.name}`).attr("title").replace(/,/g, ""),
-				sellable = $(`.${currency.name}`).attr("data-personal").replace(/,/g, ""),
-				amountToSend = 0
+			let amount       = $(`.${currency.name}`).attr("title").replace(/,/g, "")
+			let sellable     = $(`.${currency.name}`).attr("data-personal").replace(/,/g, "")
+			let amountToSend = 0
 
 			//leave this amount for the alt
 			amountToSend = amount - currency.keepAmount
@@ -273,25 +273,24 @@ async function betaGame() {
 
 	let elm = document.createElement("script")
 	elm.innerHTML = `
-		//create a new channel
-		var channel	= new MessageChannel()
-		//send message to content script (do we even need to send port2?)
-		window.postMessage("betabot-ws message", "*", [channel.port2])
+//create a new channel
+const channel = new MessageChannel()
+//send message to content script (do we even need to send port2?)
+window.postMessage("betabot-ws message", "*", [channel.port2])
 
-		$(document).on("roa-ws:all", function(event, data){
-			channel.port1.postMessage(JSON.parse(data))
-		})
-	`
+$(document).on("roa-ws:all", function(event, data){
+	channel.port1.postMessage(JSON.parse(data))
+})`
 	$(elm).attr("id", "betabot-ws")
 	document.head.appendChild(elm)
 
 	function roaWS(event) {
 		let data = event.data
-		var etype = "roa-ws:"
-		for (var i = 0; i < data.length; i++) {
+		let etype = "roa-ws:"
+		for (let i = 0; i < data.length; i++) {
 			etype = "roa-ws:"
-			var etypepage = ""
-			var item = data[i]
+			let etypepage = ""
+			let item = data[i]
 			if (item.hasOwnProperty("type")) {
 				etype = etype + item.type
 				// in case its a "page" type message create additional event
@@ -312,8 +311,8 @@ async function betaGame() {
 	}
 
 	$(window).on("message", message => {
-		let origin 	= message.originalEvent.origin,
-			data 	= message.originalEvent.data
+		let origin 	= message.originalEvent.origin
+		let data 	= message.originalEvent.data
 		//make sure we are connecting to the right port!
 		if (origin === "https://beta.avabur.com" && data === "betabot-ws message") {
 			port2 = message.originalEvent.ports[0]
@@ -543,11 +542,11 @@ async function betaGame() {
 	$(document).on("roa-ws:craft", checkCraftingQueue)
 
 	//auto event. Based on: https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js
-	let eventLimiter   = false,
-		eventID        = null,
-		carvingChanged = false,
-		mainEvent      = false,
-		motdRecieved   = false
+	let eventLimiter   = false
+	let eventID        = null
+	let carvingChanged = false
+	let mainEvent      = false
+	let motdRecieved   = false
 
 	//const CHANNEL = 3203 //debugging channel
 	const CHANNEL = 3202 //production channel
@@ -558,7 +557,7 @@ async function betaGame() {
 		mining      : $(".bossHarvest.btn")[6],
 		stonecutting: $(".bossHarvest.btn")[7],
 		crafting    : $(".bossCraft.btn")[0],
-		carving     : $(".bossCarve.btn")[0]
+		carving     : $(".bossCarve.btn")[0],
 	}
 
 	function delay(time) {
@@ -577,8 +576,8 @@ async function betaGame() {
 	}
 
 	function changeTrade() {
-		let time = $("#eventCountdown")[0].innerText,
-			carvingTier = $("#currentBossCarvingTier")[0].innerText
+		let time = $("#eventCountdown")[0].innerText
+		let carvingTier = $("#currentBossCarvingTier")[0].innerText
 
 		if (carvingTier > 2500 && !carvingChanged && !mainEvent) {
 			if (vars.verbose) log("Attacking event boss (carving tier)")

@@ -1,6 +1,6 @@
 "use strict"
 
-var vars = null
+let vars = null
 
 function abbreviateNumber(num) {
 	let round = num => Math.round(num*1000)/1000
@@ -253,7 +253,7 @@ $("#cancelChanges").click(cancelChanges)
 $("#dailyCrystals").on("input", updatePrice)
 $("#altNameType").on("input", displayAltFields)
 
-browser.storage.onChanged.addListener( changes => {
+browser.storage.onChanged.addListener(changes => {
 	for (change in Object.getOwnPropertyNames(changes)) {
 		if ( ["doQuests", "doBuildingAndHarvy", "doCraftQueue"].includes(change) ) {
 			return
