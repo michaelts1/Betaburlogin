@@ -203,34 +203,34 @@ async function getVars() {
 	//if not set, create with default settings
 	if (Object.keys(vars).length === 0) {
 		vars = {
-			version 			: VARS_VERSION,
-			startActionsDelay 	: 1000,
-			buttonDelay 		: 500,
-			dailyCrystals	 	: 50,
-			minCraftingQueue 	: 5,
-			altsNumber 			: 0,
-			wireFrequency 		: 0,
-			doQuests 			: true,
-			doBuildingAndHarvy	: true,
-			doCraftQueue 		: true,
-			actionsPending 		: false,
-			autoWire 			: false,
-			verbose 			: false,
-			questCompleting 	: null,
-			mainAccount 		: "",
-			mainUsername 		: "",
-			loginPassword 		: "",
-			pattern 			: "",
-			altBaseName 		: "",
-			namesList 			: [],
-			containers 			: ["betabot-default"],
-			tradesList 			: {
-				fishing 	 : [],
-				woodcutting  : [],
-				mining 		 : [],
-				stonecutting : [],
-				crafting 	 : [],
-				carving 	 : []
+			version           : VARS_VERSION,
+			startActionsDelay : 1000,
+			buttonDelay       : 500,
+			dailyCrystals	  : 50,
+			minCraftingQueue  : 5,
+			altsNumber        : 0,
+			wireFrequency     : 0,
+			doQuests          : true,
+			doBuildingAndHarvy: true,
+			doCraftQueue      : true,
+			actionsPending    : false,
+			autoWire          : false,
+			verbose           : false,
+			questCompleting   : null,
+			mainAccount       : "",
+			mainUsername      : "",
+			loginPassword     : "",
+			pattern           : "",
+			altBaseName       : "",
+			namesList         : [],
+			containers        : ["betabot-default"],
+			tradesList        : {
+				fishing       : [],
+				woodcutting   : [],
+				mining        : [],
+				stonecutting  : [],
+				crafting      : [],
+				carving       : []
 			},
 			css: {
 				addon : ADDON_CSS,
@@ -238,58 +238,58 @@ async function getVars() {
 			},
 			currencySend: [
 				{
-					name 			: "crystals",
-					send 			: true,
-					minimumAmount 	: 0,
-					keepAmount 		: 0
+					name         : "crystals",
+					send         : true,
+					minimumAmount: 0,
+					keepAmount   : 0
 				},
 				{
-					name 			: "platinum",
-					send 			: true,
-					minimumAmount 	: 100,
-					keepAmount 		: 0
+					name         : "platinum",
+					send         : true,
+					minimumAmount: 100,
+					keepAmount   : 0
 				},
 				{
-					name 			: "gold",
-					send 			: true,
-					minimumAmount 	: 10000,
-					keepAmount 		: 0
+					name         : "gold",
+					send         : true,
+					minimumAmount: 10000,
+					keepAmount   : 0
 				},
 				{
-					name 			: "crafting_materials",
-					send 			: true,
-					minimumAmount 	: 100,
-					keepAmount 		: 0
+					name         : "crafting_materials",
+					send         : true,
+					minimumAmount: 100,
+					keepAmount   : 0
 				},
 				{
-					name 			: "gem_fragments",
-					send 			: true,
-					minimumAmount 	: 100,
-					keepAmount 		: 0
+					name         : "gem_fragments",
+					send         : true,
+					minimumAmount: 100,
+					keepAmount   : 0
 				},
 				{
-					name 			: "food",
-					send 			: true,
-					minimumAmount 	: 100,
-					keepAmount 		: 10000000
+					name         : "food",
+					send         : true,
+					minimumAmount: 100,
+					keepAmount   : 10000000
 				},
 				{
-					name 			: "wood",
-					send 			: true,
-					minimumAmount 	: 100,
-					keepAmount 		: 10000000
+					name         : "wood",
+					send         : true,
+					minimumAmount: 100,
+					keepAmount   : 10000000
 				},
 				{
-					name 			: "iron",
-					send 			: true,
-					minimumAmount 	: 100,
-					keepAmount 		: 10000000
+					name         : "iron",
+					send         : true,
+					minimumAmount: 100,
+					keepAmount   : 10000000
 				},
 				{
-					name 			: "stone",
-					send 			: true,
-					minimumAmount 	: 100,
-					keepAmount 		: 10000000
+					name         : "stone",
+					send         : true,
+					minimumAmount: 100,
+					keepAmount   : 10000000
 				}
 			]
 		}

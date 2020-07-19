@@ -112,6 +112,10 @@ select {
 	margin-top: 0.5em;
 }
 
+#betabotSpawnGem[disabled] {
+	opacity: 0.5;
+}
+
 /* tables */
 table, th, td {
 	border: 2px solid LightSteelBlue;

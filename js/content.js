@@ -8,12 +8,7 @@
  * * Auto stamina
  * * Select house build
  * 
- * Reset autoWire if vars.wireFrequency has changed
- * 
  *~~~Needs Testing:~~~
- * Verbose logging
- * Spawn gems for all alts
- * Add option to select auto wire frequnecy
  * Allow users to specify what container tabs to use
  * Do not start new quests/harvestron jobs if cancelled manually
  */
@@ -25,11 +20,9 @@ var port = null,
 
 if (/www.avabur.com[\/?expird=1]*$/.test(url)) {
 	liveLogin()
-}
-else if (/beta.avabur.com[\/?expird=1]*$/.test(url)) {
+} else if (/beta.avabur.com[\/?expird=1]*$/.test(url)) {
 	betaLogin()
-}
-else if (/beta.avabur.com\/game/.test(url)) {
+} else if (/beta.avabur.com\/game/.test(url)) {
 	betaGame()
 }
 
@@ -79,27 +72,37 @@ async function betaLogin() {
 
 async function betaGame() {
 	let port2,
-		vars 			= await browser.storage.sync.get(),
-		username 		= $("#username").text(),
-		isAlt 			= username !== vars.mainUsername,
+		vars            = await browser.storage.sync.get(),
+		username        = $("#username").text(),
+		isAlt           = username !== vars.mainUsername,
 		betabotCooldown = false,
-		mainTrade 		= getTrade(),
-		autoWireID 		= vars.autoWire ? setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername) : null
+		mainTrade       = getTrade(),
+		autoWireID      = vars.autoWire ? setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername) : null
 
-	if (vars.verbose) log("Starting up (Beta Game)\nUsername:", username, "\nAlt?", isAlt, "\nEvent TS:", mainTrade)
+	if (vars.verbose) {
+		log("Starting up (Beta Game)\nUsername:", username, "Alt:", isAlt ? "yes" : "no", "\nEvent TS:", mainTrade, "\nAuto Wire:", autoWireID ? "on" : "off")
+	}
 
-	async function refreshVars() {
+	async function refreshVars(changes) {
 		if (vars.verbose) log("Refreshing settings")
+
 		vars = await browser.storage.sync.get()
 		isAlt = username !== vars.mainUsername
 		mainTrade = getTrade()
+
+		if (changes.hasOwnProperty("wireFrequency")) { //if wireFrequency has changed, reset autoWire
+			clearInterval(autoWireID)
+			autoWireID = null
+		}
+
 		if (autoWireID && !vars.autoWire) {
 			clearInterval(autoWireID)
 			autoWireID = null
 		} else if (!autoWireID && vars.autoWire) {
 			autoWireID = setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername)
 		}
-		if (vars.verbose) log("Alt?", isAlt, "\nEvent TS:", mainTrade, "\nAuto Wire:", autoWireID ? "on" : "off")
+
+		if (vars.verbose) log("Alt:", isAlt ? "yes" : "no", "\nEvent TS:", mainTrade, "\nAuto Wire:", autoWireID ? "on" : "off")
 	}
 	browser.storage.onChanged.addListener(refreshVars)
 
@@ -132,7 +135,7 @@ async function betaGame() {
 	function spawnGems(tier, type, splice, amount) {
 		if (vars.verbose) log(`Spawning ${amount} level ${tier*10} gems with type value of ${type} and splice value of ${splice}`)
 
-		if (tier > pareseInt($("#level").text()) * 10 || amount > 60 || type === 65535 || splice === 65535) {
+		if (tier > parseInt($("#level").text()) * 10 || amount > 60 || type === 65535 || splice === 65535 || type === splice) {
 			log("Invalid request. Aborting spawn")
 			return
 		}
@@ -144,26 +147,25 @@ async function betaGame() {
 					$("#gemSpawnType").val(type)
 					$("#gemSpawnSpliceType").val(splice)
 					$("#gemSpawnCount").val(amount)
+
 					setTimeout(() => {
 						$("#gemSpawnConfirm").click()
 					}, vars.buttonDelay)
+
 					$(document).one("roa-ws:page:gem_spawn", (e, d) => {
 						$("#betabotSpawnGem").prop("disabled", true)
+
 						setTimeout(() => {
-							$("#confirmButtons>a.green").click()
-						}, vars.buttonDelay)
+							$("#confirmButtons>a.green")[0].click()
+						}, 55*1000)
+
 						setTimeout(() => {
 							$("#betabotSpawnGem").prop("disabled", false)
-						}, 65000)
+						}, 60*1000)
 					})
 				}, vars.startActionsDelay)
 			}
 		})
-		/*if ($("#modal2Wrapper").is(":visible") && $("#modal2Title").text() === "Spawn Gems") {
-			$(document).trigger("roa-ws:modalContent", {title: "Spawn Gems"})
-		}
-		else {
-			itemBuilding()*/
 		$("#chatMessage").text("/spawngem")
 		$("#chatSendMessage").click()
 	}
@@ -297,8 +299,7 @@ async function betaGame() {
 				if (item.type === "page" && item.hasOwnProperty("page") && "string" === typeof item.page) {
 					etypepage = etype + ":" + item.page
 				}
-			}
-			else {
+			} else {
 				etype = etype + "general"
 			}
 
@@ -329,7 +330,7 @@ async function betaGame() {
 			vars.doQuests = false
 			setTimeout( async () => {
 				vars.doQuests = (await browser.storage.sync.get("doQuests")).doQuests
-			}, 60000)
+			}, 60*1000)
 		}
 	})
 
@@ -339,7 +340,7 @@ async function betaGame() {
 			vars.doBuildingAndHarvy = false
 			setTimeout( async () => {
 				vars.doBuildingAndHarvy = (await browser.storage.sync.get("doQuests")).doBuildingAndHarvy
-			}, 60000)
+			}, 60*1000)
 		}
 	})
 
@@ -404,17 +405,14 @@ async function betaGame() {
 				if (vars.verbose) log(`Upgrading custom item with id ${itemId}`)
 				$(document).one("roa-ws:page:house_all_builds", itemId, customBuild)
 				setTimeout(() => { $("#allHouseUpgrades")[0].click() }, vars.buttonDelay)
-			}
-			else if ($("#houseRoomCanBuild").is(":visible")) { //else, if new room is available, build it
+			} else if ($("#houseRoomCanBuild").is(":visible")) { //else, if new room is available, build it
 				if (vars.verbose) log("Building a new room")
 				$(document).one("roa-ws:page:house_build_room", itemBuilding)
 				setTimeout(() => { $("#houseBuildRoom")[0].click() }, vars.buttonDelay)
-			}
-			else if ($("#houseQuickBuildList li:first .houseViewRoom").length === 1) { //else, if new item is available, build it
+			} else if ($("#houseQuickBuildList li:first .houseViewRoom").length === 1) { //else, if new item is available, build it
 				$(document).one("roa-ws:page:house_room", buildItem)
 				setTimeout(() => { $("#houseQuickBuildList li:first .houseViewRoom")[0].click() }, vars.buttonDelay)
-			}
-			else { //else, upgrade existing item
+			} else { //else, upgrade existing item
 				$(document).one("roa-ws:page:house_room_item", upgradeItem)
 				setTimeout(() => { $("#houseQuickBuildList li:first .houseViewRoomItem")[0].click() }, vars.buttonDelay)
 			}
@@ -442,8 +440,7 @@ async function betaGame() {
 				if (vars.verbose) log("Upgrading item tier")
 				$(document).one("roa-ws:page:house_room_item_upgrade_tier", itemBuilding)
 				setTimeout(() => { $("#houseRoomItemUpgradeTier").click() }, vars.buttonDelay)
-			}
-			else { //else do a regular upgrade
+			} else { //else do a regular upgrade
 				if (vars.verbose) log("Upgrading fastest item")
 				$(document).one("roa-ws:page:house_room_item_upgrade_level", itemBuilding)
 				setTimeout(() => { $("#houseRoomItemUpgradeLevel").click() }, vars.buttonDelay)
@@ -546,22 +543,22 @@ async function betaGame() {
 	$(document).on("roa-ws:craft", checkCraftingQueue)
 
 	//auto event. Based on: https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js
-	let eventLimiter 	= false,
-		eventID 		= null,
-		carvingChanged 	= false,
-		mainEvent 		= false,
-		motdRecieved 	= false
+	let eventLimiter   = false,
+		eventID        = null,
+		carvingChanged = false,
+		mainEvent      = false,
+		motdRecieved   = false
 
 	//const CHANNEL = 3203 //debugging channel
 	const CHANNEL = 3202 //production channel
 	const BUTTONS = {
-		battle: 		$(".bossFight.btn.btn-primary")[0],
-		fishing: 		$(".bossHarvest.btn")[4],
-		woodcutting: 	$(".bossHarvest.btn")[5],
-		mining: 		$(".bossHarvest.btn")[6],
-		stonecutting: 	$(".bossHarvest.btn")[7],
-		crafting: 		$(".bossCraft.btn")[0],
-		carving: 		$(".bossCarve.btn")[0]
+		battle      : $(".bossFight.btn.btn-primary")[0],
+		fishing     : $(".bossHarvest.btn")[4],
+		woodcutting : $(".bossHarvest.btn")[5],
+		mining      : $(".bossHarvest.btn")[6],
+		stonecutting: $(".bossHarvest.btn")[7],
+		crafting    : $(".bossCraft.btn")[0],
+		carving     : $(".bossCarve.btn")[0]
 	}
 
 	function delay(time) {
@@ -649,8 +646,8 @@ async function betaGame() {
 		let elm = document.createElement("link");
 		elm.href = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` //decode css code into base64 and use it as a link to avoid code injection
 		elm.type = "text/css"
-		elm.rel = "stylesheet"
-		elm.id = "betabot-css"
+		elm.rel  = "stylesheet"
+		elm.id   = "betabot-css"
 		document.head.appendChild(elm)
 	}
 
@@ -658,5 +655,3 @@ async function betaGame() {
 		$("#effectInfo").remove()
 	}
 }
-
-console.log("betaburlogin finished evaluating")

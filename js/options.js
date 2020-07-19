@@ -68,17 +68,17 @@ async function fillFields() {
 		fillContainers()
 	}
 
-	$("#altName") 			.val(vars.altBaseName)
-	$("#loginPass") 		.val(vars.loginPassword)
-	$("#namesList") 		.val(vars.namesList.join(", "))
-	$("#customCSS") 		.val(vars.css.custom)
-	$("#altsNumber") 		.val(vars.altsNumber)
-	$("#altNameType") 		.val(vars.pattern)
-	$("#mainUsername") 		.val(vars.mainUsername)
-	$("#wireFrequency") 	.val(vars.wireFrequency)
-	$("#dailyCrystals") 	.val(vars.dailyCrystals)
-	$("#mainAccountName")	.val(vars.mainAccount)
-	$("#minCraftingQueue")	.val(vars.minCraftingQueue)
+	$("#altName")         .val(vars.altBaseName)
+	$("#loginPass")       .val(vars.loginPassword)
+	$("#namesList")       .val(vars.namesList.join(", "))
+	$("#customCSS")       .val(vars.css.custom)
+	$("#altsNumber")      .val(vars.altsNumber)
+	$("#altNameType")     .val(vars.pattern)
+	$("#mainUsername")    .val(vars.mainUsername)
+	$("#wireFrequency")   .val(vars.wireFrequency)
+	$("#dailyCrystals")   .val(vars.dailyCrystals)
+	$("#mainAccountName") .val(vars.mainAccount)
+	$("#minCraftingQueue").val(vars.minCraftingQueue)
 	$("#autoWire").prop("checked", vars.autoWire)
 	$("#verbose").prop("checked", vars.verbose)
 
@@ -108,20 +108,20 @@ async function saveChanges() {
 			throw new Error("Form is invalid")
 		}
 
-		vars.altBaseName 	  = $("#altName").val()
-		vars.loginPassword 	  = $("#loginPass").val()
-		vars.css.custom 	  = $("#customCSS").val()
-		vars.pattern 		  = $("#altNameType").val()
-		vars.mainUsername 	  = $("#mainUsername").val()
-		vars.wireFrequency 	  = $("#wireFrequency").val()
-		vars.mainAccount 	  = $("#mainAccountName").val()
-		vars.namesList 		  = $("#namesList").val().split(', ')
-		vars.verbose  		  = $("#verbose").prop("checked")
-		vars.autoWire 		  = $("#autoWire").prop("checked")
-		vars.altsNumber 	  = parseInt($("#altsNumber").val()) || 0
-		vars.dailyCrystals 	  = parseInt($("#dailyCrystals").val()) || 0
+		vars.altBaseName      = $("#altName").val()
+		vars.loginPassword    = $("#loginPass").val()
+		vars.css.custom       = $("#customCSS").val()
+		vars.pattern          = $("#altNameType").val()
+		vars.mainUsername     = $("#mainUsername").val()
+		vars.wireFrequency    = $("#wireFrequency").val()
+		vars.mainAccount      = $("#mainAccountName").val()
+		vars.namesList        = $("#namesList").val().split(', ')
+		vars.verbose          = $("#verbose").prop("checked")
+		vars.autoWire         = $("#autoWire").prop("checked")
+		vars.altsNumber       = parseInt($("#altsNumber").val()) || 0
+		vars.dailyCrystals    = parseInt($("#dailyCrystals").val()) || 0
 		vars.minCraftingQueue = parseInt($("#minCraftingQueue").val()) || 0
-		vars.containers 	  = $("[name=containers]:checked").get().map(e => e.id) //get id's of checked containers
+		vars.containers       = $("[name=containers]:checked").get().map(e => e.id) //get id's of checked containers
 
 		for (let i = 0; i < vars.currencySend.length; i++) {
 			let keepAmount = $(`#${vars.currencySend[i].name}Keep`).val() || 0
