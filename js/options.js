@@ -225,12 +225,8 @@ async function fillContainers() {
 		}
 	}
 
-	for (let container of vars.containers) { //check all containers previously saved
+	for (let container of vars.containers.list) { //check all containers previously saved
 		$(`#${container}`).prop("checked", true)
-	}
-
-	if (vars.containers[0] === "betabot-default") { //if there were no changes to the default, check all
-		$("[name=containers]").prop("checked", true)
 	}
 }
 
@@ -243,7 +239,7 @@ $("#dailyCrystals").on("input", updatePrice)
 $("#altNameType").on("input", displayAltFields)
 
 browser.storage.onChanged.addListener(changes => {
-	for (change in Object.getOwnPropertyNames(changes)) {
+	for (let change of Object.getOwnPropertyNames(changes)) {
 		if ( ["doQuests", "doBuildingAndHarvy", "doCraftQueue"].includes(change) ) {
 			return
 		}

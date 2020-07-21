@@ -391,12 +391,28 @@ async function updateVars() {
 
 browser.storage.onChanged.addListener(changes => {
 	getVars()
-	//list changes in console:
-	let values = Object.values(changes),
-		keys   = Object.keys(changes)
 
+	function objectEquals(object1, object2) { //https://stackoverflow.com/a/6713782/10687471
+		if (object1 === object2) return true
+		if (!(object1 instanceof Object) || !(object2 instanceof Object)) return false
+		if (object1.constructor !== object2.constructor) return false
+		for (let p in object1) {
+			if (!object1.hasOwnProperty(p)) continue
+			if (!object2.hasOwnProperty(p)) return false
+			if (object1[p] === object2[p]) continue
+			if (typeof(object1[p]) !== "object") return false
+			if (!objectEquals(object1[p], object2[p])) return false
+		}
+		for (let p in object2) {
+			if (object2.hasOwnProperty(p) && !object1.hasOwnProperty(p)) return false
+		}
+		return true
+	}
+
+	let values = Object.values(changes)
+	let keys   = Object.keys(changes)
 	for (let i = 0; i < Object.values(changes).length; i++) {
-		if (values[i].oldValue !== values[i].newValue) {
+		if (objectEquals(values[i].oldValue, values[i].newValue) === false) {
 			console.log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
 		}
 	}

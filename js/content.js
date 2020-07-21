@@ -88,7 +88,7 @@ async function betaGame() {
 		isAlt = username !== vars.mainUsername
 		mainTrade = getTrade()
 
-		if (changes.wireFrequency != null) { //if wireFrequency has changed, reset autoWire
+		if (changes.wireFrequency.oldValue !== changes.wireFrequency.newValue) { //if wireFrequency has changed, reset autoWire
 			clearInterval(autoWireID)
 			autoWireID = null
 		}
