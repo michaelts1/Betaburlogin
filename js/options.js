@@ -79,8 +79,10 @@ async function fillFields() {
 	$("#dailyCrystals")   .val(vars.dailyCrystals)
 	$("#mainAccountName") .val(vars.mainAccount)
 	$("#minCraftingQueue").val(vars.minCraftingQueue)
-	$("#autoWire").prop("checked", vars.autoWire)
+
 	$("#verbose").prop("checked", vars.verbose)
+	$("#autoWire").prop("checked", vars.autoWire)
+	$("#containersAuto").prop("checked", vars.containers.useAll)
 
 	for (let currency of vars.currencySend) {
 		$(`#${currency.name}Keep`).val(abbreviateNumber(currency.keepAmount))
@@ -89,7 +91,7 @@ async function fillFields() {
 	}
 
 	for (let trade of Object.keys(vars.tradesList)) {
-		$("#"+trade).val(vars.tradesList[trade].join(", "))
+		$(`#${trade}`).val(vars.tradesList[trade].join(", "))
 	}
 
 	updatePrice()
@@ -103,25 +105,26 @@ async function saveChanges() {
 				table = $(`table:has(#${invalid.id})`)[0].id //get containing table id
 			$(`#${table}TabButton`).click() //go to its tab
 
-			console.error("Form is invalid: First invalid field found is " + invalid)
+			console.error("Form is invalid: First invalid field found is", invalid)
 			setTimeout(() => {$("#settings")[0].reportValidity()})
 			throw new Error("Form is invalid")
 		}
 
-		vars.altBaseName      = $("#altName").val()
-		vars.loginPassword    = $("#loginPass").val()
-		vars.css.custom       = $("#customCSS").val()
-		vars.pattern          = $("#altNameType").val()
-		vars.mainUsername     = $("#mainUsername").val()
-		vars.wireFrequency    = $("#wireFrequency").val()
-		vars.mainAccount      = $("#mainAccountName").val()
-		vars.namesList        = $("#namesList").val().split(', ')
-		vars.verbose          = $("#verbose").prop("checked")
-		vars.autoWire         = $("#autoWire").prop("checked")
-		vars.altsNumber       = parseInt($("#altsNumber").val()) || 0
-		vars.dailyCrystals    = parseInt($("#dailyCrystals").val()) || 0
-		vars.minCraftingQueue = parseInt($("#minCraftingQueue").val()) || 0
-		vars.containers       = $("[name=containers]:checked").get().map(e => e.id) //get id's of checked containers
+		vars.altBaseName       = $("#altName").val()
+		vars.loginPassword     = $("#loginPass").val()
+		vars.css.custom        = $("#customCSS").val()
+		vars.pattern           = $("#altNameType").val()
+		vars.mainUsername      = $("#mainUsername").val()
+		vars.wireFrequency     = $("#wireFrequency").val()
+		vars.mainAccount       = $("#mainAccountName").val()
+		vars.namesList         = $("#namesList").val().split(', ')
+		vars.verbose           = $("#verbose").prop("checked")
+		vars.autoWire          = $("#autoWire").prop("checked")
+		vars.containers.useAll = $("#containersAuto").prop("checked")
+		vars.altsNumber        = parseInt($("#altsNumber").val()) || 0
+		vars.dailyCrystals     = parseInt($("#dailyCrystals").val()) || 0
+		vars.minCraftingQueue  = parseInt($("#minCraftingQueue").val()) || 0
+		vars.containers.list   = $("[name=containers]:checked").get().map(e => e.id) //get id's of checked containers
 
 		for (let i = 0; i < vars.currencySend.length; i++) {
 			let keepAmount = $(`#${vars.currencySend[i].name}Keep`).val() || 0
@@ -130,7 +133,7 @@ async function saveChanges() {
 		}
 
 		for (let trade of Object.keys(vars.tradesList)) {
-			vars.tradesList[trade] = $("#"+trade).val().split(", ")
+			vars.tradesList[trade] = $(`#${trade}`).val().split(", ")
 		}
 
 		await browser.storage.sync.set(vars)
@@ -139,7 +142,7 @@ async function saveChanges() {
 		displayMessage("Changes saved")
 	}
 	catch (error) {
-		displayMessage("Error: "+error.message)
+		displayMessage(`Error: ${error.message}`)
 		console.error(error)
 	}
 }
@@ -150,7 +153,7 @@ function cancelChanges() {
 		displayMessage("Cancelled changes")
 	}
 	catch (error) {
-		displayMessage("Error: "+error.message)
+		displayMessage(`Error: ${error.message}`)
 		console.error(error)
 	}
 }
@@ -222,8 +225,6 @@ async function fillContainers() {
 		}
 	}
 
-	$("#containers>input").click(toggleContainers) //add event listener to toggle select all checkbox when needed
-
 	for (let container of vars.containers) { //check all containers previously saved
 		$(`#${container}`).prop("checked", true)
 	}
@@ -231,18 +232,6 @@ async function fillContainers() {
 	if (vars.containers[0] === "betabot-default") { //if there were no changes to the default, check all
 		$("[name=containers]").prop("checked", true)
 	}
-
-	$("#containersCheckAll").prop("checked", $("[name=containers]").not(':checked').length === 0) //check if all other checkboxes are checked
-}
-
-function toggleContainers(event) {
-	if (event.target.id === "containersCheckAll") { //if select all was clicked, check all boxes
-		$("[name=containers]").prop("checked", $("#containersCheckAll").prop("checked"))
-	}
-	else if (event.target.name === "containers") { //else, check select all if needed
-		$("#containersCheckAll").prop("checked", $("[name=containers]").not(':checked').length === 0)
-	}
-
 }
 
 $(fillFields)

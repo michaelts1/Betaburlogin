@@ -6,7 +6,7 @@
 		<link rel="stylesheet" type="text/css" href="../css/options.css">
 		<script src="../js/jquery-3.4.1.min.js"></script>
 	</head>
-	<body id="optionsPage">
+	<body class="optionsPage">
 		<div id="top">
 			<h1>Betabur Login Options Page</h1>
 			<div id="tabsButtons">
@@ -307,8 +307,7 @@
 						<td>
 							<select id="altNameType" required>
 								<option value="" selected hidden>Select Name Pattern</option>
-								<option value="romanCaps">Roman Numerals Upper Case</option>
-								<option value="roman">Roman Numerals Lower Case</option>
+								<option value="roman">Roman Numerals</option>
 								<option value="unique">Unique Names</option>
 							</select>
 						</td>
@@ -380,16 +379,15 @@
 							</div>
 						</td>
 					</tr>
-					<tr>
+					<tr id="containerstr">
 						<td>
-							<label for="info">Containers</label>
-							<span class="info" aria-tooltip="Info" data-tooltip="You can choose which containers the addon will use here"></span>
+							Containers
+							<span class="info" aria-tooltip="Info" data-tooltip="You can choose which containers the addon will use here.&#13;&#10;Auto means that the first n containers will be used, where n is the number of alts you have."></span>
 						</td>
 						<td>
-							<div id="containers">
-								<input id="containersCheckAll" type="checkbox">
-								<label for="containersCheckAll">Select All</label><br>
-							</div>
+							<input id="containersAuto" type="checkbox">
+							<label for="containersAuto">Auto</label>
+							<div id="containers"></div>
 						</td>
 					</tr>
 				</tbody>

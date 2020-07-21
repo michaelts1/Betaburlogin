@@ -1,6 +1,6 @@
 "use strict"
 
-const VARS_VERSION = 7
+const VARS_VERSION = 8
 const ADDON_CSS =
 `#clearUsername {
 	font-size: 25px;
@@ -25,6 +25,9 @@ const ADDON_CSS =
 #customBuild + label > a {
 	text-decoration: none;
 	padding: 3px;
+}
+#betabotSpawnGem[disabled] {
+	opacity: 0.5;
 }`
 const CUSTOM_CSS =
 `#areaContent {
@@ -123,9 +126,20 @@ browser.runtime.onConnect.addListener(async port => {
 //open tabs:
 async function openTabs() {
 	let containers = await browser.contextualIdentities.query({}) //get all containers
-	containers = containers.filter(e => vars.containers.includes(e.name)) //filter according to settings
+	if (vars.containers.useAll === false) {
+		containers = containers.filter(e => vars.containers.list.includes(e.name)) //filter according to settings
+	}
+
+	let altsNumber = 0
+	if (vars.pattern === "unique") {
+		altsNumber += vars.namesList.length
+	}
+	else {
+		altsNumber += vars.altsNumber
+	}
+
 	browser.tabs.create({url: "https://beta.avabur.com"})
-	for (let i = 0; i < vars.containers.length; i++) {
+	for (let i = 0; i < Math.min(containers.length, altsNumber); i++) {
 		setTimeout( () => {
 			browser.tabs.create({
 				cookieStoreId: containers[i].cookieStoreId,
@@ -145,17 +159,17 @@ function login() {
 		})
 	}
 
-	if (vars.pattern === "roman" || vars.pattern === "romanCaps") {
+	if (vars.pattern === "roman") {
 		function romanize(num) {
 			if (num === 0) return ""
 			let roman = {
-				I : 1,
-				IV: 4,
-				V : 5,
-				IX: 9,
-				X : 10,
-				XL: 40,
 				L : 50,
+				XL: 40,
+				X : 10,
+				IX: 9,
+				V : 5,
+				IV: 4,
+				I : 1,
 			}
 			let str = ""
 			for (let key of Object.keys(roman)) {
@@ -231,7 +245,10 @@ async function getVars() {
 			pattern           : "",
 			altBaseName       : "",
 			namesList         : [],
-			containers        : ["betabot-default"],
+			containers        : {
+				useAll: true,
+				list  : [],
+			},
 			tradesList        : {
 				fishing       : [],
 				woodcutting   : [],
@@ -312,13 +329,12 @@ async function updateVars() {
 		return
 	}
 	if (typeof vars.version !== "number") { //reset if too old
-		console.log("reset vars - too old")
+		console.log("Reseting settings - current settings are too old")
 		await browser.storage.sync.clear()
 		getVars()
 		return
 	}
 	if (vars.version < 2) {
-		console.log("update vars from versions before 2")
 		vars.mainUsername = ""
 	}
 	if (vars.version < 3) {
@@ -356,6 +372,13 @@ async function updateVars() {
 		vars.verbose = false
 		vars.containers = ["betabot-default"]
 		vars.wireFrequency = 60
+	}
+	if (vars.version < 8) {
+		vars.containers = {
+			useAll: true,
+			list  : []
+		}
+		if (vars.pattern === "romanCaps") vars.pattern = "roman" //deprecated
 	}
 
 	if (vars.css.addon !== ADDON_CSS) {

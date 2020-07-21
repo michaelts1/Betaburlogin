@@ -9,8 +9,6 @@
  * * Select house build
  * 
  *~~~Needs Testing:~~~
- * Allow users to specify what container tabs to use
- * Do not start new quests/harvestron jobs if cancelled manually
  */
 
 "use strict"
@@ -35,7 +33,7 @@ async function liveLogin() {
 	if (verbose) log("Starting up (Live Login)")
 
 	port = browser.runtime.connect({name: "live"})
-	$("#login_notification").html(`<button id="openAltTabs">Open all alt tabs</button>`)
+	$("#login_notification").html(`<button id="openAltTabs">Open Beta Tabs</button>`)
 	$("#openAltTabs").click(() => {
 		port.postMessage({text: "open alt tabs"})
 		if (verbose) log("Requesting background script to open alt tabs")
@@ -48,7 +46,7 @@ async function betaLogin() {
 
 	port = browser.runtime.connect({name: "login"})
 	port.onMessage.addListener(message => {
-		if (verbose) log("Recieved message with text:", message.text)
+		if (verbose) log(`Recieved message with text: ${message.text}`)
 		if (message.text === "login") login(message.username, message.password)
 	})
 
@@ -56,7 +54,7 @@ async function betaLogin() {
 		$("#acctname").val(username)
 		$("#password").val(password)
 		$("#login").click()
-		if (verbose) log("Logging in with username", username)
+		if (verbose) log(`Logging in with username ${username}`)
 
 		setTimeout(() => {
 			if ($("#login_notification").text() === "Your location is making too many requests too quickly.  Try again later.") {
@@ -80,7 +78,7 @@ async function betaGame() {
 	let autoWireID      = vars.autoWire ? setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername) : null
 
 	if (vars.verbose) {
-		log("Starting up (Beta Game)\nUsername:", username, "Alt:", isAlt ? "yes" : "no", "\nEvent TS:", mainTrade, "\nAuto Wire:", autoWireID ? "on" : "off")
+		log(`Starting up (Beta Game)\nUsername: ${username}\nAlt: ${isAlt ? "yes" : "no"}\nEvent TS: ${mainTrade}\nAuto Wire: ${autoWireID ? "on" : "off"}`)
 	}
 
 	async function refreshVars(changes) {
@@ -102,7 +100,7 @@ async function betaGame() {
 			autoWireID = setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername)
 		}
 
-		if (vars.verbose) log("Alt:", isAlt ? "yes" : "no", "\nEvent TS:", mainTrade, "\nAuto Wire:", autoWireID ? "on" : "off")
+		if (vars.verbose) log(`Alt: ${isAlt ? "yes" : "no"}\nEvent TS: ${mainTrade}\nAuto Wire: ${autoWireID ? "on" : "off"}`)
 	}
 	browser.storage.onChanged.addListener(refreshVars)
 
@@ -231,7 +229,7 @@ async function betaGame() {
 	//make it easier to send currency:
 	function wire(target) {
 		if (target === username) return
-		if (vars.verbose) log("Wiring", target)
+		if (vars.verbose) log(`Wiring ${target}`)
 
 		let sendMessage = `/wire ${target}`
 
@@ -501,20 +499,12 @@ $(document).on("roa-ws:all", function(event, data){
 		if (vars.actionsPending) return
 
 		if (vars.doQuests) { //Quests
-			if (data.bq_info2) {
-				if (data.bq_info2?.c >= data.bq_info2.r) {
-					vars.questCompleting = "kill"
-				}
-			}
-			if (data.tq_info2) {
-				if (data.tq_info2?.c >= data.tq_info2.r) {
-					vars.questCompleting = "tradeskill"
-				}
-			}
-			if (data.pq_info2) {
-				if (data.pq_info2?.c >= data.pq_info2.r) {
-					vars.questCompleting = "profession"
-				}
+			if (data.bq_info2?.c >= data.bq_info2.r) {
+				vars.questCompleting = "kill"
+			} else if (data.tq_info2?.c >= data.tq_info2.r) {
+				vars.questCompleting = "tradeskill"
+			} else if (data.pq_info2?.c >= data.pq_info2.r) {
+				vars.questCompleting = "profession"
 			}
 
 			if (vars.questCompleting != null) {
@@ -609,7 +599,7 @@ $(document).on("roa-ws:all", function(event, data){
 					}
 					eventID = msgID
 
-					if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} event`)
+					if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} event due to message #${msgID}`)
 					BUTTONS[mainTrade].click()
 					await delay(70000)
 					$("#eventCountdown").bind("DOMSubtreeModified", changeTrade)
@@ -623,7 +613,7 @@ $(document).on("roa-ws:all", function(event, data){
 	setTimeout(() => {
 		$(document).on("roa-ws:message", async (event, data) => {
 			if (data.c_id === CHANNEL) {
-				delay(vars.startActionsDelay)
+				await delay(vars.startActionsDelay)
                 // wait to see if the message is recieved together with a message of the day,
                 // which means it was only sent due to a chat reconnection, and we should not join the event.
 				if (motdRecieved === false) {
@@ -634,9 +624,9 @@ $(document).on("roa-ws:all", function(event, data){
 	}, 30000) //start after a delay to avoid being triggered by old messages
 
 	//avoid joining events after chat reconnections
-	$(document).on("roa-ws:motd", async (event, data) => {
+	$(document).on("roa-ws:motd", async () => {
 		motdRecieved = true
-		delay(vars.startActionsDelay * 5)
+		await delay(vars.startActionsDelay * 5)
 		motdRecieved = false
 	})
 

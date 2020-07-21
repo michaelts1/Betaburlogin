@@ -10,7 +10,7 @@ async function getVars() {
 
 async function toggle(data) {
 	let target = data.target.id
-	vars[target] = $("#"+target).prop("checked")
+	vars[target] = $(`#${target}`).prop("checked")
 	await browser.storage.sync.set(vars)
 }
 

@@ -72,8 +72,12 @@ select {
 	vertical-align: middle;
 }
 
-[name=containers], #containersCheckAll {
+[name=containers], #containersAuto {
 	vertical-align: middle;
+}
+
+#containersAuto:checked ~ #containers {
+	display: none;
 }
 
 #CSSdiv {
@@ -81,7 +85,7 @@ select {
 	display: grid;
 }
 
-#optionsPage {
+.optionsPage {
 	padding-top: 10px;
 }
 
@@ -112,10 +116,6 @@ select {
 	margin-top: 0.5em;
 }
 
-#betabotSpawnGem[disabled] {
-	opacity: 0.5;
-}
-
 /* tables */
 table, th, td {
 	border: 2px solid LightSteelBlue;
@@ -131,12 +131,12 @@ td {
 	padding: 0.25em;
 }
 
-#optionsPage td {
+.optionsPage td {
 	height: 2.7em;
 	padding: 0 0.5em
 }
 
-#optionsPage table {
+.optionsPage table {
 	table-layout: fixed;
 	width: 26em;
 	margin-top: 2em;
@@ -160,6 +160,12 @@ td {
 
 .checkboxtd {
 	text-align: center;
+}
+
+#containerstr td {
+	vertical-align: top;
+	height: auto;
+	padding: 0.5em;
 }
 
 /* tooltips */
