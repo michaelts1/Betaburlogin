@@ -191,28 +191,25 @@ async function betaGame() {
 			if (vars.verbose) log(`Requested to move all alts ${number} mobs up`)
 		})
 
-        //spawn gems:
-        $(document).on("roa-ws:modalContent", (event, data) => {
-            if (data.title === "Spawn Gems") {
-                if ($("#betabotSpawnGem")[0] === undefined) {
-                    $("#gemSpawnConfirm").after(`
-                        <input id="betabotSpawnGem" type="button" style="padding:6.5px" value="Spawn For All Alts">
-                    `)
-                }
-                $("#betabotSpawnGem").off("click") //turn off listeners from previuos spawns
-                $("#betabotSpawnGem").on("click", () => {
+		//spawn gems:
+		$(document).on("roa-ws:modalContent", (event, data) => {
+			if (data.title === "Spawn Gems") {
+				if ($("#betabotSpawnGem")[0] === undefined) {
+					$("#gemSpawnConfirm").after(`<input id="betabotSpawnGem" type="button" style="padding:6.5px" value="Spawn For All Alts">`)
+				}
+				$("#betabotSpawnGem").on("click", () => {
 					let msg = {
-                        text  : "spawnGem",
-                        tier  : parseInt($("#spawnGemLevel").val()),
-                        type  : parseInt($("#gemSpawnType").val()),
-                        splice: parseInt($("#gemSpawnSpliceType").val()),
-                        amount: parseInt($("#gemSpawnCount").val()),
-                    }
+						text  : "spawnGem",
+						tier  : parseInt($("#spawnGemLevel").val()),
+						type  : parseInt($("#gemSpawnType").val()),
+						splice: parseInt($("#gemSpawnSpliceType").val()),
+						amount: parseInt($("#gemSpawnCount").val()),
+					}
 					port.postMessage(msg)
 					if (vars.verbose) log(`Requested to spawn ${msg.amount} level ${msg.tier*10} gems with type value of ${msg.type} and splice value of ${msg.splice}`)
-                })
+				})
 			}
-        })
+		})
 	}
 
 	//make it easier to see what alt it is:
@@ -240,15 +237,15 @@ async function betaGame() {
 			let sellable     = $(`.${currency.name}`).attr("data-personal").replace(/,/g, "")
 			let amountToSend = 0
 
-			//leave this amount for the alt
+			//keep this amount
 			amountToSend = amount - currency.keepAmount
 
-			//if we want to send more than we can, only send what we can
+			//don't send more than you can
 			if (amountToSend > sellable) {
 				amountToSend = sellable
 			}
 
-			//only send if we have the minimum amount
+			//only send if you have enough
 			if (amountToSend > currency.minimumAmount) {
 				sendMessage += ` ${amountToSend} ${currency.name},`
 			}
@@ -398,7 +395,7 @@ $(document).on("roa-ws:all", function(event, data){
 		if (vars.verbose) log("Selecting build")
 		setTimeout(() => {
 			let itemId = parseInt($("#itemId").val())
-			if ($("#customBuild").is(":checked") && itemId > 0) { //if a custom build is specified, build it
+			if ($("#customBuild").is(":checked") && itemId > 0) { //if a custom build is specified, upgrade it
 				if (vars.verbose) log(`Upgrading custom item with id ${itemId}`)
 				$(document).one("roa-ws:page:house_all_builds", itemId, customBuild)
 				setTimeout(() => { $("#allHouseUpgrades")[0].click() }, vars.buttonDelay)
@@ -532,11 +529,11 @@ $(document).on("roa-ws:all", function(event, data){
 	$(document).on("roa-ws:craft", checkCraftingQueue)
 
 	//auto event. Based on: https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js
-	let eventLimiter   = false
-	let eventID        = null
-	let carvingChanged = false
-	let mainEvent      = false
-	let motdRecieved   = false
+	let eventID         = null
+	let mainEvent       = false
+	let eventInProgress = false
+	let motdRecieved    = false
+	let carvingChanged  = false
 
 	//const CHANNEL = 3203 //debugging channel
 	const CHANNEL = 3202 //production channel
@@ -589,9 +586,9 @@ $(document).on("roa-ws:all", function(event, data){
 
 	async function joinEvent(msgContent, msgID) {
 		await delay(vars.startActionsDelay)
-		if (eventLimiter === false) {
+		if (eventInProgress === false) {
 			if (msgContent === "InitEvent" || msgContent === "MainEvent") {
-				eventLimiter = true
+				eventInProgress = true
 				if (msgID !== eventID) {
 					mainEvent = false
 					if (msgContent === "MainEvent") {
@@ -606,7 +603,7 @@ $(document).on("roa-ws:all", function(event, data){
 				}
 			}
 			await delay(vars.startActionsDelay)
-			eventLimiter = false
+			eventInProgress = false
 		}
 	}
 
@@ -614,8 +611,8 @@ $(document).on("roa-ws:all", function(event, data){
 		$(document).on("roa-ws:message", async (event, data) => {
 			if (data.c_id === CHANNEL) {
 				await delay(vars.startActionsDelay)
-                // wait to see if the message is recieved together with a message of the day,
-                // which means it was only sent due to a chat reconnection, and we should not join the event.
+				// wait to see if the message is recieved together with a message of the day,
+				// which means it was only sent due to a chat reconnection, and we should not join the event.
 				if (motdRecieved === false) {
 					joinEvent(data.m, data.m_id)
 				}

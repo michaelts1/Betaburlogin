@@ -48,7 +48,7 @@
 					<tr>
 						<td>
 							<label for="mainAccountName">Main Login Name<span class="required" data-tooltip="3-20 characters. Letters and numbers. Case sensitive.">*</span></label>
-							<span class="info" aria-tooltip="Info" data-tooltip="The name you use to log in with your main account.&#13;&#10;Might be different than your in-game username."></span>
+							<span class="info" role="img" aria-label="Info" data-tooltip="The name you use to log in with your main account.&#13;&#10;Might be different than your in-game username."></span>
 						</td>
 						<td>
 							<input id="mainAccountName" pattern="^[A-z\d]{3,20}$" placeholder="Login Name" size="15" required>
@@ -57,7 +57,7 @@
 					<tr>
 						<td>
 							<label for="mainUsername">Main In-Game Name<span class="required" data-tooltip="3-20 characters. Only letters. Case sensitive.">*</span></label>
-							<span class="info" aria-tooltip="Info" data-tooltip="Your main account in-game username.&#13;&#10;Might be different than the name you use to log in."></span>
+							<span class="info" role="img" aria-tooltip="Info" data-tooltip="Your main account in-game username.&#13;&#10;Might be different than the name you use to log in."></span>
 						</td>
 						<td>
 							<input id="mainUsername" pattern="^[A-z]{3,20}$" placeholder="In-Game Name" size="15" required>
@@ -75,7 +75,7 @@
 					<tr>
 						<td>
 							<label for="minCraftingQueue">Minimum Crafting Queue</label>
-							<span class="info" aria-tooltip="Info" data-tooltip="If there are less items in the queue than this number, it will be automatically filled."></span>
+							<span class="info" role="img" aria-tooltip="Info" data-tooltip="If there are less items in the queue than this number, it will be automatically filled."></span>
 						</td>
 						<td>
 							<input id="minCraftingQueue" pattern="^\d+$" placeholder="Minimum Queue" size=15>
@@ -84,7 +84,7 @@
 					<tr>
 						<td>
 							<label for="dailyCrystals">Daily Crystals Amount</label>
-							<span class="info" aria-tooltip="Info" data-tooltip="How many crystals to buy every day."></span>
+							<span class="info" role="img" aria-tooltip="Info" data-tooltip="How many crystals to buy every day."></span>
 						</td>
 						<td>
 							<input id="dailyCrystals" pattern="^\d+$" placeholder="Crystals Amount" size=15>
@@ -302,7 +302,7 @@
 					<tr>
 						<td>
 							<label for="altNameType">Name Pattern<span class="required">*</span></label>
-							<span class="info" aria-tooltip="Info" data-tooltip="The name pattern for your alts.&#13;&#10Examples:&#13;&#10Roman Numerals Upper Case: &quot;altI&quot; and &quot;altII&quot;.&#13;&#10Roman Numerals Lower Case: &quot;alti&quot; and &quot;altii&quot;.&#13;&#10Unique Names: &quot;altCraft&quot; and &quot;testAccount&quot;."></span>
+							<span class="info" role="img" aria-tooltip="Info" data-tooltip="The name pattern for your alts.&#13;&#10Examples:&#13;&#10Roman Numerals Upper Case: &quot;altI&quot; and &quot;altII&quot;.&#13;&#10Roman Numerals Lower Case: &quot;alti&quot; and &quot;altii&quot;.&#13;&#10Unique Names: &quot;altCraft&quot; and &quot;testAccount&quot;."></span>
 						</td>
 						<td>
 							<select id="altNameType" required>
@@ -315,7 +315,7 @@
 					<tr id="number">
 						<td>
 							<label for="altsNumber">Number of Alts</label>
-							<span class="info" aria-tooltip="Info" data-tooltip="Number of alts, not including main account."></span>
+							<span class="info" role="img" aria-tooltip="Info" data-tooltip="Number of alts, not including main account."></span>
 						</td>
 						<td>
 							<input id="altsNumber" pattern="^\d{1,3}$" placeholder="Number of Alts" size="24">
@@ -324,7 +324,7 @@
 					<tr id="altsBaseName">
 						<td>
 							<label for="altName">Alts Base Name</label>
-							<span class="info" aria-tooltip="Info" data-tooltip="The base name for your alts.&#13;&#10;For example, if your alts are &quot;alti&quot; and &quot;altii&quot;, then the base name is &quot;alt&quot;."></span>
+							<span class="info" role="img" aria-tooltip="Info" data-tooltip="The base name for your alts.&#13;&#10;For example, if your alts are &quot;alti&quot; and &quot;altii&quot;, then the base name is &quot;alt&quot;."></span>
 						</td>
 						<td>
 							<input id="altName" pattern="^[A-z\d]{3,20}$" placeholder="Alt Base Name" size="24">
@@ -333,7 +333,7 @@
 					<tr id="altsUniqueNames">
 						<td>
 							<label for="namesList">Unique Names List</label>
-							<span class="info" aria-tooltip="Info" data-tooltip="List of the names for your alts, sperated by commas and spaces.&#13;&#10;Example: &quot;altFish, altTwo, WeirdName, myAlt&quot;.&#13;&#10;Case sensitive."></span>
+							<span class="info" role="img" aria-tooltip="Info" data-tooltip="List of the names for your alts, sperated by commas and spaces.&#13;&#10;Example: &quot;altFish, altTwo, WeirdName, myAlt&quot;.&#13;&#10;Case sensitive."></span>
 						</td>
 						<td>
 							<input id="namesList" pattern="^[A-z\d, ]{3,}$" placeholder="Unique Names List" size="24">
@@ -358,7 +358,7 @@
 					<tr>
 						<td>
 							<label for="verbose">Verbose Logging</label>
-							<span class="info" aria-tooltip="Info" data-tooltip="If checked, the addon will log more things to the console.&#13;&#10;This is useful for debugging."></span>
+							<span class="info" role="img" aria-tooltip="Info" data-tooltip="If checked, the addon will log more things to the console.&#13;&#10;This is useful for debugging."></span>
 						</td>
 						<td>
 							<input id="verbose" type="checkbox" size="15">
@@ -367,7 +367,7 @@
 					<tr>
 						<td>
 							<label for="customCSS">CSS Styles</label>
-							<span class="info" aria-tooltip="Info" data-tooltip="Betaburlogin will add some CSS code to make the game look better. If you want, you can change that code here."></span>
+							<span class="info" role="img" aria-tooltip="Info" data-tooltip="Betaburlogin will add some CSS code to make the game look better. If you want, you can change that code here."></span>
 						</td>
 						<td>
 							<div id="CSSdiv">
@@ -382,7 +382,7 @@
 					<tr id="containerstr">
 						<td>
 							Containers
-							<span class="info" aria-tooltip="Info" data-tooltip="You can choose which containers the addon will use here.&#13;&#10;Auto means that the first n containers will be used, where n is the number of alts you have."></span>
+							<span class="info" role="img" aria-tooltip="Info" data-tooltip="You can choose which containers the addon will use here.&#13;&#10;Auto means that the first n containers will be used, where n is the number of alts you have."></span>
 						</td>
 						<td>
 							<input id="containersAuto" type="checkbox">
