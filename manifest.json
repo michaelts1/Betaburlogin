@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Betabur Login",
-	"version": "0.9.8.1",
+	"version": "0.9.9.0",
 	"description": "Helps logging in with all the alts on beta.avabur.com",
 
 	"applications": {
@@ -27,21 +27,21 @@
 			]
 		}
 	],
-	
+
 	"background": {
 		"scripts": ["js/background.js"]
 	},
-	
+
 	"options_ui": {
 		"page": "html/options.html",
 		"open_in_tab": true
 	},
-	
+
 	"browser_action": {
 		"default_icon": {
 			"60": "images/betaburlogin.png"
 		},
-		"default_title": "Betabur Login 2",
+		"default_title": "Betabur Login",
 		"default_popup": "html/browser_action.html"
 	},
 

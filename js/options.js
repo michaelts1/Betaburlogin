@@ -1,8 +1,10 @@
-var vars
+"use strict"
+
+let vars = null
 
 function abbreviateNumber(num) {
 	let round = num => Math.round(num*1000)/1000
-	
+
 	if(num >= 1000000000000000) {
 		return round(num/1000000000000000)+"Q"
 	}
@@ -56,19 +58,32 @@ function displayMessage(message, time=2500) {
 
 async function fillFields() {
 	vars = await browser.storage.sync.get()
-	
-	$("#mainAccountName")	.val(vars.mainAccount)
-	$("#mainUsername") 		.val(vars.mainUsername)
-	$("#loginPass") 		.val(vars.loginPassword)
-	$("#minCraftingQueue")	.val(vars.minCraftingQueue)
-	$("#dailyCrystals") 	.val(vars.dailyCrystals)
-	$("#altNameType") 		.val(vars.pattern)
-	$("#altsNumber") 		.val(vars.altsNumber)
-	$("#altName") 			.val(vars.altBaseName)
-	$("#namesList") 		.val(vars.namesList.join(", "))
-	
+	if (browser.contextualIdentities === undefined) {
+		let disabled = ["containers", "alt", "wire"]
+		for (let table of disabled) {
+			$(`#${table}`).html("This feature requires Container Tabs.<br>Please enable Container tabs in Browser Options -&gt; Tabs -&gt; Enable Container Tabs, and reload the page.")
+		}
+	}
+	else {
+		fillContainers()
+	}
+
+	$("#altName")         .val(vars.altBaseName)
+	$("#loginPass")       .val(vars.loginPassword)
+	$("#namesList")       .val(vars.namesList.join(", "))
+	$("#customCSS")       .val(vars.css.custom)
+	$("#altsNumber")      .val(vars.altsNumber)
+	$("#altNameType")     .val(vars.pattern)
+	$("#mainUsername")    .val(vars.mainUsername)
+	$("#wireFrequency")   .val(vars.wireFrequency)
+	$("#dailyCrystals")   .val(vars.dailyCrystals)
+	$("#mainAccountName") .val(vars.mainAccount)
+	$("#minCraftingQueue").val(vars.minCraftingQueue)
+
+	$("#verbose").prop("checked", vars.verbose)
 	$("#autoWire").prop("checked", vars.autoWire)
-	
+	$("#containersAuto").prop("checked", vars.containers.useAll)
+
 	for (let currency of vars.currencySend) {
 		$(`#${currency.name}Keep`).val(abbreviateNumber(currency.keepAmount))
 		$(`#${currency.name}Keep`).prop("title", currency.keepAmount)
@@ -76,9 +91,9 @@ async function fillFields() {
 	}
 
 	for (let trade of Object.keys(vars.tradesList)) {
-		$("#"+trade).val(vars.tradesList[trade].join(", "))
+		$(`#${trade}`).val(vars.tradesList[trade].join(", "))
 	}
-	
+
 	updatePrice()
 	displayAltFields()
 }
@@ -86,28 +101,39 @@ async function fillFields() {
 async function saveChanges() {
 	try {
 		if ($("#settings")[0].reportValidity() === false) {
-			throw "Form is invalid"
+			let invalid = $(":invalid")[1], //get first invalid field
+				table = $(`table:has(#${invalid.id})`)[0].id //get containing table id
+			$(`#${table}TabButton`).click() //go to its tab
+
+			console.error("Form is invalid: First invalid field found is", invalid)
+			setTimeout(() => {$("#settings")[0].reportValidity()})
+			throw new Error("Form is invalid")
 		}
 
-		vars.mainAccount 	  = $("#mainAccountName").val()
-		vars.mainUsername 	  = $("#mainUsername").val()
-		vars.loginPassword 	  = $("#loginPass").val()
-		vars.minCraftingQueue = parseInt($("#minCraftingQueue").val())
-		vars.dailyCrystals 	  = parseInt($("#dailyCrystals").val())
-		vars.pattern 		  = $("#altNameType").val()
-		vars.altsNumber 	  = parseInt($("#altsNumber").val())
-		vars.altBaseName 	  = $("#altName").val()
-		vars.namesList 		  = $("#namesList").val().split(', ')
-		vars.autoWire 		  = $("#autoWire").prop("checked")
+		vars.altBaseName       = $("#altName").val()
+		vars.loginPassword     = $("#loginPass").val()
+		vars.css.custom        = $("#customCSS").val()
+		vars.pattern           = $("#altNameType").val()
+		vars.mainUsername      = $("#mainUsername").val()
+		vars.wireFrequency     = $("#wireFrequency").val()
+		vars.mainAccount       = $("#mainAccountName").val()
+		vars.namesList         = $("#namesList").val().split(', ')
+		vars.verbose           = $("#verbose").prop("checked")
+		vars.autoWire          = $("#autoWire").prop("checked")
+		vars.containers.useAll = $("#containersAuto").prop("checked")
+		vars.altsNumber        = parseInt($("#altsNumber").val()) || 0
+		vars.dailyCrystals     = parseInt($("#dailyCrystals").val()) || 0
+		vars.minCraftingQueue  = parseInt($("#minCraftingQueue").val()) || 0
+		vars.containers.list   = $("[name=containers]:checked").get().map(e => e.id) //get id's of checked containers
 
 		for (let i = 0; i < vars.currencySend.length; i++) {
-			let keepAmount = $(`#${vars.currencySend[i].name}Keep`).val()
+			let keepAmount = $(`#${vars.currencySend[i].name}Keep`).val() || 0
 			vars.currencySend[i].keepAmount = deabbreviateNumber(keepAmount)
 			vars.currencySend[i].send = $(`#${vars.currencySend[i].name}Send`).prop("checked")
 		}
 
-		for (trade of Object.keys(vars.tradesList)) {
-			vars.tradesList[trade] = $("#"+trade).val().split(", ")
+		for (let trade of Object.keys(vars.tradesList)) {
+			vars.tradesList[trade] = $(`#${trade}`).val().split(", ")
 		}
 
 		await browser.storage.sync.set(vars)
@@ -116,7 +142,7 @@ async function saveChanges() {
 		displayMessage("Changes saved")
 	}
 	catch (error) {
-		displayMessage("Error: "+error.message)
+		displayMessage(`Error: ${error.message}`)
 		console.error(error)
 	}
 }
@@ -127,7 +153,7 @@ function cancelChanges() {
 		displayMessage("Cancelled changes")
 	}
 	catch (error) {
-		displayMessage("Error: "+error.message)
+		displayMessage(`Error: ${error.message}`)
 		console.error(error)
 	}
 }
@@ -156,14 +182,64 @@ function displayAltFields() {
 	}
 }
 
+function changeTab(event) {
+	let tabID = event.target.id.replace("TabButton", "")
+
+	for (let tab of document.querySelectorAll(".tab")) {
+		tab.classList.remove("selected")
+	}
+	$(`#${tabID}`)[0].classList.add("selected")
+
+	for (let button of document.querySelectorAll(`.tabButton`)) {
+		button.classList.remove("selected")
+	}
+	$(`#${tabID}TabButton`)[0].classList.add("selected")
+
+}
+
+function resetCSS() {
+	$("#customCSS").val(
+`#areaContent {
+	height: 350px;
+}
+#questInfo {
+	font-size: 0.95em;
+}
+.navSection li {
+	line-height: 25px;
+}`)
+}
+
+async function fillContainers() {
+	let containers = await browser.contextualIdentities.query({}) //get all containers
+	if (containers.length === 0) { //if there are no containers, abort
+		$("#containers").text("No containers found")
+		return
+	}
+
+	if ($("[name=containers]").length === 0) { //only add checkboxes if they don't exist already
+		for (let container of containers) {
+			let name = container.name
+			$("#containers").append(`<input id="${name}" name="containers" type="checkbox"><span id="${name}Icon" class="containerIcon"></span><label for="${name}">${name}</label><br>`)
+			$(`#${name}Icon`).css({"background-color": container.color, "mask": `url(${container.iconUrl})`, "mask-size": "100%"})
+		}
+	}
+
+	for (let container of vars.containers.list) { //check all containers previously saved
+		$(`#${container}`).prop("checked", true)
+	}
+}
+
 $(fillFields)
-$("#altNameType").on("input", displayAltFields)
+$("#resetCSS").click(resetCSS)
+$(".tabButton").click(changeTab)
 $("#saveChanges").click(saveChanges)
 $("#cancelChanges").click(cancelChanges)
 $("#dailyCrystals").on("input", updatePrice)
+$("#altNameType").on("input", displayAltFields)
 
-browser.storage.onChanged.addListener( changes => {
-	for (change in Object.getOwnPropertyNames(changes)) {
+browser.storage.onChanged.addListener(changes => {
+	for (let change of Object.getOwnPropertyNames(changes)) {
 		if ( ["doQuests", "doBuildingAndHarvy", "doCraftQueue"].includes(change) ) {
 			return
 		}

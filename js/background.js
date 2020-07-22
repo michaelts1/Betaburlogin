@@ -1,12 +1,51 @@
 "use strict"
 
-var	live, //those will store the ports
-	main,
-	alts = [],
-	logins = [],
-	//those will store the settings
-	vars = undefined,
-	varsVersion = 6
+const VARS_VERSION = 8
+const ADDON_CSS =
+`#clearUsername {
+	font-size: 25px;
+	color: yellow;
+	line-height: 10px;
+}
+#sendMeCurrency a {
+	text-decoration: none;
+	line-height: 10px;
+	padding: 3px;
+}
+#betabotMobJumpButton {
+	font-size: 14px;
+	padding: 6.5px;
+}
+#sendMeCurrency {
+	margin-left: 10px
+}
+#betabotBuyCrys {
+	padding: 6.5px;
+}
+#customBuild + label > a {
+	text-decoration: none;
+	padding: 3px;
+}
+#betabotSpawnGem[disabled] {
+	opacity: 0.5;
+}`
+const CUSTOM_CSS =
+`#areaContent {
+	height: 350px;
+}
+#questInfo {
+	font-size: 0.95em;
+}
+.navSection li {
+	line-height: 25px;
+}`
+
+let live //those will store the ports
+let main
+let alts = []
+let logins = []
+
+let vars = null //this will store the settings
 
 browser.runtime.onConnect.addListener(async port => {
 	console.log(port.name, " connected")
@@ -15,7 +54,7 @@ browser.runtime.onConnect.addListener(async port => {
 	//if live login
 	if (port.name === "live") {
 		live = port
-		live.onMessage.addListener( message => {
+		live.onMessage.addListener(message => {
 			if (message.text === "open alt tabs") {
 				openTabs()
 			}
@@ -24,7 +63,7 @@ browser.runtime.onConnect.addListener(async port => {
 	//if beta login
 	else if (port.name === "login") {
 		logins.push(port)
-		port.onMessage.addListener( message => {
+		port.onMessage.addListener(message => {
 			if (message.text === "requesting login") {
 				login()
 			}
@@ -37,7 +76,7 @@ browser.runtime.onConnect.addListener(async port => {
 	//if beta alt
 	else {
 		alts.push(port)
-		port.onMessage.addListener( message => {
+		port.onMessage.addListener(message => {
 			if (message.text === "move to mob") {
 				console.log(`moving all alts to mob ${message.number}`)
 				jumpMobs(message.number)
@@ -47,11 +86,11 @@ browser.runtime.onConnect.addListener(async port => {
 				spawnGem(message.type, message.splice, message.tier, message.amount)
 			}
 		})
-		
+
 	}
 	//if beta account
 	if (port.name !== "live" || port.name !== "login") {
-		port.onMessage.addListener( message => {
+		port.onMessage.addListener(message => {
 			//send currency
 			if (message.text === "requesting currency") {
 				console.log(`${port.name} requested currency`)
@@ -86,13 +125,25 @@ browser.runtime.onConnect.addListener(async port => {
 
 //open tabs:
 async function openTabs() {
-	let contexts = await browser.contextualIdentities.query({}) //get all containers
+	let containers = await browser.contextualIdentities.query({}) //get all containers
+	if (vars.containers.useAll === false) {
+		containers = containers.filter(e => vars.containers.list.includes(e.name)) //filter according to settings
+	}
+
+	let altsNumber = 0
+	if (vars.pattern === "unique") {
+		altsNumber += vars.namesList.length
+	}
+	else {
+		altsNumber += vars.altsNumber
+	}
+
 	browser.tabs.create({url: "https://beta.avabur.com"})
-	for (let i = 0; i < contexts.length; i++) { //and open them
+	for (let i = 0; i < Math.min(containers.length, altsNumber); i++) {
 		setTimeout( () => {
 			browser.tabs.create({
-				cookieStoreId: contexts[i].cookieStoreId,
-				url: "https://beta.avabur.com"
+				cookieStoreId: containers[i].cookieStoreId,
+				url: "https://beta.avabur.com",
 			})
 		}, 500*(i+1))
 	}
@@ -104,14 +155,22 @@ function login() {
 		logins[i].postMessage({
 			text: "login",
 			username: username,
-			password: vars.loginPassword
+			password: vars.loginPassword,
 		})
 	}
 
-	if (vars.pattern === "roman" || vars.pattern === "romanCaps") {
-		function romanize(num, caps) {
+	if (vars.pattern === "roman") {
+		function romanize(num) {
 			if (num === 0) return ""
-			let roman = caps ? {L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1} : {l: 50, xl: 40, x: 10, ix: 9, v: 5, iv: 4, i: 1} //use upper case if caps is true, otherwise don't
+			let roman = {
+				L : 50,
+				XL: 40,
+				X : 10,
+				IX: 9,
+				V : 5,
+				IV: 4,
+				I : 1,
+			}
 			let str = ""
 			for (let key of Object.keys(roman)) {
 				let q = Math.floor(num / roman[key])
@@ -122,7 +181,7 @@ function login() {
 		}
 		sendLogin(0, vars.mainAccount)
 		for (let i = 1; i <= vars.altsNumber; i++) {
-			sendLogin(i, vars.altBaseName+romanize(i, vars.pattern === "romanCaps")) //`vars.pattern === "romanCaps"` returns true if we should use caps and false if we shouldn't
+			sendLogin(i, vars.altBaseName+romanize(i))
 		}
 	} else if (vars.pattern === "unique") {
 		sendLogin(0, vars.mainAccount)
@@ -146,7 +205,7 @@ function spawnGem(type, splice, tier, amount) {
 		type  : type,
 		splice: splice,
 		tier  : tier,
-		amount: amount
+		amount: amount,
 	}, alts)
 }
 
@@ -166,88 +225,98 @@ async function getVars() {
 	//if not set, create with default settings
 	if (Object.keys(vars).length === 0) {
 		vars = {
-			version 			: varsVersion,
-			startActionsDelay 	: 1000,
-			buttonDelay 		: 500,
-			dailyCrystals	 	: 50,
-			minCraftingQueue 	: 5,
-			altsNumber 			: 0,
-			doQuests 			: true,
-			doBuildingAndHarvy	: true,
-			doCraftQueue 		: true,
-			actionsPending 		: false,
-			autoWire 			: false,
-			questCompleting 	: null,
-			mainAccount 		: "",
-			mainUsername 		: "",
-			loginPassword 		: "",
-			pattern 			: "",
-			altBaseName 		: "",
-			namesList 			: [],
-			currencySend 		: [
+			version           : VARS_VERSION,
+			startActionsDelay : 1000,
+			buttonDelay       : 500,
+			dailyCrystals	  : 50,
+			minCraftingQueue  : 5,
+			altsNumber        : 0,
+			wireFrequency     : 0,
+			doQuests          : true,
+			doBuildingAndHarvy: true,
+			doCraftQueue      : true,
+			actionsPending    : false,
+			autoWire          : false,
+			verbose           : false,
+			questCompleting   : null,
+			mainAccount       : "",
+			mainUsername      : "",
+			loginPassword     : "",
+			pattern           : "",
+			altBaseName       : "",
+			namesList         : [],
+			containers        : {
+				useAll: true,
+				list  : [],
+			},
+			tradesList        : {
+				fishing       : [],
+				woodcutting   : [],
+				mining        : [],
+				stonecutting  : [],
+				crafting      : [],
+				carving       : [],
+			},
+			css: {
+				addon : ADDON_CSS,
+				custom: CUSTOM_CSS,
+			},
+			currencySend: [
 				{
-					name 			: "crystals",
-					send 			: true,
-					minimumAmount 	: 0,
-					keepAmount 		: 0
+					name         : "crystals",
+					send         : true,
+					minimumAmount: 0,
+					keepAmount   : 0,
 				},
 				{
-					name 			: "platinum",
-					send 			: true,
-					minimumAmount 	: 100,
-					keepAmount 		: 0
+					name         : "platinum",
+					send         : true,
+					minimumAmount: 100,
+					keepAmount   : 0,
 				},
 				{
-					name 			: "gold",
-					send 			: true,
-					minimumAmount 	: 10000,
-					keepAmount 		: 0
+					name         : "gold",
+					send         : true,
+					minimumAmount: 10000,
+					keepAmount   : 0,
 				},
 				{
-					name 			: "crafting_materials",
-					send 			: true,
-					minimumAmount 	: 100,
-					keepAmount 		: 0
+					name         : "crafting_materials",
+					send         : true,
+					minimumAmount: 100,
+					keepAmount   : 0,
 				},
 				{
-					name 			: "gem_fragments",
-					send 			: true,
-					minimumAmount 	: 100,
-					keepAmount 		: 0
+					name         : "gem_fragments",
+					send         : true,
+					minimumAmount: 100,
+					keepAmount   : 0,
 				},
 				{
-					name 			: "food",
-					send 			: true,
-					minimumAmount 	: 100,
-					keepAmount 		: 10000000
+					name         : "food",
+					send         : true,
+					minimumAmount: 100,
+					keepAmount   : 10000000,
 				},
 				{
-					name 			: "wood",
-					send 			: true,
-					minimumAmount 	: 100,
-					keepAmount 		: 10000000
+					name         : "wood",
+					send         : true,
+					minimumAmount: 100,
+					keepAmount   : 10000000,
 				},
 				{
-					name 			: "iron",
-					send 			: true,
-					minimumAmount 	: 100,
-					keepAmount 		: 10000000
+					name         : "iron",
+					send         : true,
+					minimumAmount: 100,
+					keepAmount   : 10000000,
 				},
 				{
-					name 			: "stone",
-					send 			: true,
-					minimumAmount 	: 100,
-					keepAmount 		: 10000000
-				}
+					name         : "stone",
+					send         : true,
+					minimumAmount: 100,
+					keepAmount   : 10000000,
+				},
 			],
-			tradesList : {
-				fishing 	 : [],
-				woodcutting  : [],
-				mining 		 : [],
-				stonecutting : [],
-				crafting 	 : [],
-				carving 	 : []
-			}
 		}
 		await browser.storage.sync.set(vars)
 	}
@@ -256,19 +325,17 @@ async function getVars() {
 getVars()
 
 async function updateVars() {
-	if (vars.version === varsVersion) {
+	if (vars.version === VARS_VERSION) {
 		return
 	}
 	if (typeof vars.version !== "number") { //reset if too old
-		console.log("reset vars - too old")
+		console.log("Reseting settings - current settings are too old")
 		await browser.storage.sync.clear()
 		getVars()
 		return
 	}
 	if (vars.version < 2) {
-		console.log("update vars from versions before 2")
 		vars.mainUsername = ""
-		
 	}
 	if (vars.version < 3) {
 		vars.pattern = ""
@@ -276,12 +343,12 @@ async function updateVars() {
 	}
 	if (vars.version < 4) {
 		vars.tradesList = {
-			fishing 	 : [],
+			fishing      : [],
 			woodcutting  : [],
-			mining 		 : [],
+			mining       : [],
 			stonecutting : [],
-			crafting 	 : [],
-			carving 	 : []
+			crafting     : [],
+			carving      : [],
 		}
 	}
 	if (vars.version < 5) {
@@ -290,26 +357,62 @@ async function updateVars() {
 				name : trade,
 				send : true,
 				minimumAmount : 100,
-				keepAmount : 10000000
+				keepAmount : 10000000,
 			})
 		}
 	}
 	if (vars.version < 6) {
 		vars.autoWire = false
 	}
+	if (vars.version < 7) {
+		vars.css = {
+			addon : ADDON_CSS,
+			custom: CUSTOM_CSS,
+		},
+		vars.verbose = false
+		vars.containers = ["betabot-default"]
+		vars.wireFrequency = 60
+	}
+	if (vars.version < 8) {
+		vars.containers = {
+			useAll: true,
+			list  : []
+		}
+		if (vars.pattern === "romanCaps") vars.pattern = "roman" //deprecated
+	}
 
-	vars.version = varsVersion
+	if (vars.css.addon !== ADDON_CSS) {
+		vars.css.addon = ADDON_CSS
+	}
+
+	vars.version = VARS_VERSION
 	browser.storage.sync.set(vars)
 }
 
-browser.storage.onChanged.addListener( changes => {
+browser.storage.onChanged.addListener(changes => {
 	getVars()
-	//list changes in console:
-	let values = Object.values(changes),
-		keys   = Object.keys(changes)
 
+	function objectEquals(object1, object2) { //https://stackoverflow.com/a/6713782/10687471
+		if (object1 === object2) return true
+		if (!(object1 instanceof Object) || !(object2 instanceof Object)) return false
+		if (object1.constructor !== object2.constructor) return false
+		for (let p in object1) {
+			if (!object1.hasOwnProperty(p)) continue
+			if (!object2.hasOwnProperty(p)) return false
+			if (object1[p] === object2[p]) continue
+			if (typeof(object1[p]) !== "object") return false
+			if (!objectEquals(object1[p], object2[p])) return false
+		}
+		for (let p in object2) {
+			if (object2.hasOwnProperty(p) && !object1.hasOwnProperty(p)) return false
+		}
+		return true
+	}
+
+	let values = Object.values(changes)
+	let keys   = Object.keys(changes)
 	for (let i = 0; i < Object.values(changes).length; i++) {
-		if (values[i].oldValue !== values[i].newValue) {
+		if (objectEquals(values[i].oldValue, values[i].newValue) === false) {
 			console.log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
 		}
 	}

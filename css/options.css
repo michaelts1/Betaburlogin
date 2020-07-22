@@ -2,13 +2,29 @@
 :root {
 	--body-font-size: 13pt;
 	--tooltip-background-color: FloralWhite;
+	--background-color: Beige;
+	--input-border-color: Silver;
+	--input-text-color: LightSeaGreen;
+	--text-color: DarkSlateGray;
+	--button-color: DarkGray;
 }
 
 body {
 	font-family: sans-serif;
 	font-size: var(--body-font-size);
-	background-color: Beige;
-	color: DarkSlateGray;
+	background-color: var(--background-color);
+	color: var(--text-color);
+}
+
+#top {
+	position: fixed;
+	width: 100%;
+	top: 0;
+	left: 0;
+	margin: 0;
+	z-index: 99;
+	padding: 0.4em 0;
+	background-color: wheat;
 }
 
 h1, h2 {
@@ -25,7 +41,51 @@ h2 {
 	font-size: 15pt;
 }
 
-#optionsPage {
+input, textarea {
+	font-size: 11pt;
+	padding: 0.5em;
+	border: 1px solid var(--input-border-color);
+	background-color: var(--background-color);
+	color: var(--input-text-color);
+	border-radius: 0.4em;
+}
+
+textarea {
+	color: DarkCyan;
+	background-color: var(--background-color);
+}
+
+
+select {
+	font-size: 11pt;
+	padding: 0.5em;
+	border: 1px solid var(--input-border-color);
+	background-color: var(--background-color);
+	color: var(--input-text-color);
+	border-radius: 0.4em;
+}
+
+.containerIcon {
+	width: 1em;
+	height: 1em;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+[name=containers], #containersAuto {
+	vertical-align: middle;
+}
+
+#containersAuto:checked ~ #containers {
+	display: none;
+}
+
+#CSSdiv {
+	margin: 0.5em;
+	display: grid;
+}
+
+.optionsPage {
 	padding-top: 10px;
 }
 
@@ -36,36 +96,24 @@ h2 {
 	width: 1.25em;
 	height: 1.25em;
 	cursor: pointer;
-	
 }
 
 #dailyCrystals + div {
 	text-align: center;
-	color: LightSeaGreen;
+	color: var(--input-text-color);
 }
 
 #formButtonsOutput {
-	color: LightSeaGreen;
+	color: var(--input-text-color);
 	text-align: center;
 }
 
-input {
-	font-size: 11pt;
-	padding: 0.5em;
-	border: 1px solid silver;
-	background-color: Beige;
-	color: LightSeaGreen;
-	border-radius: 0.4em;
+#wireFrequency {
+	padding: 0.25em 0.1em 0.25em 0.25em;
 }
 
-select {
-	margin: 0.25em;
-	font-size: 11pt;
-	padding: 0.5em;
-	border: 1px solid silver;
-	background-color: Beige;
-	color: LightSeaGreen;
-	border-radius: 0.4em;
+#dailyCrystals {
+	margin-top: 0.5em;
 }
 
 /* tables */
@@ -83,12 +131,12 @@ td {
 	padding: 0.25em;
 }
 
-#optionsPage td {
+.optionsPage td {
 	height: 2.7em;
 	padding: 0 0.5em
 }
 
-#optionsPage table {
+.optionsPage table {
 	table-layout: fixed;
 	width: 26em;
 	margin-top: 2em;
@@ -101,14 +149,23 @@ td {
 #col_2_2 {width: 45%;}
 #col_2_3 {width: 45%;}
 
-#col_3_1 {width: 43%;}
-#col_3_2 {width: 57%;}
+#col_3_1 {width: 42%;}
+#col_3_2 {width: 58%;}
 
-#col_4_1 {width: 42%;}
-#col_4_2 {width: 58%;}
+#col_4_1 {width: 43%;}
+#col_4_2 {width: 57%;}
+
+#col_5_1 {width: 40%;}
+#col_5_2 {width: 60%;}
 
 .checkboxtd {
 	text-align: center;
+}
+
+#containerstr td {
+	vertical-align: top;
+	height: auto;
+	padding: 0.5em;
 }
 
 /* tooltips */
@@ -144,12 +201,13 @@ td {
 	white-space: pre-line;
 	content: attr(data-tooltip);
 	position: absolute;
-	bottom: 1.75em;
+	top: 1.75em;
 	left: -127.5px;
+	z-index: 98;
 	min-width: 255px;
 	padding: 0.5em;
 	background-color: var(--tooltip-background-color);;
-	border: 1px silver solid;
+	border: 1px var(--input-border-color) solid;
 	border-radius: 0.75em;
 }
 
@@ -175,7 +233,9 @@ td {
 }
 
 /* buttons */
+
 #formButtons {
+	margin-top: 5em;
 	display: flex;
 	justify-content: center;
 }
@@ -187,8 +247,8 @@ button {
 	height: 40px;
 	width: 150px;
 	margin: 2em 0.5em 0;
-	border: 2px solid DarkGray;
-	color: DarkGray;
+	border: 2px solid var(--button-color);
+	color: var(--button-color);
 	background-color: OldLace;
 	align-items: center;
 	justify-content: center;
@@ -202,26 +262,59 @@ button span {
 }
 
 button:hover span {
-	color: DarkSlateGray;
+	color: var(--text-color);
 }
 
-#circle {
+.circle {
 	width: 0%;
 	height: 0%;
 	opacity: 0;
 	line-height: 40px;
 	border-radius: 50%;
-	background: DarkGray;
+	background: var(--button-color);
 	position: absolute;
 	transition: all .5s ease-Out;
 	top: 20px;
 	left: 70px;
 }
 
-button:hover #circle {
+button:hover .circle {
 	width: 200%;
 	height: 500%;
 	opacity: 1;
 	top: -70px;
 	left: -70px;
+}
+
+#resetCSS {
+	margin: 0.5em 0.5em 0;
+	width: auto;
+}
+
+/* tabs */
+#tabsButtons {
+	display: flex;
+	justify-content: center;
+	margin-left: -4em;
+}
+.tabButton {
+	padding: 0 2em;
+	text-align: center;
+	cursor: pointer;
+	font-size: 13pt;
+	border-style: solid;
+	border-width: 0 2px 0 0;
+	border-color: white
+}
+
+.tabButton.selected {
+	color: var(--button-color);
+}
+
+.tab {
+	display: none;
+}
+
+.tab.selected {
+	display: table;
 }

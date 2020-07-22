@@ -6,11 +6,33 @@
 		<link rel="stylesheet" type="text/css" href="../css/options.css">
 		<script src="../js/jquery-3.4.1.min.js"></script>
 	</head>
-	<body id="optionsPage">
-		<h1>Betabur Login Options Page</h1>
+	<body class="optionsPage">
+		<div id="top">
+			<h1>Betabur Login Options Page</h1>
+			<div id="tabsButtons">
+				<div class="tabButton"></div>
+				<div id="generalTabButton" class="tabButton selected">General</div>
+				<div id="wireTabButton" class="tabButton">Currency Send</div>
+				<div id="eventTabButton" class="tabButton">Auto Event</div>
+				<div id="altTabButton" class="tabButton">Alts</div>
+				<div id="advancedTabButton" class="tabButton">Advanced</div>
+			</div>
+		</div>
+
+		<div id="formButtons">
+			<button id="saveChanges" type="button">
+				<div class="circle"></div>
+				<span>Save Changes</span>
+			</button>
+			<button id="cancelChanges" type="button">
+				<div class="circle"></div>
+				<span>Cancel Changes</span>
+			</button>
+		</div>
+		<p id="formButtonsOutput"></p>
 
 		<form id="settings">
-			<table>
+			<table id="general" class="tab selected">
 				<colgroup>
 					<col id="col_1_1"> <!--first column in the first table-->
 					<col id="col_1_2"> <!--second column in the first table-->
@@ -25,7 +47,7 @@
 				<tbody>
 					<tr>
 						<td>
-							Main Login Name<span class="required" data-tooltip="3-20 characters. Letters and numbers. Case sensitive.">*</span>
+							<label for="mainAccountName">Main Login Name<span class="required" data-tooltip="3-20 characters. Letters and numbers. Case sensitive.">*</span></label>
 							<span class="info" aria-tooltip="Info" data-tooltip="The name you use to log in with your main account.&#13;&#10;Might be different than your in-game username."></span>
 						</td>
 						<td>
@@ -34,7 +56,7 @@
 					</tr>
 					<tr>
 						<td>
-							Main In-Game Name<span class="required" data-tooltip="3-20 characters. Only letters. Case sensitive.">*</span>
+							<label for="mainUsername">Main In-Game Name<span class="required" data-tooltip="3-20 characters. Only letters. Case sensitive.">*</span></label>
 							<span class="info" aria-tooltip="Info" data-tooltip="Your main account in-game username.&#13;&#10;Might be different than the name you use to log in."></span>
 						</td>
 						<td>
@@ -43,7 +65,7 @@
 					</tr>
 					<tr>
 						<td>
-							Login Password<span class="required" data-tooltip="6+ characters. Case sensitive.">*</span>
+							<label for="loginPass">Login Password<span class="required" data-tooltip="6+ characters. Case sensitive.">*</span></label>
 							<span class="warning" aria-tooltip="warning" data-tooltip="Warning:&#13;&#10;The password is saved in plain text!&#13;&#10;Make sure it's different from passwords you use on other services, including live!"></span>
 						</td>
 						<td>
@@ -52,7 +74,7 @@
 					</tr>
 					<tr>
 						<td>
-							Minimum Crafting Queue
+							<label for="minCraftingQueue">Minimum Crafting Queue</label>
 							<span class="info" aria-tooltip="Info" data-tooltip="If there are less items in the queue than this number, it will be automatically filled."></span>
 						</td>
 						<td>
@@ -61,7 +83,7 @@
 					</tr>
 					<tr>
 						<td>
-							Daily Crystals Amount
+							<label for="dailyCrystals">Daily Crystals Amount</label>
 							<span class="info" aria-tooltip="Info" data-tooltip="How many crystals to buy every day."></span>
 						</td>
 						<td>
@@ -71,8 +93,8 @@
 					</tr>
 				</tbody>
 			</table>
-			
-			<table>
+
+			<table id="wire" class="tab">
 				<colgroup>
 					<col id="col_2_1">
 					<col id="col_2_2">
@@ -83,9 +105,9 @@
 						<th colspan=3>
 							<h2>
 								Currency Send Settings
-								<span class="titleInfo" aria-tooltip="Info" data-tooltip="Currency sending controls.&#13;&#10;Left column: Enable or disable sending of the currency.&#13;&#10;Middle column: Name of the currency.&#13;&#10;Right column: Amount of said currency to be kept when sending this currency.&#13;&#10;&#13;&#10;For example, if you marked the checkbox on the &quot;Crystals&quot; row, and typed &quot;100&quot; in the input box to the right, the alts will send their crystals when requested, but will always keep at least 100 crystals on them."></span>
+								<span class="titleInfo" aria-tooltip="Info" data-tooltip="Currency sending controls.&#13;&#10;Left column: Enable or disable sending of the currency.&#13;&#10;Middle column: Name of the currency.&#13;&#10;Right column: Amount of said currency to be kept when sending this currency.&#13;&#10;&#13;&#10;For example, if you marked the checkbox on the &quot;Crystals&quot; row, and typed &quot;100&quot; in the input box to the right, the alts will send their crystals, but will always keep at least 100 crystals on them."></span>
 							</h2>
-							
+
 						</th>
 					</tr>
 					<tr>
@@ -93,7 +115,13 @@
 							<input id="autoWire" type="checkbox">
 						</td>
 						<td colspan="2">
-							<label for="autoWire">Auto Wire to Main Account Every Hour</label>
+							<label for="autoWire">Auto Wire to Main Account Every</label>
+							<select id="wireFrequency">
+								<option value="1440">24 Hours</option>
+								<option value="300">5 Hours</option>
+								<option value="60" selected="selected">Hour</option>
+								<option value="5">5 Minutes</option>
+							</select>
 						</td>
 					</tr>
 					<tr>
@@ -197,21 +225,21 @@
 				</tbody>
 			</table>
 
-			<table>
+			<table id="event" class="tab">
 				<colgroup>
-					<col id="col_4_1">
-					<col id="col_4_2">
+					<col id="col_3_1">
+					<col id="col_3_2">
 				</colgroup>
 				<tbody>
 					<th colspan="2">
 						<h2>
 							Auto Event Settings
-							<span class="titleInfo" aria-tooltip="Info" data-tooltip="Auto event controls.&#13;&#10;Enter the names, sperated with commas and spaces, in the input boxes corressponding to the relevant tradeskill on the right.&#13;&#10;&#13;&#10;For example, if you want your alts named &quot;altI&quot; and &quot;altII&quot; to fish in the event, enter &quot;altI, altII&quot; in the input box next to the word &quot;Fishing&quot;"></span>
+							<span class="titleInfo" aria-tooltip="Info" data-tooltip="Auto event controls.&#13;&#10;Enter the names, sperated with commas and spaces, in the input boxes to the right of the corresponding tradeskill.&#13;&#10;&#13;&#10;For example, if you want your alts named &quot;altI&quot; and &quot;altII&quot; to fish in the event, enter &quot;altI, altII&quot; in the input box next to the word &quot;Fishing&quot;"></span>
 						</h2>
 					</th>
 					<tr>
 						<td>
-							Fishing
+							<label for="fishing">Fishing</label>
 						</td>
 						<td>
 							<input id="fishing" pattern="^[A-z\d, ]{3,}$" placeholder="Fishing" size="24">
@@ -219,7 +247,7 @@
 					</tr>
 					<tr>
 						<td>
-							Woodcutting
+							<label for="woodcutting">Woodcutting</label>
 						</td>
 						<td>
 							<input id="woodcutting" pattern="^[A-z\d, ]{3,}$" placeholder="Woodcutting" size="24">
@@ -227,7 +255,7 @@
 					</tr>
 					<tr>
 						<td>
-							Mining
+							<label for="mining">Mining</label>
 						</td>
 						<td>
 							<input id="mining" pattern="^[A-z\d, ]{3,}$" placeholder="Mining" size="24">
@@ -235,7 +263,7 @@
 					</tr>
 					<tr>
 						<td>
-							Stonecutting
+							<label for="stonecutting">Stonecutting</label>
 						</td>
 						<td>
 							<input id="stonecutting" pattern="^[A-z\d, ]{3,}$" placeholder="Stonecutting" size="24">
@@ -243,7 +271,7 @@
 					</tr>
 					<tr>
 						<td>
-							Crafting
+							<label for="crafting">Crafting</label>
 						</td>
 						<td>
 							<input id="crafting" pattern="^[A-z\d, ]{3,}$" placeholder="Crafting" size="24">
@@ -251,7 +279,7 @@
 					</tr>
 					<tr>
 						<td>
-							Carving
+							<label for="carving">Carving</label>
 						</td>
 						<td>
 							<input id="carving" pattern="^[A-z\d, ]{3,20}$" placeholder="Carving" size="24">
@@ -260,10 +288,10 @@
 				</tbody>
 			</table>
 
-			<table>
+			<table id="alt" class="tab">
 				<colgroup>
-					<col id="col_3_1">
-					<col id="col_3_2">
+					<col id="col_4_1">
+					<col id="col_4_2">
 				</colgroup>
 				<tbody>
 					<tr>
@@ -273,21 +301,20 @@
 					</tr>
 					<tr>
 						<td>
-							Name Pattern<span class="required">*</span>
+							<label for="altNameType">Name Pattern<span class="required">*</span></label>
 							<span class="info" aria-tooltip="Info" data-tooltip="The name pattern for your alts.&#13;&#10Examples:&#13;&#10Roman Numerals Upper Case: &quot;altI&quot; and &quot;altII&quot;.&#13;&#10Roman Numerals Lower Case: &quot;alti&quot; and &quot;altii&quot;.&#13;&#10Unique Names: &quot;altCraft&quot; and &quot;testAccount&quot;."></span>
 						</td>
 						<td>
 							<select id="altNameType" required>
 								<option value="" selected hidden>Select Name Pattern</option>
-								<option value="romanCaps">Roman Numerals Upper Case</option>
-								<option value="roman">Roman Numerals Lower Case</option>
+								<option value="roman">Roman Numerals</option>
 								<option value="unique">Unique Names</option>
 							</select>
 						</td>
 					</tr>
 					<tr id="number">
 						<td>
-							Number of Alts
+							<label for="altsNumber">Number of Alts</label>
 							<span class="info" aria-tooltip="Info" data-tooltip="Number of alts, not including main account."></span>
 						</td>
 						<td>
@@ -296,7 +323,7 @@
 					</tr>
 					<tr id="altsBaseName">
 						<td>
-							Alts Base Name
+							<label for="altName">Alts Base Name</label>
 							<span class="info" aria-tooltip="Info" data-tooltip="The base name for your alts.&#13;&#10;For example, if your alts are &quot;alti&quot; and &quot;altii&quot;, then the base name is &quot;alt&quot;."></span>
 						</td>
 						<td>
@@ -305,7 +332,7 @@
 					</tr>
 					<tr id="altsUniqueNames">
 						<td>
-							Unique Names List
+							<label for="namesList">Unique Names List</label>
 							<span class="info" aria-tooltip="Info" data-tooltip="List of the names for your alts, sperated by commas and spaces.&#13;&#10;Example: &quot;altFish, altTwo, WeirdName, myAlt&quot;.&#13;&#10;Case sensitive."></span>
 						</td>
 						<td>
@@ -314,19 +341,58 @@
 					</tr>
 				</tbody>
 			</table>
-		</form>
 
-		<div id="formButtons">
-			<button id="saveChanges" type="button">
-				<div id="circle"></div>
-				<span>Save Changes</span>
-			</button>
-			<button id="cancelChanges" type="button">
-				<div id="circle"></div>
-				<span>Cancel Changes</span>
-			</button>
-		</div>
-		<p id="formButtonsOutput"></p>
+			<table id="advanced" class="tab">
+				<colgroup>
+					<col id="col_5_1">
+					<col id="col_5_2">
+				</colgroup>
+				<thead>
+					<tr>
+						<th colspan="2">
+							<h2>Advanced Settings</h2>
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>
+							<label for="verbose">Verbose Logging</label>
+							<span class="info" aria-tooltip="Info" data-tooltip="If checked, the addon will log more things to the console.&#13;&#10;This is useful for debugging."></span>
+						</td>
+						<td>
+							<input id="verbose" type="checkbox" size="15">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="customCSS">CSS Styles</label>
+							<span class="info" aria-tooltip="Info" data-tooltip="Betaburlogin will add some CSS code to make the game look better. If you want, you can change that code here."></span>
+						</td>
+						<td>
+							<div id="CSSdiv">
+								<textarea id="customCSS" spellcheck="false" autocomplete="off" rows="10" wrap="off" cols="22"></textarea>
+								<button id="resetCSS" type="button">
+									<div class="circle"></div>
+									<span>Reset to default values</span>
+								</button>
+							</div>
+						</td>
+					</tr>
+					<tr id="containerstr">
+						<td>
+							Containers
+							<span class="info" aria-tooltip="Info" data-tooltip="You can choose which containers the addon will use here.&#13;&#10;Auto means that the first n containers will be used, where n is the number of alts you have."></span>
+						</td>
+						<td>
+							<input id="containersAuto" type="checkbox">
+							<label for="containersAuto">Auto</label>
+							<div id="containers"></div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
 
 		<script src="../js/options.js"></script>
 	</body>
