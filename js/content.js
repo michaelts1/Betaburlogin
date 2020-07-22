@@ -46,7 +46,7 @@ async function betaLogin() {
 
 	port = browser.runtime.connect({name: "login"})
 	port.onMessage.addListener(message => {
-		if (verbose) log(`Recieved message with text: ${message.text}`)
+		if (verbose) log(`Received message with text: ${message.text}`)
 		if (message.text === "login") login(message.username, message.password)
 	})
 
@@ -107,7 +107,7 @@ async function betaGame() {
 	//connect to background script:
 	port = browser.runtime.connect({name: username})
 	port.onMessage.addListener(message => {
-		if (vars.verbose) log("Recieved message:", message)
+		if (vars.verbose) log("Received message:", message)
 
 		if (message.text === "send currency") wire(message.recipient)
 		if (message.text === "jump mobs") jumpMobs(message.number)
@@ -532,7 +532,7 @@ $(document).on("roa-ws:all", function(event, data){
 	let eventID         = null
 	let mainEvent       = false
 	let eventInProgress = false
-	let motdRecieved    = false
+	let motdReceived    = false
 	let carvingChanged  = false
 
 	//const CHANNEL = 3203 //debugging channel
@@ -613,7 +613,7 @@ $(document).on("roa-ws:all", function(event, data){
 				await delay(vars.startActionsDelay)
 				// wait to see if the message is recieved together with a message of the day,
 				// which means it was only sent due to a chat reconnection, and we should not join the event.
-				if (motdRecieved === false) {
+				if (motdReceived === false) {
 					joinEvent(data.m, data.m_id)
 				}
 			}
@@ -622,9 +622,9 @@ $(document).on("roa-ws:all", function(event, data){
 
 	//avoid joining events after chat reconnections
 	$(document).on("roa-ws:motd", async () => {
-		motdRecieved = true
+		motdReceived = true
 		await delay(vars.startActionsDelay * 5)
-		motdRecieved = false
+		motdReceived = false
 	})
 
 	//custom style:
