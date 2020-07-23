@@ -1,76 +1,127 @@
-/* general */
+/* General */
+
 :root {
-	--body-font-size: 13pt;
-	--tooltip-background-color: FloralWhite;
 	--background-color: Beige;
+	--body-font-size: 13pt;
+	--button-color: DarkGray;
 	--input-border-color: Silver;
 	--input-text-color: LightSeaGreen;
 	--text-color: DarkSlateGray;
-	--button-color: DarkGray;
+	--tooltip-background-color: FloralWhite;
 }
 
 body {
+	background: var(--background-color);
+	color: var(--text-color);
 	font-family: sans-serif;
 	font-size: var(--body-font-size);
-	background-color: var(--background-color);
-	color: var(--text-color);
 }
 
-#top {
-	position: fixed;
-	width: 100%;
-	top: 0;
+.optionsPage {
+	padding: 10px 0 0;
+}
+
+/* Appears in browser_action.html */
+#settingsIcon {
+	cursor: pointer;
+	float: right;
+	height: 1.25em;
+	position: relative;
+	right: .5em;
+	width: 1.25em;
+}
+
+/* Header */
+
+header {
+	background: wheat;
 	left: 0;
 	margin: 0;
+	padding: .4em 0;
+	position: fixed;
+	top: 0;
+	width: 100%;
 	z-index: 99;
-	padding: 0.4em 0;
-	background-color: wheat;
 }
 
-h1, th {
-	font-family: cursive;
-	color: MediumSeaGreen;
+#tabsButtons {
+	display: flex;
+	justify-content: center;
+	margin: 0 0 0 -4em;
+}
+.tabButton {
+	border-color: white;
+	border-style: solid;
+	border-width: 0 2px 0 0;
+	cursor: pointer;
+	font-size: 13pt;
+	padding: 0 2em;
 	text-align: center;
-	font-size: 20pt;
 }
 
+.tabButton.selected {
+	color: var(--button-color);
+}
+
+/* Form Contents */
+
+.tab {
+	display: none;
+}
+
+.tab.selected {
+	display: table;
+}
+
+h1,
+h2,
 th {
-	padding: 0.83em 0;
-	font-size: 15pt;
+	color: MediumSeaGreen;
+	font-family: cursive;
+	font-size: 20pt;
+	text-align: center;
 }
 
-input, textarea {
-	font-size: 11pt;
-	padding: 0.5em;
+h2,
+th {
+	font-size: 15pt;
+	padding: .83em 0;
+}
+
+input,
+textarea {
+	background: var(--background-color);
+	border-radius: .4em;
 	border: 1px solid var(--input-border-color);
-	background-color: var(--background-color);
 	color: var(--input-text-color);
-	border-radius: 0.4em;
+	font-size: 11pt;
+	padding: .5em;
 }
 
 textarea {
+	background: var(--background-color);
 	color: DarkCyan;
-	background-color: var(--background-color);
 }
 
 
 select {
-	font-size: 11pt;
-	padding: 0.5em;
+	background: var(--background-color);
+	border-radius: .4em;
 	border: 1px solid var(--input-border-color);
-	background-color: var(--background-color);
 	color: var(--input-text-color);
-	border-radius: 0.4em;
+	font-size: 11pt;
+	padding: .5em;
 }
 
 .containerIcon {
-	width: 1em;
-	height: 1em;
 	display: inline-block;
+	height: 1em;
 	vertical-align: middle;
+	width: 1em;
 }
 
-[name=containers], #containersAuto {
+input[name=containers],
+#containersAuto {
 	vertical-align: middle;
 }
 
@@ -79,26 +130,13 @@ select {
 }
 
 #CSSdiv {
-	margin: 0.5em;
 	display: grid;
+	margin: .5em;
 }
 
-.optionsPage {
-	padding-top: 10px;
-}
-
-#settingsIcon {
-	position: relative;
-	float: right;
-	right: 0.5em;
-	width: 1.25em;
-	height: 1.25em;
-	cursor: pointer;
-}
-
-#dailyCrystals + div {
-	text-align: center;
+#daily-crystals-text {
 	color: var(--input-text-color);
+	text-align: center;
 }
 
 #formButtonsOutput {
@@ -107,41 +145,43 @@ select {
 }
 
 #wireFrequency {
-	padding: 0.25em 0.1em 0.25em 0.25em;
+	padding: .25em .1em .25em .25em;
 }
 
 #dailyCrystals {
-	margin-top: 0.5em;
+	margin: .5em 0 0;
 }
 
 #customCSS {
 	white-space: pre;
 }
 
-/* tables */
-table, th, td {
-	border: 2px solid LightSteelBlue;
+/* Tables Layout */
+
+table,
+th,
+td {
 	border-collapse: collapse;
+	border: 2px solid LightSteelBlue;
 }
 
 table {
-	margin-right: auto;
-	margin-left: auto;
+	margin: 0 auto;
 }
 
 td {
-	padding: 0.25em;
+	padding: .25em;
 }
 
 .optionsPage td {
 	height: 2.7em;
-	padding: 0 0.5em
+	padding: 0 .5em;
 }
 
 .optionsPage table {
+	margin: 2em auto auto;
 	table-layout: fixed;
 	width: 26em;
-	margin-top: 2em;
 }
 
 #col_1_1 {width: 60%;}
@@ -165,52 +205,52 @@ td {
 }
 
 #containerstr td {
-	vertical-align: top;
 	height: auto;
-	padding: 0.5em;
+	padding: .5em;
+	vertical-align: top;
 }
 
-/* tooltips */
+/* Tooltips */
 .warning, .info {
+	float: right;
+	height: 1.25em;
+	margin: 0 0 0 5px;
 	position: relative;
 	width: 1.25em;
-	height: 1.25em;
-	float: right;
-	margin-left: 5px;
 }
 
 .warning {
-	background-image: url("../images/warning.svg");
+	background: url('../images/warning.svg');
 }
 
 .info, .titleInfo {
-	background-image: url("../images/info.svg");
+	background: url('../images/info.svg');
 }
 
 .titleInfo {
-	position: relative;
-	width: 1.4em;
-	height: 1.4em;
 	display: inline-block;
-	vertical-align: middle;
+	font-family: sans-serif;
 	font-size: var(--body-font-size);
 	font-weight: normal;
-	font-family: sans-serif;
+	height: 1.4em;
+	position: relative;
 	text-align: left;
+	vertical-align: middle;
+	width: 1.4em;
 }
 
-.warning:hover::after, .info:hover::after, .titleInfo:hover::after,	 [data-tooltip]:hover::after{
-	white-space: pre-line;
+.warning:hover::after, .info:hover::after, .titleInfo:hover::after, .required:hover::after {
+	background: var(--tooltip-background-color);
+	border-radius: .75em;
+	border: 1px var(--input-border-color) solid;
 	content: attr(data-tooltip);
+	left: -127.5px;
+	min-width: 255px;
+	padding: .5em;
 	position: absolute;
 	top: 1.75em;
-	left: -127.5px;
+	white-space: pre-line;
 	z-index: 98;
-	min-width: 255px;
-	padding: 0.5em;
-	background-color: var(--tooltip-background-color);;
-	border: 1px var(--input-border-color) solid;
-	border-radius: 0.75em;
 }
 
 .warning:hover::after {
@@ -234,28 +274,27 @@ td {
 	color: goldenrod;
 }
 
-/* buttons */
-
+/* Buttons */
 #formButtons {
-	margin-top: 5em;
 	display: flex;
 	justify-content: center;
+	margin: 5em 0 0;
 }
 
 button {
-	font-size: var(--body-font-size);
-	cursor: pointer;
-	display: inline-flex;
-	height: 40px;
-	width: 150px;
-	margin: 2em 0.5em 0;
+	align-items: center;
+	background: OldLace;
 	border: 2px solid var(--button-color);
 	color: var(--button-color);
-	background-color: OldLace;
-	align-items: center;
+	cursor: pointer;
+	display: inline-flex;
+	font-size: var(--body-font-size);
+	height: 40px;
 	justify-content: center;
-	position: relative;
+	margin: 2em .5em 0;
 	overflow: hidden;
+	position: relative;
+	width: 150px;
 }
 
 button span {
@@ -268,55 +307,27 @@ button:hover span {
 }
 
 .circle {
-	width: 0%;
-	height: 0%;
-	opacity: 0;
-	line-height: 40px;
-	border-radius: 50%;
 	background: var(--button-color);
-	position: absolute;
-	transition: all .5s ease-Out;
-	top: 20px;
+	border-radius: 50%;
+	height: 0%;
 	left: 70px;
+	line-height: 40px;
+	opacity: 0;
+	position: absolute;
+	top: 20px;
+	transition: all .5s ease-Out;
+	width: 0%;
 }
 
 button:hover .circle {
-	width: 200%;
 	height: 500%;
+	left: -70px;
 	opacity: 1;
 	top: -70px;
-	left: -70px;
+	width: 200%;
 }
 
 #resetCSS {
-	margin: 0.5em 0.5em 0;
+	margin: .5em .5em 0;
 	width: auto;
-}
-
-/* tabs */
-#tabsButtons {
-	display: flex;
-	justify-content: center;
-	margin-left: -4em;
-}
-.tabButton {
-	padding: 0 2em;
-	text-align: center;
-	cursor: pointer;
-	font-size: 13pt;
-	border-style: solid;
-	border-width: 0 2px 0 0;
-	border-color: white
-}
-
-.tabButton.selected {
-	color: var(--button-color);
-}
-
-.tab {
-	display: none;
-}
-
-.tab.selected {
-	display: table;
 }

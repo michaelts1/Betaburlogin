@@ -7,7 +7,7 @@
 		<script src="../js/jquery-3.4.1.min.js"></script>
 	</head>
 	<body class="optionsPage">
-		<div id="top">
+		<header id="top">
 			<h1>Betabur Login Options Page</h1>
 			<div id="tabsButtons">
 				<div class="tabButton"></div>
@@ -17,7 +17,7 @@
 				<div id="altTabButton" class="tabButton">Alts</div>
 				<div id="advancedTabButton" class="tabButton">Advanced</div>
 			</div>
-		</div>
+		</header>
 
 		<div id="formButtons">
 			<button id="saveChanges" type="button">
@@ -88,7 +88,7 @@
 						</td>
 						<td>
 							<input id="dailyCrystals" pattern="^\d+$" placeholder="Crystals Amount" size=15>
-							<div>Price: <span id="dailyCrystalsPrice"></span></div>
+							<div id="daily-crystals-text">Price: <span id="dailyCrystalsPrice"></span></div>
 						</td>
 					</tr>
 				</tbody>
@@ -104,7 +104,7 @@
 					<tr>
 						<th colspan=3>
 							Currency Send Settings
-							<span class="titleInfo" aria-label="Info"></span>
+							<span class="titleInfo" aria-label="Info" data-tooltip="Currency sending controls.&#13;&#10;Left column: Enable or disable sending of the currency.&#13;&#10;Middle column: Name of the currency.&#13;&#10;Right column: Amount of said currency to be kept when sending this currency.&#13;&#10;&#13;&#10;For example, if you marked the checkbox on the &quot;Crystals&quot; row, and typed &quot;100&quot; in the input box to the right, the alts will send their crystals, but will always keep at least 100 crystals on them."></span>
 						</th>
 					</tr>
 					<tr>

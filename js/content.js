@@ -307,8 +307,8 @@ $(document).on("roa-ws:all", function(event, data){
 	}
 
 	$(window).on("message", message => {
-		let origin 	= message.originalEvent.origin
-		let data 	= message.originalEvent.data
+		let origin = message.originalEvent.origin
+		let data   = message.originalEvent.data
 		//make sure we are connecting to the right port!
 		if (origin === "https://beta.avabur.com" && data === "betabot-ws message") {
 			port2 = message.originalEvent.ports[0]

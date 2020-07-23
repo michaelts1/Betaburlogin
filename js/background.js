@@ -228,7 +228,7 @@ async function getVars() {
 			version           : VARS_VERSION,
 			startActionsDelay : 1000,
 			buttonDelay       : 500,
-			dailyCrystals	  : 50,
+			dailyCrystals     : 50,
 			minCraftingQueue  : 5,
 			altsNumber        : 0,
 			wireFrequency     : 0,
