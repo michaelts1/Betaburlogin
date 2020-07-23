@@ -7,6 +7,7 @@
  * * Wire button
  * * Auto stamina
  * * Select house build
+ * If containers are disabled, allow saving settings without setting alt settings
  * 
  *~~~Needs Testing:~~~
  */
