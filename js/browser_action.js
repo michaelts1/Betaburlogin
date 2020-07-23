@@ -9,7 +9,7 @@ async function getVars() {
 }
 
 async function toggle(data) {
-	let target = data.target.id
+	const target = data.target.id
 	vars[target] = $(`#${target}`).prop("checked")
 	await browser.storage.sync.set(vars)
 }
@@ -17,14 +17,8 @@ async function toggle(data) {
 $(getVars)
 
 $("input").on("change", toggle)
-$("#settingsIcon").click( () => {
+$("#settings-icon").click( () => {
 	browser.runtime.openOptionsPage()
 })
 
-browser.storage.onChanged.addListener(changes => {
-	for (change in Object.getOwnPropertyNames(changes)) {
-		if ( ["doQuests", "doBuildingAndHarvy", "doCraftQueue"].includes(change) ) {
-			getVars()
-		}
-	}
-})
+browser.storage.onChanged.addListener(getVars)

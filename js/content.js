@@ -10,6 +10,7 @@
  * If containers are disabled, allow saving settings without setting alt settings
  * 
  *~~~Needs Testing:~~~
+ * RoA-WS
  */
 
 "use strict"
@@ -30,7 +31,7 @@ function log(...msg) {
 }
 
 async function liveLogin() {
-	let verbose = (await browser.storage.sync.get("verbose")).verbose
+	const verbose = (await browser.storage.sync.get("verbose")).verbose
 	if (verbose) log("Starting up (Live Login)")
 
 	port = browser.runtime.connect({name: "live"})
@@ -42,7 +43,7 @@ async function liveLogin() {
 }
 
 async function betaLogin() {
-	let verbose = (await browser.storage.sync.get("verbose")).verbose
+	const verbose = (await browser.storage.sync.get("verbose")).verbose
 	if (verbose) log("Starting up (Beta Login)")
 
 	port = browser.runtime.connect({name: "login"})
@@ -70,7 +71,7 @@ async function betaLogin() {
 }
 
 async function betaGame() {
-	let port2
+	let port2           = null
 	let vars            = await browser.storage.sync.get()
 	let username        = $("#username").text()
 	let isAlt           = username !== vars.mainUsername
@@ -182,8 +183,8 @@ async function betaGame() {
 		}
 		$("#betabotMobJumpButton").click(() => {
 			//:selected won't work here, since we want the last monster won, not the currently selected mob (do we?)
-			let number = parseInt($("#enemyList>option:selected"/*[selected]"*/).val()) + parseInt($("#betabotMobJumpNumber").val())
-			let maxNumber = parseInt($(`#enemyList>option:last-child`).val())
+			const number = parseInt($("#enemyList>option:selected"/*[selected]"*/).val()) + parseInt($("#betabotMobJumpNumber").val())
+			const maxNumber = parseInt($(`#enemyList>option:last-child`).val())
 			if (number > maxNumber) {
 				$("#areaName").text("the mob you chose is not in the list!")
 				return
@@ -199,7 +200,7 @@ async function betaGame() {
 					$("#gemSpawnConfirm").after(`<input id="betabotSpawnGem" type="button" style="padding:6.5px" value="Spawn For All Alts">`)
 				}
 				$("#betabotSpawnGem").on("click", () => {
-					let msg = {
+					const msg = {
 						text  : "spawnGem",
 						tier  : parseInt($("#spawnGemLevel").val()),
 						type  : parseInt($("#gemSpawnType").val()),
@@ -220,7 +221,7 @@ async function betaGame() {
 			if (vars.verbose) log("Appended username to room name")
 		}
 	}
-	let keepUsernameVisible = new MutationObserver(appendName)
+	const keepUsernameVisible = new MutationObserver(appendName)
 	keepUsernameVisible.observe($("#roomName")[0], { attributes: true, childList: true, subtree: true })
 	appendName()
 
@@ -231,11 +232,11 @@ async function betaGame() {
 
 		let sendMessage = `/wire ${target}`
 
-		for (let currency of vars.currencySend) {
+		for (const currency of vars.currencySend) {
 			if (currency.send === false) continue
 
-			let amount       = $(`.${currency.name}`).attr("title").replace(/,/g, "")
-			let sellable     = $(`.${currency.name}`).attr("data-personal").replace(/,/g, "")
+			const amount       = $(`.${currency.name}`).attr("title").replace(/,/g, "")
+			const sellable     = $(`.${currency.name}`).attr("data-personal").replace(/,/g, "")
 			let amountToSend = 0
 
 			//keep this amount
@@ -267,9 +268,10 @@ async function betaGame() {
 	//re-inject the script
 	if ($("#betabot-ws")[0] !== undefined) $("#betabot-ws").remove()
 
-	let elm = document.createElement("script")
-	elm.innerHTML = `
-//create a new channel
+	//using an IIFE to avoid polluting the global space
+	(function() {
+		const elm = document.createElement("script")
+		elm.innerHTML = `
 const channel = new MessageChannel()
 //send message to content script (do we even need to send port2?)
 window.postMessage("betabot-ws message", "*", [channel.port2])
@@ -277,44 +279,47 @@ window.postMessage("betabot-ws message", "*", [channel.port2])
 $(document).on("roa-ws:all", function(event, data){
 	channel.port1.postMessage(JSON.parse(data))
 })`
-	$(elm).attr("id", "betabot-ws")
-	document.head.appendChild(elm)
+		$(elm).attr("id", "betabot-ws")
+		document.head.appendChild(elm)
 
-	function roaWS(event) {
-		let data = event.data
-		let etype = "roa-ws:"
-		for (let i = 0; i < data.length; i++) {
-			etype = "roa-ws:"
-			let etypepage = ""
-			let item = data[i]
-			if (item.hasOwnProperty("type")) {
-				etype = etype + item.type
-				// in case its a "page" type message create additional event
-				// e.g.: "roa-ws:page:boosts", "roa-ws:page:clans" or "roa-ws:page:settings_milestones" etc.
-				if (item.type === "page" && item.hasOwnProperty("page") && "string" === typeof item.page) {
-					etypepage = etype + ":" + item.page
+		function roaWS(event) {
+			const data = event.data
+			let etype = "roa-ws:"
+			for (let i = 0; i < data.length; i++) {
+				const item = data[i]
+				let etypepage = ""
+				etype = "roa-ws:"
+				if (item.hasOwnProperty("type")) {
+					etype = etype + item.type
+					// in case its a "page" type message create additional event
+					// e.g.: "roa-ws:page:boosts", "roa-ws:page:clans" or "roa-ws:page:settings_milestones" etc.
+					if (item.type === "page" && item.hasOwnProperty("page") && "string" === typeof item.page) {
+						etypepage = etype + ":" + item.page
+					}
 				}
-			} else {
-				etype = etype + "general"
-			}
+				else {
+					etype = etype + "general"
+				}
 
-			$(document).trigger(etype, item)
-			if (etypepage.length > 0) {
-				$(document).trigger(etypepage, item)
+				$(document).trigger(etype, item)
+				if (etypepage.length > 0) {
+					$(document).trigger(etypepage, item)
+				}
 			}
+			$(document).trigger("roa-ws:all", data)
 		}
-		$(document).trigger("roa-ws:all", data)
-	}
 
-	$(window).on("message", message => {
-		let origin = message.originalEvent.origin
-		let data   = message.originalEvent.data
-		//make sure we are connecting to the right port!
-		if (origin === "https://beta.avabur.com" && data === "betabot-ws message") {
-			port2 = message.originalEvent.ports[0]
-			port2.onmessage = roaWS
-		}
-	})
+		$(window).on("message", message => {
+			const origin = message.originalEvent.origin
+			const data = message.originalEvent.data
+			//make sure we are connecting to the right port
+			//no need to be absolutely sure about it since we don't send sensitve data
+			if (origin === "https://beta.avabur.com" && data === "betabot-ws message") {
+				port2 = message.originalEvent.ports[0]
+				port2.onmessage = roaWS
+			}
+		})
+	})()
 
 	//Betabot based on @Batosi's bot:
 
@@ -372,7 +377,7 @@ $(document).on("roa-ws:all", function(event, data){
 	setInterval(autoBuyCrys, 1000 * 60 * 60 * 24) //once a day
 
 	//quests, house, harvestron, and crafting
-	let finishQuest = () => {
+	const finishQuest = () => {
 		setTimeout(() => {
 			if (vars.verbose) log(`Completing a ${vars.questCompleting} quest`)
 			$(`input.completeQuest[data-questtype=${vars.questCompleting}]`).click() //complete the quest
@@ -392,10 +397,10 @@ $(document).on("roa-ws:all", function(event, data){
 		}, vars.startActionsDelay)
 	}
 
-	let selectBuild = () => {
+	const selectBuild = () => {
 		if (vars.verbose) log("Selecting build")
 		setTimeout(() => {
-			let itemId = parseInt($("#itemId").val())
+			const itemId = parseInt($("#itemId").val())
 			if ($("#customBuild").is(":checked") && itemId > 0) { //if a custom build is specified, upgrade it
 				if (vars.verbose) log(`Upgrading custom item with id ${itemId}`)
 				$(document).one("roa-ws:page:house_all_builds", itemId, customBuild)
@@ -414,14 +419,14 @@ $(document).on("roa-ws:all", function(event, data){
 		}, vars.startActionsDelay)
 	}
 
-	let customBuild = event => {
+	const customBuild = event => {
 		$(document).one("roa-ws:page:house_room_item", upgradeItem)
 		setTimeout(() => {
 			$(`#modal2Content a[data-itemtype=${event.data}]`)[0].click()
 		}, vars.buttonDelay)
 	}
 
-	let buildItem = () => {
+	const buildItem = () => {
 		if (vars.verbose) log("Building a new item")
 		setTimeout(() => {
 			$(document).one("roa-ws:page:house_build_room_item", itemBuilding)
@@ -429,7 +434,7 @@ $(document).on("roa-ws:all", function(event, data){
 		}, vars.startActionsDelay)
 	}
 
-	let upgradeItem = () => {
+	const upgradeItem = () => {
 		setTimeout(() => {
 			if ($("#houseRoomItemUpgradeTier").is(":visible")) { //if tier upgrade is available, upgrade it
 				if (vars.verbose) log("Upgrading item tier")
@@ -443,7 +448,7 @@ $(document).on("roa-ws:all", function(event, data){
 		}, vars.startActionsDelay)
 	}
 
-	let itemBuilding = () => {
+	const itemBuilding = () => {
 		//$("#confirmOverlay > a.red").click() //if there is confirmation layer, close it
 		setTimeout(() => {
 			vars.actionsPending = false
@@ -451,13 +456,13 @@ $(document).on("roa-ws:all", function(event, data){
 		}, vars.startActionsDelay)
 	}
 
-	let startHarvestron = () => {
+	const startHarvestron = () => {
 		if (vars.verbose) log("Starting Harvestron job")
 		$("#houseHarvestingJobStart").click()
 		setTimeout(itemBuilding, vars.buttonDelay)
 	}
 
-	let checkCraftingQueue = (event, data) => {
+	const checkCraftingQueue = (event, data) => {
 		if (vars.actionsPending || !vars.doCraftQueue) return
 
 		if (data.results.a.cq < vars.minCraftingQueue) {
@@ -482,7 +487,7 @@ $(document).on("roa-ws:all", function(event, data){
 	}
 
 	//check action results for needed actions
-	let checkResults = (event, data) => {
+	const checkResults = (event, data) => {
 		data = data.results.p
 
 		if (data.autos_remaining < 5 && !betabotCooldown) { //Stamina
@@ -555,7 +560,7 @@ $(document).on("roa-ws:all", function(event, data){
 	}
 
 	function getTrade() {
-		for (let trade of Object.keys(vars.tradesList)) {
+		for (const trade of Object.keys(vars.tradesList)) {
 			if (vars.tradesList[trade].includes(username)) {
 				return trade
 			}
@@ -564,8 +569,8 @@ $(document).on("roa-ws:all", function(event, data){
 	}
 
 	function changeTrade() {
-		let time = $("#eventCountdown")[0].innerText
-		let carvingTier = $("#currentBossCarvingTier")[0].innerText
+		const time = $("#eventCountdown")[0].innerText
+		const carvingTier = $("#currentBossCarvingTier")[0].innerText
 
 		if (carvingTier > 2500 && !carvingChanged && !mainEvent) {
 			if (vars.verbose) log("Attacking event boss (carving tier)")
@@ -630,7 +635,7 @@ $(document).on("roa-ws:all", function(event, data){
 
 	//custom style:
 	if ($("#betabot-css")[0] === undefined) {
-		let elm = document.createElement("link");
+		const elm = document.createElement("link");
 		elm.href = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` //decode css code into base64 and use it as a link to avoid code injection
 		elm.type = "text/css"
 		elm.rel  = "stylesheet"

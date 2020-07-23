@@ -17,12 +17,12 @@ body {
 	font-size: var(--body-font-size);
 }
 
-.optionsPage {
+.options-page {
 	padding: 10px 0 0;
 }
 
 /* Appears in browser_action.html */
-#settingsIcon {
+#settings-icon {
 	cursor: pointer;
 	float: right;
 	height: 1.25em;
@@ -44,12 +44,12 @@ header {
 	z-index: 99;
 }
 
-#tabsButtons {
+#tabs-buttons {
 	display: flex;
 	justify-content: center;
 	margin: 0 0 0 -4em;
 }
-.tabButton {
+.tab-button {
 	border-color: white;
 	border-style: solid;
 	border-width: 0 2px 0 0;
@@ -59,7 +59,7 @@ header {
 	text-align: center;
 }
 
-.tabButton.selected {
+.tab-button.selected {
 	color: var(--button-color);
 }
 
@@ -113,7 +113,7 @@ select {
 	padding: .5em;
 }
 
-.containerIcon {
+.container-icon {
 	display: inline-block;
 	height: 1em;
 	vertical-align: middle;
@@ -121,15 +121,15 @@ select {
 }
 
 input[name=containers],
-#containersAuto {
+#containers-auto {
 	vertical-align: middle;
 }
 
-#containersAuto:checked ~ #containers {
+#containers-auto:checked ~ #containers {
 	display: none;
 }
 
-#CSSdiv {
+#css-div {
 	display: grid;
 	margin: .5em;
 }
@@ -139,20 +139,20 @@ input[name=containers],
 	text-align: center;
 }
 
-#formButtonsOutput {
+#form-buttons-output {
 	color: var(--input-text-color);
 	text-align: center;
 }
 
-#wireFrequency {
+#wire-frequency {
 	padding: .25em .1em .25em .25em;
 }
 
-#dailyCrystals {
+#daily-crystals {
 	margin: .5em 0 0;
 }
 
-#customCSS {
+#custom-css {
 	white-space: pre;
 }
 
@@ -173,38 +173,38 @@ td {
 	padding: .25em;
 }
 
-.optionsPage td {
+.options-page td {
 	height: 2.7em;
 	padding: 0 .5em;
 }
 
-.optionsPage table {
+.options-page table {
 	margin: 2em auto auto;
 	table-layout: fixed;
 	width: 26em;
 }
 
-#col_1_1 {width: 60%;}
-#col_1_2 {width: 40%;}
+#col-1-1 {width: 60%;}
+#col-1-2 {width: 40%;}
 
-#col_2_1 {width: 10%;}
-#col_2_2 {width: 45%;}
-#col_2_3 {width: 45%;}
+#col-2-1 {width: 10%;}
+#col-2-2 {width: 45%;}
+#col-2-3 {width: 45%;}
 
-#col_3_1 {width: 42%;}
-#col_3_2 {width: 58%;}
+#col-3-1 {width: 42%;}
+#col-3-2 {width: 58%;}
 
-#col_4_1 {width: 43%;}
-#col_4_2 {width: 57%;}
+#col-4-1 {width: 43%;}
+#col-4-2 {width: 57%;}
 
-#col_5_1 {width: 40%;}
-#col_5_2 {width: 60%;}
+#col-5-1 {width: 40%;}
+#col-5-2 {width: 60%;}
 
-.checkboxtd {
+.checkbox-td {
 	text-align: center;
 }
 
-#containerstr td {
+#containers-tr td {
 	height: auto;
 	padding: .5em;
 	vertical-align: top;
@@ -223,11 +223,11 @@ td {
 	background: url('../images/warning.svg');
 }
 
-.info, .titleInfo {
+.info, .title-info {
 	background: url('../images/info.svg');
 }
 
-.titleInfo {
+.title-info {
 	display: inline-block;
 	font-family: sans-serif;
 	font-size: var(--body-font-size);
@@ -239,7 +239,7 @@ td {
 	width: 1.4em;
 }
 
-.warning:hover::after, .info:hover::after, .titleInfo:hover::after, .required:hover::after {
+.warning:hover::after, .info:hover::after, .title-info:hover::after, .required:hover::after {
 	background: var(--tooltip-background-color);
 	border-radius: .75em;
 	border: 1px var(--input-border-color) solid;
@@ -257,7 +257,7 @@ td {
 	color: IndianRed;
 }
 
-.info:hover::after, .titleInfo:hover::after {
+.info:hover::after, .title-info:hover::after {
 	color: CadetBlue;
 }
 
@@ -275,7 +275,7 @@ td {
 }
 
 /* Buttons */
-#formButtons {
+#form-buttons {
 	display: flex;
 	justify-content: center;
 	margin: 5em 0 0;
@@ -327,7 +327,7 @@ button:hover .circle {
 	width: 200%;
 }
 
-#resetCSS {
+#reset-css {
 	margin: .5em .5em 0;
 	width: auto;
 }

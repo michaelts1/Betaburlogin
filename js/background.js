@@ -40,16 +40,18 @@ const CUSTOM_CSS =
 	line-height: 25px;
 }`
 
-let live //those will store the ports
+//these will store the ports
+let live
 let main
-let alts = []
-let logins = []
+const alts = []
+const logins = []
 
-let vars = null //this will store the settings
+//this will store the settings
+let vars = null
 
 browser.runtime.onConnect.addListener(async port => {
 	console.log(port.name, " connected")
-	let mainUsername = (await browser.storage.sync.get("mainUsername")).mainUsername
+	const mainUsername = (await browser.storage.sync.get("mainUsername")).mainUsername
 
 	//if live login
 	if (port.name === "live") {
@@ -105,19 +107,15 @@ browser.runtime.onConnect.addListener(async port => {
 			live = undefined
 		}
 		else if (port.name === "login") {
-			let index = logins.indexOf(port)
-			if (index !== -1) {
-				logins.splice(index, 1)
-			}
+			const index = logins.indexOf(port)
+			if (index !== -1) logins.splice(index, 1)
 		}
 		else if (port.name === mainUsername) {
 			main = undefined
 		}
 		else {
-			let index = alts.indexOf(port)
-			if (index !== -1) {
-				alts.splice(index, 1)
-			}
+			const index = alts.indexOf(port)
+			if (index !== -1) alts.splice(index, 1)
 		}
 		console.log(port.name, " disconnected!")
 	})
@@ -162,7 +160,7 @@ function login() {
 	if (vars.pattern === "roman") {
 		function romanize(num) {
 			if (num === 0) return ""
-			let roman = {
+			const roman = {
 				L : 50,
 				XL: 40,
 				X : 10,
@@ -172,13 +170,14 @@ function login() {
 				I : 1,
 			}
 			let str = ""
-			for (let key of Object.keys(roman)) {
-				let q = Math.floor(num / roman[key])
+			for (const key of Object.keys(roman)) {
+				const q = Math.floor(num / roman[key])
 				num -= q * roman[key]
 				str += key.repeat(q)
 			}
 			return str
 		}
+
 		sendLogin(0, vars.mainAccount)
 		for (let i = 1; i <= vars.altsNumber; i++) {
 			sendLogin(i, vars.altBaseName+romanize(i))
@@ -193,7 +192,7 @@ function login() {
 
 //send message to alts:
 function sendMessage(message, users=alts.concat(main)) {
-	for (let user of users) {
+	for (const user of users) {
 		user.postMessage(message)
 	}
 }
@@ -352,7 +351,7 @@ async function updateVars() {
 		}
 	}
 	if (vars.version < 5) {
-		for (let trade of ["food", "wood", "iron", "stone"]) {
+		for (const trade of ["food", "wood", "iron", "stone"]) {
 			vars.currencySend.push({
 				name : trade,
 				send : true,
@@ -396,21 +395,21 @@ browser.storage.onChanged.addListener(changes => {
 		if (object1 === object2) return true
 		if (!(object1 instanceof Object) || !(object2 instanceof Object)) return false
 		if (object1.constructor !== object2.constructor) return false
-		for (let p in object1) {
+		for (const p in object1) {
 			if (!object1.hasOwnProperty(p)) continue
 			if (!object2.hasOwnProperty(p)) return false
 			if (object1[p] === object2[p]) continue
 			if (typeof(object1[p]) !== "object") return false
 			if (!objectEquals(object1[p], object2[p])) return false
 		}
-		for (let p in object2) {
+		for (const p in object2) {
 			if (object2.hasOwnProperty(p) && !object1.hasOwnProperty(p)) return false
 		}
 		return true
 	}
 
-	let values = Object.values(changes)
-	let keys   = Object.keys(changes)
+	const values = Object.values(changes)
+	const keys   = Object.keys(changes)
 	for (let i = 0; i < Object.values(changes).length; i++) {
 		if (objectEquals(values[i].oldValue, values[i].newValue) === false) {
 			console.log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)

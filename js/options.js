@@ -3,7 +3,7 @@
 let vars = null
 
 function abbreviateNumber(num) {
-	let round = num => Math.round(num*1000)/1000
+	const round = num => Math.round(num*1000)/1000
 
 	if(num >= 1000000000000000) {
 		return round(num/1000000000000000)+"Q"
@@ -26,15 +26,15 @@ function abbreviateNumber(num) {
 function deabbreviateNumber (input) {
 	if (typeof input !== "string") return input
 
-	let regex = /^([0-9,.]+)(k|m|b|t|q)?$/gi,
-		parts = regex.exec(input),
-		numPart = parts[1],
-		scale = (parts[2] || "").toUpperCase()
+	const regex = /^([0-9,.]+)(k|m|b|t|q)?$/gi
+	const parts = regex.exec(input)
+	const numPart = parts[1]
+	const scale = (parts[2] || "").toUpperCase()
 
 	if (!scale) return input
 
-	let num = parseFloat(numPart.replace(/[^0-9.]/g, "")),
-		scales = {
+	const num = parseFloat(numPart.replace(/[^0-9.]/g, ""))
+	const scales = {
 			K: 1000,
 			M: 1000000,
 			B: 1000000000,
@@ -48,19 +48,19 @@ function deabbreviateNumber (input) {
 }
 
 function displayMessage(message, time=2500) {
-	$("#formButtonsOutput").text(message)
-	$("#formButtonsOutput").fadeIn(250)
+	$("#form-buttons-output").text(message)
+	$("#form-buttons-output").fadeIn(250)
 
 	setTimeout( () => {
-		$("#formButtonsOutput").fadeOut(750, () => {$("#formButtonsOutput").text("")} )
+		$("#form-buttons-output").fadeOut(750, () => {$("#form-buttons-output").text("")} )
 	}, time)
 }
 
 async function fillFields() {
 	vars = await browser.storage.sync.get()
 	if (browser.contextualIdentities === undefined) {
-		let disabled = ["containers", "alt", "wire"]
-		for (let table of disabled) {
+		const disabled = ["containers", "alt", "wire"]
+		for (const table of disabled) {
 			$(`#${table}`).html("This feature requires Container Tabs.<br>Please enable Container tabs in Browser Options -&gt; Tabs -&gt; Enable Container Tabs, and reload the page.")
 		}
 	}
@@ -68,29 +68,30 @@ async function fillFields() {
 		fillContainers()
 	}
 
-	$("#altName")         .val(vars.altBaseName)
-	$("#loginPass")       .val(vars.loginPassword)
-	$("#namesList")       .val(vars.namesList.join(", "))
-	$("#customCSS")       .val(vars.css.custom)
-	$("#altsNumber")      .val(vars.altsNumber)
-	$("#altNameType")     .val(vars.pattern)
-	$("#mainUsername")    .val(vars.mainUsername)
-	$("#wireFrequency")   .val(vars.wireFrequency)
-	$("#dailyCrystals")   .val(vars.dailyCrystals)
-	$("#mainAccountName") .val(vars.mainAccount)
-	$("#minCraftingQueue").val(vars.minCraftingQueue)
+	$("#alt-name")          .val(vars.altBaseName)
+	$("#login-pass")        .val(vars.loginPassword)
+	$("#name-list")         .val(vars.namesList.join(", "))
+	$("#custom-css")        .val(vars.css.custom)
+	$("#alts-number")       .val(vars.altsNumber)
+	$("#alt-name-type")     .val(vars.pattern)
+	$("#main-username")     .val(vars.mainUsername)
+	$("#wire-frequency")    .val(vars.wireFrequency)
+	$("#daily-crystals")    .val(vars.daily-crystals)
+	$("#main-account-name") .val(vars.mainAccount)
+	$("#min-crafting-queue").val(vars.minCraftingQueue)
 
 	$("#verbose").prop("checked", vars.verbose)
-	$("#autoWire").prop("checked", vars.autoWire)
-	$("#containersAuto").prop("checked", vars.containers.useAll)
+	$("#auto-wire").prop("checked", vars.autoWire)
+	$("#containers-auto").prop("checked", vars.containers.useAll)
 
-	for (let currency of vars.currencySend) {
-		$(`#${currency.name}Keep`).val(abbreviateNumber(currency.keepAmount))
-		$(`#${currency.name}Keep`).prop("title", currency.keepAmount)
-		$(`#${currency.name}Send`).prop("checked", currency.send)
+	for (const currency of vars.currencySend) {
+		const name = currency.name.replace("_", "-")
+		$(`#${name}-keep`).val(abbreviateNumber(currency.keepAmount))
+		$(`#${name}-keep`).prop("title", currency.keepAmount)
+		$(`#${name}-send`).prop("checked", currency.send)
 	}
 
-	for (let trade of Object.keys(vars.tradesList)) {
+	for (const trade of Object.keys(vars.tradesList)) {
 		$(`#${trade}`).val(vars.tradesList[trade].join(", "))
 	}
 
@@ -101,38 +102,39 @@ async function fillFields() {
 async function saveChanges() {
 	try {
 		if ($("#settings")[0].reportValidity() === false) {
-			let invalid = $(":invalid")[1], //get first invalid field
-				table = $(`table:has(#${invalid.id})`)[0].id //get containing table id
-			$(`#${table}TabButton`).click() //go to its tab
+			const invalid = $(":invalid")[1] //get first invalid field
+			const table = $(`table:has(#${invalid.id})`)[0].id //get containing table id
+			$(`#${table}-tab-button`).click() //go to its tab
 
 			console.error("Form is invalid: First invalid field found is", invalid)
 			setTimeout(() => {$("#settings")[0].reportValidity()})
 			throw new Error("Form is invalid")
 		}
 
-		vars.altBaseName       = $("#altName").val()
-		vars.loginPassword     = $("#loginPass").val()
-		vars.css.custom        = $("#customCSS").val()
-		vars.pattern           = $("#altNameType").val()
-		vars.mainUsername      = $("#mainUsername").val()
-		vars.wireFrequency     = $("#wireFrequency").val()
-		vars.mainAccount       = $("#mainAccountName").val()
-		vars.namesList         = $("#namesList").val().split(', ')
+		vars.altBaseName       = $("#alt-name").val()
+		vars.loginPassword     = $("#login-pass").val()
+		vars.css.custom        = $("#custom-css").val()
+		vars.pattern           = $("#alt-nameType").val()
+		vars.mainUsername      = $("#main-username").val()
+		vars.wireFrequency     = $("#wire-frequency").val()
+		vars.mainAccount       = $("#main-account-name").val()
+		vars.namesList         = $("#name-list").val().split(', ')
 		vars.verbose           = $("#verbose").prop("checked")
-		vars.autoWire          = $("#autoWire").prop("checked")
-		vars.containers.useAll = $("#containersAuto").prop("checked")
-		vars.altsNumber        = parseInt($("#altsNumber").val()) || 0
-		vars.dailyCrystals     = parseInt($("#dailyCrystals").val()) || 0
-		vars.minCraftingQueue  = parseInt($("#minCraftingQueue").val()) || 0
+		vars.autoWire          = $("#auto-wire").prop("checked")
+		vars.containers.useAll = $("#containers-auto").prop("checked")
+		vars.altsNumber        = parseInt($("#alts-number").val()) || 0
+		vars.dailyCrystals     = parseInt($("#daily-crystals").val()) || 0
+		vars.minCraftingQueue  = parseInt($("#min-crafting-queue").val()) || 0
 		vars.containers.list   = $("[name=containers]:checked").get().map(e => e.id) //get id's of checked containers
 
-		for (let i = 0; i < vars.currencySend.length; i++) {
-			let keepAmount = $(`#${vars.currencySend[i].name}Keep`).val() || 0
-			vars.currencySend[i].keepAmount = deabbreviateNumber(keepAmount)
-			vars.currencySend[i].send = $(`#${vars.currencySend[i].name}Send`).prop("checked")
+		for (const currency of vars.currencySend) {
+			const name = currency.name.replace("_", "-")
+			const keepAmount = $(`#${name}-keep`).val() || 0
+			currency.keepAmount = deabbreviateNumber(keepAmount)
+			currency.send = $(`#${name}-send`).prop("checked")
 		}
 
-		for (let trade of Object.keys(vars.tradesList)) {
+		for (const trade of Object.keys(vars.tradesList)) {
 			vars.tradesList[trade] = $(`#${trade}`).val().split(", ")
 		}
 
@@ -159,46 +161,46 @@ function cancelChanges() {
 }
 
 function updatePrice() {
-	let price = n => (n * (2 * 2000000 + (n - 1) * 1000000)) / 2
-	let number = parseInt($("#dailyCrystals").val())
-	$("#dailyCrystalsPrice").text(abbreviateNumber(price(number)))
-	$("#dailyCrystals + div").prop("title", Intl.NumberFormat().format(price(number)) )
+	const price = n => (n * (2 * 2000000 + (n - 1) * 1000000)) / 2
+	const number = parseInt($("#daily-crystals").val())
+	$("#daily-crystals-price").text(abbreviateNumber(price(number)))
+	$("#daily-crystals + div").prop("title", Intl.NumberFormat().format(price(number)) )
 }
 
 function displayAltFields() {
-	let value = $("#altNameType").val()
+	const value = $("#alt-name-type").val()
 	if (value === "") {
 		$("#number").hide()
-		$("#altsBaseName").hide()
-		$("#altsUniqueNames").hide()
+		$("#alts-base-name").hide()
+		$("#alts-unique-names").hide()
 	} else if (value === "roman" || value === "romanCaps") {
 		$("#number").show()
-		$("#altsBaseName").show()
-		$("#altsUniqueNames").hide()
+		$("#alts-base-name").show()
+		$("#alts-unique-names").hide()
 	} else if (value === "unique") {
 		$("#number").hide()
-		$("#altsBaseName").hide()
-		$("#altsUniqueNames").show()
+		$("#alts-base-name").hide()
+		$("#alts-unique-names").show()
 	}
 }
 
 function changeTab(event) {
-	let tabID = event.target.id.replace("TabButton", "")
+	const tabID = event.target.id.replace("-tab-button", "")
 
-	for (let tab of document.querySelectorAll(".tab")) {
+	for (const tab of document.querySelectorAll(".tab")) {
 		tab.classList.remove("selected")
 	}
 	$(`#${tabID}`)[0].classList.add("selected")
 
-	for (let button of document.querySelectorAll(`.tabButton`)) {
+	for (const button of document.querySelectorAll(`.tab-button`)) {
 		button.classList.remove("selected")
 	}
-	$(`#${tabID}TabButton`)[0].classList.add("selected")
+	$(`#${tabID}-tab-button`)[0].classList.add("selected")
 
 }
 
 function resetCSS() {
-	$("#customCSS").val(
+	$("#custom-css").val(
 `#areaContent {
 	height: 350px;
 }
@@ -211,35 +213,35 @@ function resetCSS() {
 }
 
 async function fillContainers() {
-	let containers = await browser.contextualIdentities.query({}) //get all containers
+	const containers = await browser.contextualIdentities.query({}) //get all containers
 	if (containers.length === 0) { //if there are no containers, abort
 		$("#containers").text("No containers found")
 		return
 	}
 
 	if ($("[name=containers]").length === 0) { //only add checkboxes if they don't exist already
-		for (let container of containers) {
-			let name = container.name
-			$("#containers").append(`<input id="${name}" name="containers" type="checkbox"><span id="${name}Icon" class="containerIcon"></span><label for="${name}">${name}</label><br>`)
-			$(`#${name}Icon`).css({"background-color": container.color, "mask": `url(${container.iconUrl})`, "mask-size": "100%"})
+		for (const container of containers) {
+			const name = container.name
+			$("#containers").append(`<input id="${name}" name="containers" type="checkbox"><span id="${name}-icon" class="container-icon"></span><label for="${name}">${name}</label><br>`)
+			$(`#${name}-icon`).css({"background-color": container.color, "mask": `url(${container.iconUrl})`, "mask-size": "100%"})
 		}
 	}
 
-	for (let container of vars.containers.list) { //check all containers previously saved
+	for (const container of vars.containers.list) { //check all containers previously saved
 		$(`#${container}`).prop("checked", true)
 	}
 }
 
 $(fillFields)
-$("#resetCSS").click(resetCSS)
-$(".tabButton").click(changeTab)
-$("#saveChanges").click(saveChanges)
-$("#cancelChanges").click(cancelChanges)
-$("#dailyCrystals").on("input", updatePrice)
-$("#altNameType").on("input", displayAltFields)
+$("#reset-css").click(resetCSS)
+$(".tab-button").click(changeTab)
+$("#save-changes").click(saveChanges)
+$("#cancel-changes").click(cancelChanges)
+$("#daily-crystals").on("input", updatePrice)
+$("#alt-name-type").on("input", displayAltFields)
 
 browser.storage.onChanged.addListener(changes => {
-	for (let change of Object.getOwnPropertyNames(changes)) {
+	for (const change of Object.getOwnPropertyNames(changes)) {
 		if ( ["doQuests", "doBuildingAndHarvy", "doCraftQueue"].includes(change) ) {
 			return
 		}
