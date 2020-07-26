@@ -1,6 +1,6 @@
 "use strict"
 
-const VARS_VERSION = 8
+const VARS_VERSION = 9
 const ADDON_CSS =
 `#clear-username {
 	color: yellow;
@@ -210,37 +210,45 @@ async function getVars() {
 	// If not set, create with default settings
 	if (Object.keys(vars).length === 0) {
 		vars = {
-			version           : VARS_VERSION,
-			startActionsDelay : 1000,
-			buttonDelay       : 500,
-			dailyCrystals     : 50,
-			minCraftingQueue  : 5,
-			altsNumber        : 0,
-			wireFrequency     : 0,
-			doQuests          : true,
-			doBuildingAndHarvy: true,
-			doCraftQueue      : true,
-			actionsPending    : false,
-			autoWire          : false,
-			verbose           : false,
-			questCompleting   : null,
-			mainAccount       : "",
-			mainUsername      : "",
-			loginPassword     : "",
-			pattern           : "",
-			altBaseName       : "",
-			namesList         : [],
-			containers        : {
+				version          : VARS_VERSION,
+			startActionsDelay: 1000,
+			buttonDelay      : 500,
+			dailyCrystals    : 50,
+			minCraftingQueue : 5,
+			minStamina       : 5,
+			altsNumber       : 0,
+			wireFrequency    : 0,
+			autoStamina      : true,
+			autoQuests       : true,
+			autoHouse        : true,
+			autoCraft        : true,
+			joinEvents       : true,
+			addCustomBuild   : true,
+			addUsername      : true,
+			addJumpMobs      : true,
+			addSpawnGems     : true,
+			addRequestMoney  : true,
+			actionsPending   : false,
+			autoWire         : false,
+			verbose          : false,
+			questCompleting  : null,
+			mainAccount      : "",
+			mainUsername     : "",
+			loginPassword    : "",
+			pattern          : "",
+			altBaseName      : "",
+			namesList        : [],
+			containers       : {
 				useAll: true,
 				list  : [],
 			},
-			tradesList        : {
-				fishing       : [],
-				woodcutting   : [],
-				mining        : [],
-				stonecutting  : [],
-				crafting      : [],
-				carving       : [],
+			tradesList      : {
+				fishing     : [],
+				woodcutting : [],
+				mining      : [],
+				stonecutting: [],
+				crafting    : [],
+				carving     : [],
 			},
 			css: {
 				addon : ADDON_CSS,
@@ -359,15 +367,26 @@ async function updateVars() {
 				list  : [],
 			}
 			if (vars.pattern === "romanCaps") vars.pattern = "roman" // Deprecated
+		case 9:
+			vars.autoQuests = vars.doQuests
+			vars.autoHouse  = vars.doBuildingAndHarvy
+			vars.autoCraft  = vars.doCraftQueue
+			await browser.storage.sync.remove(["doQuests", "vars.doBuildingAndHarvy", "vars.doCraftQueue",])
+			vars.minStamina      = 5
+			vars.autoStamina     = true
+			vars.joinEvents      = true
+			vars.addCustomBuild  = true
+			vars.addUsername     = true
+			vars.addJumpMobs     = true
+			vars.addSpawnGems    = true
+			vars.addRequestMoney = true
 		default:
+			vars.version = VARS_VERSION
+			if (vars.css.addon !== ADDON_CSS) {
+				vars.css.addon = ADDON_CSS
+			}
+			browser.storage.sync.set(vars)
 	}
-
-	if (vars.css.addon !== ADDON_CSS) {
-		vars.css.addon = ADDON_CSS
-	}
-
-	vars.version = VARS_VERSION
-	browser.storage.sync.set(vars)
 }
 
 browser.storage.onChanged.addListener(changes => {
@@ -393,6 +412,10 @@ browser.storage.onChanged.addListener(changes => {
 	const values = Object.values(changes)
 	const keys   = Object.keys(changes)
 	for (let i = 0; i < Object.values(changes).length; i++) {
+		if (keys[i] === "loginPassword") {
+			console.log(keys[i], "changed")
+			continue
+		}
 		if (objectEquals(values[i].oldValue, values[i].newValue) === false) {
 			console.log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
 		}

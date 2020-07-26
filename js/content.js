@@ -321,23 +321,23 @@ $(document).on("roa-ws:all", function(event, data){
 
 	// Betabot based on @Batosi's bot:
 
-	// When the user cancels a quest or harvestron, disable doQuests or doBuildingAndHarvy to avoid starting them again
+	// When the user cancels a quest or harvestron, disable autoQuests or autoHouse to avoid starting them again
 	$(document).on("roa-ws:page:quest_forfeit", () => {
 		if (vars.verbose) log("Quest forfeited. Waiting 60 seconds before checking for quests again")
-		if (vars.doQuests) {
-			vars.doQuests = false
+		if (vars.autoQuests) {
+			vars.autoQuests = false
 			setTimeout( async () => {
-				vars.doQuests = (await browser.storage.sync.get("doQuests")).doQuests
+				vars.autoQuests = (await browser.storage.sync.get("autoQuests")).autoQuests
 			}, 60*1000)
 		}
 	})
 
 	$(document).on("roa-ws:page:house_harvest_job_cancel", () => {
 		if (vars.verbose) log("Harvestron job cancelled. Waiting 60 seconds before checking the Harvestron again")
-		if (vars.doBuildingAndHarvy) {
-			vars.doBuildingAndHarvy = false
+		if (vars.autoHouse) {
+			vars.autoHouse = false
 			setTimeout( async () => {
-				vars.doBuildingAndHarvy = (await browser.storage.sync.get("doQuests")).doBuildingAndHarvy
+				vars.autoHouse = (await browser.storage.sync.get("autoQuests")).autoHouse
 			}, 60*1000)
 		}
 	})
@@ -464,7 +464,7 @@ $(document).on("roa-ws:all", function(event, data){
 	}
 
 	const checkCraftingQueue = (event, data) => {
-		if (vars.actionsPending || !vars.doCraftQueue) return
+		if (vars.actionsPending || !vars.autoCraft) return
 
 		if (data.results.a.cq < vars.minCraftingQueue) {
 			if (vars.verbose) log(`There are less than ${vars.minCraftingQueue} items in the crafting queue. Refilling now`)
@@ -502,7 +502,7 @@ $(document).on("roa-ws:all", function(event, data){
 		// Actions that should always be performed go before this
 		if (vars.actionsPending) return
 
-		if (vars.doQuests) { // Quests
+		if (vars.autoQuests) { // Quests
 			if (data.bq_info2?.c >= data.bq_info2.r) {
 				vars.questCompleting = "kill"
 			} else if (data.tq_info2?.c >= data.tq_info2.r) {
@@ -518,13 +518,13 @@ $(document).on("roa-ws:all", function(event, data){
 				return
 			}
 		}
-		if (vars.doBuildingAndHarvy && data.can_build_house) { // Construction
+		if (vars.autoHouse && data.can_build_house) { // Construction
 			vars.actionsPending = true
 			$(document).one("roa-ws:page:house", selectBuild)
 			$("li#housing").click()
 			return
 		}
-		if (vars.doBuildingAndHarvy && data.can_house_harvest) { // Harvestron
+		if (vars.autoHouse && data.can_house_harvest) { // Harvestron
 			vars.actionsPending = true
 			$(document).one("roa-ws:page:house_room_item", startHarvestron)
 			$("#harvestronNotifier")[0].click()

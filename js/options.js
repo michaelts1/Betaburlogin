@@ -64,10 +64,12 @@ async function fillFields() {
 		fillContainers()
 	}
 
+
 	$("#alt-name")          .val(vars.altBaseName)
-	$("#login-pass")        .val(vars.loginPassword)
 	$("#name-list")         .val(vars.namesList.join(", "))
+	$("#login-pass")        .val(vars.loginPassword)
 	$("#custom-css")        .val(vars.css.custom)
+	$("#min-stamina")       .val(vars.minStamina)
 	$("#alts-number")       .val(vars.altsNumber)
 	$("#alt-name-type")     .val(vars.pattern)
 	$("#main-username")     .val(vars.mainUsername)
@@ -76,9 +78,19 @@ async function fillFields() {
 	$("#main-account-name") .val(vars.mainAccount)
 	$("#min-crafting-queue").val(vars.minCraftingQueue)
 
-	$("#verbose").prop("checked", vars.verbose)
-	$("#auto-wire").prop("checked", vars.autoWire)
-	$("#containers-auto").prop("checked", vars.containers.useAll)
+	$("#verbose")          .prop("checked", vars.verbose)
+	$("#auto-wire")        .prop("checked", vars.autoWire)
+	$("#auto-house")       .prop("checked", vars.autoHouse)
+	$("#auto-craft")       .prop("checked", vars.autoCraft)
+	$("#auto-event")       .prop("checked", vars.joinEvents)
+	$("#append-name")      .prop("checked", vars.addUsername)
+	$("#wire-button")      .prop("checked", vars.addRequestMoney)
+	$("#auto-quests")      .prop("checked", vars.autoQuests)
+	$("#auto-stamina")     .prop("checked", vars.autoStamina)
+	$("#alt-jump-button")  .prop("checked", vars.addJumpMobs)
+	$("#containers-auto")  .prop("checked", vars.containers.useAll)
+	$("#alt-spawn-button") .prop("checked", vars.addSpawnGems)
+	$("#auto-house-custom").prop("checked", vars.addCustomBuild)
 
 	for (const currency of vars.currencySend) {
 		const name = currency.name.replace("_", "-")
@@ -107,21 +119,36 @@ async function saveChanges() {
 			throw new Error("Form is invalid")
 		}
 
-		vars.altBaseName       = $("#alt-name").val()
-		vars.loginPassword     = $("#login-pass").val()
-		vars.css.custom        = $("#custom-css").val()
-		vars.pattern           = $("#alt-nameType").val()
-		vars.mainUsername      = $("#main-username").val()
-		vars.wireFrequency     = $("#wire-frequency").val()
-		vars.mainAccount       = $("#main-account-name").val()
-		vars.namesList         = $("#name-list").val().split(', ')
+
+		vars.pattern       = $("#alt-nameType").val()
+		vars.namesList     = $("#name-list").val().split(', ')
+		vars.minStamina    = $("#min-stamina").val()
+		vars.css.custom    = $("#custom-css").val()
+		vars.altBaseName   = $("#alt-name").val()
+		vars.mainAccount   = $("#main-account-name").val()
+		vars.mainUsername  = $("#main-username").val()
+		vars.wireFrequency = $("#wire-frequency").val()
+		vars.loginPassword = $("#login-pass").val()
+		
 		vars.verbose           = $("#verbose").prop("checked")
 		vars.autoWire          = $("#auto-wire").prop("checked")
+		vars.autoHouse         = $("#auto-house").prop("checked")
+		vars.autoCraft         = $("#auto-craft").prop("checked")
+		vars.joinEvents        = $("#auto-event").prop("checked")
+		vars.autoQuests        = $("#auto-quests").prop("checked")
+		vars.autoStamina       = $("#auto-stamina").prop("checked")
+		vars.addJumpMobs       = $("#alt-jump-button").prop("checked")
+		vars.addUsername       = $("#append-name").prop("checked")
+		vars.addSpawnGems      = $("#alt-spawn-button").prop("checked")
+		vars.addCustomBuild    = $("#auto-house-custom").prop("checked")
+		vars.addRequestMoney   = $("#wire-button").prop("checked")
 		vars.containers.useAll = $("#containers-auto").prop("checked")
-		vars.altsNumber        = parseInt($("#alts-number").val()) || 0
-		vars.dailyCrystals     = parseInt($("#daily-crystals").val()) || 0
-		vars.minCraftingQueue  = parseInt($("#min-crafting-queue").val()) || 0
-		vars.containers.list   = $("[name=containers]:checked").get().map(e => e.id) // Get id's of checked containers
+
+		vars.altsNumber       = parseInt($("#alts-number").val()) || 0
+		vars.dailyCrystals    = parseInt($("#daily-crystals").val()) || 0
+		vars.minCraftingQueue = parseInt($("#min-crafting-queue").val()) || 0
+
+		vars.containers.list = $("[name=containers]:checked").get().map(e => e.id) // Get id's of checked containers
 
 		for (const currency of vars.currencySend) {
 			const name = currency.name.replace("_", "-")
@@ -238,7 +265,7 @@ $("#alt-name-type").on("input", displayAltFields)
 
 browser.storage.onChanged.addListener(changes => {
 	for (const change of Object.getOwnPropertyNames(changes)) {
-		if ( ["doQuests", "doBuildingAndHarvy", "doCraftQueue"].includes(change) ) {
+		if (["autoQuests", "autoHouse", "autoCraft"].includes(change)) {
 			return
 		}
 		fillFields()
