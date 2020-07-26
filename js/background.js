@@ -40,20 +40,20 @@ const CUSTOM_CSS =
 	line-height: 25px;
 }`
 
-//these will store the ports
-let live
-let main
+//These will store the ports
+let live = null
+let main = null
 const alts = []
 const logins = []
 
-//this will store the settings
+//This will store the settings
 let vars = null
 
 browser.runtime.onConnect.addListener(async port => {
 	console.log(port.name, " connected")
 	const mainUsername = (await browser.storage.sync.get("mainUsername")).mainUsername
 
-	//if live login
+	//If live login
 	if (port.name === "live") {
 		live = port
 		live.onMessage.addListener(message => {
@@ -61,22 +61,16 @@ browser.runtime.onConnect.addListener(async port => {
 				openTabs()
 			}
 		})
-	}
-	//if beta login
-	else if (port.name === "login") {
+	} else if (port.name === "login") { //Else, if beta login
 		logins.push(port)
 		port.onMessage.addListener(message => {
 			if (message.text === "requesting login") {
 				login()
 			}
 		})
-	}
-	//if beta main
-	else if (port.name === mainUsername) {
+	} else if (port.name === mainUsername) { //Else, if beta main
 		main = port
-	}
-	//if beta alt
-	else {
+	} else { //Else, if beta alt
 		alts.push(port)
 		port.onMessage.addListener(message => {
 			if (message.text === "move to mob") {
@@ -88,32 +82,27 @@ browser.runtime.onConnect.addListener(async port => {
 				spawnGem(message.type, message.splice, message.tier, message.amount)
 			}
 		})
-
 	}
-	//if beta account
-	if (port.name !== "live" || port.name !== "login") {
+
+	if (port.name !== "live" || port.name !== "login") { //If beta account
 		port.onMessage.addListener(message => {
-			//send currency
-			if (message.text === "requesting currency") {
+			if (message.text === "requesting currency") { //Send currency
 				console.log(`${port.name} requested currency`)
 				sendCurrency(port.name)
 			}
 		})
 	}
 
-	//when a port disconnects, forget it
+	//When a port disconnects, forget it
 	port.onDisconnect.addListener( () => {
 		if (port.name === "live") {
-			live = undefined
-		}
-		else if (port.name === "login") {
+			live = null
+		} else if (port.name === "login") {
 			const index = logins.indexOf(port)
 			if (index !== -1) logins.splice(index, 1)
-		}
-		else if (port.name === mainUsername) {
-			main = undefined
-		}
-		else {
+		} else if (port.name === mainUsername) {
+			main = null
+		} else {
 			const index = alts.indexOf(port)
 			if (index !== -1) alts.splice(index, 1)
 		}
@@ -121,11 +110,11 @@ browser.runtime.onConnect.addListener(async port => {
 	})
 })
 
-//open tabs:
+//Open tabs:
 async function openTabs() {
-	let containers = await browser.contextualIdentities.query({}) //get all containers
+	let containers = await browser.contextualIdentities.query({}) //Get all containers
 	if (vars.containers.useAll === false) {
-		containers = containers.filter(e => vars.containers.list.includes(e.name)) //filter according to settings
+		containers = containers.filter(e => vars.containers.list.includes(e.name)) //Filter according to settings
 	}
 
 	let altsNumber = 0
@@ -147,7 +136,7 @@ async function openTabs() {
 	}
 }
 
-//login all alts:
+//Login all alts:
 function login() {
 	function sendLogin(i, username) {
 		logins[i].postMessage({
@@ -190,14 +179,14 @@ function login() {
 	}
 }
 
-//send message to alts:
+//Send message to alts:
 function sendMessage(message, users=alts.concat(main)) {
 	for (const user of users) {
 		user.postMessage(message)
 	}
 }
 
-//spawn gems:
+//Spawn gems:
 function spawnGem(type, splice, tier, amount) {
 	sendMessage({
 		text  : "spawn gems",
@@ -208,20 +197,20 @@ function spawnGem(type, splice, tier, amount) {
 	}, alts)
 }
 
-//jump mobs:
+//Jump mobs:
 function jumpMobs(number) {
 	sendMessage({text: "jump mobs", number: number}, alts)
 }
 
-//send currency:
+//Send currency:
 function sendCurrency(name) {
 	sendMessage({text: "send currency", recipient: name})
 }
 
-//get settings from storage:
+//Get settings from storage:
 async function getVars() {
 	vars = await browser.storage.sync.get()
-	//if not set, create with default settings
+	//If not set, create with default settings
 	if (Object.keys(vars).length === 0) {
 		vars = {
 			version           : VARS_VERSION,
@@ -327,7 +316,7 @@ async function updateVars() {
 	if (vars.version === VARS_VERSION) {
 		return
 	}
-	if (typeof vars.version !== "number") { //reset if too old
+	if (typeof vars.version !== "number") {
 		console.log("Reseting settings - current settings are too old")
 		await browser.storage.sync.clear()
 		getVars()

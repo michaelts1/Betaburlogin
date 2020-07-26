@@ -102,9 +102,9 @@ async function fillFields() {
 async function saveChanges() {
 	try {
 		if ($("#settings")[0].reportValidity() === false) {
-			const invalid = $(":invalid")[1] //get first invalid field
-			const table = $(`table:has(#${invalid.id})`)[0].id //get containing table id
-			$(`#${table}-tab-button`).click() //go to its tab
+			const invalid = $(":invalid")[1] //First invalid field
+			const table = $(`table:has(#${invalid.id})`)[0].id //Containing table id
+			$(`#${table}-tab-button`).click() //Go to its tab
 
 			console.error("Form is invalid: First invalid field found is", invalid)
 			setTimeout(() => {$("#settings")[0].reportValidity()})
@@ -125,7 +125,7 @@ async function saveChanges() {
 		vars.altsNumber        = parseInt($("#alts-number").val()) || 0
 		vars.dailyCrystals     = parseInt($("#daily-crystals").val()) || 0
 		vars.minCraftingQueue  = parseInt($("#min-crafting-queue").val()) || 0
-		vars.containers.list   = $("[name=containers]:checked").get().map(e => e.id) //get id's of checked containers
+		vars.containers.list   = $("[name=containers]:checked").get().map(e => e.id) //Get id's of checked containers
 
 		for (const currency of vars.currencySend) {
 			const name = currency.name.replace("_", "-")
@@ -213,13 +213,13 @@ function resetCSS() {
 }
 
 async function fillContainers() {
-	const containers = await browser.contextualIdentities.query({}) //get all containers
-	if (containers.length === 0) { //if there are no containers, abort
+	const containers = await browser.contextualIdentities.query({}) //Get all containers
+	if (containers.length === 0) { //If there are no containers, return
 		$("#containers").text("No containers found")
 		return
 	}
 
-	if ($("[name=containers]").length === 0) { //only add checkboxes if they don't exist already
+	if ($("[name=containers]").length === 0) { //Only add checkboxes if they don't exist already
 		for (const container of containers) {
 			const name = container.name
 			$("#containers").append(`<input id="${name}" name="containers" type="checkbox"><span id="${name}-icon" class="container-icon"></span><label for="${name}">${name}</label><br>`)
@@ -227,7 +227,7 @@ async function fillContainers() {
 		}
 	}
 
-	for (const container of vars.containers.list) { //check all containers previously saved
+	for (const container of vars.containers.list) { //Check all containers previously saved
 		$(`#${container}`).prop("checked", true)
 	}
 }

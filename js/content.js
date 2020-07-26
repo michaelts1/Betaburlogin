@@ -7,10 +7,10 @@
  * * Wire button
  * * Auto stamina
  * * Select house build
- * If containers are disabled, allow saving settings without setting alt settings
  * 
  *~~~Needs Testing:~~~
  * RoA-WS
+ * If containers are disabled, allow saving settings without setting alt settings
  */
 
 "use strict"
@@ -90,7 +90,7 @@ async function betaGame() {
 		isAlt = username !== vars.mainUsername
 		mainTrade = getTrade()
 
-		if (changes.wireFrequency.oldValue !== changes.wireFrequency.newValue) { //if wireFrequency has changed, reset autoWire
+		if (changes.wireFrequency.oldValue !== changes.wireFrequency.newValue) { //If wireFrequency has changed, reset autoWire
 			clearInterval(autoWireID)
 			autoWireID = null
 		}
@@ -106,7 +106,7 @@ async function betaGame() {
 	}
 	browser.storage.onChanged.addListener(refreshVars)
 
-	//connect to background script:
+	//Connect to background script:
 	port = browser.runtime.connect({name: username})
 	port.onMessage.addListener(message => {
 		if (vars.verbose) log("Received message:", message)
@@ -170,9 +170,9 @@ async function betaGame() {
 		$("#chatSendMessage").click()
 	}
 
-	//only run on alts:
+	//Only run on alts:
 	if (isAlt) {
-		//jump mobs:
+		//Jump mobs:
 		if ($("#betabotMobJump")[0] === undefined) {
 			$("#autoEnemy").after(`
 			<div class="mt10" id="betabotMobJump" style="display: block;">
@@ -183,7 +183,8 @@ async function betaGame() {
 		}
 		$("#betabotMobJumpButton").click(() => {
 			//:selected won't work here, since we want the last monster won, not the currently selected mob (do we?)
-			const number = parseInt($("#enemyList>option:selected"/*[selected]"*/).val()) + parseInt($("#betabotMobJumpNumber").val())
+			//const number = parseInt($("#enemyList>option[selected]").val()) + parseInt($("#betabotMobJumpNumber").val())
+			const number = parseInt($("#enemyList>option:selected").val()) + parseInt($("#betabotMobJumpNumber").val())
 			const maxNumber = parseInt($(`#enemyList>option:last-child`).val())
 			if (number > maxNumber) {
 				$("#areaName").text("the mob you chose is not in the list!")
@@ -193,7 +194,7 @@ async function betaGame() {
 			if (vars.verbose) log(`Requested to move all alts ${number} mobs up`)
 		})
 
-		//spawn gems:
+		//Spawn gems:
 		$(document).on("roa-ws:modalContent", (event, data) => {
 			if (data.title === "Spawn Gems") {
 				if ($("#betabotSpawnGem")[0] === undefined) {
@@ -214,7 +215,7 @@ async function betaGame() {
 		})
 	}
 
-	//make it easier to see what alt it is:
+	//Make it easier to see what alt it is:
 	function appendName() {
 		if ($("#roomName").text().search(username) === -1) {
 			$("#roomName").append(`: <span id="clearUsername">${username}</span>`)
@@ -225,7 +226,7 @@ async function betaGame() {
 	keepUsernameVisible.observe($("#roomName")[0], { attributes: true, childList: true, subtree: true })
 	appendName()
 
-	//make it easier to send currency:
+	//Make it easier to send currency:
 	function wire(target) {
 		if (target === username) return
 		if (vars.verbose) log(`Wiring ${target}`)
@@ -237,17 +238,14 @@ async function betaGame() {
 
 			const amount       = $(`.${currency.name}`).attr("title").replace(/,/g, "")
 			const sellable     = $(`.${currency.name}`).attr("data-personal").replace(/,/g, "")
-			let amountToSend = 0
+			let amountToSend = amount - currency.keepAmount //Keep this amount
 
-			//keep this amount
-			amountToSend = amount - currency.keepAmount
-
-			//don't send more than you can
+			//Don't send more than you can
 			if (amountToSend > sellable) {
 				amountToSend = sellable
 			}
 
-			//only send if you have enough
+			//Only send if you have enough
 			if (amountToSend > currency.minimumAmount) {
 				sendMessage += ` ${amountToSend} ${currency.name},`
 			}
@@ -265,15 +263,15 @@ async function betaGame() {
 	$("#sendMeCurrency").click(() => { port.postMessage({text: "requesting currency"}) })
 
 	//RoA-WS. Taken from: https://github.com/edvordo/RoA-WSHookUp/blob/master/RoA-WSHookUp.user.js
-	//re-inject the script
+	//Re-inject the script
 	if ($("#betabot-ws")[0] !== undefined) $("#betabot-ws").remove()
 
-	//using an IIFE to avoid polluting the global space
+	//Using an IIFE to avoid polluting the global space
 	(function() {
 		const elm = document.createElement("script")
 		elm.innerHTML = `
 const channel = new MessageChannel()
-//send message to content script (do we even need to send port2?)
+//Send message to content script (do we even need to send port2?)
 window.postMessage("betabot-ws message", "*", [channel.port2])
 
 $(document).on("roa-ws:all", function(event, data){
@@ -291,8 +289,8 @@ $(document).on("roa-ws:all", function(event, data){
 				etype = "roa-ws:"
 				if (item.hasOwnProperty("type")) {
 					etype = etype + item.type
-					// in case its a "page" type message create additional event
-					// e.g.: "roa-ws:page:boosts", "roa-ws:page:clans" or "roa-ws:page:settings_milestones" etc.
+					//In case its a "page" type message create additional event
+					//e.g. "roa-ws:page:boosts", "roa-ws:page:clans" or "roa-ws:page:settings_milestones" etc.
 					if (item.type === "page" && item.hasOwnProperty("page") && "string" === typeof item.page) {
 						etypepage = etype + ":" + item.page
 					}
@@ -312,8 +310,8 @@ $(document).on("roa-ws:all", function(event, data){
 		$(window).on("message", message => {
 			const origin = message.originalEvent.origin
 			const data = message.originalEvent.data
-			//make sure we are connecting to the right port
-			//no need to be absolutely sure about it since we don't send sensitve data
+			//Make sure we are connecting to the right port
+			//No need to be absolutely sure about it since we don't send sensitve data
 			if (origin === "https://beta.avabur.com" && data === "betabot-ws message") {
 				port2 = message.originalEvent.ports[0]
 				port2.onmessage = roaWS
@@ -323,7 +321,7 @@ $(document).on("roa-ws:all", function(event, data){
 
 	//Betabot based on @Batosi's bot:
 
-	//when the user cancels a quest or harvestron, disable doQuests or doBuildingAndHarvy to avoid starting them again
+	//When the user cancels a quest or harvestron, disable doQuests or doBuildingAndHarvy to avoid starting them again
 	$(document).on("roa-ws:page:quest_forfeit", () => {
 		if (vars.verbose) log("Quest forfeited. Waiting 60 seconds before checking for quests again")
 		if (vars.doQuests) {
@@ -344,7 +342,7 @@ $(document).on("roa-ws:all", function(event, data){
 		}
 	})
 
-	//add option to build a specific item
+	//Add option to build a specific item
 	if ($("#selectBuild")[0] === undefined) {
 		$($("div > #allHouseUpgrades")[0].parentNode).after(`
 		<div id="selectBuild" class="col-md-12 mt10">
@@ -355,7 +353,7 @@ $(document).on("roa-ws:all", function(event, data){
 		`)
 	}
 
-	//buy crystals every 24 hours
+	//Buy crystals every 24 hours
 	function autoBuyCrys() {
 		if (vars.dailyCrystals === 0) return
 
@@ -374,17 +372,17 @@ $(document).on("roa-ws:all", function(event, data){
 		})
 		$(document).one("roa-ws:page:purchase_crystals_gold", itemBuilding)
 	}
-	setInterval(autoBuyCrys, 1000 * 60 * 60 * 24) //once a day
+	setInterval(autoBuyCrys, 1000 * 60 * 60 * 24) //Once a day
 
-	//quests, house, harvestron, and crafting
+	//Quests, house, harvestron, and crafting
 	const finishQuest = () => {
 		setTimeout(() => {
 			if (vars.verbose) log(`Completing a ${vars.questCompleting} quest`)
-			$(`input.completeQuest[data-questtype=${vars.questCompleting}]`).click() //complete the quest
+			$(`input.completeQuest[data-questtype=${vars.questCompleting}]`).click() //Complete the quest
 			$(document).one("roa-ws:page:quests", () => {
 				setTimeout(() => {
 					if (vars.verbose) log(`Starting a ${vars.questCompleting} quest`)
-					$(`input.questRequest[data-questtype=${vars.questCompleting}][value="Begin Quest"]`).click() //start new quest
+					$(`input.questRequest[data-questtype=${vars.questCompleting}][value="Begin Quest"]`).click() //Start new quest
 					$(document).one("roa-ws:page:quests", () => {
 						setTimeout(() => {
 							vars.actionsPending = false
@@ -401,18 +399,18 @@ $(document).on("roa-ws:all", function(event, data){
 		if (vars.verbose) log("Selecting build")
 		setTimeout(() => {
 			const itemId = parseInt($("#itemId").val())
-			if ($("#customBuild").is(":checked") && itemId > 0) { //if a custom build is specified, upgrade it
+			if ($("#customBuild").is(":checked") && itemId > 0) { //If a custom build is specified, upgrade it
 				if (vars.verbose) log(`Upgrading custom item with id ${itemId}`)
 				$(document).one("roa-ws:page:house_all_builds", itemId, customBuild)
 				setTimeout(() => { $("#allHouseUpgrades")[0].click() }, vars.buttonDelay)
-			} else if ($("#houseRoomCanBuild").is(":visible")) { //else, if new room is available, build it
+			} else if ($("#houseRoomCanBuild").is(":visible")) { //Else, if new room is available, build it
 				if (vars.verbose) log("Building a new room")
 				$(document).one("roa-ws:page:house_build_room", itemBuilding)
 				setTimeout(() => { $("#houseBuildRoom")[0].click() }, vars.buttonDelay)
-			} else if ($("#houseQuickBuildList li:first .houseViewRoom").length === 1) { //else, if new item is available, build it
+			} else if ($("#houseQuickBuildList li:first .houseViewRoom").length === 1) { //Else, if new item is available, build it
 				$(document).one("roa-ws:page:house_room", buildItem)
 				setTimeout(() => { $("#houseQuickBuildList li:first .houseViewRoom")[0].click() }, vars.buttonDelay)
-			} else { //else, upgrade existing item
+			} else { //Else, upgrade existing item
 				$(document).one("roa-ws:page:house_room_item", upgradeItem)
 				setTimeout(() => { $("#houseQuickBuildList li:first .houseViewRoomItem")[0].click() }, vars.buttonDelay)
 			}
@@ -436,11 +434,11 @@ $(document).on("roa-ws:all", function(event, data){
 
 	const upgradeItem = () => {
 		setTimeout(() => {
-			if ($("#houseRoomItemUpgradeTier").is(":visible")) { //if tier upgrade is available, upgrade it
+			if ($("#houseRoomItemUpgradeTier").is(":visible")) { //If tier upgrade is available, upgrade it
 				if (vars.verbose) log("Upgrading item tier")
 				$(document).one("roa-ws:page:house_room_item_upgrade_tier", itemBuilding)
 				setTimeout(() => { $("#houseRoomItemUpgradeTier").click() }, vars.buttonDelay)
-			} else { //else do a regular upgrade
+			} else { //Else do a regular upgrade
 				if (vars.verbose) log("Upgrading fastest item")
 				$(document).one("roa-ws:page:house_room_item_upgrade_level", itemBuilding)
 				setTimeout(() => { $("#houseRoomItemUpgradeLevel").click() }, vars.buttonDelay)
@@ -449,7 +447,6 @@ $(document).on("roa-ws:all", function(event, data){
 	}
 
 	const itemBuilding = () => {
-		//$("#confirmOverlay > a.red").click() //if there is confirmation layer, close it
 		setTimeout(() => {
 			vars.actionsPending = false
 			$(".closeModal").click()
@@ -469,14 +466,14 @@ $(document).on("roa-ws:all", function(event, data){
 			if (vars.verbose) log(`There are less than ${vars.minCraftingQueue} items in the crafting queue. Refilling now`)
 			vars.actionsPending = true
 			setTimeout(() => {
-				//for some weird reason, .click() does not work here ¯\_(ツ)_/¯
+				//For some weird reason, .click() does not work here ¯\_(ツ)_/¯
 				$(".craftingTableLink")[0].dispatchEvent(new Event("click"))
 			}, vars.buttonDelay)
 			$(document).one("roa-ws:page:house_room_item", () => {
 				setTimeout(() => {
 					$("#craftingItemLevelMax").click()
 					setTimeout(() => {
-						$("#craftingQuality").val(0) //set to poor quality
+						$("#craftingQuality").val(0) //Set to poor quality
 						$("#craftingJobFillQueue").attr("checked", "true")
 						$("#craftingJobStart").click()
 					}, vars.buttonDelay)
@@ -486,7 +483,7 @@ $(document).on("roa-ws:all", function(event, data){
 		}
 	}
 
-	//check action results for needed actions
+	//Check action results for needed actions
 	const checkResults = (event, data) => {
 		data = data.results.p
 
@@ -498,7 +495,7 @@ $(document).on("roa-ws:all", function(event, data){
 			return
 		}
 
-		//actions that should always be performed go before this
+		//Actions that should always be performed go before this
 		if (vars.actionsPending) return
 
 		if (vars.doQuests) { //Quests
@@ -534,15 +531,15 @@ $(document).on("roa-ws:all", function(event, data){
 	$(document).on("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults)
 	$(document).on("roa-ws:craft", checkCraftingQueue)
 
-	//auto event. Based on: https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js
+	//Auto event Based on: https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js
 	let eventID         = null
 	let mainEvent       = false
 	let eventInProgress = false
 	let motdReceived    = false
 	let carvingChanged  = false
 
-	//const CHANNEL = 3203 //debugging channel
-	const CHANNEL = 3202 //production channel
+	//const CHANNEL = 3203 //Debugging channel
+	const CHANNEL = 3202 //Production channel
 	const BUTTONS = {
 		battle      : $(".bossFight.btn.btn-primary")[0],
 		fishing     : $(".bossHarvest.btn")[4],
@@ -617,26 +614,26 @@ $(document).on("roa-ws:all", function(event, data){
 		$(document).on("roa-ws:message", async (event, data) => {
 			if (data.c_id === CHANNEL) {
 				await delay(vars.startActionsDelay)
-				// wait to see if the message is recieved together with a message of the day,
-				// which means it was only sent due to a chat reconnection, and we should not join the event.
+				//Wait to see if the message is recieved together with a message of the day,
+				//which means it was only sent due to a chat reconnection, and we should not join the event.
 				if (motdReceived === false) {
 					joinEvent(data.m, data.m_id)
 				}
 			}
 		})
-	}, 30000) //start after a delay to avoid being triggered by old messages
+	}, 30000) //Start after a delay to avoid being triggered by old messages
 
-	//avoid joining events after chat reconnections
+	//Avoid joining events after chat reconnections
 	$(document).on("roa-ws:motd", async () => {
 		motdReceived = true
 		await delay(vars.startActionsDelay * 5)
 		motdReceived = false
 	})
 
-	//custom style:
+	//Custom style:
 	if ($("#betabot-css")[0] === undefined) {
 		const elm = document.createElement("link");
-		elm.href = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` //decode css code into base64 and use it as a link to avoid code injection
+		elm.href = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` //Decode CSS into base64 and use it as a link to avoid code injection
 		elm.type = "text/css"
 		elm.rel  = "stylesheet"
 		elm.id   = "betabot-css"
