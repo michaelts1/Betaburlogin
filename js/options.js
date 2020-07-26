@@ -63,9 +63,14 @@ async function fillFields() {
 		for (const table of disabled) {
 			$(`#${table}`).html("This feature requires Container Tabs.<br>Please enable Container tabs in Browser Options -&gt; Tabs -&gt; Enable Container Tabs, and reload the page.")
 		}
+		//Don't require to set up alts if there are no alts
+		$("#alt-name-type")[0].required = false
+		$("#alt-name-type-required").hide()
 	}
 	else {
 		fillContainers()
+		$("#alt-name-type")[0].required = true
+		$("#alt-name-type-required").show()
 	}
 
 	$("#alt-name")          .val(vars.altBaseName)
@@ -103,7 +108,7 @@ async function saveChanges() {
 	try {
 		if ($("#settings")[0].reportValidity() === false) {
 			const invalid = $(":invalid")[1] //First invalid field
-			const table = $(`table:has(#${invalid.id})`)[0].id //Containing table id
+			const table = $("table").has(`#${invalid.id}`)[0].id //Containing table id
 			$(`#${table}-tab-button`).click() //Go to its tab
 
 			console.error("Form is invalid: First invalid field found is", invalid)

@@ -10,7 +10,6 @@
  * 
  *~~~Needs Testing:~~~
  * RoA-WS
- * If containers are disabled, allow saving settings without setting alt settings
  */
 
 "use strict"
