@@ -37,20 +37,20 @@ const CUSTOM_CSS =
 	line-height: 25px;
 }`
 
-//These will store the ports
+// These will store the ports
 let live = null
 let main = null
 const alts = []
 const logins = []
 
-//This will store the settings
+// This will store the settings
 let vars = null
 
 browser.runtime.onConnect.addListener(async port => {
 	console.log(port.name, " connected")
 	const mainUsername = (await browser.storage.sync.get("mainUsername")).mainUsername
 
-	//If live login
+	// If live login
 	if (port.name === "live") {
 		live = port
 		live.onMessage.addListener(message => {
@@ -58,16 +58,16 @@ browser.runtime.onConnect.addListener(async port => {
 				openTabs()
 			}
 		})
-	} else if (port.name === "login") { //Else, if beta login
+	} else if (port.name === "login") { // Else, if beta login
 		logins.push(port)
 		port.onMessage.addListener(message => {
 			if (message.text === "requesting login") {
 				login()
 			}
 		})
-	} else if (port.name === mainUsername) { //Else, if beta main
+	} else if (port.name === mainUsername) { // Else, if beta main
 		main = port
-	} else { //Else, if beta alt
+	} else { // Else, if beta alt
 		alts.push(port)
 		port.onMessage.addListener(message => {
 			if (message.text === "move to mob") {
@@ -81,16 +81,16 @@ browser.runtime.onConnect.addListener(async port => {
 		})
 	}
 
-	if (port.name !== "live" || port.name !== "login") { //If beta account
+	if (port.name !== "live" || port.name !== "login") { // If beta account
 		port.onMessage.addListener(message => {
-			if (message.text === "requesting currency") { //Send currency
+			if (message.text === "requesting currency") { // Send currency
 				console.log(`${port.name} requested currency`)
 				sendCurrency(port.name)
 			}
 		})
 	}
 
-	//When a port disconnects, forget it
+	// When a port disconnects, forget it
 	port.onDisconnect.addListener( () => {
 		if (port.name === "live") {
 			live = null
@@ -107,11 +107,11 @@ browser.runtime.onConnect.addListener(async port => {
 	})
 })
 
-//Open tabs:
+// Open tabs:
 async function openTabs() {
-	let containers = await browser.contextualIdentities.query({}) //Get all containers
+	let containers = await browser.contextualIdentities.query({}) // Get all containers
 	if (vars.containers.useAll === false) {
-		containers = containers.filter(e => vars.containers.list.includes(e.name)) //Filter according to settings
+		containers = containers.filter(e => vars.containers.list.includes(e.name)) // Filter according to settings
 	}
 
 	let altsNumber = 0
@@ -133,7 +133,7 @@ async function openTabs() {
 	}
 }
 
-//Login all alts:
+// Login all alts:
 function login() {
 	function sendLogin(i, username) {
 		logins[i].postMessage({
@@ -176,14 +176,14 @@ function login() {
 	}
 }
 
-//Send message to alts:
+// Send message to alts:
 function sendMessage(message, users=alts.concat(main)) {
 	for (const user of users) {
 		user.postMessage(message)
 	}
 }
 
-//Spawn gems:
+// Spawn gems:
 function spawnGem(type, splice, tier, amount) {
 	sendMessage({
 		text  : "spawn gems",
@@ -194,20 +194,20 @@ function spawnGem(type, splice, tier, amount) {
 	}, alts)
 }
 
-//Jump mobs:
+// Jump mobs:
 function jumpMobs(number) {
 	sendMessage({text: "jump mobs", number: number}, alts)
 }
 
-//Send currency:
+// Send currency:
 function sendCurrency(name) {
 	sendMessage({text: "send currency", recipient: name})
 }
 
-//Get settings from storage:
+// Get settings from storage:
 async function getVars() {
 	vars = await browser.storage.sync.get()
-	//If not set, create with default settings
+	// If not set, create with default settings
 	if (Object.keys(vars).length === 0) {
 		vars = {
 			version           : VARS_VERSION,
@@ -363,7 +363,7 @@ async function updateVars() {
 			useAll: true,
 			list  : []
 		}
-		if (vars.pattern === "romanCaps") vars.pattern = "roman" //deprecated
+		if (vars.pattern === "romanCaps") vars.pattern = "roman" // Deprecated
 	}
 
 	if (vars.css.addon !== ADDON_CSS) {
@@ -377,7 +377,7 @@ async function updateVars() {
 browser.storage.onChanged.addListener(changes => {
 	getVars()
 
-	function objectEquals(object1, object2) { //https://stackoverflow.com/a/6713782
+	function objectEquals(object1, object2) { // https://stackoverflow.com/a/6713782
 		if (object1 === object2) return true
 		if (!(object1 instanceof Object) || !(object2 instanceof Object)) return false
 		if (object1.constructor !== object2.constructor) return false
