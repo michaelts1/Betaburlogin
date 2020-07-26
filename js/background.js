@@ -310,60 +310,56 @@ async function getVars() {
 getVars()
 
 async function updateVars() {
-	if (vars.version === VARS_VERSION) {
-		return
-	}
 	if (typeof vars.version !== "number") {
 		console.log("Reseting settings - current settings are too old")
 		await browser.storage.sync.clear()
 		getVars()
 		return
 	}
-	if (vars.version < 2) {
-		vars.mainUsername = ""
-	}
-	if (vars.version < 3) {
-		vars.pattern = ""
-		vars.namesList = []
-	}
-	if (vars.version < 4) {
-		vars.tradesList = {
-			fishing      : [],
-			woodcutting  : [],
-			mining       : [],
-			stonecutting : [],
-			crafting     : [],
-			carving      : [],
-		}
-	}
-	if (vars.version < 5) {
-		for (const trade of ["food", "wood", "iron", "stone"]) {
-			vars.currencySend.push({
-				name : trade,
-				send : true,
-				minimumAmount : 100,
-				keepAmount : 10000000,
-			})
-		}
-	}
-	if (vars.version < 6) {
-		vars.autoWire = false
-	}
-	if (vars.version < 7) {
-		vars.css = {
-			addon : ADDON_CSS,
-			custom: CUSTOM_CSS,
-		},
-		vars.verbose = false
-		vars.containers = ["betabot-default"]
-		vars.wireFrequency = 60
-	}
-	if (vars.version < 8) {
-		vars.containers = {
-			useAll: true,
-			list  : []
-		}
-		if (vars.pattern === "romanCaps") vars.pattern = "roman" // Deprecated
+
+	switch (vars.version) { // Falling through cases to update everything
+		case VARS_VERSION:
+			return
+		case 2:
+			vars.mainUsername = ""
+		case 3:
+			vars.pattern = ""
+			vars.namesList = []
+		case 4:
+			vars.tradesList = {
+				fishing      : [],
+				woodcutting  : [],
+				mining       : [],
+				stonecutting : [],
+				crafting     : [],
+				carving      : [],
+			}
+		case 5:
+			for (const trade of ["food", "wood", "iron", "stone"]) {
+				vars.currencySend.push({
+					name : trade,
+					send : true,
+					minimumAmount : 100,
+					keepAmount : 10000000,
+				})
+			}
+		case 6:
+			vars.autoWire = false
+		case 7:
+			vars.css = {
+				addon : ADDON_CSS,
+				custom: CUSTOM_CSS,
+			},
+			vars.verbose = false
+			vars.containers = ["betabot-default"]
+			vars.wireFrequency = 60
+		case 8:
+			vars.containers = {
+				useAll: true,
+				list  : []
+			}
+			if (vars.pattern === "romanCaps") vars.pattern = "roman" // Deprecated
+		default:
 	}
 
 	if (vars.css.addon !== ADDON_CSS) {
