@@ -356,7 +356,7 @@ async function updateVars() {
 		case 8:
 			vars.containers = {
 				useAll: true,
-				list  : []
+				list  : [],
 			}
 			if (vars.pattern === "romanCaps") vars.pattern = "roman" // Deprecated
 		default:
