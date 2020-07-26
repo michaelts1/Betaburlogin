@@ -9,6 +9,7 @@
  * * Select house build
  * 
  *~~~Needs Testing:~~~
+ * Make custom-build user friendly
  * RoA-WS
  */
 
@@ -342,21 +343,25 @@ $(document).on("roa-ws:all", function(event, data){
 	})
 
 	//Add option to build a specific item
-	if ($("#select-build")[0] === undefined) {
-		$($("div > #allHouseUpgrades")[0].parentNode).after(`
-		<div id="select-build" class="col-md-12 mt10">
-			<input id="custom-Build" type="checkbox">
-			<label for="custom-Build"><a>Build a specific item:</a></label>
-			<input id="item-id" placeholder="item id" type="text" size="3" pattern="^\\d*$">
-		</div>
-		`)
+	if ($("#betabot-select-build")[0] === undefined) {
+		vars.actionsPending = true
+		$("#allHouseUpgrades").click()
+		$(document).one("roa-ws:page:house_all_builds", (e, d) => {
+			setTimeout(itemBuilding)
+			const items = []
+			d.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) //Filter duplicates - https://stackoverflow.com/a/53543804
+			$("#houseQuickBuildWrapper").append(`Build a specific item: <select id="betabot-select-build"><option value="" selected>Select item</option></select>`)
+			for (const item of items) {
+				$("#betabot-select-build").append(`<option value="${item.i}">${item.n}</option>`)
+			}
+		})
 	}
 
 	//Buy crystals every 24 hours
 	function autoBuyCrys() {
 		if (vars.dailyCrystals === 0) return
 
-		if (vars.verbose) log(`Buying ${vars.dailyCrystals}} daily crystals`)
+		if (vars.verbose) log(`Buying ${vars.dailyCrystals} daily crystals`)
 		vars.actionsPending = true
 		setTimeout(() => { $("#premiumShop").click() }, vars.startActionsDelay)
 		$(document).one("roa-ws:page:boosts", () => {
@@ -600,7 +605,6 @@ $(document).on("roa-ws:all", function(event, data){
 
 					if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} event due to message #${msgID}`)
 					BUTTONS[mainTrade].click()
-					await delay(70000)
 					$("#eventCountdown").bind("DOMSubtreeModified", changeTrade)
 				}
 			}

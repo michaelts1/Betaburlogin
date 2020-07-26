@@ -377,7 +377,7 @@ async function updateVars() {
 browser.storage.onChanged.addListener(changes => {
 	getVars()
 
-	function objectEquals(object1, object2) { //https://stackoverflow.com/a/6713782/10687471
+	function objectEquals(object1, object2) { //https://stackoverflow.com/a/6713782
 		if (object1 === object2) return true
 		if (!(object1 instanceof Object) || !(object2 instanceof Object)) return false
 		if (object1.constructor !== object2.constructor) return false

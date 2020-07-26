@@ -59,18 +59,9 @@ function displayMessage(message, time=2500) {
 async function fillFields() {
 	vars = await browser.storage.sync.get()
 	if (browser.contextualIdentities === undefined) {
-		const disabled = ["containers", "alt", "wire"]
-		for (const table of disabled) {
-			$(`#${table}`).html("This feature requires Container Tabs.<br>Please enable Container tabs in Browser Options -&gt; Tabs -&gt; Enable Container Tabs, and reload the page.")
-		}
-		//Don't require to set up alts if there are no alts
-		$("#alt-name-type")[0].required = false
-		$("#alt-name-type-required").hide()
-	}
-	else {
+		$(`.requires-containers`).html(`<td colspan="2">This feature requires Container Tabs. Please enable Container tabs in Browser Options -&gt; Tabs -&gt; Enable Container Tabs, and reload the page.</td>`)
+	} else {
 		fillContainers()
-		$("#alt-name-type")[0].required = true
-		$("#alt-name-type-required").show()
 	}
 
 	$("#alt-name")          .val(vars.altBaseName)
