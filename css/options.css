@@ -46,6 +46,7 @@ header {
 
 #tabs-buttons {
 	display: flex;
+	flex-flow: wrap;
 	justify-content: center;
 	margin: 0 0 0 -4em;
 }
@@ -130,7 +131,10 @@ input[name=containers],
 }
 
 #css-div {
-	display: grid;
+	align-items: center;
+	display: flex;
+	flex-flow: column;
+	justify-content: center;
 	margin: .5em;
 }
 
@@ -181,24 +185,27 @@ td {
 .options-page table {
 	margin: 2em auto auto;
 	table-layout: fixed;
-	width: 26em;
+	width: 27em;
 }
 
-#col-1-1 {width: 60%;}
-#col-1-2 {width: 40%;}
+#general-col-1 {width: 60%;}
+#general-col-2 {width: 40%;}
 
-#col-2-1 {width: 10%;}
-#col-2-2 {width: 45%;}
-#col-2-3 {width: 45%;}
+#login-col-1 {width: 46%;}
+#login-col-2 {width: 54%;}
 
-#col-3-1 {width: 42%;}
-#col-3-2 {width: 58%;}
+#wire-col-1 {width: 10%;}
+#wire-col-2 {width: 45%;}
+#wire-col-3 {width: 45%;}
 
-#col-4-1 {width: 43%;}
-#col-4-2 {width: 57%;}
+#event-col-1 {width: 40%;}
+#event-col-2 {width: 60%;}
 
-#col-5-1 {width: 40%;}
-#col-5-2 {width: 60%;}
+#interface-col-1 {width: 10%;}
+#interface-col-2 {width: 90%;}
+
+#advanced-col-1 {width: 40%;}
+#advanced-col-2 {width: 60%;}
 
 .checkbox-td {
 	text-align: center;

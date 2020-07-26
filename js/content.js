@@ -34,8 +34,8 @@ async function liveLogin() {
 	if (verbose) log("Starting up (Live Login)")
 
 	port = browser.runtime.connect({name: "live"})
-	$("#login_notification").html(`<button id="openAltTabs">Open Beta Tabs</button>`)
-	$("#openAltTabs").click(() => {
+	$("#login_notification").html(`<button id="open-alt-tabs">Open Beta Tabs</button>`)
+	$("#open-alt-tabs").click(() => {
 		port.postMessage({text: "open alt tabs"})
 		if (verbose) log("Requesting background script to open alt tabs")
 	})
@@ -65,8 +65,8 @@ async function betaLogin() {
 		}, 7500)
 	}
 
-	$("#login_notification").html(`<button id="loginAlts">Login all alts</button>`)
-	$("#loginAlts").click(() => { port.postMessage({text: "requesting login"}) })
+	$("#login_notification").html(`<button id="login-alts">Login All Alts</button>`)
+	$("#login-alts").click(() => { port.postMessage({text: "requesting login"}) })
 }
 
 async function betaGame() {
@@ -152,14 +152,14 @@ async function betaGame() {
 					}, vars.buttonDelay)
 
 					$(document).one("roa-ws:page:gem_spawn", (e, d) => {
-						$("#betabotSpawnGem").prop("disabled", true)
+						$("#betabot-spawn-gem").prop("disabled", true)
 
 						setTimeout(() => {
 							$("#confirmButtons>a.green")[0].click()
 						}, 55*1000)
 
 						setTimeout(() => {
-							$("#betabotSpawnGem").prop("disabled", false)
+							$("#betabot-spawn-gem").prop("disabled", false)
 						}, 60*1000)
 					})
 				}, vars.startActionsDelay)
@@ -172,18 +172,18 @@ async function betaGame() {
 	//Only run on alts:
 	if (isAlt) {
 		//Jump mobs:
-		if ($("#betabotMobJump")[0] === undefined) {
+		if ($("#betabot-mob-jump")[0] === undefined) {
 			$("#autoEnemy").after(`
-			<div class="mt10" id="betabotMobJump" style="display: block;">
-				<input id="betabotMobJumpNumber" type="number" size=1>
-				<input id="betabotMobJumpButton" type="button" value="Jump Mobs">
+			<div class="mt10" id="betabot-mob-jump" style="display: block;">
+				<input id="betabot-mob-jump-Number" type="number" size=1>
+				<input id="betabot-mob-jump-button" type="button" value="Jump Mobs">
 			</div>
 			`)
 		}
-		$("#betabotMobJumpButton").click(() => {
+		$("#betabot-mob-jump-button").click(() => {
 			//:selected won't work here, since we want the last monster won, not the currently selected mob (do we?)
-			//const number = parseInt($("#enemyList>option[selected]").val()) + parseInt($("#betabotMobJumpNumber").val())
-			const number = parseInt($("#enemyList>option:selected").val()) + parseInt($("#betabotMobJumpNumber").val())
+			//const number = parseInt($("#enemyList>option[selected]").val()) + parseInt($("#betabot-mob-jump-Number").val())
+			const number = parseInt($("#enemyList>option:selected").val()) + parseInt($("#betabot-mob-jump-Number").val())
 			const maxNumber = parseInt($(`#enemyList>option:last-child`).val())
 			if (number > maxNumber) {
 				$("#areaName").text("the mob you chose is not in the list!")
@@ -196,10 +196,10 @@ async function betaGame() {
 		//Spawn gems:
 		$(document).on("roa-ws:modalContent", (event, data) => {
 			if (data.title === "Spawn Gems") {
-				if ($("#betabotSpawnGem")[0] === undefined) {
-					$("#gemSpawnConfirm").after(`<input id="betabotSpawnGem" type="button" style="padding:6.5px" value="Spawn For All Alts">`)
+				if ($("#betabot-spawn-gem")[0] === undefined) {
+					$("#gemSpawnConfirm").after(`<input id="betabot-spawn-gem" type="button" style="padding:6.5px; margin: 0 -.5em 0 .5em;" value="Spawn For All Alts">`)
 				}
-				$("#betabotSpawnGem").on("click", () => {
+				$("#betabot-spawn-gem").on("click", () => {
 					const msg = {
 						text  : "spawnGem",
 						tier  : parseInt($("#spawnGemLevel").val()),
@@ -217,7 +217,7 @@ async function betaGame() {
 	//Make it easier to see what alt it is:
 	function appendName() {
 		if ($("#roomName").text().search(username) === -1) {
-			$("#roomName").append(`: <span id="clearUsername">${username}</span>`)
+			$("#roomName").append(`: <span id="clear-username">${username}</span>`)
 			if (vars.verbose) log("Appended username to room name")
 		}
 	}
@@ -256,10 +256,10 @@ async function betaGame() {
 		}
 	}
 
-	if ($("#sendMeCurrency")[0] === undefined) {
-		$("#username").after(`<button id="sendMeCurrency"><a>Send me currency</a></button>`)
+	if ($("#send-me-currency")[0] === undefined) {
+		$("#username").after(`<button id="send-me-currency"><a>Request Currency</a></button>`)
 	}
-	$("#sendMeCurrency").click(() => { port.postMessage({text: "requesting currency"}) })
+	$("#send-me-currency").click(() => { port.postMessage({text: "requesting currency"}) })
 
 	//RoA-WS. Taken from: https://github.com/edvordo/RoA-WSHookUp/blob/master/RoA-WSHookUp.user.js
 	//Re-inject the script
@@ -342,12 +342,12 @@ $(document).on("roa-ws:all", function(event, data){
 	})
 
 	//Add option to build a specific item
-	if ($("#selectBuild")[0] === undefined) {
+	if ($("#select-build")[0] === undefined) {
 		$($("div > #allHouseUpgrades")[0].parentNode).after(`
-		<div id="selectBuild" class="col-md-12 mt10">
-			<input id="customBuild" type="checkbox">
-			<label for="customBuild"><a>Build a specific item:</a></label>
-			<input id="itemId" placeholder="item id" type="text" size="3" pattern="^\\d*$">
+		<div id="select-build" class="col-md-12 mt10">
+			<input id="custom-Build" type="checkbox">
+			<label for="custom-Build"><a>Build a specific item:</a></label>
+			<input id="item-id" placeholder="item id" type="text" size="3" pattern="^\\d*$">
 		</div>
 		`)
 	}
@@ -397,8 +397,8 @@ $(document).on("roa-ws:all", function(event, data){
 	const selectBuild = () => {
 		if (vars.verbose) log("Selecting build")
 		setTimeout(() => {
-			const itemId = parseInt($("#itemId").val())
-			if ($("#customBuild").is(":checked") && itemId > 0) { //If a custom build is specified, upgrade it
+			const itemId = parseInt($("#item-id").val())
+			if ($("#custom-Build").is(":checked") && itemId > 0) { //If a custom build is specified, upgrade it
 				if (vars.verbose) log(`Upgrading custom item with id ${itemId}`)
 				$(document).one("roa-ws:page:house_all_builds", itemId, customBuild)
 				setTimeout(() => { $("#allHouseUpgrades")[0].click() }, vars.buttonDelay)

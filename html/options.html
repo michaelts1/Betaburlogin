@@ -14,9 +14,10 @@
 			<div id="tabs-buttons">
 				<div class="tab-button"></div>
 				<div id="general-tab-button" class="tab-button selected">General</div>
+				<div id="login-tab-button" class="tab-button">Login</div>
 				<div id="wire-tab-button" class="tab-button">Currency Send</div>
 				<div id="event-tab-button" class="tab-button">Auto Event</div>
-				<div id="alt-tab-button" class="tab-button">Alts</div>
+				<div id="interface-tab-button" class="tab-button">Interface</div>
 				<div id="advanced-tab-button" class="tab-button">Advanced</div>
 			</div>
 		</header>
@@ -38,12 +39,97 @@
 		<form id="settings">
 			<table id="general" class="tab selected">
 				<colgroup>
-					<col id="col-1-1"> <!--first column in the first table-->
-					<col id="col-1-2"> <!--second column in the first table-->
+					<col id="general-col-1"> <!--First column in the general table-->
+					<col id="general-col-2"> <!--Second column in the general table-->
 				</colgroup>
 				<thead>
 					<tr>
 						<th colspan="2">General Settings</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>
+							<label for="auto-stamina">Auto Stamina</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Automatically replenish stamina when under the minimum."></span>
+						</td>
+						<td>
+							<input id="auto-stamina" type="checkbox">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="min-stamina">Minimum Stamina</label>
+						</td>
+						<td>
+							<input id="min-stamina" pattern="^\d+$" placeholder="Minimum Stamina" size=15>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="auto-quests">Auto Quests</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Automatically complete and start quests."></span>
+						</td>
+						<td>
+							<input id="auto-quests" type="checkbox">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="auto-house">Auto House</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Automatically build house items and start Harvestron jobs.&#10;Requires Alarm Clock for auto construction and Harvestron for auto Harvestron."></span>
+						</td>	
+						<td>
+							<input id="auto-house" type="checkbox">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="auto-house-custom">Enable Custom Build</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Adds a field in the house screen which allows you to set a custom item to build instead of always building the quickest."></span>
+						</td>
+						<td>
+							<input id="auto-house" type="checkbox">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="auto-craft">Auto Craft</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Automatically fill the crafting queue when under the minimum."></span>
+						</td>
+						<td>
+							<input id="auto-craft" type="checkbox">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="min-crafting-queue">Minimum Crafting Queue Items</label>
+						</td>
+						<td>
+							<input id="min-crafting-queue" pattern="^\d+$" placeholder="Minimum Queue" size=15>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="daily-crystals">Daily Crystals Amount</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="How many crystals to buy every day."></span>
+						</td>
+						<td>
+							<input id="daily-crystals" pattern="^\d+$" placeholder="Crystals Amount" size=15>
+							<div id="daily-crystals-text">Price: <span id="daily-crystals-price"></span></div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<table id="login" class="tab">
+				<colgroup>
+					<col id="login-col-1">
+					<col id="login-col-2">
+				</colgroup>
+				<thead>
+					<tr>
+						<th colspan="2">Login Settings</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -76,21 +162,42 @@
 					</tr>
 					<tr>
 						<td>
-							<label for="min-crafting-queue">Minimum Crafting Queue</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="If there are less items in the queue than this number, it will be automatically filled."></span>
+							<label for="alt-name-type">Name Pattern<span id="alt-name-type-required" class="required">*</span></label>
+							<span class="info" role="img" aria-label="info" data-tooltip="The name pattern for your alts.&#10;Examples:&#10;Roman Numerals: &quot;altI&quot; and &quot;altii&quot;.&#10;Unique Names: &quot;altCraft&quot; and &quot;testAccount&quot;."></span>
 						</td>
 						<td>
-							<input id="min-crafting-queue" pattern="^\d+$" placeholder="Minimum Queue" size=15>
+							<select id="alt-name-type" required>
+								<option value="" selected hidden>Select Name Pattern</option>
+								<option value="roman">Roman Numerals</option>
+								<option value="unique">Unique Names</option>
+							</select>
 						</td>
 					</tr>
-					<tr>
+					<tr id="number">
 						<td>
-							<label for="daily-crystals">Daily Crystals Amount</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="How many crystals to buy every day."></span>
+							<label for="alts-number">Number of Alts</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Number of alts, not including main account."></span>
 						</td>
 						<td>
-							<input id="daily-crystals" pattern="^\d+$" placeholder="Crystals Amount" size=15>
-							<div id="daily-crystals-text">Price: <span id="daily-crystals-price"></span></div>
+							<input id="alts-number" pattern="^\d{1,3}$" placeholder="Number of Alts" size="24">
+						</td>
+					</tr>
+					<tr id="alts-base-name">
+						<td>
+							<label for="alt-name">Alts Base Name</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="The base name for your alts.&#10;For example, if your alts are &quot;alti&quot; and &quot;altii&quot;, then the base name is &quot;alt&quot;."></span>
+						</td>
+						<td>
+							<input id="alt-name" pattern="^[A-z\d]{3,20}$" placeholder="Alt Base Name" size="24">
+						</td>
+					</tr>
+					<tr id="alts-unique-names">
+						<td>
+							<label for="name-list">Unique Names List</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="List of the names for your alts, sperated by commas and spaces.&#10;Example: &quot;altFish, altTwo, WeirdName, myAlt&quot;."></span>
+						</td>
+						<td>
+							<input id="name-list" pattern="^[A-z\d, ]{3,}$" placeholder="Unique Names List" size="24">
 						</td>
 					</tr>
 				</tbody>
@@ -98,17 +205,19 @@
 
 			<table id="wire" class="tab">
 				<colgroup>
-					<col id="col-2-1">
-					<col id="col-2-2">
-					<col id="col-2-3">
+					<col id="wire-col-1">
+					<col id="wire-col-2">
+					<col id="wire-col-3">
 				</colgroup>
-				<tbody>
+				<thead>
 					<tr>
-						<th colspan=3>
+						<th colspan="3">
 							Currency Send Settings
 							<span class="title-info" aria-label="info" data-tooltip="Currency sending controls.&#10;Left column: Enable or disable sending of the currency.&#10;Middle column: Name of the currency.&#10;Right column: Amount of said currency to be kept when sending this currency.&#10;&#10;For example, if you marked the checkbox on the &quot;Crystals&quot; row, and typed &quot;100&quot; in the input box to the right, the alts will send their crystals, but will always keep at least 100 crystals on them."></span>
 						</th>
 					</tr>
+				</thead>
+				<tbody>
 					<tr>
 						<td class="checkbox-td">
 							<input id="auto-wire" type="checkbox">
@@ -227,15 +336,26 @@
 
 			<table id="event" class="tab">
 				<colgroup>
-					<col id="col-3-1">
-					<col id="col-3-2">
+					<col id="event-col-1">
+					<col id="event-col-2">
 				</colgroup>
-				<tbody>
+				<thead>
 					<tr>
 						<th colspan="2">
 							Auto Event Settings
-							<span class="title-info" aria-label="info" data-tooltip="Auto event controls.&#10;Enter the names, sperated with commas and spaces, in the input boxes to the right of the corresponding tradeskill.&#10;&#10;For example, if you want your alts named &quot;altI&quot; and &quot;altII&quot; to fish in the event, enter &quot;altI, altII&quot; in the input box next to the word &quot;Fishing&quot;."></span>
+							<span class="title-info" aria-label="info" data-tooltip="Auto event controls.&#10;Enter the names, sperated by commas and spaces, to the right of the corresponding tradeskill.&#10;&#10;For example, if you want your alts named &quot;altI&quot; and &quot;altII&quot; to fish in the event, enter &quot;altI, altII&quot; next to the word &quot;Fishing&quot;."></span>
 						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>
+							<label for="auto-event">Join Events</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="To automatically join Events, you first have to add all the users that you want to join events to the special event channel. Ask in main chat if you do not know how to do this.&#10;After you are in the channel, any player can initate an event by typing in the channel chat &quot;InitEvent&quot;."></span>
+						</td>
+						<td>
+							<input id="auto-event" type="checkbox">
+						</td>
 					</tr>
 					<tr>
 						<td>
@@ -288,62 +408,61 @@
 				</tbody>
 			</table>
 
-			<table id="alt" class="tab">
+			<table id="interface" class="tab">
 				<colgroup>
-					<col id="col-4-1">
-					<col id="col-4-2">
+					<col id="interface-col-1">
+					<col id="interface-col-2">
 				</colgroup>
+				<thead>
+					<tr>
+						<th colspan="2">Interface Settings</th>
+					</tr>
+				</thead>
 				<tbody>
 					<tr>
-						<th colspan=2>Alt Settings</th>
+						<td class="checkbox-td">
+							<input id="append-name" type="checkbox">
+						</td>
+						<td>
+							<label for="append-name">Add Username Next to Room Name</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Adds the username next to the room name to help see it easily."></span>
+						</td>
 					</tr>
 					<tr>
-						<td>
-							<label for="alt-name-type">Name Pattern<span id="alt-name-type-required" class="required">*</span></label>
-							<span class="info" role="img" aria-label="info" data-tooltip="The name pattern for your alts.&#10;Examples:&#10;Roman Numerals: &quot;altI&quot; and &quot;altii&quot;.&#10;Unique Names: &quot;altCraft&quot; and &quot;testAccount&quot;."></span>
+						<td class="checkbox-td">
+							<input id="alt-jump-button" type="checkbox">
 						</td>
 						<td>
-							<select id="alt-name-type" required>
-								<option value="" selected hidden>Select Name Pattern</option>
-								<option value="roman">Roman Numerals</option>
-								<option value="unique">Unique Names</option>
-							</select>
+							<label for="alt-jump-button">Add Jump Mobs Button for Alts</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Adds a &quot;Jump Mobs&quot; button to the mob selection screen on alts.&#10;Fill a number on the left and click the button to make all of your alts jump up the number of mobs specified.&#10;Can also be used with negative values to jump down."></span>
 						</td>
 					</tr>
-					<tr id="number">
-						<td>
-							<label for="alts-number">Number of Alts</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Number of alts, not including main account."></span>
+					<tr>
+						<td class="checkbox-td">
+							<input id="alt-spawn-button" type="checkbox">
 						</td>
 						<td>
-							<input id="alts-number" pattern="^\d{1,3}$" placeholder="Number of Alts" size="24">
-						</td>
-					</tr>
-					<tr id="alts-base-name">
-						<td>
-							<label for="alt-name">Alts Base Name</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="The base name for your alts.&#10;For example, if your alts are &quot;alti&quot; and &quot;altii&quot;, then the base name is &quot;alt&quot;."></span>
-						</td>
-						<td>
-							<input id="alt-name" pattern="^[A-z\d]{3,20}$" placeholder="Alt Base Name" size="24">
+							<label for="alt-spawn-button">Add Spawn Gems Button for Alts</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Adds a &quot;Spawn For All Alts&quot; button to the spawn gems screen on alts.&#10;Clicking the button will spawn the currently selected gems for all alts."></span>
 						</td>
 					</tr>
-					<tr id="alts-unique-names">
-						<td>
-							<label for="name-list">Unique Names List</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="List of the names for your alts, sperated by commas and spaces.&#10;Example: &quot;altFish, altTwo, WeirdName, myAlt&quot;."></span>
+					<tr>
+						<td class="checkbox-td">
+							<input id="wire-button" type="checkbox">
 						</td>
 						<td>
-							<input id="name-list" pattern="^[A-z\d, ]{3,}$" placeholder="Unique Names List" size="24">
+							<label for="wire-button">Add Request Currency Button</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Adds a &quot;Request Currency&quot; button on all users.&#10;Clicking the button will cause all other users to send their excess currencies (according to the settings bellow) to the asking user."></span>
 						</td>
 					</tr>
 				</tbody>
 			</table>
 
+
 			<table id="advanced" class="tab">
 				<colgroup>
-					<col id="col-5-1">
-					<col id="col-5-2">
+					<col id="advanced-col-1">
+					<col id="advanced-col-2">
 				</colgroup>
 				<thead>
 					<tr>
@@ -370,7 +489,7 @@
 								<textarea id="custom-css" spellcheck="false" autocomplete="off" rows="10" cols="22"></textarea>
 								<button id="reset-css" type="button">
 									<span class="circle"></span>
-									<span>Reset to default values</span>
+									<span>Reset to default</span>
 								</button>
 							</div>
 						</td>

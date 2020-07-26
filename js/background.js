@@ -2,31 +2,28 @@
 
 const VARS_VERSION = 8
 const ADDON_CSS =
-`#clearUsername {
-	font-size: 25px;
+`#clear-username {
 	color: yellow;
+	font-size: 25px;
 	line-height: 10px;
 }
-#sendMeCurrency a {
-	text-decoration: none;
+#send-me-currency {
+	margin-left: 10px
+}
+#send-me-currency a {
 	line-height: 10px;
 	padding: 3px;
+	text-decoration: none;
 }
-#betabotMobJumpButton {
+#betabot-mob-jump-button {
 	font-size: 14px;
 	padding: 6.5px;
 }
-#sendMeCurrency {
-	margin-left: 10px
-}
-#betabotBuyCrys {
-	padding: 6.5px;
-}
-#customBuild + label > a {
-	text-decoration: none;
+label[for=custom-build] a {
 	padding: 3px;
+	text-decoration: none;
 }
-#betabotSpawnGem[disabled] {
+#betabot-spawn-gem[disabled] {
 	opacity: 0.5;
 }`
 const CUSTOM_CSS =
