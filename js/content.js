@@ -1,5 +1,5 @@
 /* ~~~ To Do ~~~
- * Choose when to attack in events
+ * vars.attackAt
  * Allow on/off toggling for all features. Left:
  ** vars.autoStamina
  ** vars.minStamina

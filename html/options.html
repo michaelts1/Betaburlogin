@@ -7,10 +7,10 @@
 		<script src="../js/jquery-3.4.1.min.js"></script>
 	</head>
 	<body class="options-page">
-		<!--Top panel-->
+		<!-- Top panel -->
 		<header id="top">
 			<h1>BetaburLogin Options Page</h1>
-			<!--Tabs navigation-->
+			<!-- Tabs navigation -->
 			<div id="tabs-buttons">
 				<div class="tab-button"></div>
 				<div id="general-tab-button" class="tab-button selected">General</div>
@@ -22,7 +22,7 @@
 			</div>
 		</header>
 
-		<!--Save/Cancel Changes buttons-->
+		<!-- Save/Cancel Changes buttons -->
 		<div id="form-buttons">
 			<button id="save-changes" type="button">
 				<span class="circle"></span>
@@ -35,12 +35,12 @@
 		</div>
 		<p id="form-buttons-output"></p>
 
-		<!--Settings, using <form> to enable validation-->
+		<!-- Settings, using <form> to enable validation -->
 		<form id="settings">
 			<table id="general" class="tab selected">
 				<colgroup>
-					<col id="general-col-1"> <!--First column in the general table-->
-					<col id="general-col-2"> <!--Second column in the general table-->
+					<col id="general-col-1"> <!-- First column in the general table -->
+					<col id="general-col-2"> <!-- Second column in the general table -->
 				</colgroup>
 				<thead>
 					<tr>
@@ -355,6 +355,16 @@
 						</td>
 						<td>
 							<input id="auto-event" type="checkbox">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="attack-at">Attack At</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="When automatically joining event, switch to battle when this number of minutes are left.&#10;For example, if you type 5, you will automatically attack the event boss when there are only 5 minutes left.&#10;0 to disable."></span>
+						</td>
+						<td>
+							<!-- Only accept numbers between 0 and 15 -->
+							<input id="attack-at" pattern="(^0[0-9]$)|(^1[0-5]$)|(^\d$)" placeholder="Minutes" size="6"> Minutes Left
 						</td>
 					</tr>
 					<tr>

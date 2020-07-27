@@ -1,6 +1,6 @@
 "use strict"
 
-const VARS_VERSION = 9
+const VARS_VERSION = 10
 const ADDON_CSS =
 `#clear-username {
 	color: yellow;
@@ -216,6 +216,7 @@ async function getVars() {
 			dailyCrystals    : 50,
 			minCraftingQueue : 5,
 			minStamina       : 5,
+			attackAt         : 3,
 			altsNumber       : 0,
 			wireFrequency    : 0,
 			autoStamina      : true,
@@ -329,11 +330,9 @@ async function updateVars() {
 		case VARS_VERSION:
 			return
 		case 2:
-			vars.mainUsername = ""
-		case 3:
 			vars.pattern = ""
 			vars.namesList = []
-		case 4:
+		case 3:
 			vars.tradesList = {
 				fishing      : [],
 				woodcutting  : [],
@@ -342,7 +341,7 @@ async function updateVars() {
 				crafting     : [],
 				carving      : [],
 			}
-		case 5:
+		case 4:
 			for (const trade of ["food", "wood", "iron", "stone"]) {
 				vars.currencySend.push({
 					name : trade,
@@ -351,9 +350,9 @@ async function updateVars() {
 					keepAmount : 10000000,
 				})
 			}
-		case 6:
+		case 5:
 			vars.autoWire = false
-		case 7:
+		case 6:
 			vars.css = {
 				addon : ADDON_CSS,
 				custom: CUSTOM_CSS,
@@ -361,17 +360,17 @@ async function updateVars() {
 			vars.verbose = false
 			vars.containers = ["betabot-default"]
 			vars.wireFrequency = 60
-		case 8:
+		case 7:
 			vars.containers = {
 				useAll: true,
 				list  : [],
 			}
 			if (vars.pattern === "romanCaps") vars.pattern = "roman" // Deprecated
-		case 9:
+		case 8:
 			vars.autoQuests = vars.doQuests
 			vars.autoHouse  = vars.doBuildingAndHarvy
 			vars.autoCraft  = vars.doCraftQueue
-			await browser.storage.sync.remove(["doQuests", "vars.doBuildingAndHarvy", "vars.doCraftQueue",])
+			await browser.storage.sync.remove(["doQuests", "vars.doBuildingAndHarvy", "vars.doCraftQueue",]) // Name Change
 			vars.minStamina      = 5
 			vars.autoStamina     = true
 			vars.joinEvents      = true
@@ -380,6 +379,8 @@ async function updateVars() {
 			vars.addJumpMobs     = true
 			vars.addSpawnGems    = true
 			vars.addRequestMoney = true
+		case 9:
+			vars.attackAt        = 3
 		default:
 			vars.version = VARS_VERSION
 			if (vars.css.addon !== ADDON_CSS) {

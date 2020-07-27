@@ -66,6 +66,7 @@ async function fillFields() {
 
 
 	$("#alt-name")          .val(vars.altBaseName)
+	$("#attack-at")         .val(vars.attackAt)
 	$("#name-list")         .val(vars.namesList.join(", "))
 	$("#login-pass")        .val(vars.loginPassword)
 	$("#custom-css")        .val(vars.css.custom)
@@ -121,6 +122,7 @@ async function saveChanges() {
 
 
 		vars.pattern       = $("#alt-nameType").val()
+		vars.attackAt      = $("#attack-at").val()
 		vars.namesList     = $("#name-list").val().split(', ')
 		vars.minStamina    = $("#min-stamina").val()
 		vars.css.custom    = $("#custom-css").val()
