@@ -568,7 +568,7 @@ $(document).on("roa-ws:all", function(event, data){
 
 	function getTrade() {
 		for (const trade of Object.keys(vars.tradesList)) {
-			if (vars.tradesList[trade].includes(username)) {
+			if (vars.tradesList[trade].includes(username.toLowerCase())) {
 				return trade
 			}
 		}
