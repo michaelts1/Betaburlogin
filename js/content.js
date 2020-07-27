@@ -1,16 +1,19 @@
 /* ~~~ To Do ~~~
+ * Choose when to attack in events
  * Allow on/off toggling for all features. Left:
- ** Jump mobs
- ** Auto event
- ** Spawn gems
- ** Append name
- ** Wire button
- ** Auto stamina
- ** Select house build
+ ** vars.autoStamina
+ ** vars.minStamina
+ ** vars.joinEvents
+ ** vars.addUsername
+ ** vars.addRequestMoney
+ ** vars.addJumpMobs
+ ** vars.addSpawnGems
+ ** vars.addCustomBuild
 
    ~~~ Needs Testing ~~~
  * Make custom-build user friendly
  * RoA-WS
+ * Reset autoWire
  */
 
 "use strict"
@@ -90,11 +93,14 @@ async function betaGame() {
 		isAlt = username !== vars.mainUsername
 		mainTrade = getTrade()
 
-		if (changes.wireFrequency.oldValue !== changes.wireFrequency.newValue) { // If wireFrequency has changed, reset autoWire
-			clearInterval(autoWireID)
-			autoWireID = null
+		for (const wireRelated of ["wireFrequency", "mainUsername",]) { // If one of these has changed, reset autoWire
+			if (changes[wireRelated].oldValue !== changes[wireRelated].newValue) {
+				clearInterval(autoWireID)
+				autoWireID = null
+			}
 		}
 
+		// Turn on/off autoWire if needed
 		if (autoWireID && !vars.autoWire) {
 			clearInterval(autoWireID)
 			autoWireID = null
@@ -579,7 +585,7 @@ $(document).on("roa-ws:all", function(event, data){
 			BUTTONS.battle.click()
 		}
 
-		if (time.includes("03m")) {
+		if (time.includes("02m")) {
 			if (vars.verbose) log("Attacking event boss (time)")
 			if (!isAlt || (isAlt && !mainEvent)) {
 				BUTTONS.battle.click()
