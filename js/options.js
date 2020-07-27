@@ -123,6 +123,7 @@ async function saveChanges() {
 		}
 
 		vars.pattern        = $("#alt-nameType").val()
+		vars.attackAt       = $("#attack-at").val() || "3"
 		vars.namesList      = $("#name-list").val().split(', ')
 		vars.css.custom     = $("#custom-css").val()
 		vars.altBaseName    = $("#alt-name").val()
@@ -147,7 +148,6 @@ async function saveChanges() {
 		vars.addRequestMoney   = $("#wire-button").prop("checked")
 		vars.containers.useAll = $("#containers-auto").prop("checked")
 
-		vars.attackAt         = parseInt($("#attack-at").val()) || 3
 		vars.altsNumber       = parseInt($("#alts-number").val()) || 0
 		vars.minStamina       = parseInt($("#min-stamina").val()) || 5
 		vars.dailyCrystals    = parseInt($("#daily-crystals").val()) || 0

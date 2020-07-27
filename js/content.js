@@ -1,11 +1,8 @@
 /* ~~~ To Do ~~~
- * vars.attackAt
- * vars.eventChannelID
  * vars.addOpenTabs   
  * vars.addLoginAlts  
  * vars.autoStamina
  * vars.minStamina
- * vars.joinEvents
  * vars.addUsername
  * vars.addRequestMoney
  * vars.addJumpMobs
@@ -13,6 +10,9 @@
  * vars.addCustomBuild
 
    ~~~ Needs Testing ~~~
+ * vars.joinEvents
+ * vars.attackAt
+ * vars.eventChannelID
  * Make custom-build user friendly
  * RoA-WS
  * Reset autoWire
@@ -550,8 +550,6 @@ $(document).on("roa-ws:all", function(event, data){
 	let motdReceived    = false
 	let carvingChanged  = false
 
-	//const CHANNEL = 3203 // Debugging channel
-	const CHANNEL = 3202 // Production channel
 	const BUTTONS = {
 		battle      : $(".bossFight.btn.btn-primary")[0],
 		fishing     : $(".bossHarvest.btn")[4],
@@ -586,8 +584,7 @@ $(document).on("roa-ws:all", function(event, data){
 			carvingChanged = true
 			BUTTONS.battle.click()
 		}
-
-		if (time.includes("02m")) {
+		if (time.includes(`${vars.attackAt.padStart(2, 0)}m`)) {
 			if (vars.verbose) log("Attacking event boss (time)")
 			if (!isAlt || (isAlt && !mainEvent)) {
 				BUTTONS.battle.click()
@@ -595,34 +592,32 @@ $(document).on("roa-ws:all", function(event, data){
 			$("#eventCountdown").unbind()
 			carvingChanged = false
 			mainEvent = false
+			eventInProgress = false
 		}
 	}
 
 	async function joinEvent(msgContent, msgID) {
 		await delay(vars.startActionsDelay)
-		if (eventInProgress === false) {
-			if (msgContent === "InitEvent" || msgContent === "MainEvent") {
-				eventInProgress = true
-				if (msgID !== eventID) {
-					mainEvent = false
-					if (msgContent === "MainEvent") {
-						mainEvent = true
-					}
-					eventID = msgID
-
-					if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} event due to message #${msgID}`)
-					BUTTONS[mainTrade].click()
-					$("#eventCountdown").bind("DOMSubtreeModified", changeTrade)
+		if (vars.joinEvents && !eventInProgress && (msgContent === "InitEvent" || msgContent === "MainEvent")) {
+			eventInProgress = true
+			if (eventID !== msgID) {
+				eventID = msgID
+				mainEvent = false
+				if (msgContent === "MainEvent") {
+					mainEvent = true
 				}
+
+				if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} event due to message #${msgID}`)
+				BUTTONS[mainTrade].click()
+				$("#eventCountdown").bind("DOMSubtreeModified", changeTrade)
 			}
-			await delay(vars.startActionsDelay)
-			eventInProgress = false
 		}
+		await delay(vars.startActionsDelay)
 	}
 
 	setTimeout(() => {
 		$(document).on("roa-ws:message", async (event, data) => {
-			if (data.c_id === CHANNEL) {
+			if (data.c_id === vars.eventChannelID) {
 				await delay(vars.startActionsDelay)
 				// Wait to see if the message is recieved together with a message of the day,
 				// which means it was only sent due to a chat reconnection, and we should not join the event.
