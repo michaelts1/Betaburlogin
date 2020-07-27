@@ -1,18 +1,14 @@
 /* ~~~ To Do ~~~
- * vars.addUsername
- * vars.addRequestMoney
- * vars.addJumpMobs
- * vars.addSpawnGems
- * vars.addCustomBuild
-
-   ~~~ Needs Testing ~~~
- * Open Beta Tabs setting
- * Login All Alts setting
+ * New option - Don't remove effects info
+ *
+ * ~~~ Needs Testing ~~~
+ * All interface settings
+ * Changing CSS
  * Stamina
  * Events
  * Custom build
  * RoA-WS
- * Reset autoWire when settings change
+ * Changing autoWire settings
  */
 
 "use strict"
@@ -111,6 +107,8 @@ async function betaGame() {
 			autoWireID = setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername)
 		}
 
+		toggleInterfaceChanges()
+
 		if (vars.verbose) log(`Alt: ${isAlt ? "yes" : "no"}\nEvent TS: ${mainTrade}\nAuto Wire: ${autoWireID ? "on" : "off"}`)
 	}
 	browser.storage.onChanged.addListener(refreshVars)
@@ -125,6 +123,113 @@ async function betaGame() {
 		if (message.text === "buy crystals now") autoBuyCrys()
 		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
 	})
+
+	function toggleInterfaceChanges() {
+		// Add Request Currency Button:
+		if (vars.addRequestMoney && $("#betabot-request-currency")[0] === undefined) {
+			$("#username").after(`<button id="betabot-request-currency"><a>Request Currency</a></button>`)
+			$("#betabot-request-currency").click(() => { port.postMessage({text: "requesting currency"}) })
+		} else if (vars.addRequestMoney === false && $("#betabot-request-currency")[0] !== undefined) {
+			$("#betabot-request-currency").remove()
+		}
+	
+		// Make it easier to see what alt it is:
+		function appendName() {
+			if ($("#roomName").text().search(username) === -1) {
+				$("#roomName").append(`<span id="betabot-clear-username">${username}</span>`)
+				if (vars.verbose) log("Appended username to room name")
+			}
+		}
+		const keepUsernameVisible = new MutationObserver(appendName)
+		if (vars.addUsername) {
+			appendName()
+			keepUsernameVisible.observe($("#roomName")[0], {attributes: true, childList: true, subtree: true})
+		} else {
+			keepUsernameVisible.disconnect()
+			$("#betabot-clear-username").remove()
+		}
+	
+		// Add option to build a specific item:
+		function getCustomBuild() {
+			vars.actionsPending = true
+			$("#allHouseUpgrades").click()
+
+			$(document).one("roa-ws:page:house_all_builds", (event, data) => {
+				setTimeout(itemBuilding)
+
+				const items = []
+				data.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
+
+				$("#houseQuickBuildWrapper").append(`<div id="betabot-custom-build">Build a specific item:
+				<select id="betabot-select-build"><option value="" selected>None (Build Fastest)</option></select></div>`)
+
+				for (const item of items) {
+					$("#betabot-select-build").append(`<option value="${item.i}">${item.n}</option>`)
+				}
+			})
+		}
+		if (vars.addCustomBuild && $("#betabot-custom-build")[0] === undefined) {
+			getCustomBuild()
+		} else if (vars.addCustomBuild === false && $("#betabot-custom-build")[0] !== undefined) {
+			$("#betabot-custom-build").remove()
+		}
+
+		if (!isAlt) return // Only run the rest on alts
+
+		// Jump mobs:
+		if (vars.addJumpMobs && $("#betabot-mob-jump")[0] === undefined) {
+			$("#autoEnemy").after(`
+			<div class="mt10" id="betabot-mob-jump" style="display: block;">
+				<input id="betabot-mob-jump-number" type="number" size=1>
+				<input id="betabot-mob-jump-button" type="button" value="Jump Mobs">
+			</div>`)
+
+			$("#betabot-mob-jump-button").click(() => {
+				const number = parseInt($("#enemyList>option:selected").val()) + parseInt($("#betabot-mob-jump-number").val())
+				const maxNumber = parseInt($(`#enemyList>option:last-child`).val())
+				if (number > maxNumber) {
+					$("#areaName").text("The mob you chose is not in the list!")
+					return
+				}
+
+				port.postMessage({text: "move to mob", number: number})
+				if (vars.verbose) log(`Requested to move all alts ${number} mobs up`)
+			})
+		} else if (vars.addJumpMobs === false && $("#betabot-mob-jump")[0] === undefined) {
+			$("#betabot-mob-jump").remove()
+		}
+
+		// Spawn gems:
+		$(document).on("roa-ws:modalContent", (event, data) => {
+			if (vars.addSpawnGems && data.title === "Spawn Gems") {
+				$("#gemSpawnConfirm").after(`<input id="betabot-spawn-gem" type="button" style="padding:6.5px; margin: 0 -.5em 0 .5em;" value="Spawn For All Alts">`)
+
+				$("#betabot-spawn-gem").on("click", () => {
+					const msg = {
+						text  : "spawnGem",
+						tier  : parseInt($("#spawnGemLevel").val()),
+						type  : parseInt($("#gemSpawnType").val()),
+						splice: parseInt($("#gemSpawnSpliceType").val()),
+						amount: parseInt($("#gemSpawnCount").val()),
+					}
+					port.postMessage(msg)
+					if (vars.verbose) log(`Requested to spawn ${msg.amount} tier ${msg.tier} gems with type value of ${msg.type} and splice value of ${msg.splice}`)
+				})
+			}
+		})
+
+		// Custom style:
+		const cssChanged = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` !== $("#betabot-css").prop("href")
+		if (cssChanged || $("#betabot-css")[0] === undefined) { // If the code has changed, or if it was never injected
+			$("#betabot-css").remove()
+			const elm = document.createElement("link");
+			elm.href = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` // Decode CSS into base64 and use it as a link to avoid code injection
+			elm.type = "text/css"
+			elm.rel  = "stylesheet"
+			elm.id   = "betabot-css"
+			document.head.appendChild(elm)
+		}
+	}
 
 	function jumpMobs(number) {
 		if (vars.verbose) log(`Jumping ${number} mobs`)
@@ -179,62 +284,6 @@ async function betaGame() {
 		$("#chatSendMessage").click()
 	}
 
-	// Only run on alts:
-	if (isAlt) {
-		// Jump mobs:
-		if ($("#betabot-mob-jump")[0] === undefined) {
-			$("#autoEnemy").after(`
-			<div class="mt10" id="betabot-mob-jump" style="display: block;">
-				<input id="betabot-mob-jump-Number" type="number" size=1>
-				<input id="betabot-mob-jump-button" type="button" value="Jump Mobs">
-			</div>
-			`)
-		}
-		$("#betabot-mob-jump-button").click(() => {
-			// :selected won't work here, since we want the last monster won, not the currently selected mob (do we?)
-			// const number = parseInt($("#enemyList>option[selected]").val()) + parseInt($("#betabot-mob-jump-Number").val())
-			const number = parseInt($("#enemyList>option:selected").val()) + parseInt($("#betabot-mob-jump-Number").val())
-			const maxNumber = parseInt($(`#enemyList>option:last-child`).val())
-			if (number > maxNumber) {
-				$("#areaName").text("the mob you chose is not in the list!")
-				return
-			}
-			port.postMessage({text: "move to mob", number: number})
-			if (vars.verbose) log(`Requested to move all alts ${number} mobs up`)
-		})
-
-		// Spawn gems:
-		$(document).on("roa-ws:modalContent", (event, data) => {
-			if (data.title === "Spawn Gems") {
-				if ($("#betabot-spawn-gem")[0] === undefined) {
-					$("#gemSpawnConfirm").after(`<input id="betabot-spawn-gem" type="button" style="padding:6.5px; margin: 0 -.5em 0 .5em;" value="Spawn For All Alts">`)
-				}
-				$("#betabot-spawn-gem").on("click", () => {
-					const msg = {
-						text  : "spawnGem",
-						tier  : parseInt($("#spawnGemLevel").val()),
-						type  : parseInt($("#gemSpawnType").val()),
-						splice: parseInt($("#gemSpawnSpliceType").val()),
-						amount: parseInt($("#gemSpawnCount").val()),
-					}
-					port.postMessage(msg)
-					if (vars.verbose) log(`Requested to spawn ${msg.amount} level ${msg.tier*10} gems with type value of ${msg.type} and splice value of ${msg.splice}`)
-				})
-			}
-		})
-	}
-
-	// Make it easier to see what alt it is:
-	function appendName() {
-		if ($("#roomName").text().search(username) === -1) {
-			$("#roomName").append(`: <span id="clear-username">${username}</span>`)
-			if (vars.verbose) log("Appended username to room name")
-		}
-	}
-	const keepUsernameVisible = new MutationObserver(appendName)
-	keepUsernameVisible.observe($("#roomName")[0], { attributes: true, childList: true, subtree: true })
-	appendName()
-
 	// Make it easier to send currency:
 	function wire(target) {
 		if (target === username) return
@@ -265,11 +314,6 @@ async function betaGame() {
 			$("#chatSendMessage").click()
 		}
 	}
-
-	if ($("#send-me-currency")[0] === undefined) {
-		$("#username").after(`<button id="send-me-currency"><a>Request Currency</a></button>`)
-	}
-	$("#send-me-currency").click(() => { port.postMessage({text: "requesting currency"}) })
 
 	// RoA-WS. Taken from: https://github.com/edvordo/RoA-WSHookUp/blob/master/RoA-WSHookUp.user.js
 	// Re-inject the script
@@ -350,21 +394,6 @@ $(document).on("roa-ws:all", function(event, data){
 			}, 60*1000)
 		}
 	})
-
-	// Add option to build a specific item
-	if ($("#betabot-select-build")[0] === undefined) {
-		vars.actionsPending = true
-		$("#allHouseUpgrades").click()
-		$(document).one("roa-ws:page:house_all_builds", (e, d) => {
-			setTimeout(itemBuilding)
-			const items = []
-			d.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
-			$("#houseQuickBuildWrapper").append(`Build a specific item: <select id="betabot-select-build"><option value="" selected>Select item</option></select>`)
-			for (const item of items) {
-				$("#betabot-select-build").append(`<option value="${item.i}">${item.n}</option>`)
-			}
-		})
-	}
 
 	// Buy crystals every 24 hours
 	function autoBuyCrys() {
@@ -635,16 +664,6 @@ $(document).on("roa-ws:all", function(event, data){
 		await delay(vars.startActionsDelay * 5)
 		motdReceived = false
 	})
-
-	// Custom style:
-	if ($("#betabot-css")[0] === undefined) {
-		const elm = document.createElement("link");
-		elm.href = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` // Decode CSS into base64 and use it as a link to avoid code injection
-		elm.type = "text/css"
-		elm.rel  = "stylesheet"
-		elm.id   = "betabot-css"
-		document.head.appendChild(elm)
-	}
 
 	if ($("#effectInfo")[0] !== undefined) {
 		$("#effectInfo").remove()

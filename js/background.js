@@ -2,15 +2,18 @@
 
 const VARS_VERSION = 10
 const ADDON_CSS =
-`#clear-username {
+`#betabot-clear-username {
 	color: yellow;
 	font-size: 25px;
 	line-height: 10px;
 }
-#send-me-currency {
+#betabot-clear-username::before {
+	content: ": "
+}
+#betabot-request-currency {
 	margin-left: 10px
 }
-#send-me-currency a {
+#betabot-request-currency a {
 	line-height: 10px;
 	padding: 3px;
 	text-decoration: none;
@@ -331,7 +334,7 @@ async function updateVars() {
 
 	switch (vars.version) { // Falling through cases to update everything
 		case VARS_VERSION:
-			return
+			break
 		case 2:
 			vars.pattern = ""
 			vars.namesList = []
@@ -389,11 +392,12 @@ async function updateVars() {
 			vars.addLoginAlts   = true
 		default:
 			vars.version = VARS_VERSION
-			if (vars.css.addon !== ADDON_CSS) {
-				vars.css.addon = ADDON_CSS
-			}
-			browser.storage.sync.set(vars)
 	}
+
+	if (vars.css.addon !== ADDON_CSS) {
+		vars.css.addon = ADDON_CSS
+	}
+	browser.storage.sync.set(vars)
 }
 
 browser.storage.onChanged.addListener(changes => {
