@@ -80,7 +80,7 @@ async function betaGame() {
 	let vars            = await browser.storage.sync.get()
 	let username        = $("#username").text()
 	let isAlt           = username !== vars.mainUsername
-	let betabotCooldown = false
+	let staminaCooldown = false
 	let mainTrade       = getTrade()
 	let autoWireID      = vars.autoWire ? setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername) : null
 
@@ -499,11 +499,11 @@ $(document).on("roa-ws:all", function(event, data){
 	const checkResults = (event, data) => {
 		data = data.results.p
 
-		if (data.autos_remaining < 5 && !betabotCooldown) { // Stamina
+		if (vars.autoStamina && data.autos_remaining < vars.minStamina && !staminaCooldown) { // Stamina
 			if (vars.verbose) log("Replenishing stamina")
 			$("#replenishStamina").click()
-			betabotCooldown = true
-			setTimeout(() => {betabotCooldown = false}, 2500)
+			staminaCooldown = true
+			setTimeout(() => {staminaCooldown = false}, 2500)
 			return
 		}
 
