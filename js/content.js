@@ -1,8 +1,4 @@
 /* ~~~ To Do ~~~
- * vars.addOpenTabs   
- * vars.addLoginAlts  
- * vars.autoStamina
- * vars.minStamina
  * vars.addUsername
  * vars.addRequestMoney
  * vars.addJumpMobs
@@ -10,12 +6,13 @@
  * vars.addCustomBuild
 
    ~~~ Needs Testing ~~~
- * vars.joinEvents
- * vars.attackAt
- * vars.eventChannelID
- * Make custom-build user friendly
+ * Open Beta Tabs setting
+ * Login All Alts setting
+ * Stamina
+ * Events
+ * Custom build
  * RoA-WS
- * Reset autoWire
+ * Reset autoWire when settings change
  */
 
 "use strict"
@@ -39,23 +36,19 @@ async function liveLogin() {
 	const verbose = (await browser.storage.sync.get("verbose")).verbose
 	if (verbose) log("Starting up (Live Login)")
 
-	port = browser.runtime.connect({name: "live"})
-	$("#login_notification").html(`<button id="open-alt-tabs">Open Beta Tabs</button>`)
-	$("#open-alt-tabs").click(() => {
-		port.postMessage({text: "open alt tabs"})
-		if (verbose) log("Requesting background script to open alt tabs")
-	})
+	if (vars.addOpenTabs) {
+		port = browser.runtime.connect({name: "live"})
+		$("#login_notification").html(`<button id="open-alt-tabs">Open Beta Tabs</button>`)
+		$("#open-alt-tabs").click(() => {
+			port.postMessage({text: "open alt tabs"})
+			if (verbose) log("Requesting background script to open alt tabs")
+		})
+	}
 }
 
 async function betaLogin() {
 	const verbose = (await browser.storage.sync.get("verbose")).verbose
 	if (verbose) log("Starting up (Beta Login)")
-
-	port = browser.runtime.connect({name: "login"})
-	port.onMessage.addListener(message => {
-		if (verbose) log(`Received message with text: ${message.text}`)
-		if (message.text === "login") login(message.username, message.password)
-	})
 
 	function login(username, password) {
 		$("#acctname").val(username)
@@ -71,8 +64,16 @@ async function betaLogin() {
 		}, 7500)
 	}
 
-	$("#login_notification").html(`<button id="login-alts">Login All Alts</button>`)
-	$("#login-alts").click(() => { port.postMessage({text: "requesting login"}) })
+	if (vars.addLoginAlts) {
+		port = browser.runtime.connect({name: "login"})
+		port.onMessage.addListener(message => {
+			if (verbose) log(`Received message with text: ${message.text}`)
+			if (message.text === "login") login(message.username, message.password)
+		})
+
+		$("#login_notification").html(`<button id="login-alts">Login All Alts</button>`)
+		$("#login-alts").click(() => { port.postMessage({text: "requesting login"}) })
+	}
 }
 
 async function betaGame() {
