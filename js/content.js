@@ -598,7 +598,6 @@ $(document).on("roa-ws:all", function(event, data){
 		}
 	}
 
-
 	async function joinEvent(msgContent, msgID) {
 		await delay(vars.startActionsDelay)
 		if (eventInProgress === false) {

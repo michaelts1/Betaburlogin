@@ -64,7 +64,6 @@ async function fillFields() {
 		fillContainers()
 	}
 
-
 	$("#alt-name")          .val(vars.altBaseName)
 	$("#attack-at")         .val(vars.attackAt)
 	$("#name-list")         .val(vars.namesList.join(", "))
@@ -124,16 +123,13 @@ async function saveChanges() {
 		}
 
 		vars.pattern        = $("#alt-nameType").val()
-		vars.attackAt       = $("#attack-at").val()
 		vars.namesList      = $("#name-list").val().split(', ')
-		vars.minStamina     = $("#min-stamina").val()
 		vars.css.custom     = $("#custom-css").val()
 		vars.altBaseName    = $("#alt-name").val()
 		vars.mainAccount    = $("#main-account-name").val()
 		vars.mainUsername   = $("#main-username").val()
 		vars.wireFrequency  = $("#wire-frequency").val()
 		vars.loginPassword  = $("#login-pass").val()
-		vars.eventChannelID = $("#event-channel-id").val()
 
 		vars.verbose           = $("#verbose").prop("checked")
 		vars.autoWire          = $("#auto-wire").prop("checked")
@@ -151,8 +147,11 @@ async function saveChanges() {
 		vars.addRequestMoney   = $("#wire-button").prop("checked")
 		vars.containers.useAll = $("#containers-auto").prop("checked")
 
+		vars.attackAt         = $("#attack-at").val() || 3
 		vars.altsNumber       = parseInt($("#alts-number").val()) || 0
+		vars.minStamina       = $("#min-stamina").val() || 5
 		vars.dailyCrystals    = parseInt($("#daily-crystals").val()) || 0
+		vars.eventChannelID   = $("#event-channel-id").val() || 3202
 		vars.minCraftingQueue = parseInt($("#min-crafting-queue").val()) || 0
 
 		vars.containers.list = $("[name=containers]:checked").get().map(e => e.id) // Get id's of checked containers
