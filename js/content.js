@@ -1,14 +1,16 @@
 /* ~~~ To Do ~~~
  * vars.attackAt
- * Allow on/off toggling for all features. Left:
- ** vars.autoStamina
- ** vars.minStamina
- ** vars.joinEvents
- ** vars.addUsername
- ** vars.addRequestMoney
- ** vars.addJumpMobs
- ** vars.addSpawnGems
- ** vars.addCustomBuild
+ * vars.eventChannelID
+ * vars.addOpenTabs   
+ * vars.addLoginAlts  
+ * vars.autoStamina
+ * vars.minStamina
+ * vars.joinEvents
+ * vars.addUsername
+ * vars.addRequestMoney
+ * vars.addJumpMobs
+ * vars.addSpawnGems
+ * vars.addCustomBuild
 
    ~~~ Needs Testing ~~~
  * Make custom-build user friendly

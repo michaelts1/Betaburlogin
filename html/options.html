@@ -425,10 +425,40 @@
 				</colgroup>
 				<thead>
 					<tr>
-						<th colspan="2">Interface Settings</th>
+						<th colspan="2">
+							Interface Settings
+							<span class="title-info" role="img" aria-label="info" data-tooltip="BetaburLogin makes some interface changes, like adding buttons. You can choose which ones you want here."></span>
+						</th>
 					</tr>
 				</thead>
 				<tbody>
+					<tr>
+						<th class="th-small" colspan="2">Live Login Page</th>
+					</tr>
+					<tr>
+						<td class="checkbox-td">
+							<input id="add-open-tabs" type="checkbox">
+						</td>
+						<td>
+							<label for="add-open-tabs">Add Open Beta Tabs Button</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Adds an &quot;Open Beta Tabs&quot; button to the Live login page.&#10;Clicking the button will open Beta login pages in new tabs, according to the number of alts you have."></span>
+						</td>
+					</tr>
+					<tr>
+						<th class="th-small" colspan="2">Beta Login Page</th>
+					</tr>
+					<tr>
+						<td class="checkbox-td">
+							<input id="add-login-alts" type="checkbox">
+						</td>
+						<td>
+							<label for="add-login-alts">Add Login All Alts Button</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Add a &quot;Login All Alts&quot; button to the Beta login page.&#10;Clicking the button will login all of your alts."></span>
+						</td>
+					</tr>
+					<tr>
+						<th class="th-small" colspan="2">Beta Game Page</th>
+					</tr>
 					<tr>
 						<td class="checkbox-td">
 							<input id="append-name" type="checkbox">
@@ -467,7 +497,6 @@
 					</tr>
 				</tbody>
 			</table>
-
 
 			<table id="advanced" class="tab">
 				<colgroup>
@@ -513,6 +542,15 @@
 							<input id="containers-auto" type="checkbox">
 							<label for="containers-auto">Auto</label>
 							<div id="containers"></div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label>Event channel ID</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Listen to the channel with this ID.&#10;Typing &quot;InitEvent&quot; in this channel will init a regular event, and typing &quot;MainEvent&quot; will init an event in which only main accounts will attack."></span>
+						</td>
+						<td>
+							<input id="event-channel-id" pattern="^\d+$" placeholder="Channel ID" size="15">
 						</td>
 					</tr>
 				</tbody>

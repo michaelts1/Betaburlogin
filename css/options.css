@@ -89,6 +89,12 @@ th {
 	padding: .83em 0;
 }
 
+.th-small {
+	color: olive;
+	font-size: 13pt;
+	padding: 0.5em 0;
+}
+
 input,
 textarea {
 	background: var(--background-color);

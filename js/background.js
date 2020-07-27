@@ -210,7 +210,8 @@ async function getVars() {
 	// If not set, create with default settings
 	if (Object.keys(vars).length === 0) {
 		vars = {
-				version          : VARS_VERSION,
+			version          : VARS_VERSION,
+			eventChannelID   : 3202,
 			startActionsDelay: 1000,
 			buttonDelay      : 500,
 			dailyCrystals    : 50,
@@ -229,6 +230,8 @@ async function getVars() {
 			addJumpMobs      : true,
 			addSpawnGems     : true,
 			addRequestMoney  : true,
+			addOpenTabs      : true,
+			addLoginAlts     : true,
 			actionsPending   : false,
 			autoWire         : false,
 			verbose          : false,
@@ -380,7 +383,10 @@ async function updateVars() {
 			vars.addSpawnGems    = true
 			vars.addRequestMoney = true
 		case 9:
-			vars.attackAt        = 3
+			vars.attackAt       = 3
+			vars.eventChannelID = 3202
+			vars.addOpenTabs    = true
+			vars.addLoginAlts   = true
 		default:
 			vars.version = VARS_VERSION
 			if (vars.css.addon !== ADDON_CSS) {
