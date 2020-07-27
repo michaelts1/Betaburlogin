@@ -147,11 +147,11 @@ async function saveChanges() {
 		vars.addRequestMoney   = $("#wire-button").prop("checked")
 		vars.containers.useAll = $("#containers-auto").prop("checked")
 
-		vars.attackAt         = $("#attack-at").val() || 3
+		vars.attackAt         = parseInt($("#attack-at").val()) || 3
 		vars.altsNumber       = parseInt($("#alts-number").val()) || 0
-		vars.minStamina       = $("#min-stamina").val() || 5
+		vars.minStamina       = parseInt($("#min-stamina").val()) || 5
 		vars.dailyCrystals    = parseInt($("#daily-crystals").val()) || 0
-		vars.eventChannelID   = $("#event-channel-id").val() || 3202
+		vars.eventChannelID   = parseInt($("#event-channel-id").val()) || 3202
 		vars.minCraftingQueue = parseInt($("#min-crafting-queue").val()) || 0
 
 		vars.containers.list = $("[name=containers]:checked").get().map(e => e.id) // Get id's of checked containers
