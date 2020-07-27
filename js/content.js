@@ -1,7 +1,7 @@
 /* ~~~ To Do ~~~
- * New option - Don't remove effects info
  *
  * ~~~ Needs Testing ~~~
+ * Remove effects info
  * All interface settings
  * Changing CSS
  * Stamina
@@ -228,6 +228,19 @@ async function betaGame() {
 			elm.rel  = "stylesheet"
 			elm.id   = "betabot-css"
 			document.head.appendChild(elm)
+		}
+
+		// Remove Effects Box
+		if (vars.removeEffects && $("#effectInfo")[0] !== undefined) {
+			$("#effectInfo").remove()
+		} else if (vars.removeEffects === false && $("#effectInfo")[0] === undefined) {
+			$("#gauntletInfo").after(
+			`<div id="effectInfo" style="display: block;">
+				<div class="ui-element border2">
+					<h5 class="toprounder center"><a id="effectUpgradeTable">Effects</a></h5>
+					<div class="row" id="effectTable" style=""></div>
+				</div>
+			</div>`)
 		}
 	}
 

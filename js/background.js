@@ -234,6 +234,7 @@ async function getVars() {
 			addRequestMoney  : true,
 			addOpenTabs      : true,
 			addLoginAlts     : true,
+			removeEffects    : false,
 			actionsPending   : false,
 			autoWire         : false,
 			verbose          : false,
@@ -390,6 +391,7 @@ async function updateVars() {
 			vars.eventChannelID = 3202
 			vars.addOpenTabs    = true
 			vars.addLoginAlts   = true
+			vars.removeEffects  = true
 		default:
 			vars.version = VARS_VERSION
 	}
