@@ -77,7 +77,6 @@ async function betaLogin() {
 }
 
 async function betaGame() {
-	let port2           = null
 	let vars            = await browser.storage.sync.get()
 	let username        = $("#username").text()
 	let isAlt           = username !== vars.mainUsername
@@ -332,24 +331,21 @@ async function betaGame() {
 		}
 	}
 
-	// RoA-WS. Taken from: https://github.com/edvordo/RoA-WSHookUp/blob/master/RoA-WSHookUp.user.js
-	// Re-inject the script
-	if ($("#betabot-ws")[0] !== undefined) $("#betabot-ws").remove()
-
 	// Using an IIFE to avoid polluting the global space
 	(function() {
-		const elm = document.createElement("script")
-		elm.innerHTML = `
-const channel = new MessageChannel()
-// Send message to content script (do we even need to send port2?)
-window.postMessage("betabot-ws message", "*", [channel.port2])
+		if ($("#betabot-ws")[0] !== undefined) $("#betabot-ws").remove() // Re-inject the script
 
+		const elm = document.createElement("script")
+		elm.innerHTML =
+`const channel = new MessageChannel()
+window.postMessage("betabot-ws message", "${HREF}", [channel.port2])
 $(document).on("roa-ws:all", function(event, data){
 	channel.port1.postMessage(JSON.parse(data))
 })`
-		$(elm).attr("id", "betabot-ws")
+		elm.id = "betabot-ws"
 		document.head.appendChild(elm)
 
+		// RoA-WS. Taken from: https://github.com/edvordo/RoA-WSHookUp/blob/master/RoA-WSHookUp.user.js
 		function roaWS(event) {
 			const data = event.data
 			let etype = "roa-ws:"
@@ -359,8 +355,7 @@ $(document).on("roa-ws:all", function(event, data){
 				etype = "roa-ws:"
 				if (item.hasOwnProperty("type")) {
 					etype = etype + item.type
-					// In case its a "page" type message create additional event
-					// e.g. "roa-ws:page:boosts", "roa-ws:page:clans" or "roa-ws:page:settings_milestones" etc.
+					// In case its a "page" type message create additional event, e.g. "roa-ws:page:boosts"
 					if (item.type === "page" && item.hasOwnProperty("page") && "string" === typeof item.page) {
 						etypepage = etype + ":" + item.page
 					}
@@ -383,8 +378,7 @@ $(document).on("roa-ws:all", function(event, data){
 			// Make sure we are connecting to the right port
 			// No need to be absolutely sure about it since we don't send sensitve data
 			if (origin === "https://beta.avabur.com" && data === "betabot-ws message") {
-				port2 = message.originalEvent.ports[0]
-				port2.onmessage = roaWS
+				message.originalEvent.ports[0].onmessage = roaWS
 			}
 		})
 	})()
