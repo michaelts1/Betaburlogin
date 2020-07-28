@@ -338,7 +338,7 @@ async function betaGame() {
 		const elm = document.createElement("script")
 		elm.innerHTML =
 `const channel = new MessageChannel()
-window.postMessage("betabot-ws message", "${HREF}", [channel.port2])
+window.postMessage("betabot-ws message", "*", [channel.port2])
 $(document).on("roa-ws:all", function(event, data){
 	channel.port1.postMessage(JSON.parse(data))
 })`
