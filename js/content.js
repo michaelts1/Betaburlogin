@@ -116,7 +116,7 @@ async function betaGame() {
 	}
 	browser.storage.onChanged.addListener(refreshVars)
 
-	$(document).one("roa-ws:page:username_change", (event, data) => {
+	$(document).on("roa-ws:page:username_change", (event, data) => {
 		if (data.s === 0) return // Unsuccessful name change
 
 		log(`User has changed name from ${username} to ${data.u}`)
