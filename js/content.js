@@ -250,7 +250,7 @@ async function betaGame() {
 	})
 
 	function appendName() {
-		if ($("#roomName").text().search(username) === -1) {
+		if ($("#betabot-clear-username")[0] === undefined) {
 			$("#roomName").append(`<span id="betabot-clear-username">${username}</span>`)
 			if (vars.verbose) log("Appended username to room name")
 		}
@@ -294,11 +294,9 @@ async function betaGame() {
 
 					$(document).one("roa-ws:page:gem_spawn", (e, d) => {
 						$("#betabot-spawn-gem").prop("disabled", true)
-
 						setTimeout(() => {
 							$("#confirmButtons>a.green")[0].click()
 						}, 55*1000)
-
 						setTimeout(() => {
 							$("#betabot-spawn-gem").prop("disabled", false)
 						}, 60*1000)
