@@ -223,7 +223,8 @@ td {
 }
 
 /* Tooltips */
-.warning, .info {
+.warning,
+.info {
 	float: right;
 	height: 1.25em;
 	margin: 0 0 0 5px;
@@ -235,7 +236,8 @@ td {
 	background: url('../images/warning.svg');
 }
 
-.info, .title-info {
+.info,
+.title-info {
 	background: url('../images/info.svg');
 }
 
@@ -251,7 +253,7 @@ td {
 	width: 1.4em;
 }
 
-.warning:hover::after, .info:hover::after, .title-info:hover::after, .required:hover::after {
+[data-tooltip]:hover::after {
 	background: var(--tooltip-background-color);
 	border-radius: .75em;
 	border: 1px var(--input-border-color) solid;
@@ -269,7 +271,8 @@ td {
 	color: indianred;
 }
 
-.info:hover::after, .title-info:hover::after {
+.info:hover::after,
+.title-info:hover::after {
 	color: cadetblue;
 }
 
