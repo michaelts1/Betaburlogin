@@ -1,4 +1,5 @@
 /* ~~~ To Do ~~~
+ * Login settings tooltips
  *
  * ~~~ Needs Testing ~~~
  * Remove effects info
@@ -115,6 +116,16 @@ async function betaGame() {
 		if (vars.verbose) log(`Alt: ${isAlt ? "yes" : "no"}\nEvent TS: ${mainTrade}\nAuto Wire: ${autoWireID ? "on" : "off"}`)
 	}
 	browser.storage.onChanged.addListener(refreshVars)
+
+	$(document).one("roa-ws:page:username_change", (event, data) => {
+		if (data.s === 0) return // Unsuccessful name change
+
+		log(`User has changed name from ${username} to ${data.u}`)
+		$.alert(`It looks like you have changed your username from ${username} to ${data.u}.
+			If you used the old username in BetaburLogin settings page, you might want to
+			update these settings`, "Name Changed")
+		username = data.u
+	})
 
 	// Connect to background script:
 	port = browser.runtime.connect({name: username})
