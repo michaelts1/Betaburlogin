@@ -30,9 +30,11 @@ function log(...msg) {
 
 async function liveLogin() {
 	const verbose = (await browser.storage.sync.get("verbose")).verbose
+	const addOpenTabs = (await browser.storage.sync.get("addOpenTabs")).addOpenTabs
+
 	if (verbose) log("Starting up (Live Login)")
 
-	if (vars.addOpenTabs) {
+	if (addOpenTabs) {
 		port = browser.runtime.connect({name: "live"})
 		$("#login_notification").html(`<button id="open-alt-tabs">Open Beta Tabs</button>`)
 		$("#open-alt-tabs").click(() => {
@@ -44,6 +46,8 @@ async function liveLogin() {
 
 async function betaLogin() {
 	const verbose = (await browser.storage.sync.get("verbose")).verbose
+	const addLoginAlts = (await browser.storage.sync.get("addLoginAlts")).addLoginAlts
+
 	if (verbose) log("Starting up (Beta Login)")
 
 	function login(username, password) {
@@ -60,7 +64,7 @@ async function betaLogin() {
 		}, 7500)
 	}
 
-	if (vars.addLoginAlts) {
+	if (addLoginAlts) {
 		port = browser.runtime.connect({name: "login"})
 		port.onMessage.addListener(message => {
 			if (verbose) log(`Received message with text: ${message.text}`)
