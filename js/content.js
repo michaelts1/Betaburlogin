@@ -674,8 +674,4 @@ $(document).on("roa-ws:all", function(event, data){
 		await delay(vars.startActionsDelay * 5)
 		motdReceived = false
 	})
-
-	if ($("#effectInfo")[0] !== undefined) {
-		$("#effectInfo").remove()
-	}
 }
