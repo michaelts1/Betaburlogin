@@ -1,5 +1,4 @@
 /* ~~~ To Do ~~~
- * Login settings tooltips
  *
  * ~~~ Needs Testing ~~~
  * Remove effects info
@@ -600,7 +599,6 @@ $(document).on("roa-ws:all", function(event, data){
 	let mainEvent       = false
 	let eventInProgress = false
 	let motdReceived    = false
-	let carvingChanged  = false
 
 	const BUTTONS = {
 		battle      : $(".bossFight.btn.btn-primary")[0],
@@ -627,44 +625,34 @@ $(document).on("roa-ws:all", function(event, data){
 		return "mining"
 	}
 
-	function changeTrade() {
-		const time = $("#eventCountdown")[0].innerText
-		const carvingTier = $("#currentBossCarvingTier")[0].innerText
-
-		if (carvingTier > 2500 && !carvingChanged && !mainEvent) {
+	function changeTrade(event, data) {
+		if (data.carvingTier > 2500 && !mainEvent) {
 			if (vars.verbose) log("Attacking event boss (carving tier)")
-			carvingChanged = true
 			BUTTONS.battle.click()
-		}
-		if (time.includes(`${vars.attackAt.padStart(2, 0)}m`)) {
-			if (vars.verbose) log("Attacking event boss (time)")
+		} else if (data.time_remaining / 60 < vars.attackAt) {
 			if (!isAlt || (isAlt && !mainEvent)) {
+				if (vars.verbose) log("Attacking event boss (time)")
 				BUTTONS.battle.click()
 			}
-			$("#eventCountdown").unbind()
-			carvingChanged = false
-			mainEvent = false
-			eventInProgress = false
+		} else { // Don't execute the rest of the function
+			return
 		}
+		// Stop tracking the event
+		mainEvent = false
+		eventInProgress = false
+		$(document).off("roa-ws:boss", changeTrade)
 	}
 
-	async function joinEvent(msgContent, msgID) {
-		await delay(vars.startActionsDelay)
-		if (vars.joinEvents && !eventInProgress && (msgContent === "InitEvent" || msgContent === "MainEvent")) {
+	function joinEvent(msgContent, msgID) {
+		if (vars.joinEvents && eventID !== msgID && !eventInProgress && (msgContent === "InitEvent" || msgContent === "MainEvent")) {
+			eventID = msgID
+			mainEvent = msgContent === "MainEvent"
 			eventInProgress = true
-			if (eventID !== msgID) {
-				eventID = msgID
-				mainEvent = false
-				if (msgContent === "MainEvent") {
-					mainEvent = true
-				}
 
-				if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} event due to message #${msgID}`)
-				BUTTONS[mainTrade].click()
-				$("#eventCountdown").bind("DOMSubtreeModified", changeTrade)
-			}
+			if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} event due to message #${msgID}`)
+			BUTTONS[mainTrade].click()
+			$(document).on("roa-ws:boss", changeTrade)
 		}
-		await delay(vars.startActionsDelay)
 	}
 
 	setTimeout(() => {

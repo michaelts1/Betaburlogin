@@ -220,6 +220,7 @@ async function getVars() {
 			dailyCrystals    : 50,
 			minCraftingQueue : 5,
 			minStamina       : 5,
+			attackAt         : 3,
 			altsNumber       : 0,
 			wireFrequency    : 0,
 			autoStamina      : true,
@@ -239,7 +240,6 @@ async function getVars() {
 			autoWire         : false,
 			verbose          : false,
 			questCompleting  : null,
-			attackAt         : "3",
 			mainAccount      : "",
 			mainUsername     : "",
 			loginPassword    : "",
@@ -387,7 +387,7 @@ async function updateVars() {
 			vars.addSpawnGems    = true
 			vars.addRequestMoney = true
 		case 9:
-			vars.attackAt       = "3"
+			vars.attackAt       = 3
 			vars.eventChannelID = 3202
 			vars.addOpenTabs    = true
 			vars.addLoginAlts   = true
