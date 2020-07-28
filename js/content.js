@@ -1,4 +1,5 @@
 /* ~~~ To Do ~~~
+ * Use await delay instead of setTimeout
  *
  * ~~~ Needs Testing ~~~
  * Remove effects info
@@ -138,22 +139,15 @@ async function betaGame() {
 	})
 
 	function toggleInterfaceChanges() {
-		// Add Request Currency Button:
+		// Request Currency Button:
 		if (vars.addRequestMoney && $("#betabot-request-currency")[0] === undefined) {
 			$("#username").after(`<button id="betabot-request-currency"><a>Request Currency</a></button>`)
 			$("#betabot-request-currency").click(() => { port.postMessage({text: "requesting currency"}) })
 		} else if (vars.addRequestMoney === false && $("#betabot-request-currency")[0] !== undefined) {
 			$("#betabot-request-currency").remove()
 		}
-	
+
 		// Make it easier to see what alt it is:
-		function appendName() {
-			if ($("#roomName").text().search(username) === -1) {
-				$("#roomName").append(`<span id="betabot-clear-username">${username}</span>`)
-				if (vars.verbose) log("Appended username to room name")
-			}
-		}
-		const keepUsernameVisible = new MutationObserver(appendName)
 		if (vars.addUsername) {
 			appendName()
 			keepUsernameVisible.observe($("#roomName")[0], {attributes: true, childList: true, subtree: true})
@@ -161,8 +155,8 @@ async function betaGame() {
 			keepUsernameVisible.disconnect()
 			$("#betabot-clear-username").remove()
 		}
-	
-		// Add option to build a specific item:
+
+		// Option to build a specific item:
 		function getCustomBuild() {
 			vars.actionsPending = true
 			$("#allHouseUpgrades").click()
@@ -204,39 +198,19 @@ async function betaGame() {
 					$("#areaName").text("The mob you chose is not in the list!")
 					return
 				}
-
 				port.postMessage({text: "move to mob", number: number})
 				if (vars.verbose) log(`Requested to move all alts ${number} mobs up`)
 			})
-		} else if (vars.addJumpMobs === false && $("#betabot-mob-jump")[0] === undefined) {
+		} else if (vars.addJumpMobs === false && $("#betabot-mob-jump")[0] !== undefined) {
 			$("#betabot-mob-jump").remove()
 		}
-
-		// Spawn gems:
-		$(document).on("roa-ws:modalContent", (event, data) => {
-			if (vars.addSpawnGems && data.title === "Spawn Gems") {
-				$("#gemSpawnConfirm").after(`<input id="betabot-spawn-gem" type="button" style="padding:6.5px; margin: 0 -.5em 0 .5em;" value="Spawn For All Alts">`)
-
-				$("#betabot-spawn-gem").on("click", () => {
-					const msg = {
-						text  : "spawnGem",
-						tier  : parseInt($("#spawnGemLevel").val()),
-						type  : parseInt($("#gemSpawnType").val()),
-						splice: parseInt($("#gemSpawnSpliceType").val()),
-						amount: parseInt($("#gemSpawnCount").val()),
-					}
-					port.postMessage(msg)
-					if (vars.verbose) log(`Requested to spawn ${msg.amount} tier ${msg.tier} gems with type value of ${msg.type} and splice value of ${msg.splice}`)
-				})
-			}
-		})
 
 		// Custom style:
 		const cssChanged = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` !== $("#betabot-css").prop("href")
 		if (cssChanged || $("#betabot-css")[0] === undefined) { // If the code has changed, or if it was never injected
 			$("#betabot-css").remove()
 			const elm = document.createElement("link");
-			elm.href = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` // Decode CSS into base64 and use it as a link to avoid code injection
+			elm.href = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` // Decode CSS into base64 and use it as a link to avoid script injections
 			elm.type = "text/css"
 			elm.rel  = "stylesheet"
 			elm.id   = "betabot-css"
@@ -248,7 +222,7 @@ async function betaGame() {
 			$("#effectInfo").remove()
 		} else if (vars.removeEffects === false && $("#effectInfo")[0] === undefined) {
 			$("#gauntletInfo").after(
-			`<div id="effectInfo" style="display: block;">
+`			<div id="effectInfo" style="display: block;">
 				<div class="ui-element border2">
 					<h5 class="toprounder center"><a id="effectUpgradeTable">Effects</a></h5>
 					<div class="row" id="effectTable" style=""></div>
@@ -256,6 +230,32 @@ async function betaGame() {
 			</div>`)
 		}
 	}
+
+	$(document).on("roa-ws:modalContent", (event, data) => {
+		if (vars.addSpawnGems && data.title === "Spawn Gems") {
+			$("#gemSpawnConfirm").after(`<input id="betabot-spawn-gem" type="button" style="padding:6.5px; margin: 0 -.5em 0 .5em;" value="Spawn For All Alts">`)
+
+			$("#betabot-spawn-gem").on("click", () => {
+				const msg = {
+					text  : "spawnGem",
+					tier  : parseInt($("#spawnGemLevel").val()),
+					type  : parseInt($("#gemSpawnType").val()),
+					splice: parseInt($("#gemSpawnSpliceType").val()),
+					amount: parseInt($("#gemSpawnCount").val()),
+				}
+				port.postMessage(msg)
+				if (vars.verbose) log(`Requested to spawn ${msg.amount} tier ${msg.tier} gems with type value of ${msg.type} and splice value of ${msg.splice}`)
+			})
+		}
+	})
+
+	function appendName() {
+		if ($("#roomName").text().search(username) === -1) {
+			$("#roomName").append(`<span id="betabot-clear-username">${username}</span>`)
+			if (vars.verbose) log("Appended username to room name")
+		}
+	}
+	const keepUsernameVisible = new MutationObserver(appendName)
 
 	function jumpMobs(number) {
 		if (vars.verbose) log(`Jumping ${number} mobs`)
