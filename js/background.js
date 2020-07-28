@@ -145,28 +145,27 @@ function login() {
 			password: vars.loginPassword,
 		})
 	}
+	function romanize(num) {
+		if (num === 0) return ""
+		const roman = {
+			L : 50,
+			XL: 40,
+			X : 10,
+			IX: 9,
+			V : 5,
+			IV: 4,
+			I : 1,
+		}
+		let str = ""
+		for (const key of Object.keys(roman)) {
+			const q = Math.floor(num / roman[key])
+			num -= q * roman[key]
+			str += key.repeat(q)
+		}
+		return str
+	}
 
 	if (vars.pattern === "roman") {
-		function romanize(num) {
-			if (num === 0) return ""
-			const roman = {
-				L : 50,
-				XL: 40,
-				X : 10,
-				IX: 9,
-				V : 5,
-				IV: 4,
-				I : 1,
-			}
-			let str = ""
-			for (const key of Object.keys(roman)) {
-				const q = Math.floor(num / roman[key])
-				num -= q * roman[key]
-				str += key.repeat(q)
-			}
-			return str
-		}
-
 		sendLogin(0, vars.mainAccount)
 		for (let i = 1; i <= vars.altsNumber; i++) {
 			sendLogin(i, vars.altBaseName+romanize(i))
@@ -333,10 +332,10 @@ async function updateVars() {
 		return
 	}
 
-	switch (vars.version) { // Falling through cases to update everything
+	switch (vars.version) {
 		case VARS_VERSION:
 			break
-		case 2:
+		case 2: /* eslint-disable no-fallthrough */ // Falling through to update properly
 			vars.pattern = ""
 			vars.namesList = []
 		case 3:
@@ -393,7 +392,7 @@ async function updateVars() {
 			vars.addLoginAlts   = true
 			vars.removeEffects  = true
 		default:
-			vars.version = VARS_VERSION
+			vars.version = VARS_VERSION /* eslint-enable no-fallthrough */
 	}
 
 	if (vars.css.addon !== ADDON_CSS) {
@@ -410,14 +409,14 @@ browser.storage.onChanged.addListener(changes => {
 		if (!(object1 instanceof Object) || !(object2 instanceof Object)) return false
 		if (object1.constructor !== object2.constructor) return false
 		for (const p in object1) {
-			if (!object1.hasOwnProperty(p)) continue
-			if (!object2.hasOwnProperty(p)) return false
+			if (!{}.hasOwnProperty.call(object1, p)) continue
+			if (!{}.hasOwnProperty.call(object2, p)) return false
 			if (object1[p] === object2[p]) continue
 			if (typeof(object1[p]) !== "object") return false
 			if (!objectEquals(object1[p], object2[p])) return false
 		}
 		for (const p in object2) {
-			if (object2.hasOwnProperty(p) && !object1.hasOwnProperty(p)) return false
+			if ({}.hasOwnProperty.call(object2, p) && !{}.hasOwnProperty.call(object1, p)) return false
 		}
 		return true
 	}

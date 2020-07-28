@@ -35,12 +35,12 @@ function deabbreviateNumber (input) {
 
 	const num = parseFloat(numPart.replace(/[^0-9.]/g, ""))
 	const scales = {
-			K: 1000,
-			M: 1000000,
-			B: 1000000000,
-			T: 1000000000000,
-			Q: 1000000000000000,
-		}
+		K: 1000,
+		M: 1000000,
+		B: 1000000000,
+		T: 1000000000000,
+		Q: 1000000000000000,
+	}
 
 	if (!scales[scale]) return input
 
@@ -74,7 +74,7 @@ async function fillFields() {
 	$("#alt-name-type")     .val(vars.pattern)
 	$("#main-username")     .val(vars.mainUsername)
 	$("#wire-frequency")    .val(vars.wireFrequency)
-	$("#daily-crystals")    .val(vars.daily-crystals)
+	$("#daily-crystals")    .val(vars.dailyCrystals)
 	$("#event-channel-id")  .val(vars.eventChannelID)
 	$("#main-account-name") .val(vars.mainAccount)
 	$("#min-crafting-queue").val(vars.minCraftingQueue)
@@ -124,7 +124,7 @@ async function saveChanges() {
 		}
 
 		vars.pattern        = $("#alt-nameType").val()
-		vars.namesList      = $("#name-list").val().split(', ')
+		vars.namesList      = $("#name-list").val().split(", ")
 		vars.css.custom     = $("#custom-css").val()
 		vars.altBaseName    = $("#alt-name").val()
 		vars.mainAccount    = $("#main-account-name").val()
@@ -232,7 +232,7 @@ function changeTab(event) {
 
 function resetCSS() {
 	$("#custom-css").val(
-`#areaContent {
+		`#areaContent {
 	height: 350px;
 }
 #questInfo {

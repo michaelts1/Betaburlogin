@@ -17,9 +17,9 @@
 const HREF = window.location.href
 let port = null
 
-if (/www.avabur.com[\/?expird=1]*$/.test(HREF)) {
+if (/www.avabur.com[/?expird=1]*$/.test(HREF)) {
 	liveLogin()
-} else if (/beta.avabur.com[\/?expird=1]*$/.test(HREF)) {
+} else if (/beta.avabur.com[/?expird=1]*$/.test(HREF)) {
 	betaLogin()
 } else if (/beta.avabur.com\/game/.test(HREF)) {
 	betaGame()
@@ -117,7 +117,7 @@ async function betaGame() {
 	}
 	browser.storage.onChanged.addListener(refreshVars)
 
-	$(document).on("roa-ws:page:username_change", (event, data) => {
+	$(document).on("roa-ws:page:username_change", (_, data) => {
 		if (data.s === 0) return // Unsuccessful name change
 
 		log(`User has changed name from ${username} to ${data.u}`)
@@ -161,7 +161,7 @@ async function betaGame() {
 			vars.actionsPending = true
 			$("#allHouseUpgrades").click()
 
-			$(document).one("roa-ws:page:house_all_builds", (event, data) => {
+			$(document).one("roa-ws:page:house_all_builds", (_, data) => {
 				setTimeout(itemBuilding)
 
 				const items = []
@@ -209,7 +209,7 @@ async function betaGame() {
 		const cssChanged = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` !== $("#betabot-css").prop("href")
 		if (cssChanged || $("#betabot-css")[0] === undefined) { // If the code has changed, or if it was never injected
 			$("#betabot-css").remove()
-			const elm = document.createElement("link");
+			const elm = document.createElement("link")
 			elm.href = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` // Decode CSS into base64 and use it as a link to avoid script injections
 			elm.type = "text/css"
 			elm.rel  = "stylesheet"
@@ -222,16 +222,16 @@ async function betaGame() {
 			$("#effectInfo").remove()
 		} else if (vars.removeEffects === false && $("#effectInfo")[0] === undefined) {
 			$("#gauntletInfo").after(
-`			<div id="effectInfo" style="display: block;">
-				<div class="ui-element border2">
-					<h5 class="toprounder center"><a id="effectUpgradeTable">Effects</a></h5>
-					<div class="row" id="effectTable" style=""></div>
-				</div>
-			</div>`)
+				`<div id="effectInfo" style="display: block;">
+					<div class="ui-element border2">
+						<h5 class="toprounder center"><a id="effectUpgradeTable">Effects</a></h5>
+						<div class="row" id="effectTable" style=""></div>
+					</div>
+				</div>`)
 		}
 	}
 
-	$(document).on("roa-ws:modalContent", (event, data) => {
+	$(document).on("roa-ws:modalContent", (_, data) => {
 		if (vars.addSpawnGems && data.title === "Spawn Gems") {
 			$("#gemSpawnConfirm").after(`<input id="betabot-spawn-gem" type="button" style="padding:6.5px; margin: 0 -.5em 0 .5em;" value="Spawn For All Alts">`)
 
@@ -280,8 +280,8 @@ async function betaGame() {
 			return
 		}
 
-		$(document).one("roa-ws:modalContent", (e, d) => {
-			if (d.title === "Spawn Gems") {
+		$(document).one("roa-ws:modalContent", (_, data) => {
+			if (data.title === "Spawn Gems") {
 				setTimeout(() => {
 					$("#spawnGemLevel").val(tier)
 					$("#gemSpawnType").val(type)
@@ -292,7 +292,7 @@ async function betaGame() {
 						$("#gemSpawnConfirm").click()
 					}, vars.buttonDelay)
 
-					$(document).one("roa-ws:page:gem_spawn", (e, d) => {
+					$(document).one("roa-ws:page:gem_spawn", () => {
 						$("#betabot-spawn-gem").prop("disabled", true)
 						setTimeout(() => {
 							$("#confirmButtons>a.green")[0].click()
@@ -347,7 +347,7 @@ async function betaGame() {
 		elm.innerHTML =
 `const channel = new MessageChannel()
 window.postMessage("betabot-ws message", "*", [channel.port2])
-$(document).on("roa-ws:all", function(event, data){
+$(document).on("roa-ws:all", function(_, data){
 	channel.port1.postMessage(JSON.parse(data))
 })`
 		elm.id = "betabot-ws"
@@ -361,10 +361,10 @@ $(document).on("roa-ws:all", function(event, data){
 				const item = data[i]
 				let etypepage = ""
 				etype = "roa-ws:"
-				if (item.hasOwnProperty("type")) {
+				if ({}.hasOwnProperty.call(item, "type")) {
 					etype = etype + item.type
 					// In case its a "page" type message create additional event, e.g. "roa-ws:page:boosts"
-					if (item.type === "page" && item.hasOwnProperty("page") && "string" === typeof item.page) {
+					if (item.type === "page" && {}.hasOwnProperty.call(item, "page") && "string" === typeof item.page) {
 						etypepage = etype + ":" + item.page
 					}
 				}
@@ -520,7 +520,7 @@ $(document).on("roa-ws:all", function(event, data){
 		setTimeout(itemBuilding, vars.buttonDelay)
 	}
 
-	const checkCraftingQueue = (event, data) => {
+	const checkCraftingQueue = (_, data) => {
 		if (vars.actionsPending || !vars.autoCraft) return
 
 		if (data.results.a.cq < vars.minCraftingQueue) {
@@ -545,7 +545,7 @@ $(document).on("roa-ws:all", function(event, data){
 	}
 
 	// Check action results for needed actions
-	const checkResults = (event, data) => {
+	const checkResults = (_, data) => {
 		data = data.results.p
 
 		if (vars.autoStamina && data.autos_remaining < vars.minStamina && !staminaCooldown) { // Stamina
@@ -623,7 +623,7 @@ $(document).on("roa-ws:all", function(event, data){
 		return "mining"
 	}
 
-	function changeTrade(event, data) {
+	function changeTrade(_, data) {
 		if (data.carvingTier > 2500 && !mainEvent) {
 			if (vars.verbose) log("Attacking event boss (carving tier)")
 			BUTTONS.battle.click()
@@ -654,7 +654,7 @@ $(document).on("roa-ws:all", function(event, data){
 	}
 
 	setTimeout(() => {
-		$(document).on("roa-ws:message", async (event, data) => {
+		$(document).on("roa-ws:message", async (_, data) => {
 			if (data.c_id === vars.eventChannelID) {
 				await delay(vars.startActionsDelay)
 				// Wait to see if the message is recieved together with a message of the day,
