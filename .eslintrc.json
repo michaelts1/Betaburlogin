@@ -13,7 +13,9 @@
 		"indent": [
 			"error",
 			"tab",
-			{"SwitchCase": 1}
+			{
+				"SwitchCase" : 1
+			}
 		],
 		"linebreak-style": [
 			"error",
@@ -31,7 +33,6 @@
 			"error",
 			"never"
 		],
-		"no-fallthrough": "error",
 		"eol-last": [
 			"error",
 			"always"

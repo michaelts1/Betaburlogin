@@ -2,6 +2,7 @@
  * Use await delay instead of setTimeout
  *
  * ~~~ Needs Testing ~~~
+ * Make mainUsername case insensitive
  * Remove effects info
  * All interface settings
  * Changing CSS
@@ -80,7 +81,7 @@ async function betaLogin() {
 async function betaGame() {
 	let vars            = await browser.storage.sync.get()
 	let username        = $("#username").text()
-	let isAlt           = username !== vars.mainUsername
+	let isAlt           = username !== vars.mainUsername.toLowerCase()
 	let staminaCooldown = false
 	let mainTrade       = getTrade()
 	let autoWireID      = vars.autoWire ? setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername) : null
@@ -93,7 +94,7 @@ async function betaGame() {
 		if (vars.verbose) log("Refreshing settings")
 
 		vars = await browser.storage.sync.get()
-		isAlt = username !== vars.mainUsername
+		isAlt = username !== vars.mainUsername.toLowerCase()
 		mainTrade = getTrade()
 
 		for (const wireRelated of ["wireFrequency", "mainUsername",]) { // If one of these has changed, reset autoWire
