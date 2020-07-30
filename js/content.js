@@ -31,45 +31,43 @@ function log(...msg) {
 }
 
 async function liveLogin() {
-	const verbose = (await browser.storage.sync.get("verbose")).verbose
-	const addOpenTabs = (await browser.storage.sync.get("addOpenTabs")).addOpenTabs
+	const vars = await browser.storage.sync.get(["verbose", "addOpenTabs"])
 
-	if (verbose) log("Starting up (Live Login)")
+	if (vars.verbose) log("Starting up (Live Login)")
 
-	if (addOpenTabs) {
+	if (vars.addOpenTabs) {
 		port = browser.runtime.connect({name: "live"})
 		$("#login_notification").html(`<button id="open-alt-tabs">Open Beta Tabs</button>`)
 		$("#open-alt-tabs").click(() => {
 			port.postMessage({text: "open alt tabs"})
-			if (verbose) log("Requesting background script to open alt tabs")
+			if (vars.verbose) log("Requesting background script to open alt tabs")
 		})
 	}
 }
 
 async function betaLogin() {
-	const verbose = (await browser.storage.sync.get("verbose")).verbose
-	const addLoginAlts = (await browser.storage.sync.get("addLoginAlts")).addLoginAlts
+	const vars = await browser.storage.sync.get(["verbose", "addLoginAlts"])
 
-	if (verbose) log("Starting up (Beta Login)")
+	if (vars.verbose) log("Starting up (Beta Login)")
 
-	function login(username, password) {
+	async function login(username, password) {
 		$("#acctname").val(username)
 		$("#password").val(password)
 		$("#login").click()
-		if (verbose) log(`Logging in with username ${username}`)
+		if (vars.verbose) log(`Logging in with username ${username}`)
 
 		setTimeout(() => {
 			if ($("#login_notification").text() === "Your location is making too many requests too quickly.  Try again later.") {
-				if (verbose) log("Rate limited, trying again")
+				if (vars.verbose) log("Rate limited, trying again")
 				login(username, password)
 			}
 		}, 7500)
 	}
 
-	if (addLoginAlts) {
+	if (vars.addLoginAlts) {
 		port = browser.runtime.connect({name: "login"})
 		port.onMessage.addListener(message => {
-			if (verbose) log(`Received message with text: ${message.text}`)
+			if (vars.verbose) log(`Received message with text: ${message.text}`)
 			if (message.text === "login") login(message.username, message.password)
 		})
 
@@ -609,9 +607,9 @@ $(document).on("roa-ws:all", function(_, data){
 		carving     : $(".bossCarve.btn")[0],
 	}
 
-	function delay(time) {
+	function delay(ms) {
 		return new Promise(resolve => {
-			setTimeout(resolve, time)
+			setTimeout(resolve, ms)
 		})
 	}
 
