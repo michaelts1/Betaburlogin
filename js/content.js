@@ -1,7 +1,7 @@
 /* ~~~ To Do ~~~
- * Use await delay instead of setTimeout
  *
  * ~~~ Needs Testing ~~~
+ * Use await delay instead of setTimeout
  * Make mainUsername case insensitive
  * Remove effects info
  * All interface settings
@@ -30,6 +30,12 @@ function log(...msg) {
 	console.log(`[${new Date().toLocaleString().replace(",", "")}] Betaburlogin:`, ...msg)
 }
 
+function delay(ms) {
+	return new Promise(resolve => {
+		setTimeout(resolve, ms)
+	})
+}
+
 async function liveLogin() {
 	const vars = await browser.storage.sync.get(["verbose", "addOpenTabs"])
 
@@ -55,13 +61,11 @@ async function betaLogin() {
 		$("#password").val(password)
 		$("#login").click()
 		if (vars.verbose) log(`Logging in with username ${username}`)
-
-		setTimeout(() => {
-			if ($("#login_notification").text() === "Your location is making too many requests too quickly.  Try again later.") {
-				if (vars.verbose) log("Rate limited, trying again")
-				login(username, password)
-			}
-		}, 7500)
+		await delay(7500)
+		if ($("#login_notification").text() === "Your location is making too many requests too quickly.  Try again later.") {
+			if (vars.verbose) log("Rate limited, trying again")
+			login(username, password)
+		}
 	}
 
 	if (vars.addLoginAlts) {
@@ -256,19 +260,16 @@ async function betaGame() {
 	}
 	const keepUsernameVisible = new MutationObserver(appendName)
 
-	function jumpMobs(number) {
+	async function jumpMobs(number) {
 		if (vars.verbose) log(`Jumping ${number} mobs`)
-		setTimeout(() => {
-			$("#battleGrounds").click()
-			$(document).one("roa-ws:page:town_battlegrounds", () => {
-				setTimeout(() => {
-					$(`#enemyList>option[value|=${number}]`).attr("selected", "selected")
-					setTimeout(() => {
-						$("#autoEnemy").click()
-					}, vars.buttonDelay)
-				}, vars.buttonDelay)
-			})
-		}, vars.startActionsDelay)
+		await delay(vars.startActionsDelay)
+		$("#battleGrounds").click()
+		$(document).one("roa-ws:page:town_battlegrounds", async () => {
+			await delay(vars.buttonDelay)
+			$(`#enemyList>option[value|=${number}]`).attr("selected", "selected")
+			await delay(vars.buttonDelay)
+			$("#autoEnemy").click()
+		})
 	}
 
 	function spawnGems(tier, type, splice, amount) {
@@ -279,28 +280,24 @@ async function betaGame() {
 			return
 		}
 
-		$(document).one("roa-ws:modalContent", (_, data) => {
+		$(document).one("roa-ws:modalContent", async (_, data) => {
 			if (data.title === "Spawn Gems") {
-				setTimeout(() => {
-					$("#spawnGemLevel").val(tier)
-					$("#gemSpawnType").val(type)
-					$("#gemSpawnSpliceType").val(splice)
-					$("#gemSpawnCount").val(amount)
+				await delay(vars.startActionsDelay)
 
-					setTimeout(() => {
-						$("#gemSpawnConfirm").click()
-					}, vars.buttonDelay)
+				$("#spawnGemLevel").val(tier)
+				$("#gemSpawnType").val(type)
+				$("#gemSpawnSpliceType").val(splice)
+				$("#gemSpawnCount").val(amount)
 
-					$(document).one("roa-ws:page:gem_spawn", () => {
-						$("#betabot-spawn-gem").prop("disabled", true)
-						setTimeout(() => {
-							$("#confirmButtons>a.green")[0].click()
-						}, 55*1000)
-						setTimeout(() => {
-							$("#betabot-spawn-gem").prop("disabled", false)
-						}, 60*1000)
-					})
-				}, vars.startActionsDelay)
+				await delay(vars.buttonDelay)
+				$("#gemSpawnConfirm").click()
+				$(document).one("roa-ws:page:gem_spawn", async () => {
+					$("#betabot-spawn-gem").prop("disabled", true)
+					await delay(55*1000)
+					$("#confirmButtons>a.green")[0].click()
+					await delay(5*1000)
+					$("#betabot-spawn-gem").prop("disabled", false)
+				})
 			}
 		})
 		$("#chatMessage").text("/spawngem")
@@ -393,165 +390,157 @@ $(document).on("roa-ws:all", function(_, data){
 	// Betabot based on @Batosi's bot:
 
 	// When the user cancels a quest or harvestron, disable autoQuests or autoHouse to avoid starting them again
-	$(document).on("roa-ws:page:quest_forfeit", () => {
+	$(document).on("roa-ws:page:quest_forfeit", async () => {
 		if (vars.verbose) log("Quest forfeited. Waiting 60 seconds before checking for quests again")
 		if (vars.autoQuests) {
 			vars.autoQuests = false
-			setTimeout( async () => {
-				vars.autoQuests = (await browser.storage.sync.get("autoQuests")).autoQuests
-			}, 60*1000)
+			await delay(60*1000)
+			vars.autoQuests = (await browser.storage.sync.get("autoQuests")).autoQuests
 		}
 	})
 
-	$(document).on("roa-ws:page:house_harvest_job_cancel", () => {
+	$(document).on("roa-ws:page:house_harvest_job_cancel", async () => {
 		if (vars.verbose) log("Harvestron job cancelled. Waiting 60 seconds before checking the Harvestron again")
 		if (vars.autoHouse) {
 			vars.autoHouse = false
-			setTimeout( async () => {
-				vars.autoHouse = (await browser.storage.sync.get("autoQuests")).autoHouse
-			}, 60*1000)
+			await delay(60*1000)
+			vars.autoHouse = (await browser.storage.sync.get("autoQuests")).autoHouse
 		}
 	})
 
 	// Buy crystals every 24 hours
-	function autoBuyCrys() {
+	async function autoBuyCrys() {
 		if (vars.dailyCrystals === 0) return
 
 		if (vars.verbose) log(`Buying ${vars.dailyCrystals} daily crystals`)
 		vars.actionsPending = true
-		setTimeout(() => { $("#premiumShop").click() }, vars.startActionsDelay)
-		$(document).one("roa-ws:page:boosts", () => {
-			setTimeout(() => {
-				$("#goldCrystalButton").click()
-				setTimeout(() => {
-					$("#premium_purchase_gold_count").val(vars.dailyCrystals)
-					$("#premium_purchase_gold_button").click()
-					setTimeout(itemBuilding, vars.buttonDelay)
-				}, vars.buttonDelay)
-			}, vars.buttonDelay)
+		await delay(vars.startActionsDelay)
+		$("#premiumShop").click()
+
+		$(document).one("roa-ws:page:boosts", async () => {
+			await delay(vars.buttonDelay)
+			$("#goldCrystalButton").click()
+			await delay(vars.buttonDelay)
+			$("#premium_purchase_gold_count").val(vars.dailyCrystals)
+			$("#premium_purchase_gold_button").click()
+			setTimeout(itemBuilding, vars.buttonDelay)
 		})
 		$(document).one("roa-ws:page:purchase_crystals_gold", itemBuilding)
 	}
 	setInterval(autoBuyCrys, 1000 * 60 * 60 * 24) // Once a day
 
 	// Quests, house, harvestron, and crafting
-	const finishQuest = () => {
-		setTimeout(() => {
-			if (vars.verbose) log(`Completing a ${vars.questCompleting} quest`)
-			$(`input.completeQuest[data-questtype=${vars.questCompleting}]`).click() // Complete the quest
-			$(document).one("roa-ws:page:quests", () => {
-				setTimeout(() => {
-					if (vars.verbose) log(`Starting a ${vars.questCompleting} quest`)
-					$(`input.questRequest[data-questtype=${vars.questCompleting}][value="Begin Quest"]`).click() // Start new quest
-					$(document).one("roa-ws:page:quests", () => {
-						setTimeout(() => {
-							vars.actionsPending = false
-							vars.questCompleting = null
-							$(".closeModal").click()
-						}, vars.buttonDelay)
-					})
-				}, vars.buttonDelay)
+	async function finishQuest() {
+		await delay(vars.startActionsDelay)
+		if (vars.verbose) log(`Completing a ${vars.questCompleting} quest`)
+		$(`input.completeQuest[data-questtype=${vars.questCompleting}]`).click() // Complete the quest
+		$(document).one("roa-ws:page:quests", async () => {
+			await delay(vars.buttonDelay)
+			if (vars.verbose) log(`Starting a ${vars.questCompleting} quest`)
+			$(`input.questRequest[data-questtype=${vars.questCompleting}][value="Begin Quest"]`).click() // Start new quest
+			$(document).one("roa-ws:page:quests", async () => {
+				await delay(vars.buttonDelay)
+				vars.actionsPending = false
+				vars.questCompleting = null
+				$(".closeModal").click()
 			})
-		}, vars.startActionsDelay)
+		})
 	}
 
-	const selectBuild = () => {
+	async function selectBuild() {
 		if (vars.verbose) log("Selecting build")
-		setTimeout(() => {
-			const itemId = parseInt($("#item-id").val())
-			if ($("#custom-Build").is(":checked") && itemId > 0) { // If a custom build is specified, upgrade it
-				if (vars.verbose) log(`Upgrading custom item with id ${itemId}`)
-				$(document).one("roa-ws:page:house_all_builds", itemId, customBuild)
-				setTimeout(() => { $("#allHouseUpgrades")[0].click() }, vars.buttonDelay)
-			} else if ($("#houseRoomCanBuild").is(":visible")) { // Else, if new room is available, build it
-				if (vars.verbose) log("Building a new room")
-				$(document).one("roa-ws:page:house_build_room", itemBuilding)
-				setTimeout(() => { $("#houseBuildRoom")[0].click() }, vars.buttonDelay)
-			} else if ($("#houseQuickBuildList li:first .houseViewRoom").length === 1) { // Else, if new item is available, build it
-				$(document).one("roa-ws:page:house_room", buildItem)
-				setTimeout(() => { $("#houseQuickBuildList li:first .houseViewRoom")[0].click() }, vars.buttonDelay)
-			} else { // Else, upgrade existing item
-				$(document).one("roa-ws:page:house_room_item", upgradeItem)
-				setTimeout(() => { $("#houseQuickBuildList li:first .houseViewRoomItem")[0].click() }, vars.buttonDelay)
-			}
-		}, vars.startActionsDelay)
+		const itemId = parseInt($("#item-id").val())
+		await delay(vars.startActionsDelay)
+		if ($("#custom-Build").is(":checked") && itemId > 0) { // If a custom build is specified, upgrade it
+			if (vars.verbose) log(`Upgrading custom item with id ${itemId}`)
+			$(document).one("roa-ws:page:house_all_builds", itemId, customBuild)
+			await delay(vars.buttonDelay)
+			$("#allHouseUpgrades")[0].click()
+		} else if ($("#houseRoomCanBuild").is(":visible")) { // Else, if new room is available, build it
+			if (vars.verbose) log("Building a new room")
+			$(document).one("roa-ws:page:house_build_room", itemBuilding)
+			await delay(vars.buttonDelay)
+			$("#houseBuildRoom")[0].click()
+		} else if ($("#houseQuickBuildList li:first .houseViewRoom").length === 1) { // Else, if new item is available, build it
+			$(document).one("roa-ws:page:house_room", buildItem)
+			await delay(vars.buttonDelay)
+			$("#houseQuickBuildList li:first .houseViewRoom")[0].click()
+		} else { // Else, upgrade existing item
+			$(document).one("roa-ws:page:house_room_item", upgradeItem)
+			await delay(vars.buttonDelay)
+			$("#houseQuickBuildList li:first .houseViewRoomItem")[0].click()
+		}
 	}
 
-	const customBuild = event => {
+	async function customBuild(event) {
 		$(document).one("roa-ws:page:house_room_item", upgradeItem)
-		setTimeout(() => {
-			$(`#modal2Content a[data-itemtype=${event.data}]`)[0].click()
-		}, vars.buttonDelay)
+		await delay(vars.buttonDelay)
+		$(`#modal2Content a[data-itemtype=${event.data}]`)[0].click()
 	}
 
-	const buildItem = () => {
+	async function buildItem() {
 		if (vars.verbose) log("Building a new item")
-		setTimeout(() => {
-			$(document).one("roa-ws:page:house_build_room_item", itemBuilding)
-			setTimeout(() => { $("#houseBuildRoomItem").click() }, vars.buttonDelay)
-		}, vars.startActionsDelay)
+		await delay(vars.startActionsDelay)
+		$(document).one("roa-ws:page:house_build_room_item", itemBuilding)
+		$("#houseBuildRoomItem").click()
 	}
 
-	const upgradeItem = () => {
-		setTimeout(() => {
-			if ($("#houseRoomItemUpgradeTier").is(":visible")) { // If tier upgrade is available, upgrade it
-				if (vars.verbose) log("Upgrading item tier")
-				$(document).one("roa-ws:page:house_room_item_upgrade_tier", itemBuilding)
-				setTimeout(() => { $("#houseRoomItemUpgradeTier").click() }, vars.buttonDelay)
-			} else { // Else do a regular upgrade
-				if (vars.verbose) log("Upgrading fastest item")
-				$(document).one("roa-ws:page:house_room_item_upgrade_level", itemBuilding)
-				setTimeout(() => { $("#houseRoomItemUpgradeLevel").click() }, vars.buttonDelay)
-			}
-		}, vars.startActionsDelay)
+	async function upgradeItem() {
+		await delay(vars.startActionsDelay)
+		if ($("#houseRoomItemUpgradeTier").is(":visible")) { // If tier upgrade is available, upgrade it
+			if (vars.verbose) log("Upgrading item tier")
+			$(document).one("roa-ws:page:house_room_item_upgrade_tier", itemBuilding)
+			$("#houseRoomItemUpgradeTier").click()
+		} else { // Else do a regular upgrade
+			if (vars.verbose) log("Upgrading fastest item")
+			$(document).one("roa-ws:page:house_room_item_upgrade_level", itemBuilding)
+			$("#houseRoomItemUpgradeLevel").click()
+		}
 	}
 
-	const itemBuilding = () => {
-		setTimeout(() => {
-			vars.actionsPending = false
-			$(".closeModal").click()
-		}, vars.startActionsDelay)
+	async function itemBuilding() {
+		await delay(vars.startActionsDelay)
+		vars.actionsPending = false
+		$(".closeModal").click()
 	}
 
-	const startHarvestron = () => {
+	async function startHarvestron() {
 		if (vars.verbose) log("Starting Harvestron job")
 		$("#houseHarvestingJobStart").click()
 		setTimeout(itemBuilding, vars.buttonDelay)
 	}
 
-	const checkCraftingQueue = (_, data) => {
+	async function checkCraftingQueue(_, data) {
 		if (vars.actionsPending || !vars.autoCraft) return
 
 		if (data.results.a.cq < vars.minCraftingQueue) {
 			if (vars.verbose) log(`There are less than ${vars.minCraftingQueue} items in the crafting queue. Refilling now`)
 			vars.actionsPending = true
-			setTimeout(() => {
-				// For some weird reason, .click() does not work here ¯\_(ツ)_/¯
-				$(".craftingTableLink")[0].dispatchEvent(new Event("click"))
-			}, vars.buttonDelay)
-			$(document).one("roa-ws:page:house_room_item", () => {
-				setTimeout(() => {
-					$("#craftingItemLevelMax").click()
-					setTimeout(() => {
-						$("#craftingQuality").val(0) // Set to poor quality
-						$("#craftingJobFillQueue").attr("checked", "true")
-						$("#craftingJobStart").click()
-					}, vars.buttonDelay)
-				}, vars.startActionsDelay)
+			await delay(vars.buttonDelay)
+			// For some weird reason, .click() does not work here ¯\_(ツ)_/¯
+			$(".craftingTableLink")[0].dispatchEvent(new Event("click"))
+			$(document).one("roa-ws:page:house_room_item", async () => {
+				await delay(vars.startActionsDelay)
+				$("#craftingItemLevelMax").click()
+				await delay(vars.buttonDelay)
+				$("#craftingQuality").val(0) // Set to poor quality
+				$("#craftingJobFillQueue").attr("checked", "true")
+				$("#craftingJobStart").click()
 				$(document).one("roa-ws:page:craft_item", itemBuilding)
 			})
 		}
 	}
 
 	// Check action results for needed actions
-	const checkResults = (_, data) => {
+	async function checkResults(_, data) {
 		data = data.results.p
 
 		if (vars.autoStamina && data.autos_remaining < vars.minStamina && !staminaCooldown) { // Stamina
 			if (vars.verbose) log("Replenishing stamina")
 			$("#replenishStamina").click()
 			staminaCooldown = true
-			setTimeout(() => {staminaCooldown = false}, 2500)
+			await delay(2500)
+			staminaCooldown = false
 			return
 		}
 
@@ -570,7 +559,8 @@ $(document).on("roa-ws:all", function(_, data){
 			if (vars.questCompleting != null) {
 				vars.actionsPending = true
 				$(document).one("roa-ws:page:quests", finishQuest)
-				setTimeout(() => { $("a.questCenter")[0].click() }, vars.buttonDelay)
+				await delay(vars.buttonDelay)
+				$("a.questCenter")[0].click()
 				return
 			}
 		}
@@ -605,12 +595,6 @@ $(document).on("roa-ws:all", function(_, data){
 		stonecutting: $(".bossHarvest.btn")[7],
 		crafting    : $(".bossCraft.btn")[0],
 		carving     : $(".bossCarve.btn")[0],
-	}
-
-	function delay(ms) {
-		return new Promise(resolve => {
-			setTimeout(resolve, ms)
-		})
 	}
 
 	function getTrade() {
@@ -663,7 +647,7 @@ $(document).on("roa-ws:all", function(_, data){
 				}
 			}
 		})
-	}, 30000) // Start after a delay to avoid being triggered by old messages
+	}, 30*1000) // Start after a delay to avoid being triggered by old messages
 
 	// Avoid joining events after chat reconnections
 	$(document).on("roa-ws:motd", async () => {
