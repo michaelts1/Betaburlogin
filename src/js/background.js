@@ -1,6 +1,6 @@
 "use strict"
 
-const VARS_VERSION = 10
+const VARS_VERSION = 11
 const ADDON_CSS =
 `#betabot-clear-username {
 	color: yellow;
@@ -234,6 +234,7 @@ async function getVars() {
 			addRequestMoney  : true,
 			addOpenTabs      : true,
 			addLoginAlts     : true,
+			resumeCrafting   : true,
 			removeEffects    : false,
 			actionsPending   : false,
 			autoWire         : false,
@@ -391,6 +392,8 @@ async function updateVars() {
 			vars.addOpenTabs    = true
 			vars.addLoginAlts   = true
 			vars.removeEffects  = true
+		case 10:
+			vars.resumeCrafting = false
 		default:
 			vars.version = VARS_VERSION /* eslint-enable no-fallthrough */
 	}

@@ -1,6 +1,8 @@
 /* ~~~ To Do ~~~
+ * Turn on/off event listeners according to settings instead of checking the settings every time an event is triggered
  *
  * ~~~ Needs Testing ~~~
+ * Start crafting again if stopped due to a disconnect
  * Use await delay instead of setTimeout
  * Make mainUsername case insensitive
  * Remove effects info
@@ -509,26 +511,40 @@ $(document).on("roa-ws:all", function(_, data){
 		setTimeout(completeTask, vars.buttonDelay)
 	}
 
-	async function checkCraftingQueue(_, data) {
-		if (vars.actionsPending || !vars.autoCraft) return
+	async function fillCraftingQueue() {
+		if (vars.actionsPending) return
 
-		if (data.results.a.cq < vars.minCraftingQueue) {
-			if (vars.verbose) log(`There are less than ${vars.minCraftingQueue} items in the crafting queue. Refilling now`)
-			vars.actionsPending = true
+		vars.actionsPending = true
+		await delay(vars.startActionsDelay)
+		// For some weird reason, .click() does not work here ¯\_(ツ)_/¯
+		$(".craftingTableLink")[0].dispatchEvent(new Event("click"))
+		$(document).one("roa-ws:page:house_room_item", async () => {
 			await delay(vars.buttonDelay)
-			// For some weird reason, .click() does not work here ¯\_(ツ)_/¯
-			$(".craftingTableLink")[0].dispatchEvent(new Event("click"))
-			$(document).one("roa-ws:page:house_room_item", async () => {
-				await delay(vars.startActionsDelay)
-				$("#craftingItemLevelMax").click()
-				await delay(vars.buttonDelay)
-				$("#craftingQuality").val(0) // Set to poor quality
-				$("#craftingJobFillQueue").attr("checked", "true")
-				$("#craftingJobStart").click()
-				$(document).one("roa-ws:page:craft_item", completeTask)
-			})
-		}
+			$("#craftingItemLevelMax").click()
+			await delay(vars.buttonDelay)
+			$("#craftingQuality").val(0) // Set to poor quality
+			$("#craftingJobFillQueue").attr("checked", "true")
+			await delay(vars.buttonDelay)
+			$("#craftingJobStart").click()
+			$(document).one("roa-ws:page:craft_item", completeTask)
+		})
 	}
+
+	$(document).on("roa-ws:craft", (_, data) => {
+		if(vars.autoCraft && data.results.a.cq < vars.minCraftingQueue) {
+			if (vars.verbose) log(`There are less than ${vars.minCraftingQueue} items in the crafting queue. Refilling now`)
+			fillCraftingQueue()
+		}
+	})
+
+	$(document).on("roa-ws:notification", (_, data) => {
+		// This message means the user has not manually stopped crafting:
+		const queueEmpty = /You completed your crafting queue and began (Battling|Fishing|Woodcutting|Mining|Stonecutting) automatically./.test(data.m)
+		if (queueEmpty && vars.autoCraft && vars.resumeCrafting) {
+			if (vars.verbose) log("Crafting queue is empty. Refilling")
+			fillCraftingQueue()
+		}
+	})
 
 	// Check action results for needed actions
 	async function checkResults(_, data) {
@@ -578,7 +594,6 @@ $(document).on("roa-ws:all", function(_, data){
 	}
 
 	$(document).on("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults)
-	$(document).on("roa-ws:craft", checkCraftingQueue)
 
 	// Auto event Based on: https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js
 	let eventID         = null
