@@ -137,7 +137,6 @@ async function betaGame() {
 
 		if (message.text === "send currency") wire(message.recipient)
 		if (message.text === "jump mobs") jumpMobs(message.number)
-		if (message.text === "buy crystals now") autoBuyCrys()
 		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
 	})
 
@@ -165,7 +164,7 @@ async function betaGame() {
 			$("#allHouseUpgrades").click()
 
 			$(document).one("roa-ws:page:house_all_builds", (_, data) => {
-				setTimeout(itemBuilding)
+				setTimeout(completeTask)
 
 				const items = []
 				data.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
@@ -408,8 +407,14 @@ $(document).on("roa-ws:all", function(_, data){
 		}
 	})
 
+	async function completeTask() {
+		await delay(vars.startActionsDelay)
+		vars.actionsPending = false
+		$(".closeModal").click()
+	}
+
 	// Buy crystals every 24 hours
-	async function autoBuyCrys() {
+	async function buyCrys() {
 		if (vars.dailyCrystals === 0) return
 
 		if (vars.verbose) log(`Buying ${vars.dailyCrystals} daily crystals`)
@@ -423,11 +428,11 @@ $(document).on("roa-ws:all", function(_, data){
 			await delay(vars.buttonDelay)
 			$("#premium_purchase_gold_count").val(vars.dailyCrystals)
 			$("#premium_purchase_gold_button").click()
-			setTimeout(itemBuilding, vars.buttonDelay)
+			setTimeout(completeTask, vars.buttonDelay)
 		})
-		$(document).one("roa-ws:page:purchase_crystals_gold", itemBuilding)
+		$(document).one("roa-ws:page:purchase_crystals_gold", completeTask)
 	}
-	setInterval(autoBuyCrys, 1000 * 60 * 60 * 24) // Once a day
+	setInterval(buyCrys, 1000 * 60 * 60 * 24) // Once a day
 
 	// Quests, house, harvestron, and crafting
 	async function finishQuest() {
@@ -458,7 +463,7 @@ $(document).on("roa-ws:all", function(_, data){
 			$("#allHouseUpgrades")[0].click()
 		} else if ($("#houseRoomCanBuild").is(":visible")) { // Else, if new room is available, build it
 			if (vars.verbose) log("Building a new room")
-			$(document).one("roa-ws:page:house_build_room", itemBuilding)
+			$(document).one("roa-ws:page:house_build_room", completeTask)
 			await delay(vars.buttonDelay)
 			$("#houseBuildRoom")[0].click()
 		} else if ($("#houseQuickBuildList li:first .houseViewRoom").length === 1) { // Else, if new item is available, build it
@@ -481,7 +486,7 @@ $(document).on("roa-ws:all", function(_, data){
 	async function buildItem() {
 		if (vars.verbose) log("Building a new item")
 		await delay(vars.startActionsDelay)
-		$(document).one("roa-ws:page:house_build_room_item", itemBuilding)
+		$(document).one("roa-ws:page:house_build_room_item", completeTask)
 		$("#houseBuildRoomItem").click()
 	}
 
@@ -489,25 +494,19 @@ $(document).on("roa-ws:all", function(_, data){
 		await delay(vars.startActionsDelay)
 		if ($("#houseRoomItemUpgradeTier").is(":visible")) { // If tier upgrade is available, upgrade it
 			if (vars.verbose) log("Upgrading item tier")
-			$(document).one("roa-ws:page:house_room_item_upgrade_tier", itemBuilding)
+			$(document).one("roa-ws:page:house_room_item_upgrade_tier", completeTask)
 			$("#houseRoomItemUpgradeTier").click()
 		} else { // Else do a regular upgrade
 			if (vars.verbose) log("Upgrading fastest item")
-			$(document).one("roa-ws:page:house_room_item_upgrade_level", itemBuilding)
+			$(document).one("roa-ws:page:house_room_item_upgrade_level", completeTask)
 			$("#houseRoomItemUpgradeLevel").click()
 		}
-	}
-
-	async function itemBuilding() {
-		await delay(vars.startActionsDelay)
-		vars.actionsPending = false
-		$(".closeModal").click()
 	}
 
 	async function startHarvestron() {
 		if (vars.verbose) log("Starting Harvestron job")
 		$("#houseHarvestingJobStart").click()
-		setTimeout(itemBuilding, vars.buttonDelay)
+		setTimeout(completeTask, vars.buttonDelay)
 	}
 
 	async function checkCraftingQueue(_, data) {
@@ -526,7 +525,7 @@ $(document).on("roa-ws:all", function(_, data){
 				$("#craftingQuality").val(0) // Set to poor quality
 				$("#craftingJobFillQueue").attr("checked", "true")
 				$("#craftingJobStart").click()
-				$(document).one("roa-ws:page:craft_item", itemBuilding)
+				$(document).one("roa-ws:page:craft_item", completeTask)
 			})
 		}
 	}
