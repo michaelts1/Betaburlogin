@@ -11,7 +11,7 @@
 	},
 
 	"icons": {
-		"60": "images/betaburlogin.png"
+		"60": "src/images/betaburlogin.png"
 	},
 
 	"content_scripts": [
@@ -22,27 +22,27 @@
 				"https://beta.avabur.com/game"
 			],
 			"js": [
-				"js/jquery-3.4.1.min.js",
-				"js/content.js"
+				"src/js/jquery-3.4.1.min.js",
+				"src/js/content.js"
 			]
 		}
 	],
 
 	"background": {
-		"scripts": ["js/background.js"]
+		"scripts": ["src/js/background.js"]
 	},
 
 	"options_ui": {
-		"page": "html/options.html",
+		"page": "src/html/options.html",
 		"open_in_tab": true
 	},
 
 	"browser_action": {
 		"default_icon": {
-			"60": "images/betaburlogin.png"
+			"60": "src/images/betaburlogin.png"
 		},
 		"default_title": "Betabur Login",
-		"default_popup": "html/browser_action.html"
+		"default_popup": "src/html/browser_action.html"
 	},
 
 	"permissions": [
