@@ -15,14 +15,14 @@
 
 "use strict"
 
-const HREF = window.location.href
+const href = window.location.href
 let port = null
 
-if (/www.avabur.com[/?expird=1]*$/.test(HREF)) {
+if (/www.avabur.com[/?expird=1]*$/.test(href)) {
 	liveLogin()
-} else if (/beta.avabur.com[/?expird=1]*$/.test(HREF)) {
+} else if (/beta.avabur.com[/?expird=1]*$/.test(href)) {
 	betaLogin()
-} else if (/beta.avabur.com\/game/.test(HREF)) {
+} else if (/beta.avabur.com\/game/.test(href)) {
 	betaGame()
 }
 
