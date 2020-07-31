@@ -1,5 +1,4 @@
 /* ~~~ To Do ~~~
- * Split auto house to construction and harvestron
  * Don't toggle checkEvent inside toggleInterfaceChanges() if we just loded the page (wait at least 30 seconds)
  *
  * ~~~ Needs Testing ~~~
@@ -8,6 +7,7 @@
  * Stamina
  * Custom build
  * Changing CSS
+ * Auto Harvestron
  * Remove effects info
  * All interface settings
  * eventListeners.toggle()
