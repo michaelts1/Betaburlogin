@@ -23,6 +23,7 @@
 
 const href = window.location.href
 let port = null
+let vars = null
 
 if (/www.avabur.com[/?expird=1]*$/.test(href)) {
 	liveLogin()
@@ -43,7 +44,7 @@ function delay(ms) {
 }
 
 async function liveLogin() {
-	const vars = await browser.storage.sync.get(["verbose", "addOpenTabs"])
+	vars = await browser.storage.sync.get(["verbose", "addOpenTabs"])
 
 	if (vars.verbose) log("Starting up (Live Login)")
 
@@ -58,7 +59,7 @@ async function liveLogin() {
 }
 
 async function betaLogin() {
-	const vars = await browser.storage.sync.get(["verbose", "addLoginAlts"])
+	vars = await browser.storage.sync.get(["verbose", "addLoginAlts"])
 
 	if (vars.verbose) log("Starting up (Beta Login)")
 
@@ -110,8 +111,7 @@ async function betaGame() {
 			data === undefined ? $(document)[turnOn](eventName, data, handler) : $(document)[turnOn](eventName, handler) // If we have data, send it too
 		},
 	}
-
-	let vars            = await browser.storage.sync.get()
+	vars = await browser.storage.sync.get()
 	let username        = $("#username").text()
 	let isAlt           = username !== vars.mainUsername.toLowerCase()
 	let staminaCooldown = false
@@ -621,7 +621,7 @@ $(document).on("roa-ws:all", function(_, data){
 			$("li#housing").click()
 			return
 		}
-		if (vars.autoHouse && data.can_house_harvest) { // Harvestron
+		if (vars.autoHarvestron && data.can_house_harvest) { // Harvestron
 			vars.actionsPending = true
 			$(document).one("roa-ws:page:house_room_item", startHarvestron)
 			$("#harvestronNotifier")[0].click()

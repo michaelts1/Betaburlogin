@@ -78,7 +78,7 @@
 					<tr>
 						<td>
 							<label for="auto-house">Auto House</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Automatically build house items and start Harvestron jobs.&#10;&#10;Requires Alarm Clock for auto construction and Harvestron for auto Harvestron."></span>
+							<span class="info" role="img" aria-label="info" data-tooltip="Automatically build house items.&#10;&#10;The addon will first attempt to build a new room. If there are no new rooms to build, it will upgrade item tiers. If there are also no tier upgrades available, the addon will build the fastest item.&#10;&#10;Requires Alarm Clock."></span>
 						</td>	
 						<td>
 							<input id="auto-house" type="checkbox">
@@ -95,8 +95,17 @@
 					</tr>
 					<tr>
 						<td>
+							<label for="auto-harvestron">Auto Harvestron</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Automatically start Harvestron jobs.&#10;&#10;If the user cancels an Harvestron job manually, the addon will wait at least 60 seconds before sending the Harvestron again. This gives the user the opportunity to set the Harvestron to harvest another resource without the addon interfering with him.&#10;&#10;Requires Harvestron (obviously)."></span>
+						</td>
+						<td>
+							<input id="auto-harvestron" type="checkbox">
+						</td>
+					</tr>
+					<tr>
+						<td>
 							<label for="auto-craft">Auto Craft</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Automatically fill the crafting queue when under the minimum."></span>
+							<span class="info" role="img" aria-label="info" data-tooltip="While crafting, automatically fill the crafting queue when under the minimum."></span>
 						</td>
 						<td>
 							<input id="auto-craft" type="checkbox">

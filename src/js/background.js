@@ -1,6 +1,6 @@
 "use strict"
 
-const VARS_VERSION = 11
+const VARS_VERSION = 12
 const ADDON_CSS =
 `#betabot-clear-username {
 	color: yellow;
@@ -226,6 +226,7 @@ async function getVars() {
 			autoQuests       : true,
 			autoHouse        : true,
 			autoCraft        : true,
+			autoHarvestron   : true,
 			joinEvents       : true,
 			addCustomBuild   : true,
 			addUsername      : true,
@@ -394,6 +395,8 @@ async function updateVars() {
 			vars.removeEffects  = true
 		case 10:
 			vars.resumeCrafting = false
+		case 11:
+			vars.autoHarvestron = true
 		default:
 			vars.version = VARS_VERSION /* eslint-enable no-fallthrough */
 	}
