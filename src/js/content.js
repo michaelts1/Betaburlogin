@@ -1,18 +1,19 @@
 /* ~~~ To Do ~~~
- * Turn on/off event listeners according to settings instead of checking the settings every time an event is triggered
+ * Split auto house to construction and harvestron
  *
  * ~~~ Needs Testing ~~~
- * Start crafting again if stopped due to a disconnect
- * Use await delay instead of setTimeout
- * Make mainUsername case insensitive
+ * Events
+ * RoA-WS
+ * Stamina
+ * Custom build
+ * Changing CSS
  * Remove effects info
  * All interface settings
- * Changing CSS
- * Stamina
- * Events
- * Custom build
- * RoA-WS
  * Changing autoWire settings
+ * Make mainUsername case insensitive
+ * Use await delay instead of setTimeout
+ * Start crafting again if stopped due to a disconnect
+ * Turn on/off event listeners according to settings instead of checking the settings every time an event is triggered
  */
 
 "use strict"
@@ -89,6 +90,7 @@ async function betaGame() {
 	let staminaCooldown = false
 	let mainTrade       = getTrade()
 	let autoWireID      = vars.autoWire ? setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername) : null
+	toggleInterfaceChanges()
 
 	if (vars.verbose) {
 		log(`Starting up (Beta Game)\nUsername: ${username}\nAlt: ${isAlt ? "yes" : "no"}\nEvent TS: ${mainTrade}\nAuto Wire: ${autoWireID ? "on" : "off"}`)
@@ -157,28 +159,10 @@ async function betaGame() {
 			keepUsernameVisible.observe($("#roomName")[0], {attributes: true, childList: true, subtree: true})
 		} else {
 			keepUsernameVisible.disconnect()
-			$("#betabot-clear-username").remove()
+			$("#betabot-clear-username")?.remove()
 		}
 
 		// Option to build a specific item:
-		function getCustomBuild() {
-			vars.actionsPending = true
-			$("#allHouseUpgrades").click()
-
-			$(document).one("roa-ws:page:house_all_builds", (_, data) => {
-				setTimeout(completeTask)
-
-				const items = []
-				data.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
-
-				$("#houseQuickBuildWrapper").append(`<div id="betabot-custom-build">Build a specific item:
-				<select id="betabot-select-build"><option value="" selected>None (Build Fastest)</option></select></div>`)
-
-				for (const item of items) {
-					$("#betabot-select-build").append(`<option value="${item.i}">${item.n}</option>`)
-				}
-			})
-		}
 		if (vars.addCustomBuild && $("#betabot-custom-build")[0] === undefined) {
 			getCustomBuild()
 		} else if (vars.addCustomBuild === false && $("#betabot-custom-build")[0] !== undefined) {
@@ -210,15 +194,11 @@ async function betaGame() {
 		}
 
 		// Custom style:
-		const cssChanged = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` !== $("#betabot-css").prop("href")
-		if (cssChanged || $("#betabot-css")[0] === undefined) { // If the code has changed, or if it was never injected
-			$("#betabot-css").remove()
-			const elm = document.createElement("link")
-			elm.href = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` // Decode CSS into base64 and use it as a link to avoid script injections
-			elm.type = "text/css"
-			elm.rel  = "stylesheet"
-			elm.id   = "betabot-css"
-			document.head.appendChild(elm)
+		const cssChanged = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` !== $("#betabot-css")?.prop("href")
+		if (cssChanged) { // If the code has changed, or if it was never injected
+			$("#betabot-css")?.remove() //only remove the element if it exists
+			// Decode CSS into base64 and use it as a link to avoid script injections:
+			$("head").append(`<link id="betabot-css" rel="stylesheet" href="data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}">`)
 		}
 
 		// Remove Effects Box
@@ -233,10 +213,53 @@ async function betaGame() {
 					</div>
 				</div>`)
 		}
+
+		if (vars.addSpawnGems) {
+			$(document).on("roa-ws:modalContent", addAltsSpawn)
+		} else {
+			$(document).off("roa-ws:modalContent", addAltsSpawn)
+		}
+
+		if (vars.autoCraft) {
+			$(document).on("roa-ws:craft roa-ws:notification", checkCraftingQueue)
+		} else {
+			$(document).off("roa-ws:craft roa-ws:notification", checkCraftingQueue)
+		}
+
+		if (vars.autoStamina || vars.autoQuests || vars.autoHouse) {
+			$(document).on("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults)
+		} else {
+			$(document).off("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults)
+		}
+
+		if (vars.joinEvent) {
+			$(document).on("roa-ws:message", checkEvent)
+		} else {
+			$(document).off("roa-ws:message", checkEvent)
+		}
 	}
 
-	$(document).on("roa-ws:modalContent", (_, data) => {
-		if (vars.addSpawnGems && data.title === "Spawn Gems") {
+	function getCustomBuild() {
+		vars.actionsPending = true
+		$("#allHouseUpgrades").click()
+
+		$(document).one("roa-ws:page:house_all_builds", (_, data) => {
+			setTimeout(completeTask)
+
+			const items = []
+			data.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
+
+			$("#houseQuickBuildWrapper").append(`<div id="betabot-custom-build">Build a specific item:
+			<select id="betabot-select-build"><option value="" selected>None (Build Fastest)</option></select></div>`)
+
+			for (const item of items) {
+				$("#betabot-select-build").append(`<option value="${item.i}">${item.n}</option>`)
+			}
+		})
+	}
+
+	function addAltsSpawn(_, data) {
+		if (data.title === "Spawn Gems") {
 			$("#gemSpawnConfirm").after(`<input id="betabot-spawn-gem" type="button" style="padding:6.5px; margin: 0 -.5em 0 .5em;" value="Spawn For All Alts">`)
 
 			$("#betabot-spawn-gem").on("click", () => {
@@ -251,7 +274,7 @@ async function betaGame() {
 				if (vars.verbose) log(`Requested to spawn ${msg.amount} tier ${msg.tier} gems with type value of ${msg.type} and splice value of ${msg.splice}`)
 			})
 		}
-	})
+	}
 
 	function appendName() {
 		if ($("#betabot-clear-username")[0] === undefined) {
@@ -342,10 +365,10 @@ async function betaGame() {
 
 		const elm = document.createElement("script")
 		elm.innerHTML =
-`const channel = new MessageChannel()
-window.postMessage("betabot-ws message", "*", [channel.port2])
+`const betabotChannel = new MessageChannel()
+window.postMessage("betabot-ws message", "*", [betabotChannel.port2])
 $(document).on("roa-ws:all", function(_, data){
-	channel.port1.postMessage(JSON.parse(data))
+	betabotChannel.port1.postMessage(JSON.parse(data))
 })`
 		elm.id = "betabot-ws"
 		document.head.appendChild(elm)
@@ -381,7 +404,7 @@ $(document).on("roa-ws:all", function(_, data){
 			const origin = message.originalEvent.origin
 			const data = message.originalEvent.data
 			// Make sure we are connecting to the right port
-			// No need to be absolutely sure about it since we don't send sensitve data
+			// No need to be absolutely sure about it since we don't send sensitive data
 			if (origin === "https://beta.avabur.com" && data === "betabot-ws message") {
 				message.originalEvent.ports[0].onmessage = roaWS
 			}
@@ -530,21 +553,18 @@ $(document).on("roa-ws:all", function(_, data){
 		})
 	}
 
-	$(document).on("roa-ws:craft", (_, data) => {
-		if(vars.autoCraft && data.results.a.cq < vars.minCraftingQueue) {
+	function checkCraftingQueue(_, data) {
+		if (data.type === "craft" && data.results.a.cq < vars.minCraftingQueue) {
 			if (vars.verbose) log(`There are less than ${vars.minCraftingQueue} items in the crafting queue. Refilling now`)
 			fillCraftingQueue()
+		} else if (data.type === "notification" && vars.resumeCrafting) {
+			// Means the user has not manually stopped crafting:
+			if (/You completed your crafting queue and began (Battling|Fishing|Woodcutting|Mining|Stonecutting) automatically./.test(data.m)) {
+				if (vars.verbose) log("Crafting queue is empty. Refilling")
+				fillCraftingQueue()
+			}
 		}
-	})
-
-	$(document).on("roa-ws:notification", (_, data) => {
-		// This message means the user has not manually stopped crafting:
-		const queueEmpty = /You completed your crafting queue and began (Battling|Fishing|Woodcutting|Mining|Stonecutting) automatically./.test(data.m)
-		if (queueEmpty && vars.autoCraft && vars.resumeCrafting) {
-			if (vars.verbose) log("Crafting queue is empty. Refilling")
-			fillCraftingQueue()
-		}
-	})
+	}
 
 	// Check action results for needed actions
 	async function checkResults(_, data) {
@@ -593,8 +613,6 @@ $(document).on("roa-ws:all", function(_, data){
 		}
 	}
 
-	$(document).on("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults)
-
 	// Auto event Based on: https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js
 	let eventID         = null
 	let mainEvent       = false
@@ -639,7 +657,7 @@ $(document).on("roa-ws:all", function(_, data){
 	}
 
 	function joinEvent(msgContent, msgID) {
-		if (vars.joinEvents && eventID !== msgID && !eventInProgress && (msgContent === "InitEvent" || msgContent === "MainEvent")) {
+		if (eventID !== msgID && !eventInProgress && (msgContent === "InitEvent" || msgContent === "MainEvent")) {
 			eventID = msgID
 			mainEvent = msgContent === "MainEvent"
 			eventInProgress = true
@@ -650,17 +668,18 @@ $(document).on("roa-ws:all", function(_, data){
 		}
 	}
 
-	setTimeout(() => {
-		$(document).on("roa-ws:message", async (_, data) => {
-			if (data.c_id === vars.eventChannelID) {
-				await delay(vars.startActionsDelay)
-				// Wait to see if the message is recieved together with a message of the day,
-				// which means it was only sent due to a chat reconnection, and we should not join the event.
-				if (motdReceived === false) {
-					joinEvent(data.m, data.m_id)
-				}
+	async function checkEvent(_, data) {
+		if (vars.joinEvents && data.c_id === vars.eventChannelID) {
+			await delay(vars.startActionsDelay)
+			// Wait to see if the message is recieved together with a message of the day,
+			// which means it was only sent due to a chat reconnection, and we should not join the event.
+			if (motdReceived === false) {
+				joinEvent(data.m, data.m_id)
 			}
-		})
+		}
+	}
+	setTimeout(() => {
+		$(document).on("roa-ws:message", checkEvent)
 	}, 30*1000) // Start after a delay to avoid being triggered by old messages
 
 	// Avoid joining events after chat reconnections
