@@ -1,5 +1,6 @@
 /* ~~~ To Do ~~~
  * Split auto house to construction and harvestron
+ * Don't toggle checkEvent inside toggleInterfaceChanges() if we just loded the page (wait at least 30 seconds)
  *
  * ~~~ Needs Testing ~~~
  * Events
@@ -9,6 +10,8 @@
  * Changing CSS
  * Remove effects info
  * All interface settings
+ * eventListeners.toggle()
+ * questOrHarvestronCancelled()
  * Changing autoWire settings
  * Make mainUsername case insensitive
  * Use await delay instead of setTimeout
@@ -84,6 +87,30 @@ async function betaLogin() {
 }
 
 async function betaGame() {
+	const eventListeners = {
+		/**
+		 * Attaches/deattaches a handler to an event
+		 * @param {string} eventName - Listen to events with this name
+		 * @param {function} handler - Handle the event with this handler
+		 * @param {boolean} value - Turn the event handler on/off
+		 * @param {*=} data - Data to be passed to the handler
+		 * */
+		toggle: function(eventName, handler, value, data) {
+			if (typeof eventName !== "string") throw new TypeError(`Parameter eventName ${eventName} must be a string`)
+			if (typeof handler !== "function") throw new TypeError(`Parameter handler ${handler} must be function`)
+			if (typeof value !== "boolean") throw new TypeError(`Parameter value ${value} must be boolean`)
+
+			if (this[eventName] === value) {
+				console.warn(`Event handler ${handler} is already ${value ? "on" : "off"} for event ${eventName}`)
+			}
+
+			this[eventName] = value // Mark eventName as used
+
+			const turnOn = value ? "on" : "off" // If value is truthy, $(document).on(...), if falsy, $(document).off(...)
+			data === undefined ? $(document)[turnOn](eventName, data, handler) : $(document)[turnOn](eventName, handler) // If we have data, send it too
+		},
+	}
+
 	let vars            = await browser.storage.sync.get()
 	let username        = $("#username").text()
 	let isAlt           = username !== vars.mainUsername.toLowerCase()
@@ -124,15 +151,16 @@ async function betaGame() {
 	}
 	browser.storage.onChanged.addListener(refreshVars)
 
-	$(document).on("roa-ws:page:username_change", (_, data) => {
-		if (data.s === 0) return // Unsuccessful name change
+	// Event listeners that right now are not going to be turned off (might change in the future) are here
+	// Event listeneres that will be turned on/off as needed are inside toggleInterfaceChanges()
+	eventListeners.toggle("roa-ws:motd", motd, true)
+	eventListeners.toggle("roa-ws:page:username_change", usernameChange, true)
+	eventListeners.toggle("roa-ws:page:quest_forfeit", questOrHarvestronCancelled, true, "autoQuest")
+	eventListeners.toggle("roa-ws:page:house_harvest_job_cancel", questOrHarvestronCancelled, true, "autoHouse")
 
-		log(`User has changed name from ${username} to ${data.u}`)
-		$.alert(`It looks like you have changed your username from ${username} to ${data.u}.
-			If you used the old username in BetaburLogin settings page, you might want to
-			update these settings`, "Name Changed")
-		username = data.u
-	})
+	setTimeout(() => {
+		eventListeners.toggle("roa-ws:message", checkEvent, vars.joinEvents)
+	}, 30*1000) // Start after a delay to avoid being triggered by old messages
 
 	// Connect to background script:
 	port = browser.runtime.connect({name: username})
@@ -214,29 +242,20 @@ async function betaGame() {
 				</div>`)
 		}
 
-		if (vars.addSpawnGems) {
-			$(document).on("roa-ws:modalContent", addAltsSpawn)
-		} else {
-			$(document).off("roa-ws:modalContent", addAltsSpawn)
-		}
+		eventListeners.toggle("roa-ws:message", checkEvent, vars.joinEvent)
+		eventListeners.toggle("roa-ws:modalContent", addAltsSpawn, vars.addSpawnGems)
+		eventListeners.toggle("roa-ws:craft roa-ws:notification", checkCraftingQueue, vars.autoCraft)
+		eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults, vars.autoStamina || vars.autoQuests || vars.autoHouse)
+	}
 
-		if (vars.autoCraft) {
-			$(document).on("roa-ws:craft roa-ws:notification", checkCraftingQueue)
-		} else {
-			$(document).off("roa-ws:craft roa-ws:notification", checkCraftingQueue)
-		}
+	function usernameChange(_, data) {
+		if (data.s === 0) return // Unsuccessful name change
 
-		if (vars.autoStamina || vars.autoQuests || vars.autoHouse) {
-			$(document).on("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults)
-		} else {
-			$(document).off("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults)
-		}
-
-		if (vars.joinEvent) {
-			$(document).on("roa-ws:message", checkEvent)
-		} else {
-			$(document).off("roa-ws:message", checkEvent)
-		}
+		log(`User has changed name from ${username} to ${data.u}`)
+		$.alert(`It looks like you have changed your username from ${username} to ${data.u}.
+			If you used the old username in BetaburLogin settings page, you might want to
+			update these settings`, "Name Changed")
+		username = data.u
 	}
 
 	function getCustomBuild() {
@@ -338,8 +357,8 @@ async function betaGame() {
 		for (const currency of vars.currencySend) {
 			if (currency.send === false) continue
 
-			const amount       = $(`.${currency.name}`).attr("title").replace(/,/g, "")
-			const sellable     = $(`.${currency.name}`).attr("data-personal").replace(/,/g, "")
+			const amount   = $(`.${currency.name}`).attr("title").replace(/,/g, "")
+			const sellable = $(`.${currency.name}`).attr("data-personal").replace(/,/g, "")
 			let amountToSend = amount - currency.keepAmount // Keep this amount
 
 			// Don't send more than you can
@@ -412,30 +431,27 @@ $(document).on("roa-ws:all", function(_, data){
 	})()
 
 	// Betabot based on @Batosi's bot:
-
-	// When the user cancels a quest or harvestron, disable autoQuests or autoHouse to avoid starting them again
-	$(document).on("roa-ws:page:quest_forfeit", async () => {
-		if (vars.verbose) log("Quest forfeited. Waiting 60 seconds before checking for quests again")
-		if (vars.autoQuests) {
-			vars.autoQuests = false
-			await delay(60*1000)
-			vars.autoQuests = (await browser.storage.sync.get("autoQuests")).autoQuests
-		}
-	})
-
-	$(document).on("roa-ws:page:house_harvest_job_cancel", async () => {
-		if (vars.verbose) log("Harvestron job cancelled. Waiting 60 seconds before checking the Harvestron again")
-		if (vars.autoHouse) {
-			vars.autoHouse = false
-			await delay(60*1000)
-			vars.autoHouse = (await browser.storage.sync.get("autoQuests")).autoHouse
-		}
-	})
-
 	async function completeTask() {
 		await delay(vars.startActionsDelay)
 		vars.actionsPending = false
 		$(".closeModal").click()
+	}
+
+	/**
+	 * Disables autoQuests or autoHouse to avoid starting them again, when the user cancels a quest or harvestron job
+	 * @param {Object} event - Details of the event
+	 * @param {string} event.data - Setting to disable. should be either "autoQuest" or "autoHouse"
+	 */
+	async function questOrHarvestronCancelled(event) {
+		if (vars.verbose) {
+			if (event.data === "autoQuest") log("Quest forfeited. Waiting 60 seconds before checking for quests again")
+			if (event.data === "autoHouse") log("Harvestron job cancelled. Waiting 60 seconds before checking the Harvestron again")
+		}
+		if (vars[event.data]) {
+			vars[event.data] = false
+			await delay(60*1000)
+			vars[event.data] = (await browser.storage.sync.get(event.data))[event.data]
+		}
 	}
 
 	// Buy crystals every 24 hours
@@ -653,7 +669,7 @@ $(document).on("roa-ws:all", function(_, data){
 		// Stop tracking the event
 		mainEvent = false
 		eventInProgress = false
-		$(document).off("roa-ws:boss", changeTrade)
+		eventListeners.toggle("roa-ws:boss", changeTrade, false)
 	}
 
 	function joinEvent(msgContent, msgID) {
@@ -664,12 +680,12 @@ $(document).on("roa-ws:all", function(_, data){
 
 			if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} event due to message #${msgID}`)
 			BUTTONS[mainTrade].click()
-			$(document).on("roa-ws:boss", changeTrade)
+			eventListeners.toggle("roa-ws:boss", changeTrade, true)
 		}
 	}
 
 	async function checkEvent(_, data) {
-		if (vars.joinEvents && data.c_id === vars.eventChannelID) {
+		if (data.c_id === vars.eventChannelID) {
 			await delay(vars.startActionsDelay)
 			// Wait to see if the message is recieved together with a message of the day,
 			// which means it was only sent due to a chat reconnection, and we should not join the event.
@@ -678,14 +694,10 @@ $(document).on("roa-ws:all", function(_, data){
 			}
 		}
 	}
-	setTimeout(() => {
-		$(document).on("roa-ws:message", checkEvent)
-	}, 30*1000) // Start after a delay to avoid being triggered by old messages
 
-	// Avoid joining events after chat reconnections
-	$(document).on("roa-ws:motd", async () => {
+	async function motd() {
 		motdReceived = true
 		await delay(vars.startActionsDelay * 5)
 		motdReceived = false
-	})
+	}
 }
