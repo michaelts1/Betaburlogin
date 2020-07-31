@@ -1,5 +1,6 @@
 /* ~~~ To Do ~~~
  * Don't toggle checkEvent inside toggleInterfaceChanges() if we just loded the page (wait at least 30 seconds)
+ * Allow multiple handlers for the same event
  *
  * ~~~ Needs Testing ~~~
  * Events
@@ -91,7 +92,7 @@ async function betaGame() {
 	const eventListeners = {
 		/**
 		 * Attaches/deattaches a handler to an event
-		 * @param {string} eventName - Listen to events with this name
+		 * @param {string|string[]} eventName - Listen to events with this name(s)
 		 * @param {function} handler - Handle the event with this handler
 		 * @param {boolean} value - Turn the event handler on/off
 		 * @param {*=} data - Data to be passed to the handler
@@ -151,16 +152,20 @@ async function betaGame() {
 	}
 	browser.storage.onChanged.addListener(refreshVars)
 
-	// Event listeners that right now are not going to be turned off (might change in the future) are here
+	// Event listeners that are not going to be turned off right now (might change in the future) are below
 	// Event listeneres that will be turned on/off as needed are inside toggleInterfaceChanges()
+
+	// Toggle motdReceived on for a shor time after receiving motd message
 	eventListeners.toggle("roa-ws:motd", motd, true)
+	// Advice the user to update the options page after a name change:
 	eventListeners.toggle("roa-ws:page:username_change", usernameChange, true)
+	// Don't start new quests/harvestron jobs for 60 seconds after manually cancelling one:
 	eventListeners.toggle("roa-ws:page:quest_forfeit", questOrHarvestronCancelled, true, "autoQuest")
 	eventListeners.toggle("roa-ws:page:house_harvest_job_cancel", questOrHarvestronCancelled, true, "autoHouse")
 
 	setTimeout(() => {
 		eventListeners.toggle("roa-ws:message", checkEvent, vars.joinEvents)
-	}, 30*1000) // Start after a delay to avoid being triggered by old messages
+	}, 30*1000) // Auto Event. Start after a delay to avoid being triggered by old messages
 
 	// Connect to background script:
 	port = browser.runtime.connect({name: username})
@@ -229,22 +234,26 @@ async function betaGame() {
 			$("head").append(`<link id="betabot-css" rel="stylesheet" href="data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}">`)
 		}
 
-		// Remove Effects Box
+		// Remove Effects Box:
 		if (vars.removeEffects && $("#effectInfo")[0] !== undefined) {
 			$("#effectInfo").remove()
 		} else if (vars.removeEffects === false && $("#effectInfo")[0] === undefined) {
-			$("#gauntletInfo").after(
-				`<div id="effectInfo" style="display: block;">
-					<div class="ui-element border2">
-						<h5 class="toprounder center"><a id="effectUpgradeTable">Effects</a></h5>
-						<div class="row" id="effectTable" style=""></div>
-					</div>
-				</div>`)
+			$("#gauntletInfo").after(`
+			<div id="effectInfo" style="display: block;">
+				<div class="ui-element border2">
+					<h5 class="toprounder center"><a id="effectUpgradeTable">Effects</a></h5>
+					<div class="row" id="effectTable" style=""></div>
+				</div>
+			</div>`)
 		}
 
+		// Auto Events:
 		eventListeners.toggle("roa-ws:message", checkEvent, vars.joinEvent)
+		// Spawn Gems For All Alts:
 		eventListeners.toggle("roa-ws:modalContent", addAltsSpawn, vars.addSpawnGems)
+		// Auto Craft:
 		eventListeners.toggle("roa-ws:craft roa-ws:notification", checkCraftingQueue, vars.autoCraft)
+		// Auto Stamina/Quests/House/Harvestron
 		eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults, vars.autoStamina || vars.autoQuests || vars.autoHouse)
 	}
 
