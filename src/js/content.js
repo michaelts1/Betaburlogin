@@ -44,6 +44,34 @@ function delay(ms) {
 	})
 }
 
+const eventListeners = {
+	/**
+	 * Attaches/deattaches a handler to an event
+	 * @param {string} eventName - Listen to events with this name
+	 * @param {function} handler - Handle the event with this handler
+	 * @param {boolean} value - Turn the event handler on/off
+	 * @param {*=} data - Data to be passed to the handler
+	 * */
+	toggle: function(eventName, handler, value, data) {
+		if (typeof eventName !== "string") throw new TypeError(`Parameter eventName ${eventName} must be a string`)
+		if (typeof handler !== "function") throw new TypeError(`Parameter handler ${handler} must be function`)
+		if (typeof value !== "boolean") throw new TypeError(`Parameter value ${value} must be boolean`)
+
+		if (this[eventName] === undefined) {
+			this[eventName] = []
+		}
+		const prop = this[eventName] // Shorter identifier
+		const turnOn = value ? "on" : "off" // If value is true, $(document).on(...), if false, $(document).off(...)
+
+		if (prop.includes(handler.name) && value) {
+			console.warn(`Event handler ${handler.name} is already on for event ${eventName}`)
+		}
+
+		data === undefined ? $(document)[turnOn](eventName, data, handler) : $(document)[turnOn](eventName, handler) // If we have data, send it too
+		value ? prop.push(handler.name) : prop.splice(prop.indexOf(handler.name), 1) // Push/pop the handler from the handlers array
+	},
+}
+
 async function liveLogin() {
 	vars = await browser.storage.sync.get(["verbose", "addOpenTabs"])
 
@@ -89,29 +117,6 @@ async function betaLogin() {
 }
 
 async function betaGame() {
-	const eventListeners = {
-		/**
-		 * Attaches/deattaches a handler to an event
-		 * @param {string|string[]} eventName - Listen to events with this name(s)
-		 * @param {function} handler - Handle the event with this handler
-		 * @param {boolean} value - Turn the event handler on/off
-		 * @param {*=} data - Data to be passed to the handler
-		 * */
-		toggle: function(eventName, handler, value, data) {
-			if (typeof eventName !== "string") throw new TypeError(`Parameter eventName ${eventName} must be a string`)
-			if (typeof handler !== "function") throw new TypeError(`Parameter handler ${handler} must be function`)
-			if (typeof value !== "boolean") throw new TypeError(`Parameter value ${value} must be boolean`)
-
-			if (this[eventName] === value) {
-				console.warn(`Event handler ${handler} is already ${value ? "on" : "off"} for event ${eventName}`)
-			}
-
-			this[eventName] = value // Mark eventName as used
-
-			const turnOn = value ? "on" : "off" // If value is truthy, $(document).on(...), if falsy, $(document).off(...)
-			data === undefined ? $(document)[turnOn](eventName, data, handler) : $(document)[turnOn](eventName, handler) // If we have data, send it too
-		},
-	}
 	vars = await browser.storage.sync.get()
 	let username        = $("#username").text()
 	let isAlt           = username !== vars.mainUsername.toLowerCase()
@@ -290,7 +295,7 @@ async function betaGame() {
 		if (data.title === "Spawn Gems") {
 			$("#gemSpawnConfirm").after(`<input id="betabot-spawn-gem" type="button" style="padding:6.5px; margin: 0 -.5em 0 .5em;" value="Spawn For All Alts">`)
 
-			$("#betabot-spawn-gem").on("click", () => {
+			$("#betabot-spawn-gem").click(() => {
 				const msg = {
 					text  : "spawnGem",
 					tier  : parseInt($("#spawnGemLevel").val()),
