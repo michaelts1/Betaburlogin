@@ -1,6 +1,4 @@
 /* ~~~ To Do ~~~
- * Don't toggle checkEvent inside toggleInterfaceChanges() if we just loded the page (wait at least 30 seconds)
- * Allow multiple handlers for the same event
  *
  * ~~~ Needs Testing ~~~
  * Events
@@ -16,7 +14,9 @@
  * Changing autoWire settings
  * Make mainUsername case insensitive
  * Use await delay instead of setTimeout
+ * Allow multiple handlers for the same event
  * Start crafting again if stopped due to a disconnect
+ * Don't toggle checkEvent inside toggleInterfaceChanges() if we just loaded the page
  * Turn on/off event listeners according to settings instead of checking the settings every time an event is triggered
  */
 
@@ -123,7 +123,7 @@ async function betaGame() {
 	let staminaCooldown = false
 	let mainTrade       = getTrade()
 	let autoWireID      = vars.autoWire ? setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername) : null
-	toggleInterfaceChanges()
+	toggleInterfaceChanges(false)
 
 	if (vars.verbose) {
 		log(`Starting up (Beta Game)\nUsername: ${username}\nAlt: ${isAlt ? "yes" : "no"}\nEvent TS: ${mainTrade}\nAuto Wire: ${autoWireID ? "on" : "off"}`)
@@ -151,7 +151,7 @@ async function betaGame() {
 			autoWireID = setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername)
 		}
 
-		toggleInterfaceChanges()
+		toggleInterfaceChanges(true)
 
 		if (vars.verbose) log(`Alt: ${isAlt ? "yes" : "no"}\nEvent TS: ${mainTrade}\nAuto Wire: ${autoWireID ? "on" : "off"}`)
 	}
@@ -182,7 +182,7 @@ async function betaGame() {
 		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
 	})
 
-	function toggleInterfaceChanges() {
+	function toggleInterfaceChanges(refresh) {
 		// Request Currency Button:
 		if (vars.addRequestMoney && $("#betabot-request-currency")[0] === undefined) {
 			$("#username").after(`<button id="betabot-request-currency"><a>Request Currency</a></button>`)
@@ -252,14 +252,16 @@ async function betaGame() {
 			</div>`)
 		}
 
-		// Auto Events:
-		eventListeners.toggle("roa-ws:message", checkEvent, vars.joinEvent)
 		// Spawn Gems For All Alts:
 		eventListeners.toggle("roa-ws:modalContent", addAltsSpawn, vars.addSpawnGems)
 		// Auto Craft:
 		eventListeners.toggle("roa-ws:craft roa-ws:notification", checkCraftingQueue, vars.autoCraft)
 		// Auto Stamina/Quests/House/Harvestron
 		eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults, vars.autoStamina || vars.autoQuests || vars.autoHouse)
+
+		if (refresh) { // Don't activate on page load, only after settings refreshing
+			eventListeners.toggle("roa-ws:message", checkEvent, vars.joinEvent) // Auto Events
+		}
 	}
 
 	function usernameChange(_, data) {
