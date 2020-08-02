@@ -8,10 +8,11 @@ const ADDON_CSS =
 	line-height: 10px;
 }
 #betabot-clear-username::before {
-	content: ": "
+	content: ": ";
+	font-size: 14px;
 }
 #betabot-request-currency {
-	margin-left: 10px
+	margin-left: 10px;
 }
 #betabot-request-currency a {
 	line-height: 10px;
@@ -221,7 +222,7 @@ async function getVars() {
 			minStamina       : 5,
 			attackAt         : 3,
 			altsNumber       : 0,
-			wireFrequency    : 0,
+			wireFrequency    : 60,
 			autoStamina      : true,
 			autoQuests       : true,
 			autoHouse        : true,
@@ -375,10 +376,15 @@ async function updateVars() {
 			}
 			if (vars.pattern === "romanCaps") vars.pattern = "roman" // Deprecated
 		case 8:
+			// Name Change:
 			vars.autoQuests = vars.doQuests
 			vars.autoHouse  = vars.doBuildingAndHarvy
 			vars.autoCraft  = vars.doCraftQueue
-			await browser.storage.sync.remove(["doQuests", "vars.doBuildingAndHarvy", "vars.doCraftQueue",]) // Name Change
+			delete vars.doQuests
+			delete vars.doBuildingAndHarvy
+			delete vars.doCraftQueue
+			browser.storage.sync.remove(["doQuests", "doBuildingAndHarvy", "doCraftQueue",])
+			// Other updates:
 			vars.minStamina      = 5
 			vars.autoStamina     = true
 			vars.joinEvents      = true
@@ -398,13 +404,12 @@ async function updateVars() {
 		case 11:
 			vars.autoHarvestron = true
 		default:
-			vars.version = VARS_VERSION /* eslint-enable no-fallthrough */
+			if (vars.css.addon !== ADDON_CSS) {
+				vars.css.addon = ADDON_CSS
+			}
+			vars.version = VARS_VERSION
+			browser.storage.sync.set(vars) /* eslint-enable no-fallthrough */
 	}
-
-	if (vars.css.addon !== ADDON_CSS) {
-		vars.css.addon = ADDON_CSS
-	}
-	browser.storage.sync.set(vars)
 }
 
 browser.storage.onChanged.addListener(changes => {
@@ -430,8 +435,8 @@ browser.storage.onChanged.addListener(changes => {
 	const values = Object.values(changes)
 	const keys   = Object.keys(changes)
 	for (let i = 0; i < Object.values(changes).length; i++) {
-		if (keys[i] === "loginPassword") {
-			console.log(keys[i], "changed")
+		if (keys[i] === "loginPassword" && changes.loginPassword.oldValue !== changes.loginPassword.newValue) {
+			console.log("loginPassword changed")
 			continue
 		}
 		if (objectEquals(values[i].oldValue, values[i].newValue) === false) {

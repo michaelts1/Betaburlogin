@@ -121,11 +121,11 @@
 					</tr>
 					<tr>
 						<td>
-							<label for="resume-Crafting">Craft on Finishing Queue</label>
+							<label for="resume-crafting">Craft on Finishing Queue</label>
 							<span class="info" role="img" aria-label="info" data-tooltip="Automatically start crafting again after finishing the queue.&#10;&#10;Sometimes needed since auto crafting might not work after disconnects. If this setting is on, the addon will resume crafting even after disconnects.&#10;&#10;Will only work if Auto Craft is also on."></span>
 						</td>
 						<td>
-							<input id="resume-Crafting" type="checkbox">
+							<input id="resume-crafting" type="checkbox">
 						</td>
 					</tr>
 					<tr>
@@ -158,7 +158,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="The name you use to log in with your main account.&#10;&#10;Might be different than your in-game username."></span>
 						</td>
 						<td>
-							<input id="main-account-name" pattern="^[A-z\d]{3,20}$" placeholder="Login Name" size="15" required>
+							<input id="main-account-name" pattern="^[A-Za-z\d]{3,20}$" placeholder="Login Name" size="15" required>
 						</td>
 					</tr>
 					<tr>
@@ -167,7 +167,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="Your main account in-game username.&#10;&#10;Might be different than the name you use to log in."></span>
 						</td>
 						<td>
-							<input id="main-username" pattern="^[A-z]{3,20}$" placeholder="In-Game Name" size="15" required>
+							<input id="main-username" pattern="^[A-Za-z]{3,20}$" placeholder="In-Game Name" size="15" required>
 						</td>
 					</tr>
 					<tr>
@@ -207,7 +207,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="The base name for your alts.&#10;&#10;For example, if your alts are &quot;alti&quot; and &quot;altii&quot;, then the base name is &quot;alt&quot;."></span>
 						</td>
 						<td>
-							<input id="alt-name" pattern="^[A-z\d]{3,20}$" placeholder="Alt Base Name" size="24">
+							<input id="alt-name" pattern="^[A-Za-z\d]{3,20}$" placeholder="Alt Base Name" size="24">
 						</td>
 					</tr>
 					<tr id="alts-unique-names" class="requires-containers">
@@ -216,7 +216,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="List of the names of your alts, sperated by commas and spaces.&#10;&#10;Example: &quot;altFish, altTwo, WeirdName, myAlt&quot;."></span>
 						</td>
 						<td>
-							<input id="name-list" pattern="^[A-z\d, ]{3,}$" placeholder="Unique Names List" size="24">
+							<input id="name-list" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Unique Names List" size="24">
 						</td>
 					</tr>
 				</tbody>
@@ -383,7 +383,7 @@
 						</td>
 						<td>
 							<!-- Only accept numbers between 0 and 15 -->
-							<input id="attack-at" pattern="(^0[0-9]$)|(^1[0-5]$)|(^\d$)" placeholder="Minutes" size="6"> Minutes Left
+							<input id="attack-at" pattern="(^0?\d$)|(^1[0-5]$)" placeholder="Minutes" size="6"> Minutes Left
 						</td>
 					</tr>
 					<tr>
@@ -391,7 +391,7 @@
 							<label for="fishing">Fishing</label>
 						</td>
 						<td>
-							<input id="fishing" pattern="^[A-z\d, ]{3,}$" placeholder="Fishing" size="24">
+							<input id="fishing" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Fishing" size="24">
 						</td>
 					</tr>
 					<tr>
@@ -399,7 +399,7 @@
 							<label for="woodcutting">Woodcutting</label>
 						</td>
 						<td>
-							<input id="woodcutting" pattern="^[A-z\d, ]{3,}$" placeholder="Woodcutting" size="24">
+							<input id="woodcutting" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Woodcutting" size="24">
 						</td>
 					</tr>
 					<tr>
@@ -407,7 +407,7 @@
 							<label for="mining">Mining</label>
 						</td>
 						<td>
-							<input id="mining" pattern="^[A-z\d, ]{3,}$" placeholder="Mining" size="24">
+							<input id="mining" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Mining" size="24">
 						</td>
 					</tr>
 					<tr>
@@ -415,7 +415,7 @@
 							<label for="stonecutting">Stonecutting</label>
 						</td>
 						<td>
-							<input id="stonecutting" pattern="^[A-z\d, ]{3,}$" placeholder="Stonecutting" size="24">
+							<input id="stonecutting" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Stonecutting" size="24">
 						</td>
 					</tr>
 					<tr>
@@ -423,7 +423,7 @@
 							<label for="crafting">Crafting</label>
 						</td>
 						<td>
-							<input id="crafting" pattern="^[A-z\d, ]{3,}$" placeholder="Crafting" size="24">
+							<input id="crafting" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Crafting" size="24">
 						</td>
 					</tr>
 					<tr>
@@ -431,7 +431,7 @@
 							<label for="carving">Carving</label>
 						</td>
 						<td>
-							<input id="carving" pattern="^[A-z\d, ]{3,20}$" placeholder="Carving" size="24">
+							<input id="carving" pattern="^[A-Za-z\d, ]{3,20}$" placeholder="Carving" size="24">
 						</td>
 					</tr>
 				</tbody>

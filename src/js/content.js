@@ -1,23 +1,9 @@
 /* ~~~ To Do ~~~
+ * Hide old banners
+ * Reorganize this file
  *
  * ~~~ Needs Testing ~~~
- * Events
- * RoA-WS
- * Stamina
- * Custom build
- * Changing CSS
- * Auto Harvestron
- * Remove effects info
- * All interface settings
- * eventListeners.toggle()
- * questOrHarvestronCancelled()
- * Changing autoWire settings
- * Make mainUsername case insensitive
- * Use await delay instead of setTimeout
- * Allow multiple handlers for the same event
- * Start crafting again if stopped due to a disconnect
- * Don't toggle checkEvent inside toggleInterfaceChanges() if we just loaded the page
- * Turn on/off event listeners according to settings instead of checking the settings every time an event is triggered
+ * Clear event vars after 16+ minutes even if the user is not participating
  */
 
 "use strict"
@@ -46,13 +32,12 @@ function delay(ms) {
 
 const eventListeners = {
 	/**
-	 * Attaches/deattaches a handler to an event
+	 * Attach/deattach handlers to document events, while avoiding having duplicate listeners
 	 * @param {string} eventName - Listen to events with this name
 	 * @param {function} handler - Handle the event with this handler
 	 * @param {boolean} value - Turn the event handler on/off
-	 * @param {*=} data - Data to be passed to the handler
 	 * */
-	toggle: function(eventName, handler, value, data) {
+	toggle: function(eventName, handler, value) {
 		if (typeof eventName !== "string") throw new TypeError(`Parameter eventName ${eventName} must be a string`)
 		if (typeof handler !== "function") throw new TypeError(`Parameter handler ${handler} must be function`)
 		if (typeof value !== "boolean") throw new TypeError(`Parameter value ${value} must be boolean`)
@@ -61,14 +46,17 @@ const eventListeners = {
 			this[eventName] = []
 		}
 		const prop = this[eventName] // Shorter identifier
-		const turnOn = value ? "on" : "off" // If value is true, $(document).on(...), if false, $(document).off(...)
 
-		if (prop.includes(handler.name) && value) {
-			console.warn(`Event handler ${handler.name} is already on for event ${eventName}`)
+		if (prop.includes(handler) && value) { // Turn off the previous event handler to avoid duplicates
+			$(document).off(eventName, handler)
 		}
 
-		data === undefined ? $(document)[turnOn](eventName, data, handler) : $(document)[turnOn](eventName, handler) // If we have data, send it too
-		value ? prop.push(handler.name) : prop.splice(prop.indexOf(handler.name), 1) // Push/pop the handler from the handlers array
+		$(document)[value ? "on" : "off"](eventName, handler) // If value is true, $(document).on(...), if false, $(document).off(...)
+		if (prop.includes(handler) && !value) { // Push/pop the handler from the handlers array
+			prop.splice(prop.indexOf(handler), 1)
+		} else if (value) {
+			prop.push(handler)
+		}
 	},
 }
 
@@ -123,7 +111,6 @@ async function betaGame() {
 	let staminaCooldown = false
 	let mainTrade       = getTrade()
 	let autoWireID      = vars.autoWire ? setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername) : null
-	toggleInterfaceChanges(false)
 
 	if (vars.verbose) {
 		log(`Starting up (Beta Game)\nUsername: ${username}\nAlt: ${isAlt ? "yes" : "no"}\nEvent TS: ${mainTrade}\nAuto Wire: ${autoWireID ? "on" : "off"}`)
@@ -140,6 +127,7 @@ async function betaGame() {
 			if (changes[wireRelated].oldValue !== changes[wireRelated].newValue) {
 				clearInterval(autoWireID)
 				autoWireID = null
+				log("Resetting autoWireID")
 			}
 		}
 
@@ -165,12 +153,7 @@ async function betaGame() {
 	// Advice the user to update the options page after a name change:
 	eventListeners.toggle("roa-ws:page:username_change", usernameChange, true)
 	// Don't start new quests/harvestron jobs for 60 seconds after manually cancelling one:
-	eventListeners.toggle("roa-ws:page:quest_forfeit", questOrHarvestronCancelled, true, "autoQuest")
-	eventListeners.toggle("roa-ws:page:house_harvest_job_cancel", questOrHarvestronCancelled, true, "autoHouse")
-
-	setTimeout(() => {
-		eventListeners.toggle("roa-ws:message", checkEvent, vars.joinEvents)
-	}, 30*1000) // Auto Event. Start after a delay to avoid being triggered by old messages
+	eventListeners.toggle("roa-ws:page:quest_forfeit roa-ws:page:house_harvest_job_cancel", questOrHarvestronCancelled, true,)
 
 	// Connect to background script:
 	port = browser.runtime.connect({name: username})
@@ -181,88 +164,6 @@ async function betaGame() {
 		if (message.text === "jump mobs") jumpMobs(message.number)
 		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
 	})
-
-	function toggleInterfaceChanges(refresh) {
-		// Request Currency Button:
-		if (vars.addRequestMoney && $("#betabot-request-currency")[0] === undefined) {
-			$("#username").after(`<button id="betabot-request-currency"><a>Request Currency</a></button>`)
-			$("#betabot-request-currency").click(() => { port.postMessage({text: "requesting currency"}) })
-		} else if (vars.addRequestMoney === false && $("#betabot-request-currency")[0] !== undefined) {
-			$("#betabot-request-currency").remove()
-		}
-
-		// Make it easier to see what alt it is:
-		if (vars.addUsername) {
-			appendName()
-			keepUsernameVisible.observe($("#roomName")[0], {attributes: true, childList: true, subtree: true})
-		} else {
-			keepUsernameVisible.disconnect()
-			$("#betabot-clear-username")?.remove()
-		}
-
-		// Option to build a specific item:
-		if (vars.addCustomBuild && $("#betabot-custom-build")[0] === undefined) {
-			getCustomBuild()
-		} else if (vars.addCustomBuild === false && $("#betabot-custom-build")[0] !== undefined) {
-			$("#betabot-custom-build").remove()
-		}
-
-		if (!isAlt) return // Only run the rest on alts
-
-		// Jump mobs:
-		if (vars.addJumpMobs && $("#betabot-mob-jump")[0] === undefined) {
-			$("#autoEnemy").after(`
-			<div class="mt10" id="betabot-mob-jump" style="display: block;">
-				<input id="betabot-mob-jump-number" type="number" size=1>
-				<input id="betabot-mob-jump-button" type="button" value="Jump Mobs">
-			</div>`)
-
-			$("#betabot-mob-jump-button").click(() => {
-				const number = parseInt($("#enemyList>option:selected").val()) + parseInt($("#betabot-mob-jump-number").val())
-				const maxNumber = parseInt($(`#enemyList>option:last-child`).val())
-				if (number > maxNumber) {
-					$("#areaName").text("The mob you chose is not in the list!")
-					return
-				}
-				port.postMessage({text: "move to mob", number: number})
-				if (vars.verbose) log(`Requested to move all alts ${number} mobs up`)
-			})
-		} else if (vars.addJumpMobs === false && $("#betabot-mob-jump")[0] !== undefined) {
-			$("#betabot-mob-jump").remove()
-		}
-
-		// Custom style:
-		const cssChanged = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` !== $("#betabot-css")?.prop("href")
-		if (cssChanged) { // If the code has changed, or if it was never injected
-			$("#betabot-css")?.remove() //only remove the element if it exists
-			// Decode CSS into base64 and use it as a link to avoid script injections:
-			$("head").append(`<link id="betabot-css" rel="stylesheet" href="data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}">`)
-		}
-
-		// Remove Effects Box:
-		if (vars.removeEffects && $("#effectInfo")[0] !== undefined) {
-			$("#effectInfo").remove()
-		} else if (vars.removeEffects === false && $("#effectInfo")[0] === undefined) {
-			$("#gauntletInfo").after(`
-			<div id="effectInfo" style="display: block;">
-				<div class="ui-element border2">
-					<h5 class="toprounder center"><a id="effectUpgradeTable">Effects</a></h5>
-					<div class="row" id="effectTable" style=""></div>
-				</div>
-			</div>`)
-		}
-
-		// Spawn Gems For All Alts:
-		eventListeners.toggle("roa-ws:modalContent", addAltsSpawn, vars.addSpawnGems)
-		// Auto Craft:
-		eventListeners.toggle("roa-ws:craft roa-ws:notification", checkCraftingQueue, vars.autoCraft)
-		// Auto Stamina/Quests/House/Harvestron
-		eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults, vars.autoStamina || vars.autoQuests || vars.autoHouse)
-
-		if (refresh) { // Don't activate on page load, only after settings refreshing
-			eventListeners.toggle("roa-ws:message", checkEvent, vars.joinEvent) // Auto Events
-		}
-	}
 
 	function usernameChange(_, data) {
 		if (data.s === 0) return // Unsuccessful name change
@@ -275,7 +176,9 @@ async function betaGame() {
 	}
 
 	function getCustomBuild() {
+		eventListeners.toggle("roa-ws:motd", getCustomBuild, false) // Turn off event listener
 		vars.actionsPending = true
+		$("#allHouseUpgrades")[0].click()
 		$("#allHouseUpgrades").click()
 
 		$(document).one("roa-ws:page:house_all_builds", (_, data) => {
@@ -286,7 +189,6 @@ async function betaGame() {
 
 			$("#houseQuickBuildWrapper").append(`<div id="betabot-custom-build">Build a specific item:
 			<select id="betabot-select-build"><option value="" selected>None (Build Fastest)</option></select></div>`)
-
 			for (const item of items) {
 				$("#betabot-select-build").append(`<option value="${item.i}">${item.n}</option>`)
 			}
@@ -400,7 +302,7 @@ async function betaGame() {
 
 		const elm = document.createElement("script")
 		elm.innerHTML =
-`const betabotChannel = new MessageChannel()
+`betabotChannel = new MessageChannel()
 window.postMessage("betabot-ws message", "*", [betabotChannel.port2])
 $(document).on("roa-ws:all", function(_, data){
 	betabotChannel.port1.postMessage(JSON.parse(data))
@@ -453,20 +355,21 @@ $(document).on("roa-ws:all", function(_, data){
 		$(".closeModal").click()
 	}
 
-	/**
-	 * Disables autoQuests or autoHouse to avoid starting them again, when the user cancels a quest or harvestron job
-	 * @param {Object} event - Details of the event
-	 * @param {string} event.data - Setting to disable. should be either "autoQuest" or "autoHouse"
-	 */
 	async function questOrHarvestronCancelled(event) {
-		if (vars.verbose) {
-			if (event.data === "autoQuest") log("Quest forfeited. Waiting 60 seconds before checking for quests again")
-			if (event.data === "autoHouse") log("Harvestron job cancelled. Waiting 60 seconds before checking the Harvestron again")
+		const type = event.type.replace("roa-ws:page:", "")
+		let key = null
+		if (type === "quest_forfeit") {
+			if (vars.verbose) log("Quest forfeited. Waiting 60 seconds before checking for quests again")
+			key = "autoQuest"
+		} else if (type === "house_harvest_job_cancel") {
+			if (vars.verbose) log("Harvestron job cancelled. Waiting 60 seconds before checking the Harvestron again")
+			key = "autoHarvestron"
 		}
-		if (vars[event.data]) {
-			vars[event.data] = false
+
+		if (vars[key]) {
+			vars[key] = false
 			await delay(60*1000)
-			vars[event.data] = (await browser.storage.sync.get(event.data))[event.data]
+			vars[key] = (await browser.storage.sync.get(key))[key]
 		}
 	}
 
@@ -511,11 +414,10 @@ $(document).on("roa-ws:all", function(_, data){
 
 	async function selectBuild() {
 		if (vars.verbose) log("Selecting build")
-		const itemId = parseInt($("#item-id").val())
+		const itemId = parseInt($("#betabot-select-build").val())
 		await delay(vars.startActionsDelay)
-		if ($("#custom-Build").is(":checked") && itemId > 0) { // If a custom build is specified, upgrade it
-			if (vars.verbose) log(`Upgrading custom item with id ${itemId}`)
-			$(document).one("roa-ws:page:house_all_builds", itemId, customBuild)
+		if (!isNaN(itemId)) { // If a custom build is specified, upgrade it
+			$(document).one("roa-ws:page:house_all_builds", customBuild)
 			await delay(vars.buttonDelay)
 			$("#allHouseUpgrades")[0].click()
 		} else if ($("#houseRoomCanBuild").is(":visible")) { // Else, if new room is available, build it
@@ -534,10 +436,17 @@ $(document).on("roa-ws:all", function(_, data){
 		}
 	}
 
-	async function customBuild(event) {
-		$(document).one("roa-ws:page:house_room_item", upgradeItem)
+	async function customBuild() {
+		const itemId = $("#betabot-select-build").val()
+		if (vars.verbose) log(`Upgrading custom item with id ${itemId}`)
+		$(document).one("roa-ws:page:house_room_item", async () => {
+			await delay(vars.buttonDelay)
+			$(document).one("roa-ws:page:house_room_item_upgrade_level", completeTask)
+			$("#houseRoomItemUpgradeLevel").click()
+		})
 		await delay(vars.buttonDelay)
-		$(`#modal2Content a[data-itemtype=${event.data}]`)[0].click()
+		$(`#modal2Content a[data-itemtype=${itemId}]`)[0].click()
+
 	}
 
 	async function buildItem() {
@@ -592,7 +501,7 @@ $(document).on("roa-ws:all", function(_, data){
 		} else if (data.type === "notification" && vars.resumeCrafting) {
 			// Means the user has not manually stopped crafting:
 			if (/You completed your crafting queue and began (Battling|Fishing|Woodcutting|Mining|Stonecutting) automatically./.test(data.m)) {
-				if (vars.verbose) log("Crafting queue is empty. Refilling")
+				if (vars.verbose) log("Crafting queue is empty. Refilling now")
 				fillCraftingQueue()
 			}
 		}
@@ -671,10 +580,11 @@ $(document).on("roa-ws:all", function(_, data){
 	}
 
 	function changeTrade(_, data) {
-		if (data.carvingTier > 2500 && !mainEvent) {
+		const d = data.results
+		if (d.carvingTier > 2500 && !mainEvent) {
 			if (vars.verbose) log("Attacking event boss (carving tier)")
 			BUTTONS.battle.click()
-		} else if (data.time_remaining / 60 < vars.attackAt) {
+		} else if (d.time_remaining < vars.attackAt * 60) {
 			if (!isAlt || (isAlt && !mainEvent)) {
 				if (vars.verbose) log("Attacking event boss (time)")
 				BUTTONS.battle.click()
@@ -685,10 +595,10 @@ $(document).on("roa-ws:all", function(_, data){
 		// Stop tracking the event
 		mainEvent = false
 		eventInProgress = false
-		eventListeners.toggle("roa-ws:boss", changeTrade, false)
+		eventListeners.toggle("roa-ws:event_action", changeTrade, false)
 	}
 
-	function joinEvent(msgContent, msgID) {
+	async function joinEvent(msgContent, msgID) {
 		if (eventID !== msgID && !eventInProgress && (msgContent === "InitEvent" || msgContent === "MainEvent")) {
 			eventID = msgID
 			mainEvent = msgContent === "MainEvent"
@@ -696,7 +606,13 @@ $(document).on("roa-ws:all", function(_, data){
 
 			if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} event due to message #${msgID}`)
 			BUTTONS[mainTrade].click()
-			eventListeners.toggle("roa-ws:boss", changeTrade, true)
+			eventListeners.toggle("roa-ws:event_action", changeTrade, true)
+		}
+		await delay(16*60*1000) // After 16 minutes, make sure the event is registered as over
+		if (eventID === msgID) { // Means it's the same event
+			mainEvent = false
+			eventInProgress = false
+			eventListeners.toggle("roa-ws:event_action", changeTrade, false)
 		}
 	}
 
@@ -716,4 +632,107 @@ $(document).on("roa-ws:all", function(_, data){
 		await delay(vars.startActionsDelay * 5)
 		motdReceived = false
 	}
+
+	async function toggleInterfaceChanges(refresh) {
+		// Request Currency Button:
+		if (vars.addRequestMoney && $("#betabot-request-currency")[0] === undefined) {
+			$("#username").after(`<button id="betabot-request-currency"><a>Request Currency</a></button>`)
+			$("#betabot-request-currency").click(() => { port.postMessage({text: "requesting currency"}) })
+		} else if (vars.addRequestMoney === false && $("#betabot-request-currency")[0] !== undefined) {
+			$("#betabot-request-currency").remove()
+		}
+
+		// Make it easier to see what alt it is:
+		if (vars.addUsername) {
+			appendName()
+			keepUsernameVisible.observe($("#roomName")[0], {attributes: true, childList: true, subtree: true})
+		} else {
+			keepUsernameVisible.disconnect()
+			$("#betabot-clear-username")?.remove()
+		}
+
+		// Custom style:
+		const cssChanged = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` !== $("#betabot-css")?.prop("href")
+		if (cssChanged) { // If the code has changed, or if it was never injected
+			$("#betabot-css")?.remove() //only remove the element if it exists
+			// Decode CSS into base64 and use it as a link to avoid script injections:
+			$("head").append(`<link id="betabot-css" rel="stylesheet" href="data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}">`)
+		}
+
+		// Remove Effects Box:
+		if (vars.removeEffects && $("#effectInfo")[0] !== undefined) {
+			$("#effectInfo").remove()
+		} else if (vars.removeEffects === false && $("#effectInfo")[0] === undefined) {
+			$("#gauntletInfo").after(`
+			<div id="effectInfo" style="display: block;">
+				<div class="ui-element border2">
+					<h5 class="toprounder center"><a id="effectUpgradeTable">Effects</a></h5>
+					<div class="row" id="effectTable"></div>
+				</div>
+			</div>`)
+		}
+
+		// The next two settings (customBuild and joinEvents) need to listen to roa-ws:motd to start.
+		// However, since jQuery .one method can't be used for two functions on the same event at the
+		// same time, I had to use .on and call .off immediately after the event triggers.
+
+		// Option to build a specific item:
+		if (vars.addCustomBuild && $("#betabot-custom-build")[0] === undefined) {
+			if (refresh) { // Don't activate immediately on page load
+				getCustomBuild()
+			} else {
+				eventListeners.toggle("roa-ws:motd", getCustomBuild, true) // Wait for the page to load
+			}
+		} else if (vars.addCustomBuild === false && $("#betabot-custom-build")[0] !== undefined) {
+			$("#betabot-custom-build").remove()
+		}
+
+		// Auto Events:
+		if (refresh) { // Don't activate immediately on page load
+			eventListeners.toggle("roa-ws:message", checkEvent, vars.joinEvents)
+		} else {
+			const startCheckEvent = () => {
+				eventListeners.toggle("roa-ws:message", checkEvent, vars.joinEvents)
+				eventListeners.toggle("roa-ws:motd", startCheckEvent, false)
+			}
+			eventListeners.toggle("roa-ws:motd", startCheckEvent, vars.joinEvents)/*
+			$(document).one("roa-ws:motd", () => {
+				eventListeners.toggle("roa-ws:message", checkEvent, vars.joinEvents)
+			})*/ // Start after a delay to avoid being triggered by old messages
+		}
+
+		// Auto Craft:
+		eventListeners.toggle("roa-ws:craft roa-ws:notification", checkCraftingQueue, vars.autoCraft)
+		// Auto Stamina/Quests/House/Harvestron
+		eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults,
+			vars.autoStamina || vars.autoQuests || vars.autoHouse || vars.autoHarvestron)
+
+		if (isAlt) { // Only run on alts
+			// Spawn Gems For All Alts:
+			eventListeners.toggle("roa-ws:modalContent", addAltsSpawn, vars.addSpawnGems)
+
+			// Jump mobs:
+			if (vars.addJumpMobs && $("#betabot-mob-jump")[0] === undefined) {
+				$("#autoEnemy").after(`
+				<div class="mt10" id="betabot-mob-jump" style="display: block;">
+					<input id="betabot-mob-jump-number" type="number" size=1>
+					<input id="betabot-mob-jump-button" type="button" value="Jump Mobs">
+				</div>`)
+
+				$("#betabot-mob-jump-button").click(() => {
+					const number = parseInt($("#enemyList>option:selected").val()) + parseInt($("#betabot-mob-jump-number").val())
+					const maxNumber = parseInt($(`#enemyList>option:last-child`).val())
+					if (number > maxNumber) {
+						$("#areaName").text("The mob you chose is not in the list!")
+						return
+					}
+					port.postMessage({text: "move to mob", number: number})
+					if (vars.verbose) log(`Requested to move all alts ${number} mobs up`)
+				})
+			} else if (vars.addJumpMobs === false && $("#betabot-mob-jump")[0] !== undefined) {
+				$("#betabot-mob-jump").remove()
+			}
+		}
+	}
+	toggleInterfaceChanges(false)
 }

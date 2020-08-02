@@ -91,7 +91,7 @@ async function fillFields() {
 	$("#add-open-tabs")    .prop("checked", vars.addOpenTabs)
 	$("#remove-effects")   .prop("checked", vars.removeEffects)
 	$("#add-login-alts")   .prop("checked", vars.addLoginAlts)
-	$("#resume-Crafting")  .prop("checked", vars.resumeCrafting)
+	$("#resume-crafting")  .prop("checked", vars.resumeCrafting)
 	$("#auto-harvestron")  .prop("checked", vars.autoHarvestron)
 	$("#alt-jump-button")  .prop("checked", vars.addJumpMobs)
 	$("#containers-auto")  .prop("checked", vars.containers.useAll)
@@ -125,8 +125,7 @@ async function saveChanges() {
 			throw new Error("Form is invalid")
 		}
 
-		vars.pattern        = $("#alt-nameType").val()
-		vars.namesList      = $("#name-list").val().split(", ")
+		vars.pattern        = $("#alt-name-type").val()
 		vars.css.custom     = $("#custom-css").val()
 		vars.altBaseName    = $("#alt-name").val()
 		vars.mainAccount    = $("#main-account-name").val()
@@ -147,7 +146,7 @@ async function saveChanges() {
 		vars.addLoginAlts      = $("#add-login-alts").prop("checked")
 		vars.addSpawnGems      = $("#alt-spawn-button").prop("checked")
 		vars.removeEffects     = $("#remove-effects").prop("checked")
-		vars.resumeCrafting    = $("#resume-Crafting").prop("checked")
+		vars.resumeCrafting    = $("#resume-crafting").prop("checked")
 		vars.autoHarvestron    = $("#auto-harvestron").prop("checked")
 		vars.addCustomBuild    = $("#auto-house-custom").prop("checked")
 		vars.addRequestMoney   = $("#wire-button").prop("checked")
@@ -161,6 +160,8 @@ async function saveChanges() {
 		vars.minCraftingQueue = parseInt($("#min-crafting-queue").val()) || 0
 
 		vars.containers.list = $("[name=containers]:checked").get().map(e => e.id) // Get id's of checked containers
+
+		$("#name-list").val() === "" ? vars.namesList = [] : vars.namesList = $("#name-list").val().split(", ")
 
 		for (const currency of vars.currencySend) {
 			const name = currency.name.replace("_", "-")
@@ -208,7 +209,7 @@ function displayAltFields() {
 		$("#number").hide()
 		$("#alts-base-name").hide()
 		$("#alts-unique-names").hide()
-	} else if (value === "roman" || value === "romanCaps") {
+	} else if (value === "roman") {
 		$("#number").show()
 		$("#alts-base-name").show()
 		$("#alts-unique-names").hide()
@@ -275,11 +276,4 @@ $("#cancel-changes").click(cancelChanges)
 $("#daily-crystals").on("input", updatePrice)
 $("#alt-name-type").on("input", displayAltFields)
 
-browser.storage.onChanged.addListener(changes => {
-	for (const change of Object.getOwnPropertyNames(changes)) {
-		if (["autoQuests", "autoHouse", "autoCraft"].includes(change)) {
-			return
-		}
-		fillFields()
-	}
-})
+browser.storage.onChanged.addListener(fillFields)
