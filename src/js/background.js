@@ -23,10 +23,6 @@ const ADDON_CSS =
 	font-size: 14px;
 	padding: 6.5px;
 }
-label[for=custom-build] a {
-	padding: 3px;
-	text-decoration: none;
-}
 #betabot-spawn-gem[disabled] {
 	opacity: 0.5;
 }`
