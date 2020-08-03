@@ -73,7 +73,7 @@ async function fillFields() {
 	$("#main-account")      .val(vars.mainAccount)
 	$("#main-username")     .val(vars.mainUsername)
 	$("#alt-base-name")     .val(vars.altBaseName)
-	$("#login-password")    .val(vars.loginPassword)
+	$("#login-password")    .val(atob(vars.loginPassword))
 	$("#wire-frequency")    .val(vars.wireFrequency)
 	$("#daily-crystals")    .val(vars.dailyCrystals)
 	$("#event-channel-id")  .val(vars.eventChannelID)
@@ -132,7 +132,6 @@ async function saveChanges() {
 		vars.mainAccount    = $("#main-account").val()
 		vars.mainUsername   = $("#main-username").val()
 		vars.wireFrequency  = $("#wire-frequency").val()
-		vars.loginPassword  = $("#login-password").val()
 
 		vars.verbose           = $("#verbose").prop("checked")
 		vars.autoWire          = $("#auto-wire").prop("checked")
@@ -164,6 +163,8 @@ async function saveChanges() {
 		vars.containers.list = $("[name=containers]:checked").get().map(e => e.id) // Get id's of checked containers
 
 		$("#name-list").val() === "" ? vars.namesList = [] : vars.namesList = $("#name-list").val().split(", ")
+
+		vars.loginPassword = btoa($("#login-password").val())
 
 		for (const currency of vars.currencySend) {
 			const name = currency.name.replace("_", "-")

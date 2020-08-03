@@ -83,7 +83,7 @@ async function betaLogin() {
 
 	async function login(username) {
 		$("#acctname").val(username)
-		$("#password").val(vars.loginPassword)
+		$("#password").val(atob(vars.loginPassword))
 		$("#login").click()
 		if (vars.verbose) log(`Logging in with username ${username}`)
 		await delay(7500)
