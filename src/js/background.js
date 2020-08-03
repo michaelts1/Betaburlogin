@@ -1,6 +1,6 @@
 "use strict"
 
-const VARS_VERSION = 12
+const VARS_VERSION = 13
 const ADDON_CSS =
 `#betabot-clear-username {
 	color: yellow;
@@ -67,7 +67,7 @@ browser.runtime.onConnect.addListener(async port => {
 		})
 	} else if (port.name === mainUsername) { // Else, if beta main
 		main = port
-	} else { // Else, if beta alt
+	} else { // Else, it's a beta alt
 		alts.push(port)
 		port.onMessage.addListener(message => {
 			if (message.text === "move to mob") {
@@ -86,6 +86,9 @@ browser.runtime.onConnect.addListener(async port => {
 			if (message.text === "requesting currency") { // Send currency
 				console.log(`${port.name} requested currency`)
 				sendCurrency(port.name)
+			}
+			if (message.text === "banner closed") {
+				closeBanners()
 			}
 		})
 	}
@@ -203,6 +206,10 @@ function sendCurrency(name) {
 	sendMessage({text: "send currency", recipient: name})
 }
 
+function closeBanners(){
+	sendMessage({text: "close banners"})
+}
+
 // Get settings from storage:
 async function getVars() {
 	vars = await browser.storage.sync.get()
@@ -213,12 +220,12 @@ async function getVars() {
 			eventChannelID   : 3202,
 			startActionsDelay: 1000,
 			buttonDelay      : 500,
+			wireFrequency    : 60,
 			dailyCrystals    : 50,
 			minCraftingQueue : 5,
 			minStamina       : 5,
 			attackAt         : 3,
 			altsNumber       : 0,
-			wireFrequency    : 60,
 			autoStamina      : true,
 			autoQuests       : true,
 			autoHouse        : true,
@@ -237,6 +244,7 @@ async function getVars() {
 			actionsPending   : false,
 			autoWire         : false,
 			verbose          : false,
+			removeBanner     : false,
 			questCompleting  : null,
 			mainAccount      : "",
 			mainUsername     : "",
@@ -399,6 +407,8 @@ async function updateVars() {
 			vars.resumeCrafting = false
 		case 11:
 			vars.autoHarvestron = true
+		case 12:
+			vars.removeBanner = false
 		default:
 			if (vars.css.addon !== ADDON_CSS) {
 				vars.css.addon = ADDON_CSS

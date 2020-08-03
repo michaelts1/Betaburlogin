@@ -1,8 +1,8 @@
 /* ~~~ To Do ~~~
- * Hide old banners
  * Reorganize this file
  *
  * ~~~ Needs Testing ~~~
+ * Hide old banners
  * Clear event vars after 16+ minutes even if the user is not participating
  */
 
@@ -145,7 +145,7 @@ async function betaGame() {
 	}
 	browser.storage.onChanged.addListener(refreshVars)
 
-	// Event listeners that are not going to be turned off right now (might change in the future) are below
+	// Event listeners that are currently always on (might change in the future) are below
 	// Event listeneres that will be turned on/off as needed are inside toggleInterfaceChanges()
 
 	// Toggle motdReceived on for a shor time after receiving motd message
@@ -163,6 +163,7 @@ async function betaGame() {
 		if (message.text === "send currency") wire(message.recipient)
 		if (message.text === "jump mobs") jumpMobs(message.number)
 		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
+		if (message.text === "close banners") closeBanner()
 	})
 
 	function usernameChange(_, data) {
@@ -231,6 +232,18 @@ async function betaGame() {
 			await delay(vars.buttonDelay)
 			$("#autoEnemy").click()
 		})
+	}
+
+	$("#close_general_notification").click(() => {
+		if (vars.removeBanner) {
+			if (vars.verbose) log("Banner closed by user")
+			port.postMessage({text: "banner closed"})
+		}
+	})
+
+	function closeBanner() {
+		if (vars.verbose) log("Banner closed automatically")
+		$("#close_general_notification").click()
 	}
 
 	function spawnGems(tier, type, splice, amount) {
@@ -703,7 +716,7 @@ $(document).on("roa-ws:all", function(_, data){
 
 		// Auto Craft:
 		eventListeners.toggle("roa-ws:craft roa-ws:notification", checkCraftingQueue, vars.autoCraft)
-		// Auto Stamina/Quests/House/Harvestron
+		// Auto Stamina/Quests/House/Harvestron:
 		eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults,
 			vars.autoStamina || vars.autoQuests || vars.autoHouse || vars.autoHarvestron)
 

@@ -65,7 +65,9 @@ header {
 }
 
 /* Form Contents */
-
+#settings {
+	margin: 7.5em 0 0;
+}
 .tab {
 	display: none;
 }
@@ -297,7 +299,6 @@ td {
 #form-buttons {
 	display: flex;
 	justify-content: center;
-	margin: 5em 0 0;
 }
 
 button {
