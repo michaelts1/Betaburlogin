@@ -142,7 +142,6 @@ function login() {
 		logins[i].postMessage({
 			text: "login",
 			username: username,
-			password: vars.loginPassword,
 		})
 	}
 	function romanize(num) {

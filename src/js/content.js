@@ -1,5 +1,6 @@
 /* ~~~ To Do ~~~
  * Reorganize this file
+ * Use weak and compromised encryption for the password (this **CANNOT** be trusted as a secure encryption)
  *
  * ~~~ Needs Testing ~~~
  * Hide old banners
@@ -76,19 +77,19 @@ async function liveLogin() {
 }
 
 async function betaLogin() {
-	vars = await browser.storage.sync.get(["verbose", "addLoginAlts"])
+	vars = await browser.storage.sync.get(["verbose", "addLoginAlts", "loginPassword"])
 
 	if (vars.verbose) log("Starting up (Beta Login)")
 
-	async function login(username, password) {
+	async function login(username) {
 		$("#acctname").val(username)
-		$("#password").val(password)
+		$("#password").val(vars.loginPassword)
 		$("#login").click()
 		if (vars.verbose) log(`Logging in with username ${username}`)
 		await delay(7500)
 		if ($("#login_notification").text() === "Your location is making too many requests too quickly.  Try again later.") {
 			if (vars.verbose) log("Rate limited, trying again")
-			login(username, password)
+			login(username)
 		}
 	}
 
@@ -96,7 +97,7 @@ async function betaLogin() {
 		port = browser.runtime.connect({name: "login"})
 		port.onMessage.addListener(message => {
 			if (vars.verbose) log(`Received message with text: ${message.text}`)
-			if (message.text === "login") login(message.username, message.password)
+			if (message.text === "login") login(message.username)
 		})
 
 		$("#login_notification").html(`<button id="login-alts">Login All Alts</button>`)
