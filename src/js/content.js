@@ -1,8 +1,11 @@
 /* ~~~ To Do ~~~
  * Reorganize this file
  * Use weak and compromised encryption for the password (this **CANNOT** be trusted as a secure encryption)
+ * Remove logs from spawnGems()
+ * Socket 5 gems at once ({type: "roa-ws:page:gem_socket_to_item", s: 1})
  *
  * ~~~ Needs Testing ~~~
+ * Clicking on the OK button after spawning gems for all alts
  * Hide old banners
  * Clear event vars after 16+ minutes even if the user is not participating
  */
@@ -268,10 +271,12 @@ async function betaGame() {
 				$("#gemSpawnConfirm").click()
 				$(document).one("roa-ws:page:gem_spawn", async () => {
 					$("#betabot-spawn-gem").prop("disabled", true)
-					await delay(55*1000)
-					$("#confirmButtons>a.green")[0].click()
-					await delay(5*1000)
+					log("Disabled Spawn For All Alts button")
+					await delay(60*1000)
 					$("#betabot-spawn-gem").prop("disabled", false)
+					log("Enabled Spawn For All Alts button")
+					$("#confirmButtons>a.green")[0].click()
+					log("Clicked #confirmButtons>a.green")
 				})
 			}
 		})

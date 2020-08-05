@@ -176,8 +176,9 @@ input[name=containers],
 table,
 th,
 td {
-	border-collapse: collapse;
-	border: 2px solid lightsteelblue;
+	border: 1px solid lightsteelblue;
+	border-collapse: separate;
+	border-spacing: 0;
 }
 
 table {
