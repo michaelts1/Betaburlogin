@@ -1,6 +1,6 @@
 "use strict"
 
-const VARS_VERSION = 13
+const VARS_VERSION = 14
 const ADDON_CSS =
 `#betabot-clear-username {
 	color: yellow;
