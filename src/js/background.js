@@ -332,7 +332,7 @@ getVars()
 
 async function updateVars() {
 	if (typeof vars.version !== "number") {
-		console.log("Reseting settings - current settings are too old")
+		console.log("Resetting settings - current settings are too old")
 		await browser.storage.sync.clear()
 		getVars()
 		return
@@ -440,10 +440,6 @@ browser.storage.onChanged.addListener(changes => {
 	const values = Object.values(changes)
 	const keys   = Object.keys(changes)
 	for (let i = 0; i < Object.values(changes).length; i++) {
-		if (keys[i] === "loginPassword" && changes.loginPassword.oldValue !== changes.loginPassword.newValue) {
-			console.log("loginPassword changed")
-			continue
-		}
 		if (objectEquals(values[i].oldValue, values[i].newValue) === false) {
 			console.log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
 		}

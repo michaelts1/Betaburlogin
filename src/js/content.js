@@ -86,7 +86,7 @@ async function betaLogin() {
 
 	async function login(username) {
 		$("#acctname").val(username)
-		$("#password").val(atob(vars.loginPassword))
+		$("#password").val(insecureCrypt.decrypt(vars.password, "betabot Totally-not-secure Super NOT secret key!"))
 		$("#login").click()
 		if (vars.verbose) log(`Logging in with username ${username}`)
 		await delay(7500)
@@ -150,9 +150,9 @@ async function betaGame() {
 	browser.storage.onChanged.addListener(refreshVars)
 
 	// Event listeners that are currently always on (might change in the future) are below
-	// Event listeneres that will be turned on/off as needed are inside toggleInterfaceChanges()
+	// Event listeners that will be turned on/off as needed are inside toggleInterfaceChanges()
 
-	// Toggle motdReceived on for a shor time after receiving motd message
+	// Toggle motdReceived on for a short time after receiving motd message
 	eventListeners.toggle("roa-ws:motd", motd, true)
 	// Advice the user to update the options page after a name change:
 	eventListeners.toggle("roa-ws:page:username_change", usernameChange, true)
@@ -638,7 +638,7 @@ $(document).on("roa-ws:all", function(_, data){
 	async function checkEvent(_, data) {
 		if (data.c_id === vars.eventChannelID) {
 			await delay(vars.startActionsDelay)
-			// Wait to see if the message is recieved together with a message of the day,
+			// Wait to see if the message is received together with a message of the day,
 			// which means it was only sent due to a chat reconnection, and we should not join the event.
 			if (motdReceived === false) {
 				joinEvent(data.m, data.m_id)

@@ -73,7 +73,7 @@ async function fillFields() {
 	$("#main-account")      .val(vars.mainAccount)
 	$("#main-username")     .val(vars.mainUsername)
 	$("#alt-base-name")     .val(vars.altBaseName)
-	$("#login-password")    .val(atob(vars.loginPassword))
+	$("#login-password")    .val(insecureCrypt.decrypt(vars.password, "betabot Totally-not-secure Super NOT secret key!"))
 	$("#wire-frequency")    .val(vars.wireFrequency)
 	$("#daily-crystals")    .val(vars.dailyCrystals)
 	$("#event-channel-id")  .val(vars.eventChannelID)

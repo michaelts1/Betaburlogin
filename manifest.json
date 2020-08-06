@@ -23,6 +23,7 @@
 			],
 			"js": [
 				"src/js/jquery-3.4.1.min.js",
+				"src/js/insecureCrypt.js",
 				"src/js/content.js"
 			]
 		}
