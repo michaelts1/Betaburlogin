@@ -1,8 +1,20 @@
 "use strict"
 
+/**
+ * @type {object} Stores the settings
+ */
 let vars = null
 
+/**
+ * @param {number}
+ * @returns {string}
+ */
 function abbreviateNumber(num) {
+	/**
+	 * @function
+	 * @param {number} num
+	 * @returns {number}
+	 */
 	const round = num => Math.round(num*1000)/1000
 
 	if(num >= 1000000000000000) {
@@ -23,6 +35,11 @@ function abbreviateNumber(num) {
 	return round(num)
 }
 
+/**
+ * @function Deabbreviates a number from short form (e.g. 10K => 10000)
+ * @param {string} input A string containing a short form number
+ * @returns {number} The long form number
+ */
 function deabbreviateNumber (input) {
 	if (typeof input !== "string") return input
 
@@ -47,6 +64,11 @@ function deabbreviateNumber (input) {
 	return num * scales[scale]
 }
 
+/**
+ * @function Displays a message to the user under the form control buttons
+ * @param {string} message A message to show to the user
+ * @param {number=} time The amount of time (ms) that the message should be shown for. Defaults to 2500 ms
+ */
 function displayMessage(message, time=2500) {
 	$("#form-buttons-output").text(message)
 	$("#form-buttons-output").fadeIn(250)
@@ -56,6 +78,7 @@ function displayMessage(message, time=2500) {
 	}, time)
 }
 
+/** @async @function Gets the settings from storage, and fills updates the displayed settings accordingly */
 async function fillFields() {
 	vars = await browser.storage.sync.get()
 	if (browser.contextualIdentities === undefined) {
@@ -115,6 +138,7 @@ async function fillFields() {
 	displayAltFields()
 }
 
+/** @async @function Saves the displayed settings to storage */
 async function saveChanges() {
 	try {
 		if ($("#settings")[0].reportValidity() === false) {
@@ -190,6 +214,7 @@ async function saveChanges() {
 	}
 }
 
+/** @function Reloads the settings from storage and updates the displayed settings */
 function cancelChanges() {
 	try {
 		fillFields()
@@ -201,13 +226,20 @@ function cancelChanges() {
 	}
 }
 
+/** @function Updates the displayed daily crystal prices */
 function updatePrice() {
+	/**
+	 * @function
+	 * @param {number} n
+	 * @returns {number}
+	 */
 	const price = n => (n * (2 * 2000000 + (n - 1) * 1000000)) / 2
 	const number = parseInt($("#daily-crystals").val())
 	$("#daily-crystals-price").text(abbreviateNumber(price(number)))
 	$("#daily-crystals + div").prop("title", Intl.NumberFormat().format(price(number)) )
 }
 
+/** @function Displays or hides the alt settings as needed */
 function displayAltFields() {
 	const value = $("#pattern").val()
 	if (value === "") {
@@ -225,6 +257,10 @@ function displayAltFields() {
 	}
 }
 
+/**
+ * @function Switches settings tab
+ * @param {event} event Click event object
+ */
 function changeTab(event) {
 	const tabID = event.target.id.replace("-tab-button", "")
 
@@ -240,6 +276,7 @@ function changeTab(event) {
 
 }
 
+/** @function Resets the code in the custom css textarea */
 function resetCSS() {
 	$("#custom-css").val(
 		`#areaContent {
@@ -253,9 +290,10 @@ function resetCSS() {
 }`)
 }
 
+/** @async @function Gets all the containers from and lists them to the user */
 async function fillContainers() {
 	const containers = await browser.contextualIdentities.query({}) // Get all containers
-	if (containers.length === 0) { // If there are no containers, return
+	if (containers.length === 0) { // If there are no containers
 		$("#containers").text("No containers found")
 		return
 	}

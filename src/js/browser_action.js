@@ -1,7 +1,7 @@
 "use strict"
 
 /**
- * @type {object} stores the settings
+ * @type {object} Stores the settings
  */
 let vars = null
 
