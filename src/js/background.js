@@ -238,6 +238,7 @@ async function getVars() {
 			addRequestMoney  : true,
 			addOpenTabs      : true,
 			addLoginAlts     : true,
+			addSocketX5       : true,
 			resumeCrafting   : true,
 			removeEffects    : false,
 			actionsPending   : false,
@@ -408,6 +409,8 @@ async function updateVars() {
 			vars.autoHarvestron = true
 		case 12:
 			vars.removeBanner = false
+		case 13:
+			vars.addSocketX5 = true
 		default:
 			if (vars.css.addon !== ADDON_CSS) {
 				vars.css.addon = ADDON_CSS

@@ -1,13 +1,12 @@
 /* ~~~ To Do ~~~
  * Reorganize this file
- * Use weak and compromised encryption for the password (this **CANNOT** be trusted as a secure encryption)
- * Remove logs from spawnGems()
- * Socket 5 gems at once ({type: "roa-ws:page:gem_socket_to_item", s: 1})
  *
  * ~~~ Needs Testing ~~~
- * Clicking on the OK button after spawning gems for all alts
  * Hide old banners
+ * Socket 5 gems at once
+ * Clicking on the OK button after spawning gems for all alts
  * Clear event vars after 16+ minutes even if the user is not participating
+ * Use weak and compromised encryption for the password (this **CANNOT** be trusted as a secure encryption)
  */
 
 "use strict"
@@ -271,12 +270,9 @@ async function betaGame() {
 				$("#gemSpawnConfirm").click()
 				$(document).one("roa-ws:page:gem_spawn", async () => {
 					$("#betabot-spawn-gem").prop("disabled", true)
-					log("Disabled Spawn For All Alts button")
 					await delay(60*1000)
 					$("#betabot-spawn-gem").prop("disabled", false)
-					log("Enabled Spawn For All Alts button")
 					$("#confirmButtons>a.green")[0].click()
-					log("Clicked #confirmButtons>a.green")
 				})
 			}
 		})
@@ -526,6 +522,23 @@ $(document).on("roa-ws:all", function(_, data){
 		}
 	}
 
+	function addSocket5Button() {
+		$("#socketThisGem").after(`<button id="betabot-socket-5">Socket Gem x5</button>`)
+		$("#betabot-socket-5").click( () => {
+			eventListeners.toggle("roa-ws:page:gem_socket_to_item", socketGem, true)
+			$("#socketThisGem").click()
+		})
+	}
+
+	function socketGem(_, data) {
+		const gemsAmount = $(".moreGemOptions2").get().length
+		if (gemsAmount === 5 || data.s !== 1) { // If we finished, or if it was an unsuccessful socket
+			eventListeners.toggle("roa-ws:page:gem_socket_to_item", socketGem, false)
+			return
+		}
+		$("#socketThisGem").click()
+	}
+
 	// Check action results for needed actions
 	async function checkResults(_, data) {
 		data = data.results.p
@@ -725,6 +738,8 @@ $(document).on("roa-ws:all", function(_, data){
 		// Auto Stamina/Quests/House/Harvestron:
 		eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults,
 			vars.autoStamina || vars.autoQuests || vars.autoHouse || vars.autoHarvestron)
+		// Socket Gem x5:
+		eventListeners.toggle("roa-ws:page:item_options", addSocket5Button, vars.addSocketX5)
 
 		if (isAlt) { // Only run on alts
 			// Spawn Gems For All Alts:
