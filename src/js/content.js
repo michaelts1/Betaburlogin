@@ -1,5 +1,6 @@
 /* ~~~ To Do ~~~
  * Reorganize this file
+ * Crypto - use block cipher (ask <...> what that means), and use "﷽" (decimal u+65021) as padding
  *
  * ~~~ Needs Testing ~~~
  * Hide old banners
