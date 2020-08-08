@@ -226,7 +226,7 @@ async function betaGame() {
 	const keepUsernameVisible = new MutationObserver(appendName)
 
 	async function jumpMobs(number) {
-		if (vars.verbose) log(`Jumping ${number} mobs`)
+		if (vars.verbose) log(`Jumping to mob number ${number}`)
 		await delay(vars.startActionsDelay)
 		$("#battleGrounds").click()
 		$(document).one("roa-ws:page:town_battlegrounds", async () => {
