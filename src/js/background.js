@@ -1,6 +1,23 @@
 "use strict"
-
+/**
+ * @constant VARS_VERSION
+ * @type {number}
+ * @description
+ * - Current settings version
+ * - Bump this number when adding or removing settings, and when changing ADDON_CSS
+ * - If the number isn't bumped, the new settings will only have effect on new users
+ * @default
+ */
 const VARS_VERSION = 14
+
+/**
+ * @constant ADDON_CSS
+ * @type {string}
+ * @description
+ * - CSS code for Betaburlogin interface changes
+ * - If you change ADDON_CSS value, make sure to also bump VARS_VERSION, or the changes will only have effect on new users
+ * @default
+ */
 const ADDON_CSS =
 `#betabot-clear-username {
 	color: yellow;
@@ -26,6 +43,15 @@ const ADDON_CSS =
 #betabot-spawn-gem[disabled] {
 	opacity: 0.5;
 }`
+
+/**
+ * @const CUSTOM_CSS
+ * @type {string}
+ * @description
+ * - Default value for CSS code that affects page elements that aren't part of Betaburlogin interface changes
+ * - Can be changed by the user in the Advanced section of the Settings page
+ * @default
+ */
 const CUSTOM_CSS =
 `#areaContent {
 	height: 350px;
@@ -37,13 +63,42 @@ const CUSTOM_CSS =
 	line-height: 25px;
 }`
 
-// These will store the ports
+/**
+ * @typedef {object} runtimePort
+ * @description See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/Port)
+ * @property {string=} name Name of the sender
+ * @property {object} sender Contains information about the sender of the port
+ * @property {object} onMessage
+ * @property {object} onDisconnect
+ */
+
+/**
+ * @type {runtimePort}
+ * @description Live Login page port
+ */
 let live = null
+
+/**
+ * @type {runtimePort}
+ * @description Main account Beta Game page port
+ */
 let main = null
+
+/**
+ * @type {runtimePort[]}
+ * @description Alt accounts Beta Game page ports
+ */
 const alts = []
+
+/**
+ * @type {runtimePort[]}
+ * @description Beta Login page port
+ */
 const logins = []
 
-// This will store the settings
+/**
+ * @type {object} Stores the settings
+ */
 let vars = null
 
 browser.runtime.onConnect.addListener(async port => {
@@ -110,7 +165,10 @@ browser.runtime.onConnect.addListener(async port => {
 	})
 })
 
-// Open tabs:
+/**
+ * @async
+ * @function openTabs Opens Beta Login tabs according to the amount of alts
+ */
 async function openTabs() {
 	let containers = await browser.contextualIdentities.query({}) // Get all containers
 	if (vars.containers.useAll === false) {
@@ -136,14 +194,30 @@ async function openTabs() {
 	}
 }
 
-// Login all alts:
+/**
+ * @async
+ * @function login Logins all the currently open Beta Login pages
+ */
 function login() {
+	/**
+	 * @function sendLogin Sends a message to login[i] containing a username
+	 * @param {number} i Index of port inside logins[], that the message will be sent to
+	 * @param {string} username Username that will be sent to the port
+	 * @private
+	 */
 	function sendLogin(i, username) {
 		logins[i].postMessage({
 			text: "login",
 			username: username,
 		})
 	}
+
+	/**
+	 * @function romanize Converts a latin numeral to Roman numeral
+	 * @param {number} num Latin numeral
+	 * @returns {string} String containing a roman numeral (e.g. "IX")
+	 * @private
+	 */
 	function romanize(num) {
 		if (num === 0) return ""
 		const roman = {
@@ -177,14 +251,29 @@ function login() {
 	}
 }
 
-// Send message to alts:
+/**
+ * @typedef {runtimePort[]} runtimePorts
+ * @description An array containing multiple runtimePort objects
+ */
+
+/**
+ * @function sendMessage Sends a message to all ports inside an array at once
+ * @param {object} message A message to be sent
+ * @param {runtimePorts=} users An array of runtimePorts. Defaults to alts.concat(main)
+ */
 function sendMessage(message, users=alts.concat(main)) {
 	for (const user of users) {
 		user.postMessage(message)
 	}
 }
 
-// Spawn gems:
+/**
+ * @function spawnGem Spawns gems as specified by the parameters for all alts
+ * @param {number} type ID of a gem type for the main gem
+ * @param {number} splice ID of a gem type for the spliced gem
+ * @param {number} tier
+ * @param {number} amount
+ */
 function spawnGem(type, splice, tier, amount) {
 	sendMessage({
 		text  : "spawn gems",
@@ -195,21 +284,36 @@ function spawnGem(type, splice, tier, amount) {
 	}, alts)
 }
 
-// Jump mobs:
+/**
+ * @function jumpMobs Jumps all alts to mob with a given ID
+ * @param {number} number Mob ID
+ */
 function jumpMobs(number) {
 	sendMessage({text: "jump mobs", number: number}, alts)
 }
 
-// Send currency:
+/**
+ * @function sendCurrency
+ * - Causes all users to send their currency to the given name.
+ * - Exact settings can be changed by the user under the Currency Send section of the Options Page.
+ * @param {string} name Username
+ */
 function sendCurrency(name) {
 	sendMessage({text: "send currency", recipient: name})
 }
 
+/**
+ * @function closeBanners Closes the banners on all users
+ */
 function closeBanners(){
 	sendMessage({text: "close banners"})
 }
 
 // Get settings from storage:
+/**
+ * @async
+ * @function getVars Gets the settings from the storage, Using default values if none are saved, and then calls updateVars
+ */
 async function getVars() {
 	vars = await browser.storage.sync.get()
 	// If not set, create with default settings
@@ -238,7 +342,7 @@ async function getVars() {
 			addRequestMoney  : true,
 			addOpenTabs      : true,
 			addLoginAlts     : true,
-			addSocketX5       : true,
+			addSocketX5      : true,
 			resumeCrafting   : true,
 			removeEffects    : false,
 			actionsPending   : false,
@@ -331,6 +435,10 @@ async function getVars() {
 }
 getVars()
 
+/**
+ * @async
+ * @function updateVars Checks settings version and updates the settings if needed
+ */
 async function updateVars() {
 	if (typeof vars.version !== "number") {
 		console.log("Resetting settings - current settings are too old")
