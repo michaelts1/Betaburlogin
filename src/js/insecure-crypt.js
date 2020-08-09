@@ -2,6 +2,8 @@
 
 /**
  * Allows basic, **vulnerable**, crypto operation
+ * @property {function} encrypt Encrypts a message
+ * @property {function} decrypt Decrypts a message
  */
 /* eslint-disable-next-line no-redeclare, no-unused-vars */ // Defined in this file, used in other files
 const insecureCrypt = {

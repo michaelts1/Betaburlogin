@@ -1,21 +1,19 @@
 "use strict"
 /**
- * @constant VARS_VERSION
- * @type {number}
- * @description
  * - Current settings version
  * - Bump this number when adding or removing settings, and when changing ADDON_CSS
  * - If the number isn't bumped, the new settings will only have effect on new users
+ * @constant VARS_VERSION
+ * @type {number}
  * @default
  */
 const VARS_VERSION = 14
 
 /**
- * @constant ADDON_CSS
- * @type {string}
- * @description
  * - CSS code for Betaburlogin interface changes
  * - If you change ADDON_CSS value, make sure to also bump VARS_VERSION, or the changes will only have effect on new users
+ * @constant ADDON_CSS
+ * @type {string}
  * @default
  */
 const ADDON_CSS =
@@ -45,11 +43,10 @@ const ADDON_CSS =
 }`
 
 /**
- * @const CUSTOM_CSS
- * @type {string}
- * @description
  * - Default value for CSS code that affects page elements that aren't part of Betaburlogin interface changes
  * - Can be changed by the user in the Advanced section of the Settings page
+ * @const CUSTOM_CSS
+ * @type {string}
  * @default
  */
 const CUSTOM_CSS =
@@ -64,8 +61,8 @@ const CUSTOM_CSS =
 }`
 
 /**
+ * See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/Port)
  * @typedef {object} runtimePort
- * @description See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/Port)
  * @property {string=} name Name of the sender
  * @property {object} sender Contains information about the sender of the port
  * @property {object} onMessage
@@ -78,32 +75,32 @@ const CUSTOM_CSS =
  */
 
 /**
+ * Live Login page port
  * @type {runtimePort}
- * @description Live Login page port
  */
 let live = null
 
 /**
+ * Main account on Beta Game page port
  * @type {runtimePort}
- * @description Main account on Beta Game page port
  */
 let main = null
 
 /**
+ * Alt accounts on Beta Game page ports
  * @type {runtimePort[]}
- * @description Alt accounts on Beta Game page ports
  */
 const alts = []
 
 /**
+ * Beta Login page ports
  * @type {runtimePort[]}
- * @description Beta Login page ports
  */
 const logins = []
 
 /**
+ * Stores the settings
  * @type {object}
- * @description Stores the settings
  */
 let vars = null
 

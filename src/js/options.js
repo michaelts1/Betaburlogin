@@ -1,8 +1,8 @@
 "use strict"
 
 /**
+ * Stores the settings
  * @type {object}
- * @description Stores the settings
  */
 let vars = null
 
@@ -230,7 +230,7 @@ async function saveChanges() {
 }
 
 /**
- * Reloads the settings from storage and updates the displayed settings 
+ * Reloads the settings from storage and updates the displayed settings
  * @function cancelChanges
  */
 function cancelChanges() {
