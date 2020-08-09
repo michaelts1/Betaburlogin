@@ -1,12 +1,20 @@
-/* ~~~ To Do ~~~
- * Reorganize this file
+/**
+ * @file
+ * @todo
+ * <pre>
+ * <h5>Add</h5>
+ * - Reorganize this file
+ * </pre>
  *
- * ~~~ Needs Testing ~~~
- * Hide old banners
- * Socket 5 gems at once
- * Clicking on the OK button after spawning gems for all alts
- * Clear event vars after 16+ minutes even if the user is not participating
- * Use weak and compromised encryption for the password (this **CANNOT** be trusted as a secure encryption)
+ * @todo
+ * <pre>
+ * <h5>Test</h5>
+ * - Hide old banners
+ * - Socket 5 gems at once
+ * - Clicking on the OK button after spawning gems for all alts
+ * - Clear event vars after 16+ minutes even if the user is not participating
+ * - Use weak and compromised encryption for the password (this **CANNOT** be trusted as a secure encryption)
+ * </pre>
  */
 
 "use strict"
