@@ -6,10 +6,11 @@
 /* eslint-disable-next-line no-redeclare, no-unused-vars */ // Defined in this file, used in other files
 const insecureCrypt = {
 	/**
-	 * @method Do the actual crypto operations
+	 * Do the actual crypto operations
+	 * @method _insecureCrypt
 	 * @param {string} str Message to work on
 	 * @param {string} key Key to work with
-	 * @param {boolean} decrypt If decrypt is true, decrypts the message. If decrypt is false, encrypts the message
+	 * @param {boolean} decrypt If true, decrypts the message. If false, encrypts the message
 	 * @returns {string} A string containing the new message
 	 * @private
 	 */
@@ -33,7 +34,8 @@ const insecureCrypt = {
 	},
 
 	/**
-	 * @method **vulnerable** Encrypt a string using another string as a key
+	 * **vulnerable** Encrypt a string using another string as a key
+	 * @method encrypt
 	 * @param {string} str Message to encrypt
 	 * @param {string} key Key to encrypt the message with
 	 * @return {string} A string containing the encrypted message
@@ -41,7 +43,8 @@ const insecureCrypt = {
 	encrypt(str, key) { return this._insecureCrypt(str, key, true) },
 
 	/**
-	 * @method **vulnerable** Decrypt a string using another string as a key
+	 * **vulnerable** Decrypt a string using another string as a key
+	 * @method decrypt
 	 * @param {string} str Message to decrypt
 	 * @param {string} key Key to decrypt the message with
 	 * @return {string} A string containing the decrypted message

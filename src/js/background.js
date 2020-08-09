@@ -69,7 +69,12 @@ const CUSTOM_CSS =
  * @property {string=} name Name of the sender
  * @property {object} sender Contains information about the sender of the port
  * @property {object} onMessage
+ * @property {function} onMessage.addListener
+ * @property {function} onMessage.removeListener
  * @property {object} onDisconnect
+ * @property {function} onDisconnect.addListener
+ * @property {function} onDisconnect.removeListener
+ * @property {function} postMessage
  */
 
 /**
@@ -80,24 +85,25 @@ let live = null
 
 /**
  * @type {runtimePort}
- * @description Main account Beta Game page port
+ * @description Main account on Beta Game page port
  */
 let main = null
 
 /**
  * @type {runtimePort[]}
- * @description Alt accounts Beta Game page ports
+ * @description Alt accounts on Beta Game page ports
  */
 const alts = []
 
 /**
  * @type {runtimePort[]}
- * @description Beta Login page port
+ * @description Beta Login page ports
  */
 const logins = []
 
 /**
- * @type {object} Stores the settings
+ * @type {object}
+ * @description Stores the settings
  */
 let vars = null
 
@@ -166,8 +172,9 @@ browser.runtime.onConnect.addListener(async port => {
 })
 
 /**
+ * Opens Beta Login tabs according to the amount of alts
  * @async
- * @function openTabs Opens Beta Login tabs according to the amount of alts
+ * @function openTabs
  */
 async function openTabs() {
 	let containers = await browser.contextualIdentities.query({}) // Get all containers
@@ -195,12 +202,14 @@ async function openTabs() {
 }
 
 /**
+ * Logins all the currently open Beta Login pages
  * @async
- * @function login Logins all the currently open Beta Login pages
+ * @function login
  */
 function login() {
 	/**
-	 * @function sendLogin Sends a message to login[i] containing a username
+	 * Sends a message to login[i] containing a username
+	 * @function sendLogin
 	 * @param {number} i Index of port inside logins[], that the message will be sent to
 	 * @param {string} username Username that will be sent to the port
 	 * @private
@@ -213,9 +222,10 @@ function login() {
 	}
 
 	/**
-	 * @function romanize Converts a latin numeral to Roman numeral
+	 * Converts a Latin numeral to Roman numeral (e.g. 9 => "IX")
+	 * @function romanize
 	 * @param {number} num Latin numeral
-	 * @returns {string} String containing a roman numeral (e.g. "IX")
+	 * @returns {string} String containing a roman numeral
 	 * @private
 	 */
 	function romanize(num) {
@@ -252,14 +262,10 @@ function login() {
 }
 
 /**
- * @typedef {runtimePort[]} runtimePorts
- * @description An array containing multiple runtimePort objects
- */
-
-/**
- * @function sendMessage Sends a message to all ports inside an array at once
+ * Sends a message to all ports inside an array at once
+ * @function sendMessage
  * @param {object} message A message to be sent
- * @param {runtimePorts=} users An array of runtimePorts. Defaults to alts.concat(main)
+ * @param {runtimePort[]} [users=alts.concat(main)] An array of runtimePort objects. Defaults to alts.concat(main)
  */
 function sendMessage(message, users=alts.concat(main)) {
 	for (const user of users) {
@@ -268,7 +274,8 @@ function sendMessage(message, users=alts.concat(main)) {
 }
 
 /**
- * @function spawnGem Spawns gems as specified by the parameters for all alts
+ * Spawns gems as specified by the parameters for all alts
+ * @function spawnGem
  * @param {number} type ID of a gem type for the main gem
  * @param {number} splice ID of a gem type for the spliced gem
  * @param {number} tier
@@ -285,7 +292,8 @@ function spawnGem(type, splice, tier, amount) {
 }
 
 /**
- * @function jumpMobs Jumps all alts to mob with a given ID
+ * Jumps all alts to mob with a given ID
+ * @function jumpMobs
  * @param {number} number Mob ID
  */
 function jumpMobs(number) {
@@ -293,9 +301,9 @@ function jumpMobs(number) {
 }
 
 /**
- * @function sendCurrency
  * - Causes all users to send their currency to the given name.
  * - Exact settings can be changed by the user under the Currency Send section of the Options Page.
+ * @function sendCurrency
  * @param {string} name Username
  */
 function sendCurrency(name) {
@@ -303,16 +311,18 @@ function sendCurrency(name) {
 }
 
 /**
- * @function closeBanners Closes the banners on all users
+ * Closes the banners on all users
+ * @function closeBanners
  */
 function closeBanners(){
 	sendMessage({text: "close banners"})
 }
 
-// Get settings from storage:
 /**
+ * - Gets the settings from the storage, Using default values if none are saved, and then calls updateVars
+ * - When adding or removing settings, make sure to also update updateVars accordingly and bump VARS_VERSION
  * @async
- * @function getVars Gets the settings from the storage, Using default values if none are saved, and then calls updateVars
+ * @function getVars
  */
 async function getVars() {
 	vars = await browser.storage.sync.get()
@@ -436,8 +446,9 @@ async function getVars() {
 getVars()
 
 /**
+ * Checks settings version and updates the settings if needed
  * @async
- * @function updateVars Checks settings version and updates the settings if needed
+ * @function updateVars
  */
 async function updateVars() {
 	if (typeof vars.version !== "number") {

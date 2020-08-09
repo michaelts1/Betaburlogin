@@ -1,13 +1,15 @@
 "use strict"
 
 /**
- * @type {object} Stores the settings
+ * Stores the settings
+ * @type {object}
  */
 let vars = null
 
 /**
+ * Gets the settings from the storage, and updates the displayed settings accordingly
  * @async
- * @function Gets the settings from the storage, and updates the displayed settings accordingly
+ * @function getVars
  */
 async function getVars() {
 	vars = await browser.storage.sync.get()
@@ -19,8 +21,9 @@ async function getVars() {
 }
 
 /**
+ * Toggles a setting on/off, and saves the new value to the storage
  * @async
- * @function Toggles a setting on/off, and saves the new value to the storage
+ * @function toggle
  */
 async function toggle(event) {
 	const id = event.target.id
