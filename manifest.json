@@ -22,8 +22,9 @@
 				"https://beta.avabur.com/game"
 			],
 			"js": [
-				"src/js/jquery-3.4.1.min.js",
-				"src/js/insecureCrypt.js",
+				"src/js/jquery-3.5.1.min.js",
+				"src/js/insecure-crypt.js",
+				"src/js/event-listeners.js",
 				"src/js/content.js"
 			]
 		}

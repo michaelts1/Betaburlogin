@@ -107,7 +107,7 @@ async function fillFields() {
 	$("#main-account")      .val(vars.mainAccount)
 	$("#main-username")     .val(vars.mainUsername)
 	$("#alt-base-name")     .val(vars.altBaseName)
-	$("#login-password")    .val(insecureCrypt.decrypt(vars.password, "betabot Totally-not-secure Super NOT secret key!"))
+	$("#login-password")    .val(insecureCrypt.decrypt(vars.loginPassword, "betabot Totally-not-secure Super NOT secret key!"))
 	$("#wire-frequency")    .val(vars.wireFrequency)
 	$("#daily-crystals")    .val(vars.dailyCrystals)
 	$("#event-channel-id")  .val(vars.eventChannelID)
@@ -120,7 +120,7 @@ async function fillFields() {
 	$("#join-events")      .prop("checked", vars.joinEvents)
 	$("#addUsername")      .prop("checked", vars.addUsername)
 	$("#auto-quests")      .prop("checked", vars.autoQuests)
-	$("remove-banner")     .prop("checked", vars.removeBanner)
+	$("#remove-banner")     .prop("checked", vars.removeBanner)
 	$("#auto-stamina")     .prop("checked", vars.autoStamina)
 	$("#add-socket-x5")    .prop("checked", vars.addSocketX5)
 	$("#add-open-tabs")    .prop("checked", vars.addOpenTabs)
@@ -184,7 +184,7 @@ async function saveChanges() {
 		vars.addJumpMobs       = $("#add-jump-mobs").prop("checked")
 		vars.addUsername       = $("#addUsername").prop("checked")
 		vars.addOpenTabs       = $("#add-open-tabs").prop("checked")
-		vars.removeBanner      = $("remove-banner").prop("checked")
+		vars.removeBanner      = $("#remove-banner").prop("checked")
 		vars.addLoginAlts      = $("#add-login-alts").prop("checked")
 		vars.addSpawnGems      = $("#add-spawn-gems").prop("checked")
 		vars.removeEffects     = $("#remove-effects").prop("checked")
@@ -205,7 +205,7 @@ async function saveChanges() {
 
 		$("#name-list").val() === "" ? vars.namesList = [] : vars.namesList = $("#name-list").val().split(", ")
 
-		vars.loginPassword = btoa($("#login-password").val())
+		vars.loginPassword = insecureCrypt.encrypt($("#login-password").val(), "betabot Totally-not-secure Super NOT secret key!")
 
 		for (const currency of vars.currencySend) {
 			const name = currency.name.replace("_", "-")

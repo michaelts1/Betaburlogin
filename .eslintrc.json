@@ -10,7 +10,8 @@
 		"ecmaVersion": 11
 	},
 	"globals": {
-		"insecureCrypt": "readonly"
+		"insecureCrypt": "readonly",
+		"eventListeners": "readonly"
 	},
 	"rules": {
 		"indent": [

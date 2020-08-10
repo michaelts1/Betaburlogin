@@ -42,7 +42,7 @@ const insecureCrypt = {
 	 * @param {string} key Key to encrypt the message with
 	 * @return {string} A string containing the encrypted message
 	 */
-	encrypt(str, key) { return this._insecureCrypt(str, key, true) },
+	encrypt(str, key) { return this._insecureCrypt(str, key, false) },
 
 	/**
 	 * **vulnerable** Decrypt a string using another string as a key
@@ -51,7 +51,5 @@ const insecureCrypt = {
 	 * @param {string} key Key to decrypt the message with
 	 * @return {string} A string containing the decrypted message
 	 */
-	decrypt(str, key) { return this._insecureCrypt(str, key, false) },
+	decrypt(str, key) { return this._insecureCrypt(str, key, true) },
 }
-
-insecureCrypt.encrypt("2to")

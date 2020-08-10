@@ -3,18 +3,13 @@
  * @todo
  * <pre>
  * <h5>Add</h5>
- * - Reorganize this file
- * - Crypto - use block cipher (ask <...> what that means), and use "﷽" (decimal u+65021) as padding
- * </pre>
+ * - Separate vars from settings
+ * - Rename Auto Event things to Auto Gauntlet
+ * - After merging into master, sync branches history again
+ * - Crypto - use block cipher (ask <...> what that means), and use "﷼" (decimal u+65020) as padding
+ * - Reorganize this file (Using {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/contentScripts/register|browser.contentScripts.register}?)
  *
- * @todo
- * <pre>
  * <h5>Test</h5>
- * - Hide old banners
- * - Socket 5 gems at once
- * - Clicking on the OK button after spawning gems for all alts
- * - Clear event vars after 16+ minutes even if the user is not participating
- * - Use weak and compromised encryption for the password (this **CANNOT** be trusted as a secure encryption)
  * </pre>
  */
 
@@ -83,47 +78,6 @@ function delay(ms) {
 }
 
 /**
- * Object used to manage jQuery document event listeners
- * @const eventListeners
- * @property {function} toggle Toggles an event listener on/off
- * @property {...function[]}
- * - One or more properties using the following format:
- * - string: function[]
- * - Where the string is the name of the event (e.g. "roa-ws:all"), and function[] is an array of functions that will be called when the event is triggered
- * - Example: `eventListeners["roa-ws:page"] = [onPage, getPage, log]` will call onPage(), getPage(), and log() whenever "roa-ws:page" is triggered
- */
-const eventListeners = {
-	/**
-	 * Attaches/deattaches handlers to document events, while avoiding having duplicate listeners
-	 * @method toggle
-	 * @param {string} eventName - Listen to events with this name
-	 * @param {function} handler - Handle the event with this handler
-	 * @param {boolean} value - Turn the event handler on/off
-	 * */
-	toggle: function(eventName, handler, value) {
-		if (typeof eventName !== "string") throw new TypeError(`Parameter eventName ${eventName} must be a string`)
-		if (typeof handler !== "function") throw new TypeError(`Parameter handler ${handler} must be function`)
-		if (typeof value !== "boolean") throw new TypeError(`Parameter value ${value} must be boolean`)
-
-		if (this[eventName] === undefined) {
-			this[eventName] = []
-		}
-		const prop = this[eventName] // Shorter identifier
-
-		if (prop.includes(handler) && value) { // Turn off the previous event handler to avoid duplicates
-			$(document).off(eventName, handler)
-		}
-
-		$(document)[value ? "on" : "off"](eventName, handler) // If value is true, $(document).on(...), if false, $(document).off(...)
-		if (prop.includes(handler) && !value) { // Push/pop the handler from the handlers array
-			prop.splice(prop.indexOf(handler), 1)
-		} else if (value) {
-			prop.push(handler)
-		}
-	},
-}
-
-/**
  * Code to run when on Live Login page
  * @async
  * @function liveLogin
@@ -160,7 +114,7 @@ async function betaLogin() {
 	 */
 	async function login(username) {
 		$("#acctname").val(username)
-		$("#password").val(insecureCrypt.decrypt(vars.password, "betabot Totally-not-secure Super NOT secret key!"))
+		$("#password").val(insecureCrypt.decrypt(vars.loginPassword, "betabot Totally-not-secure Super NOT secret key!"))
 		$("#login").click()
 		if (vars.verbose) log(`Logging in with username ${username}`)
 		await delay(7500)
@@ -277,9 +231,9 @@ async function betaGame() {
 	function getCustomBuild() {
 		eventListeners.toggle("roa-ws:motd", getCustomBuild, false) // Turn off event listener
 		vars.actionsPending = true
-		$("#allHouseUpgrades")[0].click()
-		$("#allHouseUpgrades").click()
+		$("#modalBackground, #modal2Wrapper").prop("style", "display: none !important;") // Hide the interface for the duration of this process
 
+		$("#allHouseUpgrades")[0].click()
 		$(document).one("roa-ws:page:house_all_builds", (_, data) => {
 			setTimeout(completeTask)
 
@@ -291,6 +245,10 @@ async function betaGame() {
 			for (const item of items) {
 				$("#betabot-select-build").append(`<option value="${item.i}">${item.n}</option>`)
 			}
+
+			$("#modalBackground, #modal2Wrapper").prop("style", "") // Return to normal
+
+			log("Added Custom Build select menu")
 		})
 	}
 
@@ -352,9 +310,9 @@ async function betaGame() {
 		})
 	}
 
-	$("#close_general_notification").click(() => {
+	$("#close_general_notification").click(event => {
+		if (!event.originalEvent.isTrusted) return // Don't run due to closeBanner()
 		if (vars.removeBanner) {
-			if (vars.verbose) log("Banner closed by user")
 			port.postMessage({text: "banner closed"})
 		}
 	})
@@ -364,8 +322,9 @@ async function betaGame() {
 	 * @function closeBanner
 	 */
 	function closeBanner() {
-		if (vars.verbose) log("Banner closed automatically")
-		$("#close_general_notification").click()
+		if ($("#close_general_notification") === undefined) return // Don't run if the banner is already closed
+		$("#close_general_notification")[0].click()
+		if (vars.verbose) log("Banner closed")
 	}
 
 	/**
@@ -729,25 +688,31 @@ $(document).on("roa-ws:all", function(_, data){
 	 */
 	function addSocket5Button() {
 		$("#socketThisGem").after(`<button id="betabot-socket-5">Socket Gem x5</button>`)
-		$("#betabot-socket-5").click( () => {
-			eventListeners.toggle("roa-ws:page:gem_socket_to_item", socketGem, true)
-			$("#socketThisGem").click()
-		})
+		$("#betabot-socket-5").click(socketGems)
 	}
 
 	/**
-	 * Sockets a gem to an item
-	 * @function socketGem
-	 * @param {event} _ Placeholder parameter
-	 * @param {object} data Event data
+	 * Socket gems into an item
+	 * @async
+	 * @function socketGems
 	 */
-	function socketGem(_, data) {
-		const gemsAmount = $(".moreGemOptions2").get().length
-		if (gemsAmount === 5 || data.s !== 1) { // If we finished, or if it was an unsuccessful socket
-			eventListeners.toggle("roa-ws:page:gem_socket_to_item", socketGem, false)
-			return
+	async function socketGems() {
+		log("Socketing gems")
+		vars.actionsPending = true
+
+		// Until there are no more empty slots, or until the user closes the modal:
+		while ($("#socketThisGem").is(":visible")) {
+			$("#socketThisGem").click()
+
+			// Wait for roa-ws:page:gem_socket_to_item event:
+			await eventListeners.waitFor("roa-ws:page:gem_socket_to_item")
+
+			// Add a small pause before the next iteration
+			await delay(vars.actionsDelay)
 		}
-		$("#socketThisGem").click()
+
+		vars.actionsPending = false
+		log("Socketing complete")
 	}
 
 	/**
@@ -997,10 +962,12 @@ $(document).on("roa-ws:all", function(_, data){
 		// Auto Craft:
 		eventListeners.toggle("roa-ws:craft roa-ws:notification", checkCraftingQueue, vars.autoCraft)
 		// Auto Stamina/Quests/House/Harvestron:
-		eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults,
-			vars.autoStamina || vars.autoQuests || vars.autoHouse || vars.autoHarvestron)
+		eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action",
+			checkResults, vars.autoStamina || vars.autoQuests || vars.autoHouse || vars.autoHarvestron)
 		// Socket Gem x5:
-		eventListeners.toggle("roa-ws:page:item_options", addSocket5Button, vars.addSocketX5)
+		eventListeners.toggle(
+			"roa-ws:page:item_options roa-ws:page:gem_unsocket_from_item roa-ws:page:gem_unsocket_all_from_item roa-ws:page:gem_socket_to_item",
+			addSocket5Button, vars.addSocketX5)
 
 		if (isAlt) { // Only run on alts
 			// Spawn Gems For All Alts:

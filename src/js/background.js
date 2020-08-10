@@ -40,6 +40,10 @@ const ADDON_CSS =
 }
 #betabot-spawn-gem[disabled] {
 	opacity: 0.5;
+}
+#betabot-socket-5 {
+	padding: 6.5px;
+	margin-left: 10px;
 }`
 
 /**
