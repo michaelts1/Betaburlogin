@@ -65,7 +65,9 @@ header {
 }
 
 /* Form Contents */
-
+#settings {
+	margin: 7.5em 0 0;
+}
 .tab {
 	display: none;
 }
@@ -174,8 +176,9 @@ input[name=containers],
 table,
 th,
 td {
-	border-collapse: collapse;
-	border: 2px solid lightsteelblue;
+	border: 1px solid lightsteelblue;
+	border-collapse: separate;
+	border-spacing: 0;
 }
 
 table {
@@ -297,7 +300,6 @@ td {
 #form-buttons {
 	display: flex;
 	justify-content: center;
-	margin: 5em 0 0;
 }
 
 button {

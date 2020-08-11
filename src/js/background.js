@@ -1,6 +1,21 @@
 "use strict"
+/**
+ * - Current settings version
+ * - Bump this number when adding or removing settings, and when changing ADDON_CSS
+ * - If the number isn't bumped, the new settings will only have effect on new users
+ * @constant VARS_VERSION
+ * @type {number}
+ * @default
+ */
+const VARS_VERSION = 14
 
-const VARS_VERSION = 12
+/**
+ * - CSS code for Betaburlogin interface changes
+ * - If you change ADDON_CSS value, make sure to also bump VARS_VERSION, or the changes will only have effect on new users
+ * @constant ADDON_CSS
+ * @type {string}
+ * @default
+ */
 const ADDON_CSS =
 `#betabot-clear-username {
 	color: yellow;
@@ -23,13 +38,21 @@ const ADDON_CSS =
 	font-size: 14px;
 	padding: 6.5px;
 }
-label[for=custom-build] a {
-	padding: 3px;
-	text-decoration: none;
-}
 #betabot-spawn-gem[disabled] {
 	opacity: 0.5;
+}
+#betabot-socket-5 {
+	padding: 6.5px;
+	margin-left: 10px;
 }`
+
+/**
+ * - Default value for CSS code that affects page elements that aren't part of Betaburlogin interface changes
+ * - Can be changed by the user in the Advanced section of the Settings page
+ * @const CUSTOM_CSS
+ * @type {string}
+ * @default
+ */
 const CUSTOM_CSS =
 `#areaContent {
 	height: 350px;
@@ -41,13 +64,48 @@ const CUSTOM_CSS =
 	line-height: 25px;
 }`
 
-// These will store the ports
+/**
+ * See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/Port)
+ * @typedef {object} runtimePort
+ * @property {string=} name Name of the sender
+ * @property {object} sender Contains information about the sender of the port
+ * @property {object} onMessage
+ * @property {function} onMessage.addListener
+ * @property {function} onMessage.removeListener
+ * @property {object} onDisconnect
+ * @property {function} onDisconnect.addListener
+ * @property {function} onDisconnect.removeListener
+ * @property {function} postMessage
+ */
+
+/**
+ * Live Login page port
+ * @type {runtimePort}
+ */
 let live = null
+
+/**
+ * Main account on Beta Game page port
+ * @type {runtimePort}
+ */
 let main = null
+
+/**
+ * Alt accounts on Beta Game page ports
+ * @type {runtimePort[]}
+ */
 const alts = []
+
+/**
+ * Beta Login page ports
+ * @type {runtimePort[]}
+ */
 const logins = []
 
-// This will store the settings
+/**
+ * Stores the settings
+ * @type {object}
+ */
 let vars = null
 
 browser.runtime.onConnect.addListener(async port => {
@@ -71,7 +129,7 @@ browser.runtime.onConnect.addListener(async port => {
 		})
 	} else if (port.name === mainUsername) { // Else, if beta main
 		main = port
-	} else { // Else, if beta alt
+	} else { // Else, it's a beta alt
 		alts.push(port)
 		port.onMessage.addListener(message => {
 			if (message.text === "move to mob") {
@@ -90,6 +148,9 @@ browser.runtime.onConnect.addListener(async port => {
 			if (message.text === "requesting currency") { // Send currency
 				console.log(`${port.name} requested currency`)
 				sendCurrency(port.name)
+			}
+			if (message.text === "banner closed") {
+				closeBanners()
 			}
 		})
 	}
@@ -111,7 +172,11 @@ browser.runtime.onConnect.addListener(async port => {
 	})
 })
 
-// Open tabs:
+/**
+ * Opens Beta Login tabs according to the amount of alts
+ * @async
+ * @function openTabs
+ */
 async function openTabs() {
 	let containers = await browser.contextualIdentities.query({}) // Get all containers
 	if (vars.containers.useAll === false) {
@@ -137,15 +202,33 @@ async function openTabs() {
 	}
 }
 
-// Login all alts:
+/**
+ * Logins all the currently open Beta Login pages
+ * @async
+ * @function login
+ */
 function login() {
+	/**
+	 * Sends a message to login[i] containing a username
+	 * @function sendLogin
+	 * @param {number} i Index of port inside logins[], that the message will be sent to
+	 * @param {string} username Username that will be sent to the port
+	 * @private
+	 */
 	function sendLogin(i, username) {
 		logins[i].postMessage({
 			text: "login",
 			username: username,
-			password: vars.loginPassword,
 		})
 	}
+
+	/**
+	 * Converts a Latin numeral to Roman numeral (e.g. 9 => "IX")
+	 * @function romanize
+	 * @param {number} num Latin numeral
+	 * @returns {string} String containing a roman numeral
+	 * @private
+	 */
 	function romanize(num) {
 		if (num === 0) return ""
 		const roman = {
@@ -179,14 +262,26 @@ function login() {
 	}
 }
 
-// Send message to alts:
+/**
+ * Sends a message to all ports inside an array at once
+ * @function sendMessage
+ * @param {object} message A message to be sent
+ * @param {runtimePort[]} [users=alts.concat(main)] An array of runtimePort objects. Defaults to alts.concat(main)
+ */
 function sendMessage(message, users=alts.concat(main)) {
 	for (const user of users) {
 		user.postMessage(message)
 	}
 }
 
-// Spawn gems:
+/**
+ * Spawns gems as specified by the parameters for all alts
+ * @function spawnGem
+ * @param {number} type ID of a gem type for the main gem
+ * @param {number} splice ID of a gem type for the spliced gem
+ * @param {number} tier
+ * @param {number} amount
+ */
 function spawnGem(type, splice, tier, amount) {
 	sendMessage({
 		text  : "spawn gems",
@@ -197,17 +292,39 @@ function spawnGem(type, splice, tier, amount) {
 	}, alts)
 }
 
-// Jump mobs:
+/**
+ * Jumps all alts to mob with a given ID
+ * @function jumpMobs
+ * @param {number} number Mob ID
+ */
 function jumpMobs(number) {
 	sendMessage({text: "jump mobs", number: number}, alts)
 }
 
-// Send currency:
+/**
+ * - Causes all users to send their currency to the given name.
+ * - Exact settings can be changed by the user under the Currency Send section of the Options Page.
+ * @function sendCurrency
+ * @param {string} name Username
+ */
 function sendCurrency(name) {
 	sendMessage({text: "send currency", recipient: name})
 }
 
-// Get settings from storage:
+/**
+ * Closes the banners on all users
+ * @function closeBanners
+ */
+function closeBanners(){
+	sendMessage({text: "close banners"})
+}
+
+/**
+ * - Gets the settings from the storage, Using default values if none are saved, and then calls updateVars
+ * - When adding or removing settings, make sure to also update updateVars accordingly and bump VARS_VERSION
+ * @async
+ * @function getVars
+ */
 async function getVars() {
 	vars = await browser.storage.sync.get()
 	// If not set, create with default settings
@@ -217,12 +334,12 @@ async function getVars() {
 			eventChannelID   : 3202,
 			startActionsDelay: 1000,
 			buttonDelay      : 500,
+			wireFrequency    : 60,
 			dailyCrystals    : 50,
 			minCraftingQueue : 5,
 			minStamina       : 5,
 			attackAt         : 3,
 			altsNumber       : 0,
-			wireFrequency    : 60,
 			autoStamina      : true,
 			autoQuests       : true,
 			autoHouse        : true,
@@ -236,11 +353,13 @@ async function getVars() {
 			addRequestMoney  : true,
 			addOpenTabs      : true,
 			addLoginAlts     : true,
+			addSocketX5      : true,
 			resumeCrafting   : true,
 			removeEffects    : false,
 			actionsPending   : false,
 			autoWire         : false,
 			verbose          : false,
+			removeBanner     : false,
 			questCompleting  : null,
 			mainAccount      : "",
 			mainUsername     : "",
@@ -327,9 +446,14 @@ async function getVars() {
 }
 getVars()
 
+/**
+ * Checks settings version and updates the settings if needed
+ * @async
+ * @function updateVars
+ */
 async function updateVars() {
 	if (typeof vars.version !== "number") {
-		console.log("Reseting settings - current settings are too old")
+		console.log("Resetting settings - current settings are too old")
 		await browser.storage.sync.clear()
 		getVars()
 		return
@@ -403,6 +527,10 @@ async function updateVars() {
 			vars.resumeCrafting = false
 		case 11:
 			vars.autoHarvestron = true
+		case 12:
+			vars.removeBanner = false
+		case 13:
+			vars.addSocketX5 = true
 		default:
 			if (vars.css.addon !== ADDON_CSS) {
 				vars.css.addon = ADDON_CSS
@@ -435,10 +563,6 @@ browser.storage.onChanged.addListener(changes => {
 	const values = Object.values(changes)
 	const keys   = Object.keys(changes)
 	for (let i = 0; i < Object.values(changes).length; i++) {
-		if (keys[i] === "loginPassword" && changes.loginPassword.oldValue !== changes.loginPassword.newValue) {
-			console.log("loginPassword changed")
-			continue
-		}
 		if (objectEquals(values[i].oldValue, values[i].newValue) === false) {
 			console.log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
 		}

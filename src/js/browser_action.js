@@ -1,5 +1,16 @@
+"use strict"
+
+/**
+ * Stores the settings
+ * @type {object}
+ */
 let vars = null
 
+/**
+ * Gets the settings from the storage, and updates the displayed settings accordingly
+ * @async
+ * @function getVars
+ */
 async function getVars() {
 	vars = await browser.storage.sync.get()
 
@@ -9,6 +20,11 @@ async function getVars() {
 	$("#auto-harvestron").prop("checked", vars.autoHarvestron)
 }
 
+/**
+ * Toggles a setting on/off, and saves the new value to the storage
+ * @async
+ * @function toggle
+ */
 async function toggle(event) {
 	const id = event.target.id
 	const setting = id.replaceAll(/-(.)/g, (match, group1) => match.replace(match, group1.toUpperCase())) // auto-house => autoHouse

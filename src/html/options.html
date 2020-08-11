@@ -5,7 +5,8 @@
 		<title>BetaburLogin Options Page</title>
 		<link rel="icon" href="../images/betaburlogin.png">
 		<link rel="stylesheet" href="../css/options.css">
-		<script src="../js/jquery-3.4.1.min.js"></script>
+		<script src="../js/jquery-3.5.1.min.js"></script>
+		<script src="../js/insecure-crypt.js"></script>
 	</head>
 	<body class="options-page">
 		<!-- Top panel -->
@@ -22,19 +23,6 @@
 				<div id="advanced-tab-button" class="tab-button">Advanced</div>
 			</div>
 		</header>
-
-		<!-- Save/Cancel Changes buttons -->
-		<div id="form-buttons">
-			<button id="save-changes" type="button">
-				<span class="circle"></span>
-				<span>Save Changes</span>
-			</button>
-			<button id="cancel-changes" type="button">
-				<span class="circle"></span>
-				<span>Cancel Changes</span>
-			</button>
-		</div>
-		<p id="form-buttons-output"></p>
 
 		<!-- Settings, using <form> to enable validation -->
 		<form id="settings">
@@ -79,18 +67,18 @@
 						<td>
 							<label for="auto-house">Auto House</label>
 							<span class="info" role="img" aria-label="info" data-tooltip="Automatically build house items.&#10;&#10;The addon will first attempt to build a new room. If there are no new rooms to build, it will upgrade item tiers. If there are also no tier upgrades available, the addon will build the fastest item.&#10;&#10;Requires Alarm Clock."></span>
-						</td>	
+						</td>
 						<td>
 							<input id="auto-house" type="checkbox">
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<label for="auto-house-custom">Enable Custom Build</label>
+							<label for="add-custom-build">Enable Custom Build</label>
 							<span class="info" role="img" aria-label="info" data-tooltip="Adds a field in the house screen which allows you to set a custom item to build instead of always building the quickest."></span>
 						</td>
 						<td>
-							<input id="auto-house-custom" type="checkbox">
+							<input id="add-custom-build" type="checkbox">
 						</td>
 					</tr>
 					<tr>
@@ -154,11 +142,11 @@
 				<tbody>
 					<tr>
 						<td>
-							<label for="main-account-name">Main Login Name<span class="required" data-tooltip="3-20 characters. Letters and numbers.">*</span></label>
+							<label for="main-account">Main Login Name<span class="required" data-tooltip="3-20 characters. Letters and numbers.">*</span></label>
 							<span class="info" role="img" aria-label="info" data-tooltip="The name you use to log in with your main account.&#10;&#10;Might be different than your in-game username."></span>
 						</td>
 						<td>
-							<input id="main-account-name" pattern="^[A-Za-z\d]{3,20}$" placeholder="Login Name" size="15" required>
+							<input id="main-account" pattern="^[A-Za-z\d]{3,20}$" placeholder="Login Name" size="15" required>
 						</td>
 					</tr>
 					<tr>
@@ -172,20 +160,20 @@
 					</tr>
 					<tr>
 						<td>
-							<label for="login-pass">Login Password<span class="required" data-tooltip="6+ characters. Case sensitive.">*</span></label>
+							<label for="login-password">Login Password<span class="required" data-tooltip="6+ characters. Case sensitive.">*</span></label>
 							<span class="warning" role="img" aria-label="warning" data-tooltip="Warning:&#10;The password is saved in plain text!&#10;&#10;Make sure it's different from passwords you use on other services, including live!"></span>
 						</td>
 						<td>
-							<input id="login-pass" pattern=".{6,}" type="password" placeholder="Password" size=15 required>
+							<input id="login-password" pattern=".{6,}" type="password" placeholder="Password" size=15 required>
 						</td>
 					</tr>
 					<tr class="requires-containers">
 						<td>
-							<label for="alt-name-type">Name Pattern<span id="alt-name-type-required" class="required">*</span></label>
+							<label for="pattern">Name Pattern<span id="pattern-required" class="required">*</span></label>
 							<span class="info" role="img" aria-label="info" data-tooltip="The name pattern for your alts.&#10;&#10;Examples:&#10;Roman Numerals: &quot;altI&quot; and &quot;altii&quot;.&#10;Unique Names: &quot;altCraft&quot; and &quot;testAccount&quot;."></span>
 						</td>
 						<td>
-							<select id="alt-name-type" required>
+							<select id="pattern" required>
 								<option value="" selected hidden>Select Name Pattern</option>
 								<option value="roman">Roman Numerals</option>
 								<option value="unique">Unique Names</option>
@@ -203,11 +191,11 @@
 					</tr>
 					<tr id="alts-base-name" class="requires-containers">
 						<td>
-							<label for="alt-name">Alts Base Name</label>
+							<label for="alt-base-name">Alts Base Name</label>
 							<span class="info" role="img" aria-label="info" data-tooltip="The base name for your alts.&#10;&#10;For example, if your alts are &quot;alti&quot; and &quot;altii&quot;, then the base name is &quot;alt&quot;."></span>
 						</td>
 						<td>
-							<input id="alt-name" pattern="^[A-Za-z\d]{3,20}$" placeholder="Alt Base Name" size="24">
+							<input id="alt-base-name" pattern="^[A-Za-z\d]{3,20}$" placeholder="Alt Base Name" size="24">
 						</td>
 					</tr>
 					<tr id="alts-unique-names" class="requires-containers">
@@ -369,11 +357,11 @@
 				<tbody>
 					<tr>
 						<td>
-							<label for="auto-event">Join Events</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="To automatically join Events, you first have to add all the users that you want to join events to the special event channel. Ask in main chat if you do not know how to do this.&#10;&#10;After you are in the channel, any player can initate an event by typing in the channel chat &quot;InitEvent&quot;."></span>
+							<label for="join-events">Join Events</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="To automatically join Events, you first have to add all the users that you want to join events to the special event channel. Ask in main chat if you do not know how to do this.&#10;&#10;After you are in the channel, any player can initiate an event by typing in the channel chat &quot;InitEvent&quot;."></span>
 						</td>
 						<td>
-							<input id="auto-event" type="checkbox">
+							<input id="join-events" type="checkbox">
 						</td>
 					</tr>
 					<tr>
@@ -480,38 +468,47 @@
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="append-name" type="checkbox">
+							<input id="addUsername" type="checkbox">
 						</td>
 						<td>
-							<label for="append-name">Add Username Next to Room Name</label>
+							<label for="addUsername">Add Username Next to Room Name</label>
 							<span class="info" role="img" aria-label="info" data-tooltip="Adds the username next to the room name to help see it easily."></span>
 						</td>
 					</tr>
 					<tr class="requires-containers">
 						<td class="checkbox-td">
-							<input id="alt-jump-button" type="checkbox">
+							<input id="add-jump-mobs" type="checkbox">
 						</td>
 						<td>
-							<label for="alt-jump-button">Add Jump Mobs Button for Alts</label>
+							<label for="add-jump-mobs">Add Jump Mobs Button for Alts</label>
 							<span class="info" role="img" aria-label="info" data-tooltip="Adds a &quot;Jump Mobs&quot; button to the mob selection screen on alts.&#10;&#10;Fill a number on the left and click the button to make all of your alts jump up the number of mobs specified.&#10;&#10;Can also be used with negative values to jump down."></span>
 						</td>
 					</tr>
 					<tr class="requires-containers">
 						<td class="checkbox-td">
-							<input id="alt-spawn-button" type="checkbox">
+							<input id="add-spawn-gems" type="checkbox">
 						</td>
 						<td>
-							<label for="alt-spawn-button">Add Spawn Gems Button for Alts</label>
+							<label for="add-spawn-gems">Add Spawn Gems Button for Alts</label>
 							<span class="info" role="img" aria-label="info" data-tooltip="Adds a &quot;Spawn For All Alts&quot; button to the spawn gems screen on alts.&#10;&#10;Clicking the button will spawn the currently selected gems for all alts.&#10;&#10;Close and reopen the gem spawn interface to apply changes."></span>
 						</td>
 					</tr>
 					<tr>
-						<td class="checkbox-td">
-							<input id="wire-button" type="checkbox">
+						<td>
+							<input id="add-socket-x5" type="checkbox">
 						</td>
 						<td>
-							<label for="wire-button">Add Request Currency Button</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Adds a &quot;Request Currency&quot; button on all users.&#10;&#10;Clicking the button will cause all other users to send their excess currencies (according to the currency send settings) to the asking user."></span>
+							<label for="add-socket-x5">Add Socket Gem x5 Button</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Adds a &quot;Socket Gem x5&quot; button next to the &quot;Socket Gem&quot; Button on the Item Options interface.&#10;&#10;Clicking the button will socket 5 of the selected gems.&#10;&#10;Close and reopen the Item Options interface to apply changes."></span>
+						</td>
+					</tr>
+					<tr>
+						<td class="checkbox-td">
+							<input id="add-request-money" type="checkbox">
+						</td>
+						<td>
+							<label for="add-request-money">Add Request Currency Button</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Adds a &quot;Request Currency&quot; button on all users.&#10;&#10;Clicking the button will cause all other users to send their excess currencies (according to the currency send settings) to the requesting user."></span>
 						</td>
 					</tr>
 					<tr>
@@ -521,6 +518,15 @@
 						<td>
 							<label for="remove-effects">Remove Effects Box</label>
 							<span class="info" role="img" aria-label="info" data-tooltip="Removes the &quot;Effects&quot; box under the battle stats section."></span>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input id="remove-banner" type="checkbox">
+						</td>
+						<td>
+							<label for="remove-banner">Remove Banner on Click</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="When closing the banner, also close the banner on all other alts."></span>
 						</td>
 					</tr>
 				</tbody>
@@ -584,6 +590,19 @@
 				</tbody>
 			</table>
 		</form>
+
+		<!-- Save/Cancel Changes buttons -->
+		<div id="form-buttons">
+			<button id="save-changes" type="button">
+				<span class="circle"></span>
+				<span>Save Changes</span>
+			</button>
+			<button id="cancel-changes" type="button">
+				<span class="circle"></span>
+				<span>Cancel Changes</span>
+			</button>
+		</div>
+		<p id="form-buttons-output"></p>
 
 		<script src="../js/options.js"></script>
 	</body>

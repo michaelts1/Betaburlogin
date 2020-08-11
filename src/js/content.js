@@ -1,15 +1,51 @@
-/* ~~~ To Do ~~~
- * Hide old banners
- * Reorganize this file
+/**
+ * @file
+ * @todo
+ * <pre>
+ * <h5>Add</h5>
+ * - Separate vars from settings
+ * - Rename Auto Event things to Auto Gauntlet
+ * - After merging into master, sync branches history again
+ * - Crypto - use block cipher (ask <...> what that means), and use "﷼" (decimal u+65020) as padding
+ * - Split each root function to it's own file (main-login.js, beta-login.js, beta-game.js), and modify manifest.json accordingly
  *
- * ~~~ Needs Testing ~~~
- * Clear event vars after 16+ minutes even if the user is not participating
+ * <h5>Test</h5>
+ * </pre>
  */
 
 "use strict"
 
+/**
+ * Stores the current page URL
+ * @constant href
+ * @type {string}
+ */
 const href = window.location.href
+
+/**
+ * See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/Port)
+ * @typedef {object} runtimePort
+ * @property {string=} name Name of the sender
+ * @property {object} sender Contains information about the sender of the port
+ * @property {object} onMessage
+ * @property {function} onMessage.addListener
+ * @property {function} onMessage.removeListener
+ * @property {object} onDisconnect
+ * @property {function} onDisconnect.addListener
+ * @property {function} onDisconnect.removeListener
+ * @property {function} postMessage
+ */
+
+/**
+ * Stores the connection to the background script
+ * @type {runtimePort}
+ */
 let port = null
+
+/**
+ * @type {object}
+ * @description Stores the settings
+ */
 let vars = null
 
 if (/www.avabur.com[/?expird=1]*$/.test(href)) {
@@ -20,46 +56,32 @@ if (/www.avabur.com[/?expird=1]*$/.test(href)) {
 	betaGame()
 }
 
+/**
+ * Logs a message, while prefixing it with date, time and the the addon's name
+ * @function log
+ * @param {...any} msg Zero or more objects of any type that will be logged
+ */
 function log(...msg) {
 	console.log(`[${new Date().toLocaleString().replace(",", "")}] Betaburlogin:`, ...msg)
 }
 
+/**
+ * - Returns a promise that is resolved after some time.
+ * - Useful for pausing async functions.
+ * @function delay
+ * @param {number} ms Amount of milliseconds to wait before resolving the promise
+ */
 function delay(ms) {
 	return new Promise(resolve => {
 		setTimeout(resolve, ms)
 	})
 }
 
-const eventListeners = {
-	/**
-	 * Attach/deattach handlers to document events, while avoiding having duplicate listeners
-	 * @param {string} eventName - Listen to events with this name
-	 * @param {function} handler - Handle the event with this handler
-	 * @param {boolean} value - Turn the event handler on/off
-	 * */
-	toggle: function(eventName, handler, value) {
-		if (typeof eventName !== "string") throw new TypeError(`Parameter eventName ${eventName} must be a string`)
-		if (typeof handler !== "function") throw new TypeError(`Parameter handler ${handler} must be function`)
-		if (typeof value !== "boolean") throw new TypeError(`Parameter value ${value} must be boolean`)
-
-		if (this[eventName] === undefined) {
-			this[eventName] = []
-		}
-		const prop = this[eventName] // Shorter identifier
-
-		if (prop.includes(handler) && value) { // Turn off the previous event handler to avoid duplicates
-			$(document).off(eventName, handler)
-		}
-
-		$(document)[value ? "on" : "off"](eventName, handler) // If value is true, $(document).on(...), if false, $(document).off(...)
-		if (prop.includes(handler) && !value) { // Push/pop the handler from the handlers array
-			prop.splice(prop.indexOf(handler), 1)
-		} else if (value) {
-			prop.push(handler)
-		}
-	},
-}
-
+/**
+ * Code to run when on Live Login page
+ * @async
+ * @function liveLogin
+ */
 async function liveLogin() {
 	vars = await browser.storage.sync.get(["verbose", "addOpenTabs"])
 
@@ -75,20 +97,30 @@ async function liveLogin() {
 	}
 }
 
+/**
+ * Code to run when on Beta Login page
+ * @async
+ * @function betaLogin
+ */
 async function betaLogin() {
-	vars = await browser.storage.sync.get(["verbose", "addLoginAlts"])
+	vars = await browser.storage.sync.get(["verbose", "addLoginAlts", "loginPassword"])
 
 	if (vars.verbose) log("Starting up (Beta Login)")
 
-	async function login(username, password) {
+	/**
+	 * Logs in with given username
+	 * @function login
+	 * @param {string} username
+	 */
+	async function login(username) {
 		$("#acctname").val(username)
-		$("#password").val(password)
+		$("#password").val(insecureCrypt.decrypt(vars.loginPassword, "betabot Totally-not-secure Super NOT secret key!"))
 		$("#login").click()
 		if (vars.verbose) log(`Logging in with username ${username}`)
 		await delay(7500)
 		if ($("#login_notification").text() === "Your location is making too many requests too quickly.  Try again later.") {
 			if (vars.verbose) log("Rate limited, trying again")
-			login(username, password)
+			login(username)
 		}
 	}
 
@@ -96,7 +128,7 @@ async function betaLogin() {
 		port = browser.runtime.connect({name: "login"})
 		port.onMessage.addListener(message => {
 			if (vars.verbose) log(`Received message with text: ${message.text}`)
-			if (message.text === "login") login(message.username, message.password)
+			if (message.text === "login") login(message.username)
 		})
 
 		$("#login_notification").html(`<button id="login-alts">Login All Alts</button>`)
@@ -104,6 +136,11 @@ async function betaLogin() {
 	}
 }
 
+/**
+ * Code to run when on Beta Game page
+ * @async
+ * @function betaGame
+ */
 async function betaGame() {
 	vars = await browser.storage.sync.get()
 	let username        = $("#username").text()
@@ -116,6 +153,11 @@ async function betaGame() {
 		log(`Starting up (Beta Game)\nUsername: ${username}\nAlt: ${isAlt ? "yes" : "no"}\nEvent TS: ${mainTrade}\nAuto Wire: ${autoWireID ? "on" : "off"}`)
 	}
 
+	/**
+	 * Loads new settings from storage
+	 * @function refreshVars
+	 * @param {object} changes [StorageChange object](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/StorageChange)
+	 */
 	async function refreshVars(changes) {
 		if (vars.verbose) log("Refreshing settings")
 
@@ -145,10 +187,10 @@ async function betaGame() {
 	}
 	browser.storage.onChanged.addListener(refreshVars)
 
-	// Event listeners that are not going to be turned off right now (might change in the future) are below
-	// Event listeneres that will be turned on/off as needed are inside toggleInterfaceChanges()
+	// Event listeners that are currently always on (might change in the future) are below
+	// Event listeners that will be turned on/off as needed are inside toggleInterfaceChanges()
 
-	// Toggle motdReceived on for a shor time after receiving motd message
+	// Toggle motdReceived on for a short time after receiving motd message
 	eventListeners.toggle("roa-ws:motd", motd, true)
 	// Advice the user to update the options page after a name change:
 	eventListeners.toggle("roa-ws:page:username_change", usernameChange, true)
@@ -163,8 +205,15 @@ async function betaGame() {
 		if (message.text === "send currency") wire(message.recipient)
 		if (message.text === "jump mobs") jumpMobs(message.number)
 		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
+		if (message.text === "close banners") closeBanner()
 	})
 
+	/**
+	 * Advises the user to update settings when changing name
+	 * @function usernameChange
+	 * @param {event} _ Placeholder parameter
+	 * @param {object} data Event data
+	 */
 	function usernameChange(_, data) {
 		if (data.s === 0) return // Unsuccessful name change
 
@@ -175,12 +224,16 @@ async function betaGame() {
 		username = data.u
 	}
 
+	/**
+	 * Creates a drop down list in the house page, allowing the user to select a custom build instead of always building the fastest
+	 * @function getCustomBuild
+	 */
 	function getCustomBuild() {
 		eventListeners.toggle("roa-ws:motd", getCustomBuild, false) // Turn off event listener
 		vars.actionsPending = true
-		$("#allHouseUpgrades")[0].click()
-		$("#allHouseUpgrades").click()
+		$("#modalBackground, #modal2Wrapper").prop("style", "display: none !important;") // Hide the interface for the duration of this process
 
+		$("#allHouseUpgrades")[0].click()
 		$(document).one("roa-ws:page:house_all_builds", (_, data) => {
 			setTimeout(completeTask)
 
@@ -192,9 +245,19 @@ async function betaGame() {
 			for (const item of items) {
 				$("#betabot-select-build").append(`<option value="${item.i}">${item.n}</option>`)
 			}
+
+			$("#modalBackground, #modal2Wrapper").prop("style", "") // Return to normal
+
+			log("Added Custom Build select menu")
 		})
 	}
 
+	/**
+	 * Creates a "Spawn For All Alts" button on the Spawn Gems interface
+	 * @function addAltsSpawn
+	 * @param {event} _ Placeholder parameter
+	 * @param {object} data Event data
+	 */
 	function addAltsSpawn(_, data) {
 		if (data.title === "Spawn Gems") {
 			$("#gemSpawnConfirm").after(`<input id="betabot-spawn-gem" type="button" style="padding:6.5px; margin: 0 -.5em 0 .5em;" value="Spawn For All Alts">`)
@@ -213,16 +276,30 @@ async function betaGame() {
 		}
 	}
 
+	/**
+	 * Appends the username to the room name
+	 * @function appendName
+	 */
 	function appendName() {
 		if ($("#betabot-clear-username")[0] === undefined) {
 			$("#roomName").append(`<span id="betabot-clear-username">${username}</span>`)
 			if (vars.verbose) log("Appended username to room name")
 		}
 	}
+	/**
+	 * MutationObserver for appendName
+	 * @constant {MutationObserver} keepUsernameVisible
+	 */
 	const keepUsernameVisible = new MutationObserver(appendName)
 
+	/**
+	 * Jumps to a mob with a given ID
+	 * @async
+	 * @function jumpMobs
+	 * @param {number} number Mob ID
+	 */
 	async function jumpMobs(number) {
-		if (vars.verbose) log(`Jumping ${number} mobs`)
+		if (vars.verbose) log(`Jumping to mob number ${number}`)
 		await delay(vars.startActionsDelay)
 		$("#battleGrounds").click()
 		$(document).one("roa-ws:page:town_battlegrounds", async () => {
@@ -233,6 +310,30 @@ async function betaGame() {
 		})
 	}
 
+	$("#close_general_notification").click(event => {
+		if (!event.originalEvent.isTrusted) return // Don't run due to closeBanner()
+		if (vars.removeBanner) {
+			port.postMessage({text: "banner closed"})
+		}
+	})
+
+	/**
+	 * Closes the banner
+	 * @function closeBanner
+	 */
+	function closeBanner() {
+		if ($("#close_general_notification") === undefined) return // Don't run if the banner is already closed
+		$("#close_general_notification")[0].click()
+		if (vars.verbose) log("Banner closed")
+	}
+
+	/**
+	 * Spawns gems
+	 * @param {number} type ID of a gem type for the main gem
+	 * @param {number} splice ID of a gem type for the spliced gem
+	 * @param {number} tier
+	 * @param {number} amount
+	 */
 	function spawnGems(tier, type, splice, amount) {
 		if (vars.verbose) log(`Spawning ${amount} level ${tier*10} gems with type value of ${type} and splice value of ${splice}`)
 
@@ -254,10 +355,9 @@ async function betaGame() {
 				$("#gemSpawnConfirm").click()
 				$(document).one("roa-ws:page:gem_spawn", async () => {
 					$("#betabot-spawn-gem").prop("disabled", true)
-					await delay(55*1000)
-					$("#confirmButtons>a.green")[0].click()
-					await delay(5*1000)
+					await delay(60*1000)
 					$("#betabot-spawn-gem").prop("disabled", false)
+					$("#confirmButtons>a.green")[0].click()
 				})
 			}
 		})
@@ -265,7 +365,12 @@ async function betaGame() {
 		$("#chatSendMessage").click()
 	}
 
-	// Make it easier to send currency:
+	/**
+	 * - Sends currency to another user
+	 * - Exact settings can be changed by the user under the Currency Send section of the Options Page.
+	 * @function wire
+	 * @param {string} target Wire recipient
+	 */
 	function wire(target) {
 		if (target === username) return
 		if (vars.verbose) log(`Wiring ${target}`)
@@ -300,6 +405,11 @@ async function betaGame() {
 	(function() {
 		if ($("#betabot-ws")[0] !== undefined) $("#betabot-ws").remove() // Re-inject the script
 
+		/**
+		 * A script that will be injected to the page. Used to broadcast events to the content script
+		 * @constant elm
+		 * @private
+		 */
 		const elm = document.createElement("script")
 		elm.innerHTML =
 `betabotChannel = new MessageChannel()
@@ -310,7 +420,14 @@ $(document).on("roa-ws:all", function(_, data){
 		elm.id = "betabot-ws"
 		document.head.appendChild(elm)
 
-		// RoA-WS. Taken from: https://github.com/edvordo/RoA-WSHookUp/blob/master/RoA-WSHookUp.user.js
+		/**
+		 * Broadcasts events from the page to the content script
+		 * @function roaWS
+		 * @param {event} event Event object
+		 * @author {@link https://github.com/edvordo/RoA-WSHookUp|Edvordo}
+		 * @license MIT License
+		 * @private
+		 */
 		function roaWS(event) {
 			const data = event.data
 			let etype = "roa-ws:"
@@ -348,13 +465,27 @@ $(document).on("roa-ws:all", function(_, data){
 		})
 	})()
 
-	// Betabot based on @Batosi's bot:
+	/**
+	 * This section of the code was originally based on a private distribution of @Batosi's bot
+	 */
+
+	/**
+	 * Closes the modal and sets actionsPending to false
+	 * @async
+	 * @function completeTask
+	 */
 	async function completeTask() {
 		await delay(vars.startActionsDelay)
 		vars.actionsPending = false
 		$(".closeModal").click()
 	}
 
+	/**
+	 * Stops tracking Harvestron/Quests for 60 seconds after manually cancelling
+	 * @async
+	 * @function questOrHarvestronCancelled
+	 * @param {event} event Event object
+	 */
 	async function questOrHarvestronCancelled(event) {
 		const type = event.type.replace("roa-ws:page:", "")
 		let key = null
@@ -373,7 +504,11 @@ $(document).on("roa-ws:all", function(_, data){
 		}
 	}
 
-	// Buy crystals every 24 hours
+	/**
+	 * Buys daily crystals for gold
+	 * @async
+	 * @function buyCrys
+	 */
 	async function buyCrys() {
 		if (vars.dailyCrystals === 0) return
 
@@ -394,7 +529,11 @@ $(document).on("roa-ws:all", function(_, data){
 	}
 	setInterval(buyCrys, 1000 * 60 * 60 * 24) // Once a day
 
-	// Quests, house, harvestron, and crafting
+	/**
+	 * Finishes a quest and get a new one
+	 * @async
+	 * @function finishQuest
+	 */
 	async function finishQuest() {
 		await delay(vars.startActionsDelay)
 		if (vars.verbose) log(`Completing a ${vars.questCompleting} quest`)
@@ -412,6 +551,11 @@ $(document).on("roa-ws:all", function(_, data){
 		})
 	}
 
+	/**
+	 * Selects the next item to build
+	 * @async
+	 * @function selectBuild
+	 */
 	async function selectBuild() {
 		if (vars.verbose) log("Selecting build")
 		const itemId = parseInt($("#betabot-select-build").val())
@@ -436,6 +580,11 @@ $(document).on("roa-ws:all", function(_, data){
 		}
 	}
 
+	/**
+	 * Builds a custom item as specified by the user
+	 * @async
+	 * @function customBuild
+	 */
 	async function customBuild() {
 		const itemId = $("#betabot-select-build").val()
 		if (vars.verbose) log(`Upgrading custom item with id ${itemId}`)
@@ -449,6 +598,11 @@ $(document).on("roa-ws:all", function(_, data){
 
 	}
 
+	/**
+	 * Builds a new item
+	 * @async
+	 * @function buildItem
+	 */
 	async function buildItem() {
 		if (vars.verbose) log("Building a new item")
 		await delay(vars.startActionsDelay)
@@ -456,6 +610,11 @@ $(document).on("roa-ws:all", function(_, data){
 		$("#houseBuildRoomItem").click()
 	}
 
+	/**
+	 * Upgrades an existing item tier or level
+	 * @async
+	 * @function upgradeItem
+	 */
 	async function upgradeItem() {
 		await delay(vars.startActionsDelay)
 		if ($("#houseRoomItemUpgradeTier").is(":visible")) { // If tier upgrade is available, upgrade it
@@ -469,12 +628,22 @@ $(document).on("roa-ws:all", function(_, data){
 		}
 	}
 
+	/**
+	 * Starts a new Harvestron job
+	 * @async
+	 * @function startHarvestron
+	 */
 	async function startHarvestron() {
 		if (vars.verbose) log("Starting Harvestron job")
 		$("#houseHarvestingJobStart").click()
 		setTimeout(completeTask, vars.buttonDelay)
 	}
 
+	/**
+	 * Fills the crafting queue
+	 * @async
+	 * @function fillCraftingQueue
+	 */
 	async function fillCraftingQueue() {
 		if (vars.actionsPending) return
 
@@ -494,6 +663,12 @@ $(document).on("roa-ws:all", function(_, data){
 		})
 	}
 
+	/**
+	 * Checks if the crafting queue should be filled
+	 * @function checkCraftingQueue
+	 * @param {event} _ Placeholder parameter
+	 * @param {object} data Event data
+	 */
 	function checkCraftingQueue(_, data) {
 		if (data.type === "craft" && data.results.a.cq < vars.minCraftingQueue) {
 			if (vars.verbose) log(`There are less than ${vars.minCraftingQueue} items in the crafting queue. Refilling now`)
@@ -507,7 +682,46 @@ $(document).on("roa-ws:all", function(_, data){
 		}
 	}
 
-	// Check action results for needed actions
+	/**
+	 * Adds a "Socket Gem x5" button to the Item Options interface
+	 * @function addSocket5Button
+	 */
+	function addSocket5Button() {
+		$("#socketThisGem").after(`<button id="betabot-socket-5">Socket Gem x5</button>`)
+		$("#betabot-socket-5").click(socketGems)
+	}
+
+	/**
+	 * Socket gems into an item
+	 * @async
+	 * @function socketGems
+	 */
+	async function socketGems() {
+		log("Socketing gems")
+		vars.actionsPending = true
+
+		// Until there are no more empty slots, or until the user closes the modal:
+		while ($("#socketThisGem").is(":visible")) {
+			$("#socketThisGem").click()
+
+			// Wait for roa-ws:page:gem_socket_to_item event:
+			await eventListeners.waitFor("roa-ws:page:gem_socket_to_item")
+
+			// Add a small pause before the next iteration
+			await delay(vars.actionsDelay)
+		}
+
+		vars.actionsPending = false
+		log("Socketing complete")
+	}
+
+	/**
+	 * Checks action results for needed actions
+	 * @async
+	 * @function checkResults
+	 * @param {event} _ Placeholder parameter
+	 * @param {object} data Event data
+	 */
 	async function checkResults(_, data) {
 		data = data.results.p
 
@@ -554,12 +768,18 @@ $(document).on("roa-ws:all", function(_, data){
 		}
 	}
 
-	// Auto event Based on: https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js
+	/**
+	 * This section of the code was originally based on [BetaburCheats](https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js)
+	 */
 	let eventID         = null
 	let mainEvent       = false
 	let eventInProgress = false
 	let motdReceived    = false
 
+	/**
+	 * Enum for the event buttons
+	 * @enum {HTMLElement}
+	 */
 	const BUTTONS = {
 		battle      : $(".bossFight.btn.btn-primary")[0],
 		fishing     : $(".bossHarvest.btn")[4],
@@ -570,6 +790,12 @@ $(document).on("roa-ws:all", function(_, data){
 		carving     : $(".bossCarve.btn")[0],
 	}
 
+	/**
+	 * - Gets the Trade Skill of this user
+	 * - If the user's Trade Skill is not found, returns `"mining"`
+	 * @function getTrade
+	 * @returns {string} Name of the Trade Skill
+	 */
 	function getTrade() {
 		for (const trade of Object.keys(vars.tradesList)) {
 			if (vars.tradesList[trade].includes(username.toLowerCase())) {
@@ -579,6 +805,12 @@ $(document).on("roa-ws:all", function(_, data){
 		return "mining"
 	}
 
+	/**
+	 * Attacks in events if the criteria are met
+	 * @function changeTrade
+	 * @param {event} _ Placeholder parameter
+	 * @param {object} data Event data
+	 */
 	function changeTrade(_, data) {
 		const d = data.results
 		if (d.carvingTier > 2500 && !mainEvent) {
@@ -598,16 +830,24 @@ $(document).on("roa-ws:all", function(_, data){
 		eventListeners.toggle("roa-ws:event_action", changeTrade, false)
 	}
 
+	/**
+	 * Joins the event if the criteria are met
+	 * @async
+	 * @function joinEvent
+	 * @param {string} msgContent Contents of the chat message
+	 * @param {string} msgID ID of the chat message
+	 */
 	async function joinEvent(msgContent, msgID) {
-		if (eventID !== msgID && !eventInProgress && (msgContent === "InitEvent" || msgContent === "MainEvent")) {
-			eventID = msgID
-			mainEvent = msgContent === "MainEvent"
-			eventInProgress = true
+		if (eventID === msgID || eventInProgress || !["InitEvent", "MainEvent"].includes(msgContent)) return
 
-			if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} event due to message #${msgID}`)
-			BUTTONS[mainTrade].click()
-			eventListeners.toggle("roa-ws:event_action", changeTrade, true)
-		}
+		eventID = msgID
+		mainEvent = msgContent === "MainEvent"
+		eventInProgress = true
+
+		if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} event due to message #${msgID}`)
+		BUTTONS[mainTrade].click()
+		eventListeners.toggle("roa-ws:event_action", changeTrade, true)
+
 		await delay(16*60*1000) // After 16 minutes, make sure the event is registered as over
 		if (eventID === msgID) { // Means it's the same event
 			mainEvent = false
@@ -616,10 +856,17 @@ $(document).on("roa-ws:all", function(_, data){
 		}
 	}
 
+	/**
+	 * Checks chat message and listens to event commands
+	 * @async
+	 * @function checkEvent
+	 * @param {event} _ Placeholder parameter
+	 * @param {object} data Event data
+	 */
 	async function checkEvent(_, data) {
 		if (data.c_id === vars.eventChannelID) {
 			await delay(vars.startActionsDelay)
-			// Wait to see if the message is recieved together with a message of the day,
+			// Wait to see if the message is received together with a message of the day,
 			// which means it was only sent due to a chat reconnection, and we should not join the event.
 			if (motdReceived === false) {
 				joinEvent(data.m, data.m_id)
@@ -627,12 +874,22 @@ $(document).on("roa-ws:all", function(_, data){
 		}
 	}
 
+	/**
+	 * Sets motdReceived to true for a short time after receiving a message of the day
+	 * @async
+	 * @function motd
+	 */
 	async function motd() {
 		motdReceived = true
 		await delay(vars.startActionsDelay * 5)
 		motdReceived = false
 	}
 
+	/**
+	 * @async
+	 * @function toggleInterfaceChanges
+	 * @param {boolean} refresh Should be true when called by refreshVars and false otherwise
+	 */
 	async function toggleInterfaceChanges(refresh) {
 		// Request Currency Button:
 		if (vars.addRequestMoney && $("#betabot-request-currency")[0] === undefined) {
@@ -672,9 +929,11 @@ $(document).on("roa-ws:all", function(_, data){
 			</div>`)
 		}
 
-		// The next two settings (customBuild and joinEvents) need to listen to roa-ws:motd to start.
-		// However, since jQuery .one method can't be used for two functions on the same event at the
-		// same time, I had to use .on and call .off immediately after the event triggers.
+		/**
+		 * The next two settings (customBuild and joinEvents) need to listen to roa-ws:motd to start.
+		 * However, since jQuery .one method can't be used for two functions on the same event at the
+		 * same time, I had to use .on and call .off immediately after the event triggers.
+		 */
 
 		// Option to build a specific item:
 		if (vars.addCustomBuild && $("#betabot-custom-build")[0] === undefined) {
@@ -703,9 +962,13 @@ $(document).on("roa-ws:all", function(_, data){
 
 		// Auto Craft:
 		eventListeners.toggle("roa-ws:craft roa-ws:notification", checkCraftingQueue, vars.autoCraft)
-		// Auto Stamina/Quests/House/Harvestron
-		eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action", checkResults,
-			vars.autoStamina || vars.autoQuests || vars.autoHouse || vars.autoHarvestron)
+		// Auto Stamina/Quests/House/Harvestron:
+		eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action",
+			checkResults, vars.autoStamina || vars.autoQuests || vars.autoHouse || vars.autoHarvestron)
+		// Socket Gem x5:
+		eventListeners.toggle(
+			"roa-ws:page:item_options roa-ws:page:gem_unsocket_from_item roa-ws:page:gem_unsocket_all_from_item roa-ws:page:gem_socket_to_item",
+			addSocket5Button, vars.addSocketX5)
 
 		if (isAlt) { // Only run on alts
 			// Spawn Gems For All Alts:

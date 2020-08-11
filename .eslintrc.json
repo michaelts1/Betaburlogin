@@ -9,6 +9,10 @@
 	"parserOptions": {
 		"ecmaVersion": 11
 	},
+	"globals": {
+		"insecureCrypt": "readonly",
+		"eventListeners": "readonly"
+	},
 	"rules": {
 		"indent": [
 			"error",
@@ -43,6 +47,8 @@
 				"max": 1
 			}
 		],
+		"no-eval": "error",
+		"no-implied-eval": "error",
 		"no-trailing-spaces": "error"
 	}
 }

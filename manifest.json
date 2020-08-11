@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Betabur Login",
-	"version": "1.0.0.0beta1",
+	"version": "1.0.0.0beta2",
 	"description": "Helps logging in with all the alts on beta.avabur.com",
 
 	"applications": {
@@ -22,7 +22,9 @@
 				"https://beta.avabur.com/game"
 			],
 			"js": [
-				"src/js/jquery-3.4.1.min.js",
+				"src/js/jquery-3.5.1.min.js",
+				"src/js/insecure-crypt.js",
+				"src/js/event-listeners.js",
 				"src/js/content.js"
 			]
 		}
