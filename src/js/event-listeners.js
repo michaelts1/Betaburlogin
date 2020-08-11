@@ -4,11 +4,12 @@
  * Object used to manage jQuery document event listeners
  * @const eventListeners
  * @property {function} toggle Toggles an event listener on/off
+ * @property {function} waitFor Allows asynchronously waiting for events
  * @property {...function[]}
  * - One or more properties using the following format:
  * - string: function[]
  * - Where the string is the name of the event (e.g. "roa-ws:all"), and function[] is an array of functions that will be called when the event is triggered
- * - Example: `eventListeners["roa-ws:page"] = [onPage, getPage, log]` will call onPage(), getPage(), and log() whenever "roa-ws:page" is triggered
+ * - Example: `eventListeners["roa-ws:page"] = [onPage, getPage, log]` will call onPage(), getPage(), and log() every time "roa-ws:page" is triggered
  */
 /* eslint-disable-next-line no-redeclare, no-unused-vars */ // Defined in this file, used in other files
 const eventListeners = {

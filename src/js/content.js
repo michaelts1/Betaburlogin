@@ -5,7 +5,6 @@
  * <h5>Add</h5>
  * - Separate vars from settings
  * - Rename Auto Event things to Auto Gauntlet
- * - After merging into master, sync branches history again
  * - Crypto - use block cipher (ask <...> what that means), and use "﷼" (decimal u+65020) as padding
  * - Split each root function to it's own file (main-login.js, beta-login.js, beta-game.js), and modify manifest.json accordingly
  *
