@@ -52,9 +52,9 @@ const eventListeners = {
 		if (typeof eventName !== "string") throw new TypeError(`Parameter eventName ${eventName} must be a string`)
 
 		return new Promise(resolve => {
-			function resolved() {
+			function resolved(event, data) {
 				eventListeners.toggle(eventName, resolved, false) // Remove the listener
-				resolve() // Resolve the promise
+				resolve({event, data}) // Resolve the promise
 			}
 			eventListeners.toggle(eventName, resolved, true) // Add a listener that will call resolved() when the event is triggered
 		})

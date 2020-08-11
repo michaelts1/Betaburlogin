@@ -4,6 +4,7 @@
  * <pre>
  * <h5>Add</h5>
  * - Separate vars from settings
+ * - Make use of eventListeners.waitFor()
  * - Rename Auto Event things to Auto Gauntlet
  * - Crypto - use block cipher (ask <...> what that means), and use "﷼" (decimal u+65020) as padding
  * - Split each root function to it's own file (main-login.js, beta-login.js, beta-game.js), and modify manifest.json accordingly
