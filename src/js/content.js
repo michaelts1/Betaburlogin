@@ -7,7 +7,7 @@
  * - Rename Auto Event things to Auto Gauntlet
  * - After merging into master, sync branches history again
  * - Crypto - use block cipher (ask <...> what that means), and use "﷼" (decimal u+65020) as padding
- * - Reorganize this file (Using {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/contentScripts/register|browser.contentScripts.register}?)
+ * - Split each root function to it's own file (main-login.js, beta-login.js, beta-game.js), and modify manifest.json accordingly
  *
  * <h5>Test</h5>
  * </pre>
@@ -838,15 +838,16 @@ $(document).on("roa-ws:all", function(_, data){
 	 * @param {string} msgID ID of the chat message
 	 */
 	async function joinEvent(msgContent, msgID) {
-		if (eventID !== msgID && !eventInProgress && (msgContent === "InitEvent" || msgContent === "MainEvent")) {
-			eventID = msgID
-			mainEvent = msgContent === "MainEvent"
-			eventInProgress = true
+		if (eventID === msgID || eventInProgress || !["InitEvent", "MainEvent"].includes(msgContent)) return
 
-			if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} event due to message #${msgID}`)
-			BUTTONS[mainTrade].click()
-			eventListeners.toggle("roa-ws:event_action", changeTrade, true)
-		}
+		eventID = msgID
+		mainEvent = msgContent === "MainEvent"
+		eventInProgress = true
+
+		if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} event due to message #${msgID}`)
+		BUTTONS[mainTrade].click()
+		eventListeners.toggle("roa-ws:event_action", changeTrade, true)
+
 		await delay(16*60*1000) // After 16 minutes, make sure the event is registered as over
 		if (eventID === msgID) { // Means it's the same event
 			mainEvent = false
