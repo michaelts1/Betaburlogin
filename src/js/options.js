@@ -1,6 +1,10 @@
 "use strict"
 
 /**
+ * @file Options Page code
+ */
+
+/**
  * Stores the settings
  * @type {object}
  */
@@ -107,7 +111,7 @@ async function fillFields() {
 	$("#main-account")      .val(vars.mainAccount)
 	$("#main-username")     .val(vars.mainUsername)
 	$("#alt-base-name")     .val(vars.altBaseName)
-	$("#login-password")    .val(insecureCrypt.decrypt(vars.loginPassword, "betabot Totally-not-secure Super NOT secret key!"))
+	$("#login-password")    .val(await insecureCrypt.decrypt(vars.loginPassword, "betabot Totally-not-secure Super NOT secret key!"))
 	$("#wire-frequency")    .val(vars.wireFrequency)
 	$("#daily-crystals")    .val(vars.dailyCrystals)
 	$("#event-channel-id")  .val(vars.eventChannelID)
@@ -117,7 +121,7 @@ async function fillFields() {
 	$("#auto-wire")        .prop("checked", vars.autoWire)
 	$("#auto-house")       .prop("checked", vars.autoHouse)
 	$("#auto-craft")       .prop("checked", vars.autoCraft)
-	$("#join-events")      .prop("checked", vars.joinEvents)
+	$("#join-gauntlets")   .prop("checked", vars.joinGauntlets)
 	$("#append-name")      .prop("checked", vars.addUsername)
 	$("#auto-quests")      .prop("checked", vars.autoQuests)
 	$("#auto-stamina")     .prop("checked", vars.autoStamina)
@@ -159,7 +163,7 @@ async function saveChanges() {
 		if ($("#settings")[0].reportValidity() === false) {
 			const invalid = $(":invalid")[1] // First invalid field
 			const table = $("table").has(`#${invalid.id}`)[0].id // Containing table id
-			$(`#${table}-tab-button`).click() // Go to its tab
+			$(`#${table}-tab-button`).click() // Go to tab
 
 			console.error("Form is invalid: First invalid field found is", invalid)
 			setTimeout(() => {$("#settings")[0].reportValidity()})
@@ -177,7 +181,7 @@ async function saveChanges() {
 		vars.autoWire          = $("#auto-wire").prop("checked")
 		vars.autoHouse         = $("#auto-house").prop("checked")
 		vars.autoCraft         = $("#auto-craft").prop("checked")
-		vars.joinEvents        = $("#join-events").prop("checked")
+		vars.joinGauntlets     = $("#join-gauntlets").prop("checked")
 		vars.autoQuests        = $("#auto-quests").prop("checked")
 		vars.addSocketX5       = $("#add-socket-x5").prop("checked")
 		vars.autoStamina       = $("#auto-stamina").prop("checked")
@@ -205,7 +209,13 @@ async function saveChanges() {
 
 		$("#name-list").val() === "" ? vars.namesList = [] : vars.namesList = $("#name-list").val().split(", ")
 
-		vars.loginPassword = insecureCrypt.encrypt($("#login-password").val(), "betabot Totally-not-secure Super NOT secret key!")
+		/**
+		 * **Note: DO NOT trust this encryption**. it's very weak and uses a public key for encryption.
+		 * There is a reason why there is still a warning about the password being saved in plain text.
+		 * @name notEncrypted
+		 */
+
+		vars.loginPassword = await insecureCrypt.encrypt($("#login-password").val(), "betabot Totally-not-secure Super NOT secret key!")
 
 		for (const currency of vars.currencySend) {
 			const name = currency.name.replace("_", "-")
@@ -284,6 +294,16 @@ function displayAltFields() {
 }
 
 /**
+ * Sets login-related settings as non-required/required
+ * @function loginChanged
+ */
+function loginChanged() {
+	const checked = $("#add-login-alts").prop("checked")
+	$("#login .required")[`${checked ? "remove" : "add"}Class`]("hidden") // .removeClass() or .addClass(), respectively
+	$("#login input[size=15],#pattern").get().forEach(elm => elm.required = checked)
+}
+
+/**
  * Switches settings tab
  * @function changeTab
  * @param {event} event Click event object
@@ -350,7 +370,8 @@ $("#reset-css").click(resetCSS)
 $(".tab-button").click(changeTab)
 $("#save-changes").click(saveChanges)
 $("#cancel-changes").click(cancelChanges)
-$("#daily-crystals").on("input", updatePrice)
 $("#pattern").on("input", displayAltFields)
+$("#daily-crystals").on("input", updatePrice)
+$("#add-login-alts").on("input", loginChanged)
 
 browser.storage.onChanged.addListener(fillFields)

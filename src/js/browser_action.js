@@ -1,6 +1,10 @@
 "use strict"
 
 /**
+ * @file Browser action window code
+ */
+
+/**
  * Stores the settings
  * @type {object}
  */

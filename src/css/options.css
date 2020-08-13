@@ -352,3 +352,7 @@ button:hover .circle {
 	margin: .5em .5em 0;
 	width: auto;
 }
+
+.hidden {
+	display: none !important;
+}

@@ -1,148 +1,39 @@
-/**
- * @file
- * @todo
- * <pre>
- * <h5>Add</h5>
- * - Separate vars from settings
- * - Make use of eventListeners.waitFor()
- * - Rename Auto Event things to Auto Gauntlet
- * - Crypto - use block cipher (ask <...> what that means), and use "﷼" (decimal u+65020) as padding
- * - Split each root function to it's own file (main-login.js, beta-login.js, beta-game.js), and modify manifest.json accordingly
- *
- * <h5>Test</h5>
- * </pre>
- */
-
 "use strict"
 
 /**
- * Stores the current page URL
- * @constant href
- * @type {string}
- */
-const href = window.location.href
-
-/**
- * See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/Port)
- * @typedef {object} runtimePort
- * @property {string=} name Name of the sender
- * @property {object} sender Contains information about the sender of the port
- * @property {object} onMessage
- * @property {function} onMessage.addListener
- * @property {function} onMessage.removeListener
- * @property {object} onDisconnect
- * @property {function} onDisconnect.addListener
- * @property {function} onDisconnect.removeListener
- * @property {function} postMessage
+ * @file Code to run when on Beta Game page
+ * @todo [Add] Set `buyCrystals()` to run shortly after page load
  */
 
 /**
- * Stores the connection to the background script
- * @type {runtimePort}
- */
-let port = null
-
-/**
- * @type {object}
- * @description Stores the settings
- */
-let vars = null
-
-if (/www.avabur.com[/?expird=1]*$/.test(href)) {
-	liveLogin()
-} else if (/beta.avabur.com[/?expird=1]*$/.test(href)) {
-	betaLogin()
-} else if (/beta.avabur.com\/game/.test(href)) {
-	betaGame()
-}
-
-/**
- * Logs a message, while prefixing it with date, time and the the addon's name
- * @function log
- * @param {...any} msg Zero or more objects of any type that will be logged
- */
-function log(...msg) {
-	console.log(`[${new Date().toLocaleString().replace(",", "")}] Betaburlogin:`, ...msg)
-}
-
-/**
- * - Returns a promise that is resolved after some time.
- * - Useful for pausing async functions.
- * @function delay
- * @param {number} ms Amount of milliseconds to wait before resolving the promise
- */
-function delay(ms) {
-	return new Promise(resolve => {
-		setTimeout(resolve, ms)
-	})
-}
-
-/**
- * Code to run when on Live Login page
- * @async
- * @function liveLogin
- */
-async function liveLogin() {
-	vars = await browser.storage.sync.get(["verbose", "addOpenTabs"])
-
-	if (vars.verbose) log("Starting up (Live Login)")
-
-	if (vars.addOpenTabs) {
-		port = browser.runtime.connect({name: "live"})
-		$("#login_notification").html(`<button id="open-alt-tabs">Open Beta Tabs</button>`)
-		$("#open-alt-tabs").click(() => {
-			port.postMessage({text: "open alt tabs"})
-			if (vars.verbose) log("Requesting background script to open alt tabs")
-		})
-	}
-}
-
-/**
- * Code to run when on Beta Login page
- * @async
- * @function betaLogin
- */
-async function betaLogin() {
-	vars = await browser.storage.sync.get(["verbose", "addLoginAlts", "loginPassword"])
-
-	if (vars.verbose) log("Starting up (Beta Login)")
-
-	/**
-	 * Logs in with given username
-	 * @function login
-	 * @param {string} username
-	 */
-	async function login(username) {
-		$("#acctname").val(username)
-		$("#password").val(insecureCrypt.decrypt(vars.loginPassword, "betabot Totally-not-secure Super NOT secret key!"))
-		$("#login").click()
-		if (vars.verbose) log(`Logging in with username ${username}`)
-		await delay(7500)
-		if ($("#login_notification").text() === "Your location is making too many requests too quickly.  Try again later.") {
-			if (vars.verbose) log("Rate limited, trying again")
-			login(username)
-		}
-	}
-
-	if (vars.addLoginAlts) {
-		port = browser.runtime.connect({name: "login"})
-		port.onMessage.addListener(message => {
-			if (vars.verbose) log(`Received message with text: ${message.text}`)
-			if (message.text === "login") login(message.username)
-		})
-
-		$("#login_notification").html(`<button id="login-alts">Login All Alts</button>`)
-		$("#login-alts").click(() => { port.postMessage({text: "requesting login"}) })
-	}
-}
-
-/**
- * Code to run when on Beta Game page
  * @async
  * @function betaGame
  */
 async function betaGame() {
-	vars = await browser.storage.sync.get()
+	/**
+	 * @typedef {helpers.runtimePort} runtimePort
+	 */
+
+	/**
+	 * Stores the connection to the background script
+	 * @type {runtimePort}
+	 */
+	const port = browser.runtime.connect({name: username})
+	port.onMessage.addListener(message => {
+		if (vars.verbose) log("Received message:", message)
+
+		if (message.text === "send currency") wire(message.recipient)
+		if (message.text === "jump mobs") jumpMobs(message.number)
+		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
+		if (message.text === "close banners") closeBanner()
+	})
+
+	/**
+	 * Stores the settings
+	 * @type {object}
+	 */
+	let vars = await browser.storage.sync.get()
+
 	let username        = $("#username").text()
 	let isAlt           = username !== vars.mainUsername.toLowerCase()
 	let staminaCooldown = false
@@ -150,7 +41,7 @@ async function betaGame() {
 	let autoWireID      = vars.autoWire ? setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername) : null
 
 	if (vars.verbose) {
-		log(`Starting up (Beta Game)\nUsername: ${username}\nAlt: ${isAlt ? "yes" : "no"}\nEvent TS: ${mainTrade}\nAuto Wire: ${autoWireID ? "on" : "off"}`)
+		log(`Starting up (Beta Game)\nUsername: ${username}\nAlt: ${isAlt ? "yes" : "no"}\nGauntlet: ${vars.joinGauntlets ? "Join" : "Don't join"}, ${mainTrade}\nAuto Wire: ${autoWireID ? "on" : "off"}`)
 	}
 
 	/**
@@ -183,7 +74,7 @@ async function betaGame() {
 
 		toggleInterfaceChanges(true)
 
-		if (vars.verbose) log(`Alt: ${isAlt ? "yes" : "no"}\nEvent TS: ${mainTrade}\nAuto Wire: ${autoWireID ? "on" : "off"}`)
+		if (vars.verbose) log(`Alt: ${isAlt ? "yes" : "no"}\nGauntlet: ${vars.joinGauntlets ? "Join" : "Don't join"}, ${mainTrade}\nAuto Wire: ${autoWireID ? "on" : "off"}`)
 	}
 	browser.storage.onChanged.addListener(refreshVars)
 
@@ -196,17 +87,6 @@ async function betaGame() {
 	eventListeners.toggle("roa-ws:page:username_change", usernameChange, true)
 	// Don't start new quests/harvestron jobs for 60 seconds after manually cancelling one:
 	eventListeners.toggle("roa-ws:page:quest_forfeit roa-ws:page:house_harvest_job_cancel", questOrHarvestronCancelled, true,)
-
-	// Connect to background script:
-	port = browser.runtime.connect({name: username})
-	port.onMessage.addListener(message => {
-		if (vars.verbose) log("Received message:", message)
-
-		if (message.text === "send currency") wire(message.recipient)
-		if (message.text === "jump mobs") jumpMobs(message.number)
-		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
-		if (message.text === "close banners") closeBanner()
-	})
 
 	/**
 	 * Advises the user to update settings when changing name
@@ -228,28 +108,25 @@ async function betaGame() {
 	 * Creates a drop down list in the house page, allowing the user to select a custom build instead of always building the fastest
 	 * @function getCustomBuild
 	 */
-	function getCustomBuild() {
-		eventListeners.toggle("roa-ws:motd", getCustomBuild, false) // Turn off event listener
+	async function getCustomBuild() {
 		vars.actionsPending = true
 		$("#modalBackground, #modal2Wrapper").prop("style", "display: none !important;") // Hide the interface for the duration of this process
-
 		$("#allHouseUpgrades")[0].click()
-		$(document).one("roa-ws:page:house_all_builds", (_, data) => {
-			setTimeout(completeTask)
 
-			const items = []
-			data.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
+		const {data} = await eventListeners.waitFor("roa-ws:page:house_all_builds")
+		const items = []
+		data.data.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
 
-			$("#houseQuickBuildWrapper").append(`<div id="betabot-custom-build">Build a specific item:
-			<select id="betabot-select-build"><option value="" selected>None (Build Fastest)</option></select></div>`)
-			for (const item of items) {
-				$("#betabot-select-build").append(`<option value="${item.i}">${item.n}</option>`)
-			}
+		// Create the dropdown list:
+		let select = `<div id="betabot-custom-build">Build a specific item:<select id="betabot-select-build"><option value="" selected>None (Build Fastest)</option>`
+		for (const item of items) {
+			select += `<option value="${item.i}">${item.n}</option>`
+		}
+		$("#houseQuickBuildWrapper").append(select + "</select></div>")
 
-			$("#modalBackground, #modal2Wrapper").prop("style", "") // Return to normal
-
-			log("Added Custom Build select menu")
-		})
+		$("#modalBackground, #modal2Wrapper").prop("style", "") // Return to normal
+		log("Added Custom Build select menu")
+		completeTask()
 	}
 
 	/**
@@ -302,19 +179,16 @@ async function betaGame() {
 		if (vars.verbose) log(`Jumping to mob number ${number}`)
 		await delay(vars.startActionsDelay)
 		$("#battleGrounds").click()
-		$(document).one("roa-ws:page:town_battlegrounds", async () => {
-			await delay(vars.buttonDelay)
-			$(`#enemyList>option[value|=${number}]`).attr("selected", "selected")
-			await delay(vars.buttonDelay)
-			$("#autoEnemy").click()
-		})
+
+		await eventListeners.waitFor("roa-ws:page:town_battlegrounds")
+		$(`#enemyList>option[value|=${number}]`).attr("selected", "selected")
+		await delay(vars.buttonDelay)
+		$("#autoEnemy").click()
 	}
 
 	$("#close_general_notification").click(event => {
-		if (!event.originalEvent.isTrusted) return // Don't run due to closeBanner()
-		if (vars.removeBanner) {
-			port.postMessage({text: "banner closed"})
-		}
+		// Don't run due to closeBanner()
+		if (event.originalEvent.isTrusted && vars.removeBanner) port.postMessage({text: "banner closed"})
 	})
 
 	/**
@@ -334,7 +208,7 @@ async function betaGame() {
 	 * @param {number} tier
 	 * @param {number} amount
 	 */
-	function spawnGems(tier, type, splice, amount) {
+	async function spawnGems(tier, type, splice, amount) {
 		if (vars.verbose) log(`Spawning ${amount} level ${tier*10} gems with type value of ${type} and splice value of ${splice}`)
 
 		if (tier > parseInt($("#level").text()) * 10 || amount > 60 || type === 65535 || splice === 65535 || type === splice) {
@@ -342,27 +216,23 @@ async function betaGame() {
 			return
 		}
 
-		$(document).one("roa-ws:modalContent", async (_, data) => {
-			if (data.title === "Spawn Gems") {
-				await delay(vars.startActionsDelay)
-
-				$("#spawnGemLevel").val(tier)
-				$("#gemSpawnType").val(type)
-				$("#gemSpawnSpliceType").val(splice)
-				$("#gemSpawnCount").val(amount)
-
-				await delay(vars.buttonDelay)
-				$("#gemSpawnConfirm").click()
-				$(document).one("roa-ws:page:gem_spawn", async () => {
-					$("#betabot-spawn-gem").prop("disabled", true)
-					await delay(60*1000)
-					$("#betabot-spawn-gem").prop("disabled", false)
-					$("#confirmButtons>a.green")[0].click()
-				})
-			}
-		})
 		$("#chatMessage").text("/spawngem")
 		$("#chatSendMessage").click()
+
+		await eventListeners.waitFor("roa-ws:modalContent")
+		$("#spawnGemLevel").val(tier)
+		$("#gemSpawnType").val(type)
+		$("#gemSpawnSpliceType").val(splice)
+		$("#gemSpawnCount").val(amount)
+
+		await delay(vars.startActionsDelay)
+		$("#gemSpawnConfirm").click()
+
+		await eventListeners.waitFor("roa-ws:page:gem_spawn")
+		$("#betabot-spawn-gem").prop("disabled", true)
+		await delay(60*1000)
+		$("#betabot-spawn-gem").prop("disabled", false)
+		$("#confirmButtons>a.green")[0].click()
 	}
 
 	/**
@@ -414,7 +284,7 @@ async function betaGame() {
 		elm.innerHTML =
 `betabotChannel = new MessageChannel()
 window.postMessage("betabot-ws message", "*", [betabotChannel.port2])
-$(document).on("roa-ws:all", function(_, data){
+$(document).on("roa-ws:all", function(_, data) {
 	betabotChannel.port1.postMessage(JSON.parse(data))
 })`
 		elm.id = "betabot-ws"
@@ -466,7 +336,9 @@ $(document).on("roa-ws:all", function(_, data){
 	})()
 
 	/**
-	 * This section of the code was originally based on a private distribution of @Batosi's bot
+	 * Auto quests, house, craft, stamina, `checkResults()`, and `completeTask()` were originally based on a private distribution of @Batosi's bot
+	 * @author {@link https://github.com/Isotab|Isotab}
+	 * @name Betabot
 	 */
 
 	/**
@@ -517,20 +389,22 @@ $(document).on("roa-ws:all", function(_, data){
 		await delay(vars.startActionsDelay)
 		$("#premiumShop").click()
 
-		$(document).one("roa-ws:page:boosts", async () => {
+		await eventListeners.waitFor("roa-ws:page:boosts")
+		const leftToBuy = vars.dailyCrystals - parseInt($("#premium_purchased_today").text()) // Amount of crystals left to buy
+		if (leftToBuy > 0) { // Don't purchase if there is nothing to purchase
 			await delay(vars.buttonDelay)
 			$("#goldCrystalButton").click()
+
 			await delay(vars.buttonDelay)
-			$("#premium_purchase_gold_count").val(vars.dailyCrystals)
+			$("#premium_purchase_gold_count").val(leftToBuy)
 			$("#premium_purchase_gold_button").click()
-			setTimeout(completeTask, vars.buttonDelay)
-		})
-		$(document).one("roa-ws:page:purchase_crystals_gold", completeTask)
+		}
+		completeTask()
 	}
 	setInterval(buyCrys, 1000 * 60 * 60 * 24) // Once a day
 
 	/**
-	 * Finishes a quest and get a new one
+	 * Finishes a quest and starts a new one
 	 * @async
 	 * @function finishQuest
 	 */
@@ -538,17 +412,16 @@ $(document).on("roa-ws:all", function(_, data){
 		await delay(vars.startActionsDelay)
 		if (vars.verbose) log(`Completing a ${vars.questCompleting} quest`)
 		$(`input.completeQuest[data-questtype=${vars.questCompleting}]`).click() // Complete the quest
-		$(document).one("roa-ws:page:quests", async () => {
-			await delay(vars.buttonDelay)
-			if (vars.verbose) log(`Starting a ${vars.questCompleting} quest`)
-			$(`input.questRequest[data-questtype=${vars.questCompleting}][value="Begin Quest"]`).click() // Start new quest
-			$(document).one("roa-ws:page:quests", async () => {
-				await delay(vars.buttonDelay)
-				vars.actionsPending = false
-				vars.questCompleting = null
-				$(".closeModal").click()
-			})
-		})
+
+		await eventListeners.waitFor("roa-ws:page:quests")
+		await delay(vars.buttonDelay)
+		if (vars.verbose) log(`Starting a ${vars.questCompleting} quest`)
+		$(`input.questRequest[data-questtype=${vars.questCompleting}][value="Begin Quest"]`).click() // Start new quest
+
+		await eventListeners.waitFor("roa-ws:page:quests")
+		await delay(vars.buttonDelay)
+		vars.questCompleting = null
+		completeTask()
 	}
 
 	/**
@@ -559,43 +432,45 @@ $(document).on("roa-ws:all", function(_, data){
 	async function selectBuild() {
 		if (vars.verbose) log("Selecting build")
 		const itemId = parseInt($("#betabot-select-build").val())
+
 		await delay(vars.startActionsDelay)
 		if (!isNaN(itemId)) { // If a custom build is specified, upgrade it
-			$(document).one("roa-ws:page:house_all_builds", customBuild)
-			await delay(vars.buttonDelay)
 			$("#allHouseUpgrades")[0].click()
+			await eventListeners.waitFor("roa-ws:page:house_all_builds")
+			customBuild(itemId)
 		} else if ($("#houseRoomCanBuild").is(":visible")) { // Else, if new room is available, build it
 			if (vars.verbose) log("Building a new room")
-			$(document).one("roa-ws:page:house_build_room", completeTask)
-			await delay(vars.buttonDelay)
 			$("#houseBuildRoom")[0].click()
+			await eventListeners.waitFor("roa-ws:page:house_build_room")
+			completeTask()
 		} else if ($("#houseQuickBuildList li:first .houseViewRoom").length === 1) { // Else, if new item is available, build it
-			$(document).one("roa-ws:page:house_room", buildItem)
-			await delay(vars.buttonDelay)
 			$("#houseQuickBuildList li:first .houseViewRoom")[0].click()
+			await eventListeners.waitFor("roa-ws:page:house_room")
+			buildItem()
 		} else { // Else, upgrade existing item
-			$(document).one("roa-ws:page:house_room_item", upgradeItem)
-			await delay(vars.buttonDelay)
 			$("#houseQuickBuildList li:first .houseViewRoomItem")[0].click()
+			await eventListeners.waitFor("roa-ws:page:house_room_item")
+			upgradeItem()
 		}
 	}
 
 	/**
-	 * Builds a custom item as specified by the user
+	 * Builds a custom item based on its ID
 	 * @async
 	 * @function customBuild
+	 * @param {number} itemId ID of a house item
 	 */
-	async function customBuild() {
-		const itemId = $("#betabot-select-build").val()
+	async function customBuild(itemId) {
 		if (vars.verbose) log(`Upgrading custom item with id ${itemId}`)
-		$(document).one("roa-ws:page:house_room_item", async () => {
-			await delay(vars.buttonDelay)
-			$(document).one("roa-ws:page:house_room_item_upgrade_level", completeTask)
-			$("#houseRoomItemUpgradeLevel").click()
-		})
 		await delay(vars.buttonDelay)
 		$(`#modal2Content a[data-itemtype=${itemId}]`)[0].click()
 
+		await eventListeners.waitFor("roa-ws:page:house_room_item")
+		await delay(vars.buttonDelay)
+		$("#houseRoomItemUpgradeLevel").click()
+
+		await eventListeners.waitFor("roa-ws:page:house_room_item_upgrade_level")
+		completeTask()
 	}
 
 	/**
@@ -606,8 +481,9 @@ $(document).on("roa-ws:all", function(_, data){
 	async function buildItem() {
 		if (vars.verbose) log("Building a new item")
 		await delay(vars.startActionsDelay)
-		$(document).one("roa-ws:page:house_build_room_item", completeTask)
 		$("#houseBuildRoomItem").click()
+		await eventListeners.waitFor("roa-ws:page:house_build_room_item")
+		completeTask()
 	}
 
 	/**
@@ -619,13 +495,13 @@ $(document).on("roa-ws:all", function(_, data){
 		await delay(vars.startActionsDelay)
 		if ($("#houseRoomItemUpgradeTier").is(":visible")) { // If tier upgrade is available, upgrade it
 			if (vars.verbose) log("Upgrading item tier")
-			$(document).one("roa-ws:page:house_room_item_upgrade_tier", completeTask)
 			$("#houseRoomItemUpgradeTier").click()
 		} else { // Else do a regular upgrade
 			if (vars.verbose) log("Upgrading fastest item")
-			$(document).one("roa-ws:page:house_room_item_upgrade_level", completeTask)
 			$("#houseRoomItemUpgradeLevel").click()
 		}
+		await eventListeners.waitFor("roa-ws:page:house_room_item_upgrade_tier roa-ws:page:house_room_item_upgrade_level")
+		completeTask()
 	}
 
 	/**
@@ -636,7 +512,8 @@ $(document).on("roa-ws:all", function(_, data){
 	async function startHarvestron() {
 		if (vars.verbose) log("Starting Harvestron job")
 		$("#houseHarvestingJobStart").click()
-		setTimeout(completeTask, vars.buttonDelay)
+		await eventListeners.waitFor("roa-ws:page:house_harvest_job")
+		completeTask()
 	}
 
 	/**
@@ -651,20 +528,22 @@ $(document).on("roa-ws:all", function(_, data){
 		await delay(vars.startActionsDelay)
 		// For some weird reason, .click() does not work here ¯\_(ツ)_/¯
 		$(".craftingTableLink")[0].dispatchEvent(new Event("click"))
-		$(document).one("roa-ws:page:house_room_item", async () => {
-			await delay(vars.buttonDelay)
-			$("#craftingItemLevelMax").click()
-			await delay(vars.buttonDelay)
-			$("#craftingQuality").val(0) // Set to poor quality
-			$("#craftingJobFillQueue").attr("checked", "true")
-			await delay(vars.buttonDelay)
-			$("#craftingJobStart").click()
-			$(document).one("roa-ws:page:craft_item", completeTask)
-		})
+
+		await eventListeners.waitFor("roa-ws:page:house_room_item")
+		await delay(vars.buttonDelay)
+		$("#craftingItemLevelMax").click()
+		$("#craftingQuality").val(0) // Set to poor quality
+		$("#craftingJobFillQueue").attr("checked", "true")
+
+		await delay(vars.buttonDelay)
+		$("#craftingJobStart").click()
+
+		await eventListeners.waitFor("roa-ws:page:craft_item")
+		completeTask()
 	}
 
 	/**
-	 * Checks if the crafting queue should be filled
+	 * Checks whether or not the crafting queue should be filled
 	 * @function checkCraftingQueue
 	 * @param {event} _ Placeholder parameter
 	 * @param {object} data Event data
@@ -704,10 +583,8 @@ $(document).on("roa-ws:all", function(_, data){
 		while ($("#socketThisGem").is(":visible")) {
 			$("#socketThisGem").click()
 
-			// Wait for roa-ws:page:gem_socket_to_item event:
+			// Wait for roa-ws:page:gem_socket_to_item event and add a small pause, before the next iteration:
 			await eventListeners.waitFor("roa-ws:page:gem_socket_to_item")
-
-			// Add a small pause before the next iteration
 			await delay(vars.actionsDelay)
 		}
 
@@ -748,36 +625,40 @@ $(document).on("roa-ws:all", function(_, data){
 
 			if (vars.questCompleting != null) {
 				vars.actionsPending = true
-				$(document).one("roa-ws:page:quests", finishQuest)
 				await delay(vars.buttonDelay)
 				$("a.questCenter")[0].click()
+				await eventListeners.waitFor("roa-ws:page:quests")
+				finishQuest()
 				return
 			}
 		}
 		if (vars.autoHouse && data.can_build_house) { // Construction
 			vars.actionsPending = true
-			$(document).one("roa-ws:page:house", selectBuild)
 			$("li#housing").click()
+			await eventListeners.waitFor("roa-ws:page:house")
+			selectBuild()
 			return
 		}
 		if (vars.autoHarvestron && data.can_house_harvest) { // Harvestron
 			vars.actionsPending = true
-			$(document).one("roa-ws:page:house_room_item", startHarvestron)
 			$("#harvestronNotifier")[0].click()
+			await eventListeners.waitFor("roa-ws:page:house_room_item")
+			startHarvestron()
 			return
 		}
 	}
 
 	/**
-	 * This section of the code was originally based on [BetaburCheats](https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js)
+	 * Auto Gauntlet was originally based on [BetaburCheats](https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js)
 	 */
-	let eventID         = null
-	let mainEvent       = false
-	let eventInProgress = false
-	let motdReceived    = false
+	let gauntletID         = null
+	let mainEvent          = false
+	let gauntletInProgress = false
+	let motdReceived       = false
 
 	/**
-	 * Enum for the event buttons
+	 * Enum for the gauntlet buttons
+	 * @const BUTTONS
 	 * @enum {HTMLElement}
 	 */
 	const BUTTONS = {
@@ -806,7 +687,7 @@ $(document).on("roa-ws:all", function(_, data){
 	}
 
 	/**
-	 * Attacks in events if the criteria are met
+	 * Attacks in gauntlets when the criteria are met
 	 * @function changeTrade
 	 * @param {event} _ Placeholder parameter
 	 * @param {object} data Event data
@@ -814,62 +695,56 @@ $(document).on("roa-ws:all", function(_, data){
 	function changeTrade(_, data) {
 		const d = data.results
 		if (d.carvingTier > 2500 && !mainEvent) {
-			if (vars.verbose) log("Attacking event boss (carving tier)")
+			if (vars.verbose) log("Attacking gauntlet boss (carving tier)")
 			BUTTONS.battle.click()
 		} else if (d.time_remaining < vars.attackAt * 60) {
 			if (!isAlt || (isAlt && !mainEvent)) {
-				if (vars.verbose) log("Attacking event boss (time)")
+				if (vars.verbose) log("Attacking gauntlet boss (time)")
 				BUTTONS.battle.click()
 			}
 		} else { // Don't execute the rest of the function
 			return
 		}
-		// Stop tracking the event
-		mainEvent = false
-		eventInProgress = false
-		eventListeners.toggle("roa-ws:event_action", changeTrade, false)
+		finishGauntlet()
 	}
 
 	/**
-	 * Joins the event if the criteria are met
+	 * Joins the gauntlet if the criteria are met
 	 * @async
-	 * @function joinEvent
+	 * @function joinGauntlet
 	 * @param {string} msgContent Contents of the chat message
 	 * @param {string} msgID ID of the chat message
 	 */
-	async function joinEvent(msgContent, msgID) {
-		if (eventID === msgID || eventInProgress || !["InitEvent", "MainEvent"].includes(msgContent)) return
+	async function joinGauntlet(msgContent, msgID) {
+		if (gauntletID === msgID || gauntletInProgress || !["InitEvent", "MainEvent"].includes(msgContent)) return
 
-		eventID = msgID
+		gauntletID = msgID
 		mainEvent = msgContent === "MainEvent"
-		eventInProgress = true
+		gauntletInProgress = true
 
-		if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} event due to message #${msgID}`)
+		if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} gauntlet due to message #${msgID}`)
 		BUTTONS[mainTrade].click()
 		eventListeners.toggle("roa-ws:event_action", changeTrade, true)
 
-		await delay(16*60*1000) // After 16 minutes, make sure the event is registered as over
-		if (eventID === msgID) { // Means it's the same event
-			mainEvent = false
-			eventInProgress = false
-			eventListeners.toggle("roa-ws:event_action", changeTrade, false)
-		}
+		// If we are still tracking the same gauntlet after 16 minutes, stop tracking it:
+		await delay(16*60*1000)
+		if (gauntletID === msgID) finishGauntlet()
 	}
 
 	/**
-	 * Checks chat message and listens to event commands
+	 * Checks chat message and listens to gauntlet commands
 	 * @async
-	 * @function checkEvent
+	 * @function checkGauntletMessage
 	 * @param {event} _ Placeholder parameter
 	 * @param {object} data Event data
 	 */
-	async function checkEvent(_, data) {
+	async function checkGauntletMessage(_, data) {
 		if (data.c_id === vars.eventChannelID) {
 			await delay(vars.startActionsDelay)
 			// Wait to see if the message is received together with a message of the day,
-			// which means it was only sent due to a chat reconnection, and we should not join the event.
+			// which means it was only sent due to a chat reconnection, and we should not join the gauntlet.
 			if (motdReceived === false) {
-				joinEvent(data.m, data.m_id)
+				joinGauntlet(data.m, data.m_id)
 			}
 		}
 	}
@@ -883,6 +758,16 @@ $(document).on("roa-ws:all", function(_, data){
 		motdReceived = true
 		await delay(vars.startActionsDelay * 5)
 		motdReceived = false
+	}
+
+	/**
+	 * Resets gauntlet trackers
+	 * @function finishGauntlet
+	 */
+	function finishGauntlet() {
+		mainEvent = false
+		gauntletInProgress = false
+		eventListeners.toggle("roa-ws:event_action", changeTrade, false)
 	}
 
 	/**
@@ -929,35 +814,26 @@ $(document).on("roa-ws:all", function(_, data){
 			</div>`)
 		}
 
-		/**
-		 * The next two settings (customBuild and joinEvents) need to listen to roa-ws:motd to start.
-		 * However, since jQuery .one method can't be used for two functions on the same event at the
-		 * same time, I had to use .on and call .off immediately after the event triggers.
-		 */
-
 		// Option to build a specific item:
 		if (vars.addCustomBuild && $("#betabot-custom-build")[0] === undefined) {
 			if (refresh) { // Don't activate immediately on page load
 				getCustomBuild()
 			} else {
-				eventListeners.toggle("roa-ws:motd", getCustomBuild, true) // Wait for the page to load
+				eventListeners.waitFor("roa-ws:motd").then(() => { // Wait for the page to load
+					getCustomBuild()
+				})
 			}
 		} else if (vars.addCustomBuild === false && $("#betabot-custom-build")[0] !== undefined) {
 			$("#betabot-custom-build").remove()
 		}
 
-		// Auto Events:
+		// Auto Gauntlets:
 		if (refresh) { // Don't activate immediately on page load
-			eventListeners.toggle("roa-ws:message", checkEvent, vars.joinEvents)
+			eventListeners.toggle("roa-ws:message", checkGauntletMessage, vars.joinGauntlets)
 		} else {
-			const startCheckEvent = () => {
-				eventListeners.toggle("roa-ws:message", checkEvent, vars.joinEvents)
-				eventListeners.toggle("roa-ws:motd", startCheckEvent, false)
-			}
-			eventListeners.toggle("roa-ws:motd", startCheckEvent, vars.joinEvents)/*
-			$(document).one("roa-ws:motd", () => {
-				eventListeners.toggle("roa-ws:message", checkEvent, vars.joinEvents)
-			})*/ // Start after a delay to avoid being triggered by old messages
+			eventListeners.waitFor("roa-ws:motd").then(() => { // Start after a delay to avoid being triggered by old messages
+				eventListeners.toggle("roa-ws:message", checkGauntletMessage, vars.joinGauntlets)
+			})
 		}
 
 		// Auto Craft:
@@ -999,3 +875,5 @@ $(document).on("roa-ws:all", function(_, data){
 	}
 	toggleInterfaceChanges(false)
 }
+
+betaGame()

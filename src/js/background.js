@@ -1,4 +1,10 @@
 "use strict"
+
+/**
+ * @file Background processes
+ * @todo [Add] Separate vars from settings
+ */
+
 /**
  * - Current settings version
  * - Bump this number when adding or removing settings, and when changing ADDON_CSS
@@ -7,7 +13,7 @@
  * @type {number}
  * @default
  */
-const VARS_VERSION = 14
+const VARS_VERSION = 15
 
 /**
  * - CSS code for Betaburlogin interface changes
@@ -65,42 +71,20 @@ const CUSTOM_CSS =
 }`
 
 /**
- * See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/Port)
- * @typedef {object} runtimePort
- * @property {string=} name Name of the sender
- * @property {object} sender Contains information about the sender of the port
- * @property {object} onMessage
- * @property {function} onMessage.addListener
- * @property {function} onMessage.removeListener
- * @property {object} onDisconnect
- * @property {function} onDisconnect.addListener
- * @property {function} onDisconnect.removeListener
- * @property {function} postMessage
+ * @typedef {helpers.runtimePort} runtimePort
  */
 
 /**
- * Live Login page port
- * @type {runtimePort}
+ * Stores the different ports
+ * @const ports
+ * @enum {runtimePort|runtimePort[]}
  */
-let live = null
-
-/**
- * Main account on Beta Game page port
- * @type {runtimePort}
- */
-let main = null
-
-/**
- * Alt accounts on Beta Game page ports
- * @type {runtimePort[]}
- */
-const alts = []
-
-/**
- * Beta Login page ports
- * @type {runtimePort[]}
- */
-const logins = []
+const ports = {
+	live  : null,
+	main  : null,
+	alts  : [],
+	logins: [],
+}
 
 /**
  * Stores the settings
@@ -109,35 +93,35 @@ const logins = []
 let vars = null
 
 browser.runtime.onConnect.addListener(async port => {
-	console.log(port.name, " connected")
+	log(port.name, " connected")
 	const mainUsername = (await browser.storage.sync.get("mainUsername")).mainUsername
 
 	// If live login
 	if (port.name === "live") {
-		live = port
-		live.onMessage.addListener(message => {
+		ports.live = port
+		port.onMessage.addListener(message => {
 			if (message.text === "open alt tabs") {
 				openTabs()
 			}
 		})
 	} else if (port.name === "login") { // Else, if beta login
-		logins.push(port)
+		ports.logins.push(port)
 		port.onMessage.addListener(message => {
 			if (message.text === "requesting login") {
 				login()
 			}
 		})
 	} else if (port.name === mainUsername) { // Else, if beta main
-		main = port
+		ports.main = port
 	} else { // Else, it's a beta alt
-		alts.push(port)
+		ports.alts.push(port)
 		port.onMessage.addListener(message => {
 			if (message.text === "move to mob") {
-				console.log(`moving all alts to mob ${message.number}`)
+				log(`moving all alts to mob ${message.number}`)
 				jumpMobs(message.number)
 			}
 			if (message.text === "spawnGem") {
-				console.log("${port.name} requested to spawn gems:", message)
+				log("${port.name} requested to spawn gems:", message)
 				spawnGem(message.type, message.splice, message.tier, message.amount)
 			}
 		})
@@ -146,7 +130,7 @@ browser.runtime.onConnect.addListener(async port => {
 	if (port.name !== "live" || port.name !== "login") { // If beta account
 		port.onMessage.addListener(message => {
 			if (message.text === "requesting currency") { // Send currency
-				console.log(`${port.name} requested currency`)
+				log(`${port.name} requested currency`)
 				sendCurrency(port.name)
 			}
 			if (message.text === "banner closed") {
@@ -158,17 +142,17 @@ browser.runtime.onConnect.addListener(async port => {
 	// When a port disconnects, forget it
 	port.onDisconnect.addListener( () => {
 		if (port.name === "live") {
-			live = null
+			ports.live = null
 		} else if (port.name === "login") {
-			const index = logins.indexOf(port)
-			if (index !== -1) logins.splice(index, 1)
+			const index = ports.logins.indexOf(port)
+			if (index !== -1) ports.logins.splice(index, 1)
 		} else if (port.name === mainUsername) {
-			main = null
+			ports.main = null
 		} else {
-			const index = alts.indexOf(port)
-			if (index !== -1) alts.splice(index, 1)
+			const index = ports.alts.indexOf(port)
+			if (index !== -1) ports.alts.splice(index, 1)
 		}
-		console.log(port.name, " disconnected!")
+		log(port.name, " disconnected!")
 	})
 })
 
@@ -209,14 +193,14 @@ async function openTabs() {
  */
 function login() {
 	/**
-	 * Sends a message to login[i] containing a username
+	 * Sends a message to a login port containing a username
 	 * @function sendLogin
-	 * @param {number} i Index of port inside logins[], that the message will be sent to
-	 * @param {string} username Username that will be sent to the port
+	 * @param {number} i Index of a port inside `ports.logins`
+	 * @param {string} username Username to send to the port
 	 * @private
 	 */
 	function sendLogin(i, username) {
-		logins[i].postMessage({
+		ports.logins[i].postMessage({
 			text: "login",
 			username: username,
 		})
@@ -266,16 +250,16 @@ function login() {
  * Sends a message to all ports inside an array at once
  * @function sendMessage
  * @param {object} message A message to be sent
- * @param {runtimePort[]} [users=alts.concat(main)] An array of runtimePort objects. Defaults to alts.concat(main)
+ * @param {runtimePort[]} [users=[...ports.alts, ports.main]] An array of `runtimePort` objects. If omitted, defaults to `[...ports.alts, ports.main]`
  */
-function sendMessage(message, users=alts.concat(main)) {
+function sendMessage(message, users=[...ports.alts, ports.main]) {
 	for (const user of users) {
 		user.postMessage(message)
 	}
 }
 
 /**
- * Spawns gems as specified by the parameters for all alts
+ * Spawns the gems specified by the parameters for all alts
  * @function spawnGem
  * @param {number} type ID of a gem type for the main gem
  * @param {number} splice ID of a gem type for the spliced gem
@@ -289,7 +273,7 @@ function spawnGem(type, splice, tier, amount) {
 		splice: splice,
 		tier  : tier,
 		amount: amount,
-	}, alts)
+	}, ports.alts)
 }
 
 /**
@@ -298,7 +282,7 @@ function spawnGem(type, splice, tier, amount) {
  * @param {number} number Mob ID
  */
 function jumpMobs(number) {
-	sendMessage({text: "jump mobs", number: number}, alts)
+	sendMessage({text: "jump mobs", number: number}, ports.alts)
 }
 
 /**
@@ -345,7 +329,7 @@ async function getVars() {
 			autoHouse        : true,
 			autoCraft        : true,
 			autoHarvestron   : true,
-			joinEvents       : true,
+			joinGauntlets    : true,
 			addCustomBuild   : true,
 			addUsername      : true,
 			addJumpMobs      : true,
@@ -453,7 +437,7 @@ getVars()
  */
 async function updateVars() {
 	if (typeof vars.version !== "number") {
-		console.log("Resetting settings - current settings are too old")
+		log("Resetting settings - current settings are too old")
 		await browser.storage.sync.clear()
 		getVars()
 		return
@@ -462,7 +446,8 @@ async function updateVars() {
 	switch (vars.version) {
 		case VARS_VERSION:
 			break
-		case 2: /* eslint-disable no-fallthrough */ // Falling through to update properly
+		/* eslint-disable no-fallthrough */ // Falling through to update properly
+		case 2:
 			vars.pattern = ""
 			vars.namesList = []
 		case 3:
@@ -531,12 +516,17 @@ async function updateVars() {
 			vars.removeBanner = false
 		case 13:
 			vars.addSocketX5 = true
+		case 14: // Name Change
+			vars.joinGauntlets = vars.joinEvents
+			delete vars.joinEvents
+			browser.storage.sync.remove("joinEvents")
 		default:
 			if (vars.css.addon !== ADDON_CSS) {
 				vars.css.addon = ADDON_CSS
 			}
 			vars.version = VARS_VERSION
-			browser.storage.sync.set(vars) /* eslint-enable no-fallthrough */
+			browser.storage.sync.set(vars)
+		/* eslint-enable no-fallthrough */
 	}
 }
 
@@ -564,9 +554,9 @@ browser.storage.onChanged.addListener(changes => {
 	const keys   = Object.keys(changes)
 	for (let i = 0; i < Object.values(changes).length; i++) {
 		if (objectEquals(values[i].oldValue, values[i].newValue) === false) {
-			console.log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
+			log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
 		}
 	}
 })
 
-console.log("background script finished evaluating")
+log("background script finished evaluating")
