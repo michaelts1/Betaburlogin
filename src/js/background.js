@@ -3,6 +3,9 @@
 /**
  * @file Background processes
  */
+/**
+ * @namespace background
+ */
 
 /**
  * - Current settings version
@@ -10,7 +13,7 @@
  * - If the number isn't bumped, the new settings will only have effect on new users
  * @constant SETTINGS_VERSION
  * @type {number}
- * @default
+ * @memberof background
  */
 const SETTINGS_VERSION = 15
 
@@ -19,7 +22,7 @@ const SETTINGS_VERSION = 15
  * - If you change ADDON_CSS value, make sure to also bump SETTINGS_VERSION, or the changes will only have effect on new users
  * @constant ADDON_CSS
  * @type {string}
- * @default
+ * @memberof background
  */
 const ADDON_CSS =
 `#betabot-clear-username {
@@ -56,7 +59,7 @@ const ADDON_CSS =
  * - Can be changed by the user in the Advanced section of the Settings page
  * @const CUSTOM_CSS
  * @type {string}
- * @default
+ * @memberof background
  */
 const CUSTOM_CSS =
 `#areaContent {
@@ -71,12 +74,18 @@ const CUSTOM_CSS =
 
 /**
  * @typedef {helpers.runtimePort} runtimePort
+ * @memberof background
  */
 
 /**
  * Stores the different ports
  * @const ports
- * @enum {runtimePort|runtimePort[]}
+ * @enum {null|runtimePort|runtimePort[]}
+ * @property {?runtimePort} live Live Login Page port
+ * @property {?runtimePort} main Beta game page main port
+ * @property {runtimePort[]} alts Beta game page alt ports
+ * @property {runtimePort[]} logins Beta Login Page port
+ * @memberof background
  */
 const ports = {
 	live  : null,
@@ -155,6 +164,7 @@ browser.runtime.onConnect.addListener(async port => {
  * Opens Beta Login tabs according to the amount of alts
  * @async
  * @function openTabs
+ * @memberof background
  */
 async function openTabs() {
 	let containers = await browser.contextualIdentities.query({}) // Get all containers
@@ -185,6 +195,7 @@ async function openTabs() {
  * Logins all the currently open Beta Login pages
  * @async
  * @function login
+ * @memberof background
  */
 function login() {
 	/**
@@ -193,6 +204,7 @@ function login() {
 	 * @param {number} i Index of a port inside `ports.logins`
 	 * @param {string} username Username to send to the port
 	 * @private
+	 * @memberof background
 	 */
 	function sendLogin(i, username) {
 		ports.logins[i].postMessage({
@@ -207,6 +219,7 @@ function login() {
 	 * @param {number} num Latin numeral
 	 * @returns {string} String containing a roman numeral
 	 * @private
+	 * @memberof background
 	 */
 	function romanize(num) {
 		if (num === 0) return ""
@@ -246,6 +259,7 @@ function login() {
  * @function sendMessage
  * @param {object} message A message to be sent
  * @param {runtimePort[]} [users=[...ports.alts, ports.main]] An array of `runtimePort` objects. If omitted, defaults to `[...ports.alts, ports.main]`
+ * @memberof background
  */
 function sendMessage(message, users=[...ports.alts, ports.main]) {
 	for (const user of users) {
@@ -260,6 +274,7 @@ function sendMessage(message, users=[...ports.alts, ports.main]) {
  * @param {number} splice ID of a gem type for the spliced gem
  * @param {number} tier
  * @param {number} amount
+ * @memberof background
  */
 function spawnGem(type, splice, tier, amount) {
 	sendMessage({
@@ -275,6 +290,7 @@ function spawnGem(type, splice, tier, amount) {
  * Jumps all alts to mob with a given ID
  * @function jumpMobs
  * @param {number} number Mob ID
+ * @memberof background
  */
 function jumpMobs(number) {
 	sendMessage({text: "jump mobs", number: number}, ports.alts)
@@ -285,6 +301,7 @@ function jumpMobs(number) {
  * - Exact settings can be changed by the user under the Currency Send section of the Options Page.
  * @function sendCurrency
  * @param {string} name Username
+ * @memberof background
  */
 function sendCurrency(name) {
 	sendMessage({text: "send currency", recipient: name})
@@ -293,6 +310,7 @@ function sendCurrency(name) {
 /**
  * Closes the banners on all users
  * @function closeBanners
+ * @memberof background
  */
 function closeBanners(){
 	sendMessage({text: "close banners"})
@@ -303,6 +321,7 @@ function closeBanners(){
  * - When adding or removing settings, make sure to also update updateSettings accordingly and bump SETTINGS_VERSION
  * @async
  * @function getSettings
+ * @memberof background
  */
 async function getSettings() {
 	settings = await browser.storage.sync.get()
@@ -425,6 +444,7 @@ getSettings()
  * Checks settings version and updates the settings if needed
  * @async
  * @function updateSettings
+ * @memberof background
  */
 async function updateSettings() {
 	if (typeof settings.version !== "number") {

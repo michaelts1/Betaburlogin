@@ -3,6 +3,9 @@
 /**
  * @file Options Page code
  */
+/**
+ * @namespace options
+ */
 
 let settings = null
 
@@ -11,6 +14,7 @@ let settings = null
  * @function abbreviateNumber
  * @param {number} num
  * @returns {string} Short form number
+ * @memberof options
  */
 function abbreviateNumber(num) {
 	/**
@@ -19,6 +23,7 @@ function abbreviateNumber(num) {
 	 * @param {number} num
 	 * @returns {number}
 	 * @private
+	 * @memberof options
 	 */
 	const round = num => Math.round(num*1000)/1000
 
@@ -45,6 +50,7 @@ function abbreviateNumber(num) {
  * @function deabbreviateNumber
  * @param {string} input A string containing a short form number
  * @returns {number} Long form number
+ * @memberof options
  */
 function deabbreviateNumber (input) {
 	if (typeof input !== "string") return input
@@ -75,6 +81,7 @@ function deabbreviateNumber (input) {
  * @function displayMessage
  * @param {string} message A message to show to the user
  * @param {number} [time=2500] The amount of time (ms) that the message should be shown for. Defaults to 2500 ms
+ * @memberof options
  */
 function displayMessage(message, time=2500) {
 	$("#form-buttons-output").text(message)
@@ -89,6 +96,7 @@ function displayMessage(message, time=2500) {
  * Gets the settings from storage, and updates the displayed settings accordingly
  * @async
  * @function fillFields
+ * @memberof options
  */
 async function fillFields() {
 	settings = await browser.storage.sync.get()
@@ -153,6 +161,7 @@ async function fillFields() {
  * Saves the displayed settings to storage
  * @async
  * @function saveChanges
+ * @memberof options
  */
 async function saveChanges() {
 	try {
@@ -209,6 +218,7 @@ async function saveChanges() {
 		 * **Note: DO NOT trust this encryption**. it's very weak and uses a public key for encryption.
 		 * There is a reason why there is still a warning about the password being saved in plain text.
 		 * @name notEncrypted
+		 * @memberof options
 		 */
 
 		settings.loginPassword = await insecureCrypt.encrypt($("#login-password").val(), "betabot Totally-not-secure Super NOT secret key!")
@@ -238,6 +248,7 @@ async function saveChanges() {
 /**
  * Reloads the settings from storage and updates the displayed settings
  * @function cancelChanges
+ * @memberof options
  */
 function cancelChanges() {
 	try {
@@ -253,6 +264,7 @@ function cancelChanges() {
 /**
  * Updates the displayed daily crystal prices
  * @function updatePrice
+ * @memberof options
  */
 function updatePrice() {
 	/**
@@ -261,6 +273,7 @@ function updatePrice() {
 	 * @param {number} n Number of daily crystals
 	 * @returns {number} Cost of daily crystals
 	 * @private
+	 * @memberof options
 	 */
 	const price = n => (n * (2 * 2000000 + (n - 1) * 1000000)) / 2
 	const number = parseInt($("#daily-crystals").val())
@@ -271,6 +284,7 @@ function updatePrice() {
 /**
  * Displays or hides the alt settings as needed
  * @function displayAltFields
+ * @memberof options
  */
 function displayAltFields() {
 	const value = $("#pattern").val()
@@ -292,6 +306,7 @@ function displayAltFields() {
 /**
  * Sets login-related settings as non-required/required
  * @function loginChanged
+ * @memberof options
  */
 function loginChanged() {
 	const checked = $("#add-login-alts").prop("checked")
@@ -303,6 +318,7 @@ function loginChanged() {
  * Switches settings tab
  * @function changeTab
  * @param {event} event Click event object
+ * @memberof options
  */
 function changeTab(event) {
 	const tabID = event.target.id.replace("-tab-button", "")
@@ -322,6 +338,7 @@ function changeTab(event) {
 /**
  * Resets the code in the custom css textarea
  * @function resetCSS
+ * @memberof options
  */
 function resetCSS() {
 	$("#custom-css").val(
@@ -340,6 +357,7 @@ function resetCSS() {
  * Gets all the containers from and lists them to the user
  * @async
  * @function fillContainers
+ * @memberof options
  */
 async function fillContainers() {
 	const containers = await browser.contextualIdentities.query({}) // Get all containers

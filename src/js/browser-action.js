@@ -3,6 +3,9 @@
 /**
  * @file Browser action window code
  */
+/**
+ * @namespace browser-action
+ */
 
 let settings = null
 
@@ -10,6 +13,7 @@ let settings = null
  * Gets the settings from the storage, and updates the displayed settings accordingly
  * @async
  * @function getVars
+ * @memberof browser-action
  */
 async function getVars() {
 	settings = await browser.storage.sync.get()
@@ -24,6 +28,7 @@ async function getVars() {
  * Toggles a setting on/off, and saves the new value to the storage
  * @async
  * @function toggle
+ * @memberof browser-action
  */
 async function toggle(event) {
 	const id = event.target.id

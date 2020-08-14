@@ -3,19 +3,25 @@
 /**
  * @file Code to run when on Beta Login page
  */
+/**
+ * @namespace beta-login
+ */
 
 /**
  * @async
  * @function betaLogin
+ * @memberof beta-login
  */
 async function betaLogin() {
 	/**
 	 * @typedef {helpers.runtimePort} runtimePort
+	 * @memberof beta-login
 	 */
 
 	/**
 	 * Stores the connection to the background script
 	 * @type {runtimePort}
+	 * @memberof beta-login
 	 */
 	const port = browser.runtime.connect({name: "login"})
 	const settings = await browser.storage.sync.get(["verbose", "addLoginAlts", "loginPassword"])
@@ -26,6 +32,7 @@ async function betaLogin() {
 	 * @function login
 	 * @param {string} username
 	 * @private
+	 * @memberof beta-login
 	 */
 	async function login(username) {
 		$("#acctname").val(username)

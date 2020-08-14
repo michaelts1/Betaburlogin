@@ -12,6 +12,9 @@
  * @todo [Test] Functions with eventListeners.waitFor()
  * @todo [Test] Split each root function to it's own file, and modify manifest.json accordingly
  */
+/**
+ * @namespace helpers
+ */
 
 /* eslint-disable no-redeclare, no-unused-vars */ // Defined in this file, used in other files
 
@@ -27,12 +30,14 @@
  * @property {function} onDisconnect.addListener
  * @property {function} onDisconnect.removeListener
  * @property {function} postMessage
+ * @memberof helpers
  */
 
 /**
  * Logs a message, while prefixing it with date, time and the the addon's name
  * @function log
  * @param {...any} msg Zero or more objects of any type that will be logged
+ * @memberof helpers
  */
 function log(...msg) {
 	console.log(`[${new Date().toLocaleString().replace(",", "")}] Betaburlogin:`, ...msg)
@@ -43,6 +48,7 @@ function log(...msg) {
  * - Useful for pausing async functions.
  * @function delay
  * @param {number} ms Amount of milliseconds to wait before resolving the promise
+ * @memberof helpers
  */
 function delay(ms) {
 	return new Promise(resolve => {
@@ -60,6 +66,7 @@ function delay(ms) {
  * - string: function[]
  * - Where the string is the name of the event (e.g. "roa-ws:all"), and function[] is an array of functions that will be called when the event is triggered
  * - Example: `eventListeners["roa-ws:page"] = [onPage, getPage, log]` will call onPage(), getPage(), and log() every time "roa-ws:page" is triggered
+ * @memberof helpers
  */
 const eventListeners = {
 	/**
@@ -68,6 +75,7 @@ const eventListeners = {
 	 * @param {string} eventName - Listen to events with this name
 	 * @param {function} handler - Handle the event with this handler
 	 * @param {boolean} turnOn - If true, turns the event listener on. If false, turns the event listener off
+	 * @memberof helpers
 	 * */
 	toggle(eventName, handler, turnOn) {
 		if (typeof eventName !== "string") throw new TypeError(`Parameter eventName ${eventName} must be a string`)
@@ -95,6 +103,7 @@ const eventListeners = {
 	 * @typedef {object} waitForEvent
 	 * @property {event} event Event object
 	 * @property {object} data Event data, see [event.data](https://api.jquery.com/event.data/) in jQuery docs
+	 * @memberof helpers
 	 */
 
 	/**
@@ -102,6 +111,7 @@ const eventListeners = {
 	 * @method waitFor
 	 * @param {string} eventName Wait for event with this name
 	 * @returns {promise<waitForEvent>} A Promise that will be fulfilled with an object, containing an `event` object and an `data` object, after `eventName` is triggered
+	 * @memberof helpers
 	 */
 	waitFor(eventName) {
 		if (typeof eventName !== "string") throw new TypeError(`Parameter eventName ${eventName} must be a string`)
@@ -120,6 +130,7 @@ const eventListeners = {
  * Allows basic, **vulnerable**, crypto operations
  * @property {function} encrypt Encrypts a message
  * @property {function} decrypt Decrypts a message
+ * @memberof helpers
  */
 const insecureCrypt = {
 	/**
@@ -131,6 +142,7 @@ const insecureCrypt = {
 	 * @param {boolean} decrypt If true, decrypts the message. If false, encrypts the message
 	 * @returns {promise<string>} A promise that is resolved with a string containing the new message
 	 * @private
+	 * @memberof helpers
 	 */
 	async _insecureCrypt(str, key, decrypt) {
 		if (typeof str !== "string") throw new TypeError("Parameter \"str\" must be a string")
@@ -164,6 +176,7 @@ const insecureCrypt = {
 	 * @param {string} str Message to encrypt
 	 * @param {string} key Key to encrypt the message with
 	 * @returns {promise<string>} A promise that is resolved with a string containing the encrypted message
+	 * @memberof helpers
 	 */
 	async encrypt(str, key) { return await this._insecureCrypt(str, key, false) },
 
@@ -174,6 +187,7 @@ const insecureCrypt = {
 	 * @param {string} str Message to decrypt
 	 * @param {string} key Key to decrypt the message with
 	 * @returns {promise<string>} A promise that is resolved with a string containing the decrypted message
+	 * @memberof helpers
 	 */
 	async decrypt(str, key) { return await this._insecureCrypt(str, key, true) },
 }

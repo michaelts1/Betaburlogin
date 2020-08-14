@@ -3,19 +3,25 @@
 /**
  * @file Code to run when on Live Login page
  */
+/**
+ * @namespace live-login
+ */
 
 /**
  * @async
  * @function liveLogin
+ * @memberof live-login
  */
 async function liveLogin() {
 	/**
 	 * @typedef {helpers.runtimePort} runtimePort
+	 * @memberof live-login
 	 */
 
 	/**
 	 * Stores the connection to the background script
 	 * @type {runtimePort}
+	 * @memberof live-login
 	 */
 	const port = browser.runtime.connect({name: "live"})
 	const settings = await browser.storage.sync.get(["verbose", "addOpenTabs"])

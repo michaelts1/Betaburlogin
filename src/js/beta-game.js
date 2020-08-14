@@ -4,19 +4,25 @@
  * @file Code to run when on Beta Game page
  * @todo [Add] Set `buyCrystals()` to run shortly after page load
  */
+/**
+ * @namespace beta-game
+ */
 
 /**
  * @async
  * @function betaGame
+ * @memberof beta-game
  */
 async function betaGame() {
 	/**
 	 * @typedef {helpers.runtimePort} runtimePort
+	 * @memberof beta-game
 	 */
 
 	/**
 	 * Stores the connection to the background script
 	 * @type {runtimePort}
+	 * @memberof beta-game
 	 */
 	const port = browser.runtime.connect({name: vars.username})
 	port.onMessage.addListener(message => {
@@ -34,6 +40,7 @@ async function betaGame() {
 	 * Stores variables and constants to avoid polluting the global space
 	 * @constant vars
 	 * @enum {any}
+	 * @memberof beta-game
 	 */
 	const vars = {
 		startActionsDelay: 1000,
@@ -55,6 +62,7 @@ async function betaGame() {
 	 * Loads new settings from storage
 	 * @function refreshSettings
 	 * @param {object} changes [StorageChange object](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/StorageChange)
+	 * @memberof beta-game
 	 */
 	async function refreshSettings(changes) {
 		if (settings.verbose) log("Refreshing settings")
@@ -100,6 +108,7 @@ async function betaGame() {
 	 * @function usernameChange
 	 * @param {event} _ Placeholder parameter
 	 * @param {object} data Event data
+	 * @memberof beta-game
 	 */
 	function usernameChange(_, data) {
 		if (data.s === 0) return // Unsuccessful name change
@@ -114,6 +123,7 @@ async function betaGame() {
 	/**
 	 * Creates a drop down list in the house page, allowing the user to select a custom build instead of always building the fastest
 	 * @function getCustomBuild
+	 * @memberof beta-game
 	 */
 	async function getCustomBuild() {
 		vars.actionsPending = true
@@ -141,6 +151,7 @@ async function betaGame() {
 	 * @function addAltsSpawn
 	 * @param {event} _ Placeholder parameter
 	 * @param {object} data Event data
+	 * @memberof beta-game
 	 */
 	function addAltsSpawn(_, data) {
 		if (data.title === "Spawn Gems") {
@@ -163,6 +174,7 @@ async function betaGame() {
 	/**
 	 * Appends the username to the room name
 	 * @function appendName
+	 * @memberof beta-game
 	 */
 	function appendName() {
 		if ($("#betabot-clear-username")[0] === undefined) {
@@ -173,6 +185,7 @@ async function betaGame() {
 	/**
 	 * MutationObserver for appendName
 	 * @constant {MutationObserver} keepUsernameVisible
+	 * @memberof beta-game
 	 */
 	const keepUsernameVisible = new MutationObserver(appendName)
 
@@ -181,6 +194,7 @@ async function betaGame() {
 	 * @async
 	 * @function jumpMobs
 	 * @param {number} number Mob ID
+	 * @memberof beta-game
 	 */
 	async function jumpMobs(number) {
 		if (settings.verbose) log(`Jumping to mob number ${number}`)
@@ -201,6 +215,7 @@ async function betaGame() {
 	/**
 	 * Closes the banner
 	 * @function closeBanner
+	 * @memberof beta-game
 	 */
 	function closeBanner() {
 		if ($("#close_general_notification") === undefined) return // Don't run if the banner is already closed
@@ -210,10 +225,13 @@ async function betaGame() {
 
 	/**
 	 * Spawns gems
+	 * @async
+	 * @function spawnGems
 	 * @param {number} type ID of a gem type for the main gem
 	 * @param {number} splice ID of a gem type for the spliced gem
 	 * @param {number} tier
 	 * @param {number} amount
+	 * @memberof beta-game
 	 */
 	async function spawnGems(tier, type, splice, amount) {
 		if (settings.verbose) log(`Spawning ${amount} level ${tier*10} gems with type value of ${type} and splice value of ${splice}`)
@@ -247,6 +265,7 @@ async function betaGame() {
 	 * - Exact settings can be changed by the user under the Currency Send section of the Options Page.
 	 * @function wire
 	 * @param {string} target Wire recipient
+	 * @memberof beta-game
 	 */
 	function wire(target) {
 		if (target === vars.username) return
@@ -286,6 +305,7 @@ async function betaGame() {
 		 * A script that will be injected to the page. Used to broadcast events to the content script
 		 * @constant elm
 		 * @private
+		 * @memberof beta-game
 		 */
 		const elm = document.createElement("script")
 		elm.innerHTML =
@@ -304,6 +324,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		 * @author {@link https://github.com/edvordo/RoA-WSHookUp|Edvordo}
 		 * @license MIT License
 		 * @private
+		 * @memberof beta-game
 		 */
 		function roaWS(event) {
 			const data = event.data
@@ -345,13 +366,15 @@ $(document).on("roa-ws:all", function(_, data) {
 	/**
 	 * Auto quests, house, craft, stamina, `checkResults()`, and `completeTask()` were originally based on a private distribution of @Batosi's bot
 	 * @author {@link https://github.com/Isotab|Isotab}
-	 * @name Betabot
+	 * @name "Betabot Credits"
+	 * @memberof beta-game
 	 */
 
 	/**
 	 * Closes the modal and sets `vars.actionsPending` to false
 	 * @async
 	 * @function completeTask
+	 * @memberof beta-game
 	 */
 	async function completeTask() {
 		await delay(vars.startActionsDelay)
@@ -364,6 +387,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @async
 	 * @function questOrHarvestronCancelled
 	 * @param {event} event Event object
+	 * @memberof beta-game
 	 */
 	async function questOrHarvestronCancelled(event) {
 		const type = event.type.replace("roa-ws:page:", "")
@@ -387,6 +411,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * Buys daily crystals for gold
 	 * @async
 	 * @function buyCrys
+	 * @memberof beta-game
 	 */
 	async function buyCrys() {
 		if (settings.dailyCrystals === 0) return
@@ -414,6 +439,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * Finishes a quest and starts a new one
 	 * @async
 	 * @function finishQuest
+	 * @memberof beta-game
 	 */
 	async function finishQuest() {
 		await delay(vars.startActionsDelay)
@@ -435,6 +461,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * Selects the next item to build
 	 * @async
 	 * @function selectBuild
+	 * @memberof beta-game
 	 */
 	async function selectBuild() {
 		if (settings.verbose) log("Selecting build")
@@ -466,6 +493,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @async
 	 * @function customBuild
 	 * @param {number} itemId ID of a house item
+	 * @memberof beta-game
 	 */
 	async function customBuild(itemId) {
 		if (settings.verbose) log(`Upgrading custom item with id ${itemId}`)
@@ -484,6 +512,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * Builds a new item
 	 * @async
 	 * @function buildItem
+	 * @memberof beta-game
 	 */
 	async function buildItem() {
 		if (settings.verbose) log("Building a new item")
@@ -497,6 +526,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * Upgrades an existing item tier or level
 	 * @async
 	 * @function upgradeItem
+	 * @memberof beta-game
 	 */
 	async function upgradeItem() {
 		await delay(vars.startActionsDelay)
@@ -515,6 +545,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * Starts a new Harvestron job
 	 * @async
 	 * @function startHarvestron
+	 * @memberof beta-game
 	 */
 	async function startHarvestron() {
 		if (settings.verbose) log("Starting Harvestron job")
@@ -527,6 +558,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * Fills the crafting queue
 	 * @async
 	 * @function fillCraftingQueue
+	 * @memberof beta-game
 	 */
 	async function fillCraftingQueue() {
 		if (vars.actionsPending) return
@@ -554,6 +586,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @function checkCraftingQueue
 	 * @param {event} _ Placeholder parameter
 	 * @param {object} data Event data
+	 * @memberof beta-game
 	 */
 	function checkCraftingQueue(_, data) {
 		if (data.type === "craft" && data.results.a.cq < settings.minCraftingQueue) {
@@ -571,6 +604,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	/**
 	 * Adds a "Socket Gem x5" button to the Item Options interface
 	 * @function addSocket5Button
+	 * @memberof beta-game
 	 */
 	function addSocket5Button() {
 		$("#socketThisGem").after(`<button id="betabot-socket-5">Socket Gem x5</button>`)
@@ -581,6 +615,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * Socket gems into an item
 	 * @async
 	 * @function socketGems
+	 * @memberof beta-game
 	 */
 	async function socketGems() {
 		log("Socketing gems")
@@ -605,6 +640,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @function checkResults
 	 * @param {event} _ Placeholder parameter
 	 * @param {object} data Event data
+	 * @memberof beta-game
 	 */
 	async function checkResults(_, data) {
 		data = data.results.p
@@ -657,6 +693,9 @@ $(document).on("roa-ws:all", function(_, data) {
 
 	/**
 	 * Auto Gauntlet was originally based on [BetaburCheats](https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js)
+	 * @author {@link https://github.com/dragonminja24|dragonminja24}
+	 * @name "Auto Gauntlet Credits"
+	 * @memberof beta-game
 	 */
 	let gauntletID         = null
 	let mainEvent          = false
@@ -667,6 +706,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * Enum for the gauntlet buttons
 	 * @const BUTTONS
 	 * @enum {HTMLElement}
+	 * @memberof beta-game
 	 */
 	const BUTTONS = {
 		battle      : $(".bossFight.btn.btn-primary")[0],
@@ -683,6 +723,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * - If the user's Trade Skill is not found, returns `"mining"`
 	 * @function getTrade
 	 * @returns {string} Name of the Trade Skill
+	 * @memberof beta-game
 	 */
 	function getTrade() {
 		for (const trade of Object.keys(settings.tradesList)) {
@@ -698,6 +739,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @function changeTrade
 	 * @param {event} _ Placeholder parameter
 	 * @param {object} data Event data
+	 * @memberof beta-game
 	 */
 	function changeTrade(_, data) {
 		const d = data.results
@@ -721,6 +763,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @function joinGauntlet
 	 * @param {string} msgContent Contents of the chat message
 	 * @param {string} msgID ID of the chat message
+	 * @memberof beta-game
 	 */
 	async function joinGauntlet(msgContent, msgID) {
 		if (gauntletID === msgID || gauntletInProgress || !["InitEvent", "MainEvent"].includes(msgContent)) return
@@ -744,6 +787,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @function checkGauntletMessage
 	 * @param {event} _ Placeholder parameter
 	 * @param {object} data Event data
+	 * @memberof beta-game
 	 */
 	async function checkGauntletMessage(_, data) {
 		if (data.c_id === settings.eventChannelID) {
@@ -760,6 +804,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * Sets motdReceived to true for a short time after receiving a message of the day
 	 * @async
 	 * @function motd
+	 * @memberof beta-game
 	 */
 	async function motd() {
 		motdReceived = true
@@ -770,6 +815,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	/**
 	 * Resets gauntlet trackers
 	 * @function finishGauntlet
+	 * @memberof beta-game
 	 */
 	function finishGauntlet() {
 		mainEvent = false
@@ -781,6 +827,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @async
 	 * @function toggleInterfaceChanges
 	 * @param {boolean} refresh Should be true when called by refreshSettings and false otherwise
+	 * @memberof beta-game
 	 */
 	async function toggleInterfaceChanges(refresh) {
 		// Request Currency Button:
