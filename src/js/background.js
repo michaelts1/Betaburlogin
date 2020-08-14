@@ -2,22 +2,21 @@
 
 /**
  * @file Background processes
- * @todo [Add] Separate vars from settings
  */
 
 /**
  * - Current settings version
  * - Bump this number when adding or removing settings, and when changing ADDON_CSS
  * - If the number isn't bumped, the new settings will only have effect on new users
- * @constant VARS_VERSION
+ * @constant SETTINGS_VERSION
  * @type {number}
  * @default
  */
-const VARS_VERSION = 15
+const SETTINGS_VERSION = 15
 
 /**
  * - CSS code for Betaburlogin interface changes
- * - If you change ADDON_CSS value, make sure to also bump VARS_VERSION, or the changes will only have effect on new users
+ * - If you change ADDON_CSS value, make sure to also bump SETTINGS_VERSION, or the changes will only have effect on new users
  * @constant ADDON_CSS
  * @type {string}
  * @default
@@ -86,11 +85,7 @@ const ports = {
 	logins: [],
 }
 
-/**
- * Stores the settings
- * @type {object}
- */
-let vars = null
+let settings = null
 
 browser.runtime.onConnect.addListener(async port => {
 	log(port.name, " connected")
@@ -163,16 +158,16 @@ browser.runtime.onConnect.addListener(async port => {
  */
 async function openTabs() {
 	let containers = await browser.contextualIdentities.query({}) // Get all containers
-	if (vars.containers.useAll === false) {
-		containers = containers.filter(e => vars.containers.list.includes(e.name)) // Filter according to settings
+	if (settings.containers.useAll === false) {
+		containers = containers.filter(e => settings.containers.list.includes(e.name)) // Filter according to settings
 	}
 
 	let altsNumber = 0
-	if (vars.pattern === "unique") {
-		altsNumber += vars.namesList.length
+	if (settings.pattern === "unique") {
+		altsNumber += settings.namesList.length
 	}
 	else {
-		altsNumber += vars.altsNumber
+		altsNumber += settings.altsNumber
 	}
 
 	browser.tabs.create({url: "https://beta.avabur.com"})
@@ -233,15 +228,15 @@ function login() {
 		return str
 	}
 
-	if (vars.pattern === "roman") {
-		sendLogin(0, vars.mainAccount)
-		for (let i = 1; i <= vars.altsNumber; i++) {
-			sendLogin(i, vars.altBaseName+romanize(i))
+	if (settings.pattern === "roman") {
+		sendLogin(0, settings.mainAccount)
+		for (let i = 1; i <= settings.altsNumber; i++) {
+			sendLogin(i, settings.altBaseName+romanize(i))
 		}
-	} else if (vars.pattern === "unique") {
-		sendLogin(0, vars.mainAccount)
-		for (let i = 0; i < vars.namesList.length; i++) {
-			sendLogin(i+1, vars.namesList[i])
+	} else if (settings.pattern === "unique") {
+		sendLogin(0, settings.mainAccount)
+		for (let i = 0; i < settings.namesList.length; i++) {
+			sendLogin(i+1, settings.namesList[i])
 		}
 	}
 }
@@ -304,20 +299,18 @@ function closeBanners(){
 }
 
 /**
- * - Gets the settings from the storage, Using default values if none are saved, and then calls updateVars
- * - When adding or removing settings, make sure to also update updateVars accordingly and bump VARS_VERSION
+ * - Gets the settings from the storage, Using default values if none are saved, and then calls updateSettings
+ * - When adding or removing settings, make sure to also update updateSettings accordingly and bump SETTINGS_VERSION
  * @async
- * @function getVars
+ * @function getSettings
  */
-async function getVars() {
-	vars = await browser.storage.sync.get()
+async function getSettings() {
+	settings = await browser.storage.sync.get()
 	// If not set, create with default settings
-	if (Object.keys(vars).length === 0) {
-		vars = {
-			version          : VARS_VERSION,
+	if (Object.keys(settings).length === 0) {
+		settings = {
+			version          : SETTINGS_VERSION,
 			eventChannelID   : 3202,
-			startActionsDelay: 1000,
-			buttonDelay      : 500,
 			wireFrequency    : 60,
 			dailyCrystals    : 50,
 			minCraftingQueue : 5,
@@ -340,11 +333,9 @@ async function getVars() {
 			addSocketX5      : true,
 			resumeCrafting   : true,
 			removeEffects    : false,
-			actionsPending   : false,
 			autoWire         : false,
 			verbose          : false,
 			removeBanner     : false,
-			questCompleting  : null,
 			mainAccount      : "",
 			mainUsername     : "",
 			loginPassword    : "",
@@ -424,34 +415,34 @@ async function getVars() {
 				},
 			],
 		}
-		await browser.storage.sync.set(vars)
+		await browser.storage.sync.set(settings)
 	}
-	updateVars()
+	updateSettings()
 }
-getVars()
+getSettings()
 
 /**
  * Checks settings version and updates the settings if needed
  * @async
- * @function updateVars
+ * @function updateSettings
  */
-async function updateVars() {
-	if (typeof vars.version !== "number") {
+async function updateSettings() {
+	if (typeof settings.version !== "number") {
 		log("Resetting settings - current settings are too old")
 		await browser.storage.sync.clear()
-		getVars()
+		getSettings()
 		return
 	}
 
-	switch (vars.version) {
-		case VARS_VERSION:
+	switch (settings.version) {
+		case SETTINGS_VERSION:
 			break
 		/* eslint-disable no-fallthrough */ // Falling through to update properly
 		case 2:
-			vars.pattern = ""
-			vars.namesList = []
+			settings.pattern = ""
+			settings.namesList = []
 		case 3:
-			vars.tradesList = {
+			settings.tradesList = {
 				fishing      : [],
 				woodcutting  : [],
 				mining       : [],
@@ -461,7 +452,7 @@ async function updateVars() {
 			}
 		case 4:
 			for (const trade of ["food", "wood", "iron", "stone"]) {
-				vars.currencySend.push({
+				settings.currencySend.push({
 					name : trade,
 					send : true,
 					minimumAmount : 100,
@@ -469,69 +460,76 @@ async function updateVars() {
 				})
 			}
 		case 5:
-			vars.autoWire = false
+			settings.autoWire = false
 		case 6:
-			vars.css = {
+			settings.css = {
 				addon : ADDON_CSS,
 				custom: CUSTOM_CSS,
 			},
-			vars.verbose = false
-			vars.containers = ["betabot-default"]
-			vars.wireFrequency = 60
+			settings.verbose = false
+			settings.containers = ["betabot-default"]
+			settings.wireFrequency = 60
 		case 7:
-			vars.containers = {
+			settings.containers = {
 				useAll: true,
 				list  : [],
 			}
-			if (vars.pattern === "romanCaps") vars.pattern = "roman" // Deprecated
+			if (settings.pattern === "romanCaps") settings.pattern = "roman" // Deprecated
 		case 8:
 			// Name Change:
-			vars.autoQuests = vars.doQuests
-			vars.autoHouse  = vars.doBuildingAndHarvy
-			vars.autoCraft  = vars.doCraftQueue
-			delete vars.doQuests
-			delete vars.doBuildingAndHarvy
-			delete vars.doCraftQueue
-			browser.storage.sync.remove(["doQuests", "doBuildingAndHarvy", "doCraftQueue",])
+			settings.autoQuests = settings.doQuests
+			settings.autoHouse  = settings.doBuildingAndHarvy
+			settings.autoCraft  = settings.doCraftQueue
+			delete settings.doQuests
+			delete settings.doBuildingAndHarvy
+			delete settings.doCraftQueue
+			browser.storage.sync.remove(["doQuests", "doBuildingAndHarvy", "doCraftQueue"])
 			// Other updates:
-			vars.minStamina      = 5
-			vars.autoStamina     = true
-			vars.joinEvents      = true
-			vars.addCustomBuild  = true
-			vars.addUsername     = true
-			vars.addJumpMobs     = true
-			vars.addSpawnGems    = true
-			vars.addRequestMoney = true
+			settings.minStamina      = 5
+			settings.autoStamina     = true
+			settings.joinEvents      = true
+			settings.addCustomBuild  = true
+			settings.addUsername     = true
+			settings.addJumpMobs     = true
+			settings.addSpawnGems    = true
+			settings.addRequestMoney = true
 		case 9:
-			vars.attackAt       = 3
-			vars.eventChannelID = 3202
-			vars.addOpenTabs    = true
-			vars.addLoginAlts   = true
-			vars.removeEffects  = true
+			settings.attackAt       = 3
+			settings.eventChannelID = 3202
+			settings.addOpenTabs    = true
+			settings.addLoginAlts   = true
+			settings.removeEffects  = true
 		case 10:
-			vars.resumeCrafting = false
+			settings.resumeCrafting = false
 		case 11:
-			vars.autoHarvestron = true
+			settings.autoHarvestron = true
 		case 12:
-			vars.removeBanner = false
+			settings.removeBanner = false
 		case 13:
-			vars.addSocketX5 = true
-		case 14: // Name Change
-			vars.joinGauntlets = vars.joinEvents
-			delete vars.joinEvents
+			settings.addSocketX5 = true
+		case 14:
+			// Name Change:
+			settings.joinGauntlets = settings.joinEvents
+			delete settings.joinEvents
 			browser.storage.sync.remove("joinEvents")
+			// Deletions:
+			delete settings.buttonDelay
+			delete settings.actionsPending
+			delete settings.questCompleting
+			delete settings.startActionsDelay
+			browser.storage.sync.remove(["buttonDelay", "actionsPending", "questCompleting", "startActionsDelay"])
 		default:
-			if (vars.css.addon !== ADDON_CSS) {
-				vars.css.addon = ADDON_CSS
+			if (settings.css.addon !== ADDON_CSS) {
+				settings.css.addon = ADDON_CSS
 			}
-			vars.version = VARS_VERSION
-			browser.storage.sync.set(vars)
+			settings.version = SETTINGS_VERSION
+			browser.storage.sync.set(settings)
 		/* eslint-enable no-fallthrough */
 	}
 }
 
 browser.storage.onChanged.addListener(changes => {
-	getVars()
+	getSettings()
 
 	function objectEquals(object1, object2) { // https://stackoverflow.com/a/6713782
 		if (object1 === object2) return true

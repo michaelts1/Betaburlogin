@@ -7,6 +7,7 @@
  * @todo [Test] checkEvent
  * @todo [Test] Auto Gauntlet
  * @todo [Test] getCustomBuild
+ * @todo [Test] Separate settings from settings
  * @todo [Test] Options Page: Saving/loading passwords
  * @todo [Test] Functions with eventListeners.waitFor()
  * @todo [Test] Split each root function to it's own file, and modify manifest.json accordingly
@@ -112,7 +113,7 @@ const eventListeners = {
 			}
 			eventListeners.toggle(eventName, resolved, true) // Add a listener that will call resolved() when the event is triggered
 		})
-	}
+	},
 }
 
 /**
@@ -120,7 +121,6 @@ const eventListeners = {
  * @property {function} encrypt Encrypts a message
  * @property {function} decrypt Decrypts a message
  */
-/* eslint-disable-next-line no-redeclare, no-unused-vars */ // Defined in this file, used in other files
 const insecureCrypt = {
 	/**
 	 * Do the actual crypto operations

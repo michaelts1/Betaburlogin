@@ -18,9 +18,9 @@ async function betaGame() {
 	 * Stores the connection to the background script
 	 * @type {runtimePort}
 	 */
-	const port = browser.runtime.connect({name: username})
+	const port = browser.runtime.connect({name: vars.username})
 	port.onMessage.addListener(message => {
-		if (vars.verbose) log("Received message:", message)
+		if (settings.verbose) log("Received message:", message)
 
 		if (message.text === "send currency") wire(message.recipient)
 		if (message.text === "jump mobs") jumpMobs(message.number)
@@ -28,55 +28,62 @@ async function betaGame() {
 		if (message.text === "close banners") closeBanner()
 	})
 
+	let settings = await browser.storage.sync.get()
+
 	/**
-	 * Stores the settings
-	 * @type {object}
+	 * Stores variables and constants to avoid polluting the global space
+	 * @constant vars
+	 * @enum {any}
 	 */
-	let vars = await browser.storage.sync.get()
+	const vars = {
+		startActionsDelay: 1000,
+		buttonDelay      : 500,
+		questCompleting  : null,
+		actionsPending   : false,
+		staminaCooldown  : false,
+		username         : $("#username").text(),
+		mainTrade        : getTrade(),
+		isAlt            : vars.username !== settings.mainUsername.toLowerCase(),
+		autoWireID       : settings.autoWire ? setInterval(wire, settings.wireFrequency*60*1000, settings.mainUsername) : null,
+	}
 
-	let username        = $("#username").text()
-	let isAlt           = username !== vars.mainUsername.toLowerCase()
-	let staminaCooldown = false
-	let mainTrade       = getTrade()
-	let autoWireID      = vars.autoWire ? setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername) : null
-
-	if (vars.verbose) {
-		log(`Starting up (Beta Game)\nUsername: ${username}\nAlt: ${isAlt ? "yes" : "no"}\nGauntlet: ${vars.joinGauntlets ? "Join" : "Don't join"}, ${mainTrade}\nAuto Wire: ${autoWireID ? "on" : "off"}`)
+	if (settings.verbose) {
+		log(`Starting up (Beta Game)\nUsername: ${vars.username}\nAlt: ${vars.isAlt ? "yes" : "no"}\nGauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\nAuto Wire: ${vars.autoWireID ? "on" : "off"}`)
 	}
 
 	/**
 	 * Loads new settings from storage
-	 * @function refreshVars
+	 * @function refreshSettings
 	 * @param {object} changes [StorageChange object](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/StorageChange)
 	 */
-	async function refreshVars(changes) {
-		if (vars.verbose) log("Refreshing settings")
+	async function refreshSettings(changes) {
+		if (settings.verbose) log("Refreshing settings")
 
-		vars = await browser.storage.sync.get()
-		isAlt = username !== vars.mainUsername.toLowerCase()
-		mainTrade = getTrade()
+		settings = await browser.storage.sync.get()
+		vars.isAlt = vars.username !== settings.mainUsername.toLowerCase()
+		vars.mainTrade = getTrade()
 
-		for (const wireRelated of ["wireFrequency", "mainUsername",]) { // If one of these has changed, reset autoWire
+		for (const wireRelated of ["wireFrequency", "mainUsername"]) { // If one of these has changed, reset autoWire
 			if (changes[wireRelated].oldValue !== changes[wireRelated].newValue) {
-				clearInterval(autoWireID)
-				autoWireID = null
-				log("Resetting autoWireID")
+				clearInterval(vars.autoWireID)
+				vars.autoWireID = null
+				log("Resetting vars.autoWireID")
 			}
 		}
 
 		// Turn on/off autoWire if needed
-		if (autoWireID && !vars.autoWire) {
-			clearInterval(autoWireID)
-			autoWireID = null
-		} else if (!autoWireID && vars.autoWire) {
-			autoWireID = setInterval(wire, vars.wireFrequency*60*1000, vars.mainUsername)
+		if (vars.autoWireID && !settings.autoWire) {
+			clearInterval(vars.autoWireID)
+			vars.autoWireID = null
+		} else if (!vars.autoWireID && settings.autoWire) {
+			vars.autoWireID = setInterval(wire, settings.wireFrequency*60*1000, settings.mainUsername)
 		}
 
 		toggleInterfaceChanges(true)
 
-		if (vars.verbose) log(`Alt: ${isAlt ? "yes" : "no"}\nGauntlet: ${vars.joinGauntlets ? "Join" : "Don't join"}, ${mainTrade}\nAuto Wire: ${autoWireID ? "on" : "off"}`)
+		if (settings.verbose) log(`Alt: ${vars.isAlt ? "yes" : "no"}\nGauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\nAuto Wire: ${vars.autoWireID ? "on" : "off"}`)
 	}
-	browser.storage.onChanged.addListener(refreshVars)
+	browser.storage.onChanged.addListener(refreshSettings)
 
 	// Event listeners that are currently always on (might change in the future) are below
 	// Event listeners that will be turned on/off as needed are inside toggleInterfaceChanges()
@@ -86,7 +93,7 @@ async function betaGame() {
 	// Advice the user to update the options page after a name change:
 	eventListeners.toggle("roa-ws:page:username_change", usernameChange, true)
 	// Don't start new quests/harvestron jobs for 60 seconds after manually cancelling one:
-	eventListeners.toggle("roa-ws:page:quest_forfeit roa-ws:page:house_harvest_job_cancel", questOrHarvestronCancelled, true,)
+	eventListeners.toggle("roa-ws:page:quest_forfeit roa-ws:page:house_harvest_job_cancel", questOrHarvestronCancelled, true)
 
 	/**
 	 * Advises the user to update settings when changing name
@@ -97,11 +104,11 @@ async function betaGame() {
 	function usernameChange(_, data) {
 		if (data.s === 0) return // Unsuccessful name change
 
-		log(`User has changed name from ${username} to ${data.u}`)
-		$.alert(`It looks like you have changed your username from ${username} to ${data.u}.
+		log(`User has changed name from ${vars.username} to ${data.u}`)
+		$.alert(`It looks like you have changed your username from ${vars.username} to ${data.u}.
 			If you used the old username in BetaburLogin settings page, you might want to
 			update these settings`, "Name Changed")
-		username = data.u
+		vars.username = data.u
 	}
 
 	/**
@@ -148,7 +155,7 @@ async function betaGame() {
 					amount: parseInt($("#gemSpawnCount").val()),
 				}
 				port.postMessage(msg)
-				if (vars.verbose) log(`Requested to spawn ${msg.amount} tier ${msg.tier} gems with type value of ${msg.type} and splice value of ${msg.splice}`)
+				if (settings.verbose) log(`Requested to spawn ${msg.amount} tier ${msg.tier} gems with type value of ${msg.type} and splice value of ${msg.splice}`)
 			})
 		}
 	}
@@ -159,8 +166,8 @@ async function betaGame() {
 	 */
 	function appendName() {
 		if ($("#betabot-clear-username")[0] === undefined) {
-			$("#roomName").append(`<span id="betabot-clear-username">${username}</span>`)
-			if (vars.verbose) log("Appended username to room name")
+			$("#roomName").append(`<span id="betabot-clear-username">${vars.username}</span>`)
+			if (settings.verbose) log("Appended username to room name")
 		}
 	}
 	/**
@@ -176,7 +183,7 @@ async function betaGame() {
 	 * @param {number} number Mob ID
 	 */
 	async function jumpMobs(number) {
-		if (vars.verbose) log(`Jumping to mob number ${number}`)
+		if (settings.verbose) log(`Jumping to mob number ${number}`)
 		await delay(vars.startActionsDelay)
 		$("#battleGrounds").click()
 
@@ -188,7 +195,7 @@ async function betaGame() {
 
 	$("#close_general_notification").click(event => {
 		// Don't run due to closeBanner()
-		if (event.originalEvent.isTrusted && vars.removeBanner) port.postMessage({text: "banner closed"})
+		if (event.originalEvent.isTrusted && settings.removeBanner) port.postMessage({text: "banner closed"})
 	})
 
 	/**
@@ -198,7 +205,7 @@ async function betaGame() {
 	function closeBanner() {
 		if ($("#close_general_notification") === undefined) return // Don't run if the banner is already closed
 		$("#close_general_notification")[0].click()
-		if (vars.verbose) log("Banner closed")
+		if (settings.verbose) log("Banner closed")
 	}
 
 	/**
@@ -209,7 +216,7 @@ async function betaGame() {
 	 * @param {number} amount
 	 */
 	async function spawnGems(tier, type, splice, amount) {
-		if (vars.verbose) log(`Spawning ${amount} level ${tier*10} gems with type value of ${type} and splice value of ${splice}`)
+		if (settings.verbose) log(`Spawning ${amount} level ${tier*10} gems with type value of ${type} and splice value of ${splice}`)
 
 		if (tier > parseInt($("#level").text()) * 10 || amount > 60 || type === 65535 || splice === 65535 || type === splice) {
 			log("Invalid request. Aborting spawn")
@@ -242,12 +249,12 @@ async function betaGame() {
 	 * @param {string} target Wire recipient
 	 */
 	function wire(target) {
-		if (target === username) return
-		if (vars.verbose) log(`Wiring ${target}`)
+		if (target === vars.username) return
+		if (settings.verbose) log(`Wiring ${target}`)
 
 		let sendMessage = `/wire ${target}`
 
-		for (const currency of vars.currencySend) {
+		for (const currency of settings.currencySend) {
 			if (currency.send === false) continue
 
 			const amount   = $(`.${currency.name}`).attr("title").replace(/,/g, "")
@@ -342,7 +349,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 */
 
 	/**
-	 * Closes the modal and sets actionsPending to false
+	 * Closes the modal and sets `vars.actionsPending` to false
 	 * @async
 	 * @function completeTask
 	 */
@@ -362,17 +369,17 @@ $(document).on("roa-ws:all", function(_, data) {
 		const type = event.type.replace("roa-ws:page:", "")
 		let key = null
 		if (type === "quest_forfeit") {
-			if (vars.verbose) log("Quest forfeited. Waiting 60 seconds before checking for quests again")
+			if (settings.verbose) log("Quest forfeited. Waiting 60 seconds before checking for quests again")
 			key = "autoQuest"
 		} else if (type === "house_harvest_job_cancel") {
-			if (vars.verbose) log("Harvestron job cancelled. Waiting 60 seconds before checking the Harvestron again")
+			if (settings.verbose) log("Harvestron job cancelled. Waiting 60 seconds before checking the Harvestron again")
 			key = "autoHarvestron"
 		}
 
-		if (vars[key]) {
-			vars[key] = false
+		if (settings[key]) {
+			settings[key] = false
 			await delay(60*1000)
-			vars[key] = (await browser.storage.sync.get(key))[key]
+			settings[key] = (await browser.storage.sync.get(key))[key]
 		}
 	}
 
@@ -382,15 +389,14 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @function buyCrys
 	 */
 	async function buyCrys() {
-		if (vars.dailyCrystals === 0) return
+		if (settings.dailyCrystals === 0) return
 
-		if (vars.verbose) log(`Buying ${vars.dailyCrystals} daily crystals`)
 		vars.actionsPending = true
 		await delay(vars.startActionsDelay)
 		$("#premiumShop").click()
 
 		await eventListeners.waitFor("roa-ws:page:boosts")
-		const leftToBuy = vars.dailyCrystals - parseInt($("#premium_purchased_today").text()) // Amount of crystals left to buy
+		const leftToBuy = settings.dailyCrystals - parseInt($("#premium_purchased_today").text()) // Amount of crystals left to buy
 		if (leftToBuy > 0) { // Don't purchase if there is nothing to purchase
 			await delay(vars.buttonDelay)
 			$("#goldCrystalButton").click()
@@ -398,6 +404,7 @@ $(document).on("roa-ws:all", function(_, data) {
 			await delay(vars.buttonDelay)
 			$("#premium_purchase_gold_count").val(leftToBuy)
 			$("#premium_purchase_gold_button").click()
+			if (settings.verbose) log(`Bought ${leftToBuy} daily crystals`)
 		}
 		completeTask()
 	}
@@ -410,12 +417,12 @@ $(document).on("roa-ws:all", function(_, data) {
 	 */
 	async function finishQuest() {
 		await delay(vars.startActionsDelay)
-		if (vars.verbose) log(`Completing a ${vars.questCompleting} quest`)
+		if (settings.verbose) log(`Completing a ${vars.questCompleting} quest`)
 		$(`input.completeQuest[data-questtype=${vars.questCompleting}]`).click() // Complete the quest
 
 		await eventListeners.waitFor("roa-ws:page:quests")
 		await delay(vars.buttonDelay)
-		if (vars.verbose) log(`Starting a ${vars.questCompleting} quest`)
+		if (settings.verbose) log(`Starting a ${vars.questCompleting} quest`)
 		$(`input.questRequest[data-questtype=${vars.questCompleting}][value="Begin Quest"]`).click() // Start new quest
 
 		await eventListeners.waitFor("roa-ws:page:quests")
@@ -430,7 +437,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @function selectBuild
 	 */
 	async function selectBuild() {
-		if (vars.verbose) log("Selecting build")
+		if (settings.verbose) log("Selecting build")
 		const itemId = parseInt($("#betabot-select-build").val())
 
 		await delay(vars.startActionsDelay)
@@ -439,7 +446,7 @@ $(document).on("roa-ws:all", function(_, data) {
 			await eventListeners.waitFor("roa-ws:page:house_all_builds")
 			customBuild(itemId)
 		} else if ($("#houseRoomCanBuild").is(":visible")) { // Else, if new room is available, build it
-			if (vars.verbose) log("Building a new room")
+			if (settings.verbose) log("Building a new room")
 			$("#houseBuildRoom")[0].click()
 			await eventListeners.waitFor("roa-ws:page:house_build_room")
 			completeTask()
@@ -461,7 +468,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @param {number} itemId ID of a house item
 	 */
 	async function customBuild(itemId) {
-		if (vars.verbose) log(`Upgrading custom item with id ${itemId}`)
+		if (settings.verbose) log(`Upgrading custom item with id ${itemId}`)
 		await delay(vars.buttonDelay)
 		$(`#modal2Content a[data-itemtype=${itemId}]`)[0].click()
 
@@ -479,7 +486,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @function buildItem
 	 */
 	async function buildItem() {
-		if (vars.verbose) log("Building a new item")
+		if (settings.verbose) log("Building a new item")
 		await delay(vars.startActionsDelay)
 		$("#houseBuildRoomItem").click()
 		await eventListeners.waitFor("roa-ws:page:house_build_room_item")
@@ -494,10 +501,10 @@ $(document).on("roa-ws:all", function(_, data) {
 	async function upgradeItem() {
 		await delay(vars.startActionsDelay)
 		if ($("#houseRoomItemUpgradeTier").is(":visible")) { // If tier upgrade is available, upgrade it
-			if (vars.verbose) log("Upgrading item tier")
+			if (settings.verbose) log("Upgrading item tier")
 			$("#houseRoomItemUpgradeTier").click()
 		} else { // Else do a regular upgrade
-			if (vars.verbose) log("Upgrading fastest item")
+			if (settings.verbose) log("Upgrading fastest item")
 			$("#houseRoomItemUpgradeLevel").click()
 		}
 		await eventListeners.waitFor("roa-ws:page:house_room_item_upgrade_tier roa-ws:page:house_room_item_upgrade_level")
@@ -510,7 +517,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @function startHarvestron
 	 */
 	async function startHarvestron() {
-		if (vars.verbose) log("Starting Harvestron job")
+		if (settings.verbose) log("Starting Harvestron job")
 		$("#houseHarvestingJobStart").click()
 		await eventListeners.waitFor("roa-ws:page:house_harvest_job")
 		completeTask()
@@ -549,13 +556,13 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @param {object} data Event data
 	 */
 	function checkCraftingQueue(_, data) {
-		if (data.type === "craft" && data.results.a.cq < vars.minCraftingQueue) {
-			if (vars.verbose) log(`There are less than ${vars.minCraftingQueue} items in the crafting queue. Refilling now`)
+		if (data.type === "craft" && data.results.a.cq < settings.minCraftingQueue) {
+			if (settings.verbose) log(`There are less than ${settings.minCraftingQueue} items in the crafting queue. Refilling now`)
 			fillCraftingQueue()
-		} else if (data.type === "notification" && vars.resumeCrafting) {
+		} else if (data.type === "notification" && settings.resumeCrafting) {
 			// Means the user has not manually stopped crafting:
 			if (/You completed your crafting queue and began (Battling|Fishing|Woodcutting|Mining|Stonecutting) automatically./.test(data.m)) {
-				if (vars.verbose) log("Crafting queue is empty. Refilling now")
+				if (settings.verbose) log("Crafting queue is empty. Refilling now")
 				fillCraftingQueue()
 			}
 		}
@@ -585,7 +592,7 @@ $(document).on("roa-ws:all", function(_, data) {
 
 			// Wait for roa-ws:page:gem_socket_to_item event and add a small pause, before the next iteration:
 			await eventListeners.waitFor("roa-ws:page:gem_socket_to_item")
-			await delay(vars.actionsDelay)
+			await delay(settings.actionsDelay)
 		}
 
 		vars.actionsPending = false
@@ -602,19 +609,19 @@ $(document).on("roa-ws:all", function(_, data) {
 	async function checkResults(_, data) {
 		data = data.results.p
 
-		if (vars.autoStamina && data.autos_remaining < vars.minStamina && !staminaCooldown) { // Stamina
-			if (vars.verbose) log("Replenishing stamina")
+		if (settings.autoStamina && data.autos_remaining < settings.minStamina && !vars.staminaCooldown) { // Stamina
+			if (settings.verbose) log("Replenishing stamina")
 			$("#replenishStamina").click()
-			staminaCooldown = true
+			vars.staminaCooldown = true
 			await delay(2500)
-			staminaCooldown = false
+			vars.staminaCooldown = false
 			return
 		}
 
 		// Actions that should always be performed go before this
 		if (vars.actionsPending) return
 
-		if (vars.autoQuests) { // Quests
+		if (settings.autoQuests) { // Quests
 			if (data.bq_info2?.c >= data.bq_info2.r) {
 				vars.questCompleting = "kill"
 			} else if (data.tq_info2?.c >= data.tq_info2.r) {
@@ -632,14 +639,14 @@ $(document).on("roa-ws:all", function(_, data) {
 				return
 			}
 		}
-		if (vars.autoHouse && data.can_build_house) { // Construction
+		if (settings.autoHouse && data.can_build_house) { // Construction
 			vars.actionsPending = true
 			$("li#housing").click()
 			await eventListeners.waitFor("roa-ws:page:house")
 			selectBuild()
 			return
 		}
-		if (vars.autoHarvestron && data.can_house_harvest) { // Harvestron
+		if (settings.autoHarvestron && data.can_house_harvest) { // Harvestron
 			vars.actionsPending = true
 			$("#harvestronNotifier")[0].click()
 			await eventListeners.waitFor("roa-ws:page:house_room_item")
@@ -678,8 +685,8 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @returns {string} Name of the Trade Skill
 	 */
 	function getTrade() {
-		for (const trade of Object.keys(vars.tradesList)) {
-			if (vars.tradesList[trade].includes(username.toLowerCase())) {
+		for (const trade of Object.keys(settings.tradesList)) {
+			if (settings.tradesList[trade].includes(vars.username.toLowerCase())) {
 				return trade
 			}
 		}
@@ -695,11 +702,11 @@ $(document).on("roa-ws:all", function(_, data) {
 	function changeTrade(_, data) {
 		const d = data.results
 		if (d.carvingTier > 2500 && !mainEvent) {
-			if (vars.verbose) log("Attacking gauntlet boss (carving tier)")
+			if (settings.verbose) log("Attacking gauntlet boss (carving tier)")
 			BUTTONS.battle.click()
-		} else if (d.time_remaining < vars.attackAt * 60) {
-			if (!isAlt || (isAlt && !mainEvent)) {
-				if (vars.verbose) log("Attacking gauntlet boss (time)")
+		} else if (d.time_remaining < settings.attackAt * 60) {
+			if (!vars.isAlt || (vars.isAlt && !mainEvent)) {
+				if (settings.verbose) log("Attacking gauntlet boss (time)")
 				BUTTONS.battle.click()
 			}
 		} else { // Don't execute the rest of the function
@@ -722,8 +729,8 @@ $(document).on("roa-ws:all", function(_, data) {
 		mainEvent = msgContent === "MainEvent"
 		gauntletInProgress = true
 
-		if (vars.verbose) log(`Joining ${mainEvent ? "main" : "regular"} gauntlet due to message #${msgID}`)
-		BUTTONS[mainTrade].click()
+		if (settings.verbose) log(`Joining ${mainEvent ? "main" : "regular"} gauntlet due to message #${msgID}`)
+		BUTTONS[vars.mainTrade].click()
 		eventListeners.toggle("roa-ws:event_action", changeTrade, true)
 
 		// If we are still tracking the same gauntlet after 16 minutes, stop tracking it:
@@ -739,7 +746,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @param {object} data Event data
 	 */
 	async function checkGauntletMessage(_, data) {
-		if (data.c_id === vars.eventChannelID) {
+		if (data.c_id === settings.eventChannelID) {
 			await delay(vars.startActionsDelay)
 			// Wait to see if the message is received together with a message of the day,
 			// which means it was only sent due to a chat reconnection, and we should not join the gauntlet.
@@ -773,19 +780,19 @@ $(document).on("roa-ws:all", function(_, data) {
 	/**
 	 * @async
 	 * @function toggleInterfaceChanges
-	 * @param {boolean} refresh Should be true when called by refreshVars and false otherwise
+	 * @param {boolean} refresh Should be true when called by refreshSettings and false otherwise
 	 */
 	async function toggleInterfaceChanges(refresh) {
 		// Request Currency Button:
-		if (vars.addRequestMoney && $("#betabot-request-currency")[0] === undefined) {
+		if (settings.addRequestMoney && $("#betabot-request-currency")[0] === undefined) {
 			$("#username").after(`<button id="betabot-request-currency"><a>Request Currency</a></button>`)
 			$("#betabot-request-currency").click(() => { port.postMessage({text: "requesting currency"}) })
-		} else if (vars.addRequestMoney === false && $("#betabot-request-currency")[0] !== undefined) {
+		} else if (settings.addRequestMoney === false && $("#betabot-request-currency")[0] !== undefined) {
 			$("#betabot-request-currency").remove()
 		}
 
 		// Make it easier to see what alt it is:
-		if (vars.addUsername) {
+		if (settings.addUsername) {
 			appendName()
 			keepUsernameVisible.observe($("#roomName")[0], {attributes: true, childList: true, subtree: true})
 		} else {
@@ -794,17 +801,17 @@ $(document).on("roa-ws:all", function(_, data) {
 		}
 
 		// Custom style:
-		const cssChanged = `data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}` !== $("#betabot-css")?.prop("href")
+		const cssChanged = `data:text/css;base64,${btoa(settings.css.addon + settings.css.custom)}` !== $("#betabot-css")?.prop("href")
 		if (cssChanged) { // If the code has changed, or if it was never injected
 			$("#betabot-css")?.remove() //only remove the element if it exists
 			// Decode CSS into base64 and use it as a link to avoid script injections:
-			$("head").append(`<link id="betabot-css" rel="stylesheet" href="data:text/css;base64,${btoa(vars.css.addon + vars.css.custom)}">`)
+			$("head").append(`<link id="betabot-css" rel="stylesheet" href="data:text/css;base64,${btoa(settings.css.addon + settings.css.custom)}">`)
 		}
 
 		// Remove Effects Box:
-		if (vars.removeEffects && $("#effectInfo")[0] !== undefined) {
+		if (settings.removeEffects && $("#effectInfo")[0] !== undefined) {
 			$("#effectInfo").remove()
-		} else if (vars.removeEffects === false && $("#effectInfo")[0] === undefined) {
+		} else if (settings.removeEffects === false && $("#effectInfo")[0] === undefined) {
 			$("#gauntletInfo").after(`
 			<div id="effectInfo" style="display: block;">
 				<div class="ui-element border2">
@@ -815,7 +822,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		}
 
 		// Option to build a specific item:
-		if (vars.addCustomBuild && $("#betabot-custom-build")[0] === undefined) {
+		if (settings.addCustomBuild && $("#betabot-custom-build")[0] === undefined) {
 			if (refresh) { // Don't activate immediately on page load
 				getCustomBuild()
 			} else {
@@ -823,35 +830,35 @@ $(document).on("roa-ws:all", function(_, data) {
 					getCustomBuild()
 				})
 			}
-		} else if (vars.addCustomBuild === false && $("#betabot-custom-build")[0] !== undefined) {
+		} else if (settings.addCustomBuild === false && $("#betabot-custom-build")[0] !== undefined) {
 			$("#betabot-custom-build").remove()
 		}
 
 		// Auto Gauntlets:
 		if (refresh) { // Don't activate immediately on page load
-			eventListeners.toggle("roa-ws:message", checkGauntletMessage, vars.joinGauntlets)
+			eventListeners.toggle("roa-ws:message", checkGauntletMessage, settings.joinGauntlets)
 		} else {
 			eventListeners.waitFor("roa-ws:motd").then(() => { // Start after a delay to avoid being triggered by old messages
-				eventListeners.toggle("roa-ws:message", checkGauntletMessage, vars.joinGauntlets)
+				eventListeners.toggle("roa-ws:message", checkGauntletMessage, settings.joinGauntlets)
 			})
 		}
 
 		// Auto Craft:
-		eventListeners.toggle("roa-ws:craft roa-ws:notification", checkCraftingQueue, vars.autoCraft)
+		eventListeners.toggle("roa-ws:craft roa-ws:notification", checkCraftingQueue, settings.autoCraft)
 		// Auto Stamina/Quests/House/Harvestron:
 		eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action",
-			checkResults, vars.autoStamina || vars.autoQuests || vars.autoHouse || vars.autoHarvestron)
+			checkResults, settings.autoStamina || settings.autoQuests || settings.autoHouse || settings.autoHarvestron)
 		// Socket Gem x5:
 		eventListeners.toggle(
 			"roa-ws:page:item_options roa-ws:page:gem_unsocket_from_item roa-ws:page:gem_unsocket_all_from_item roa-ws:page:gem_socket_to_item",
-			addSocket5Button, vars.addSocketX5)
+			addSocket5Button, settings.addSocketX5)
 
-		if (isAlt) { // Only run on alts
+		if (vars.isAlt) { // Only run on alts
 			// Spawn Gems For All Alts:
-			eventListeners.toggle("roa-ws:modalContent", addAltsSpawn, vars.addSpawnGems)
+			eventListeners.toggle("roa-ws:modalContent", addAltsSpawn, settings.addSpawnGems)
 
 			// Jump mobs:
-			if (vars.addJumpMobs && $("#betabot-mob-jump")[0] === undefined) {
+			if (settings.addJumpMobs && $("#betabot-mob-jump")[0] === undefined) {
 				$("#autoEnemy").after(`
 				<div class="mt10" id="betabot-mob-jump" style="display: block;">
 					<input id="betabot-mob-jump-number" type="number" size=1>
@@ -866,9 +873,9 @@ $(document).on("roa-ws:all", function(_, data) {
 						return
 					}
 					port.postMessage({text: "move to mob", number: number})
-					if (vars.verbose) log(`Requested to move all alts ${number} mobs up`)
+					if (settings.verbose) log(`Requested to move all alts ${number} mobs up`)
 				})
-			} else if (vars.addJumpMobs === false && $("#betabot-mob-jump")[0] !== undefined) {
+			} else if (settings.addJumpMobs === false && $("#betabot-mob-jump")[0] !== undefined) {
 				$("#betabot-mob-jump").remove()
 			}
 		}

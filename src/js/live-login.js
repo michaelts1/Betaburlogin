@@ -18,21 +18,15 @@ async function liveLogin() {
 	 * @type {runtimePort}
 	 */
 	const port = browser.runtime.connect({name: "live"})
+	const settings = await browser.storage.sync.get(["verbose", "addOpenTabs"])
 
-	/**
-	 * Stores the settings
-	 * @constant vars
-	 * @type {object}
-	 */
-	const vars = await browser.storage.sync.get(["verbose", "addOpenTabs"])
+	if (settings.verbose) log("Starting up (Live Login)")
 
-	if (vars.verbose) log("Starting up (Live Login)")
-
-	if (vars.addOpenTabs) {
+	if (settings.addOpenTabs) {
 		$("#login_notification").html(`<button id="open-alt-tabs">Open Beta Tabs</button>`)
 		$("#open-alt-tabs").click(() => {
 			port.postMessage({text: "open alt tabs"})
-			if (vars.verbose) log("Requesting background script to open alt tabs")
+			if (settings.verbose) log("Requesting background script to open alt tabs")
 		})
 	}
 }

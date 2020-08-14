@@ -18,13 +18,7 @@ async function betaLogin() {
 	 * @type {runtimePort}
 	 */
 	const port = browser.runtime.connect({name: "login"})
-
-	/**
-	 * Stores the settings
-	 * @constant vars
-	 * @type {object}
-	 */
-	const vars = await browser.storage.sync.get(["verbose", "addLoginAlts", "loginPassword"])
+	const settings = await browser.storage.sync.get(["verbose", "addLoginAlts", "loginPassword"])
 
 	/**
 	 * Logs in with a given username
@@ -35,21 +29,21 @@ async function betaLogin() {
 	 */
 	async function login(username) {
 		$("#acctname").val(username)
-		$("#password").val(await insecureCrypt.decrypt(vars.loginPassword, "betabot Totally-not-secure Super NOT secret key!"))
+		$("#password").val(await insecureCrypt.decrypt(settings.loginPassword, "betabot Totally-not-secure Super NOT secret key!"))
 		$("#login").click()
-		if (vars.verbose) log(`Logging in with username ${username}`)
+		if (settings.verbose) log(`Logging in with username ${username}`)
 		await delay(7500)
 		if ($("#login_notification").text() === "Your location is making too many requests too quickly.  Try again later.") {
-			if (vars.verbose) log("Rate limited, trying again")
+			if (settings.verbose) log("Rate limited, trying again")
 			login(username)
 		}
 	}
 
-	if (vars.verbose) log("Starting up (Beta Login)")
+	if (settings.verbose) log("Starting up (Beta Login)")
 
-	if (vars.addLoginAlts) {
+	if (settings.addLoginAlts) {
 		port.onMessage.addListener(message => {
-			if (vars.verbose) log(`Received message with text: ${message.text}`)
+			if (settings.verbose) log(`Received message with text: ${message.text}`)
 			if (message.text === "login") login(message.username)
 		})
 
