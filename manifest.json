@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Betabur Login",
-	"version": "1.0.0.0beta2",
+	"version": "1.0.0.0beta3",
 	"description": "Helps logging in with all the alts on beta.avabur.com",
 
 	"applications": {
@@ -23,15 +23,36 @@
 			],
 			"js": [
 				"src/js/jquery-3.5.1.min.js",
-				"src/js/insecure-crypt.js",
-				"src/js/event-listeners.js",
-				"src/js/content.js"
+				"src/js/helpers.js"
 			]
+		},
+		{
+			"matches": [
+				"https://www.avabur.com/",
+				"https://www.avabur.com/?expired=1"
+			],
+			"js": ["src/js/live-login.js"]
+		},
+		{
+			"matches": [
+				"https://beta.avabur.com/?expired=1",
+				"https://beta.avabur.com/"
+			],
+			"js": ["src/js/beta-login.js"]
+		},
+		{
+			"matches": [
+				"https://beta.avabur.com/game"
+			],
+			"js": ["src/js/beta-game.js"]
 		}
 	],
 
 	"background": {
-		"scripts": ["src/js/background.js"]
+		"scripts": [
+			"src/js/helpers.js",
+			"src/js/background.js"
+		]
 	},
 
 	"options_ui": {

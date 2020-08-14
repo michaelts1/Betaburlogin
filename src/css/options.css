@@ -21,7 +21,7 @@ body {
 	padding: 10px 0 0;
 }
 
-/* Appears in browser_action.html */
+/* Appears in browser-action.html */
 #settings-icon {
 	cursor: pointer;
 	float: right;
@@ -351,4 +351,8 @@ button:hover .circle {
 #reset-css {
 	margin: .5em .5em 0;
 	width: auto;
+}
+
+.hidden {
+	display: none !important;
 }

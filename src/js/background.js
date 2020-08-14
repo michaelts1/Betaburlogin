@@ -1,20 +1,28 @@
 "use strict"
+
+/**
+ * @file Background processes
+ */
+/**
+ * @namespace background
+ */
+
 /**
  * - Current settings version
  * - Bump this number when adding or removing settings, and when changing ADDON_CSS
  * - If the number isn't bumped, the new settings will only have effect on new users
- * @constant VARS_VERSION
+ * @constant SETTINGS_VERSION
  * @type {number}
- * @default
+ * @memberof background
  */
-const VARS_VERSION = 14
+const SETTINGS_VERSION = 15
 
 /**
  * - CSS code for Betaburlogin interface changes
- * - If you change ADDON_CSS value, make sure to also bump VARS_VERSION, or the changes will only have effect on new users
+ * - If you change ADDON_CSS value, make sure to also bump SETTINGS_VERSION, or the changes will only have effect on new users
  * @constant ADDON_CSS
  * @type {string}
- * @default
+ * @memberof background
  */
 const ADDON_CSS =
 `#betabot-clear-username {
@@ -51,7 +59,7 @@ const ADDON_CSS =
  * - Can be changed by the user in the Advanced section of the Settings page
  * @const CUSTOM_CSS
  * @type {string}
- * @default
+ * @memberof background
  */
 const CUSTOM_CSS =
 `#areaContent {
@@ -65,79 +73,59 @@ const CUSTOM_CSS =
 }`
 
 /**
- * See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/Port)
- * @typedef {object} runtimePort
- * @property {string=} name Name of the sender
- * @property {object} sender Contains information about the sender of the port
- * @property {object} onMessage
- * @property {function} onMessage.addListener
- * @property {function} onMessage.removeListener
- * @property {object} onDisconnect
- * @property {function} onDisconnect.addListener
- * @property {function} onDisconnect.removeListener
- * @property {function} postMessage
+ * @typedef {helpers.runtimePort} runtimePort
+ * @memberof background
  */
 
 /**
- * Live Login page port
- * @type {runtimePort}
+ * Stores the different ports
+ * @const ports
+ * @enum {null|runtimePort|runtimePort[]}
+ * @property {?runtimePort} live Live Login Page port
+ * @property {?runtimePort} main Beta game page main port
+ * @property {runtimePort[]} alts Beta game page alt ports
+ * @property {runtimePort[]} logins Beta Login Page port
+ * @memberof background
  */
-let live = null
+const ports = {
+	live  : null,
+	main  : null,
+	alts  : [],
+	logins: [],
+}
 
-/**
- * Main account on Beta Game page port
- * @type {runtimePort}
- */
-let main = null
-
-/**
- * Alt accounts on Beta Game page ports
- * @type {runtimePort[]}
- */
-const alts = []
-
-/**
- * Beta Login page ports
- * @type {runtimePort[]}
- */
-const logins = []
-
-/**
- * Stores the settings
- * @type {object}
- */
-let vars = null
+let settings = null
 
 browser.runtime.onConnect.addListener(async port => {
-	console.log(port.name, " connected")
+	log(port.name, " connected")
 	const mainUsername = (await browser.storage.sync.get("mainUsername")).mainUsername
 
 	// If live login
 	if (port.name === "live") {
-		live = port
-		live.onMessage.addListener(message => {
+		ports.live = port
+		port.onMessage.addListener(message => {
 			if (message.text === "open alt tabs") {
 				openTabs()
 			}
 		})
 	} else if (port.name === "login") { // Else, if beta login
-		logins.push(port)
+		ports.logins.push(port)
 		port.onMessage.addListener(message => {
 			if (message.text === "requesting login") {
 				login()
 			}
 		})
 	} else if (port.name === mainUsername) { // Else, if beta main
-		main = port
+		ports.main = port
 	} else { // Else, it's a beta alt
-		alts.push(port)
+		ports.alts.push(port)
 		port.onMessage.addListener(message => {
 			if (message.text === "move to mob") {
-				console.log(`moving all alts to mob ${message.number}`)
+				log(`moving all alts to mob ${message.number}`)
 				jumpMobs(message.number)
 			}
 			if (message.text === "spawnGem") {
-				console.log("${port.name} requested to spawn gems:", message)
+				log(`${port.name} requested to spawn gems: ${message}`)
 				spawnGem(message.type, message.splice, message.tier, message.amount)
 			}
 		})
@@ -146,7 +134,7 @@ browser.runtime.onConnect.addListener(async port => {
 	if (port.name !== "live" || port.name !== "login") { // If beta account
 		port.onMessage.addListener(message => {
 			if (message.text === "requesting currency") { // Send currency
-				console.log(`${port.name} requested currency`)
+				log(`${port.name} requested currency`)
 				sendCurrency(port.name)
 			}
 			if (message.text === "banner closed") {
@@ -158,17 +146,17 @@ browser.runtime.onConnect.addListener(async port => {
 	// When a port disconnects, forget it
 	port.onDisconnect.addListener( () => {
 		if (port.name === "live") {
-			live = null
+			ports.live = null
 		} else if (port.name === "login") {
-			const index = logins.indexOf(port)
-			if (index !== -1) logins.splice(index, 1)
+			const index = ports.logins.indexOf(port)
+			if (index !== -1) ports.logins.splice(index, 1)
 		} else if (port.name === mainUsername) {
-			main = null
+			ports.main = null
 		} else {
-			const index = alts.indexOf(port)
-			if (index !== -1) alts.splice(index, 1)
+			const index = ports.alts.indexOf(port)
+			if (index !== -1) ports.alts.splice(index, 1)
 		}
-		console.log(port.name, " disconnected!")
+		log(port.name, " disconnected!")
 	})
 })
 
@@ -176,19 +164,20 @@ browser.runtime.onConnect.addListener(async port => {
  * Opens Beta Login tabs according to the amount of alts
  * @async
  * @function openTabs
+ * @memberof background
  */
 async function openTabs() {
 	let containers = await browser.contextualIdentities.query({}) // Get all containers
-	if (vars.containers.useAll === false) {
-		containers = containers.filter(e => vars.containers.list.includes(e.name)) // Filter according to settings
+	if (settings.containers.useAll === false) {
+		containers = containers.filter(e => settings.containers.list.includes(e.name)) // Filter according to settings
 	}
 
 	let altsNumber = 0
-	if (vars.pattern === "unique") {
-		altsNumber += vars.namesList.length
+	if (settings.pattern === "unique") {
+		altsNumber += settings.namesList.length
 	}
 	else {
-		altsNumber += vars.altsNumber
+		altsNumber += settings.altsNumber
 	}
 
 	browser.tabs.create({url: "https://beta.avabur.com"})
@@ -206,17 +195,19 @@ async function openTabs() {
  * Logins all the currently open Beta Login pages
  * @async
  * @function login
+ * @memberof background
  */
 function login() {
 	/**
-	 * Sends a message to login[i] containing a username
+	 * Sends a message to a login port containing a username
 	 * @function sendLogin
-	 * @param {number} i Index of port inside logins[], that the message will be sent to
-	 * @param {string} username Username that will be sent to the port
+	 * @param {number} i Index of a port inside `ports.logins`
+	 * @param {string} username Username to send to the port
 	 * @private
+	 * @memberof background
 	 */
 	function sendLogin(i, username) {
-		logins[i].postMessage({
+		ports.logins[i].postMessage({
 			text: "login",
 			username: username,
 		})
@@ -228,6 +219,7 @@ function login() {
 	 * @param {number} num Latin numeral
 	 * @returns {string} String containing a roman numeral
 	 * @private
+	 * @memberof background
 	 */
 	function romanize(num) {
 		if (num === 0) return ""
@@ -249,15 +241,15 @@ function login() {
 		return str
 	}
 
-	if (vars.pattern === "roman") {
-		sendLogin(0, vars.mainAccount)
-		for (let i = 1; i <= vars.altsNumber; i++) {
-			sendLogin(i, vars.altBaseName+romanize(i))
+	if (settings.pattern === "roman") {
+		sendLogin(0, settings.mainAccount)
+		for (let i = 1; i <= settings.altsNumber; i++) {
+			sendLogin(i, settings.altBaseName+romanize(i))
 		}
-	} else if (vars.pattern === "unique") {
-		sendLogin(0, vars.mainAccount)
-		for (let i = 0; i < vars.namesList.length; i++) {
-			sendLogin(i+1, vars.namesList[i])
+	} else if (settings.pattern === "unique") {
+		sendLogin(0, settings.mainAccount)
+		for (let i = 0; i < settings.namesList.length; i++) {
+			sendLogin(i+1, settings.namesList[i])
 		}
 	}
 }
@@ -266,21 +258,23 @@ function login() {
  * Sends a message to all ports inside an array at once
  * @function sendMessage
  * @param {object} message A message to be sent
- * @param {runtimePort[]} [users=alts.concat(main)] An array of runtimePort objects. Defaults to alts.concat(main)
+ * @param {runtimePort[]} [users=[...ports.alts, ports.main]] An array of `runtimePort` objects. If omitted, defaults to `[...ports.alts, ports.main]`
+ * @memberof background
  */
-function sendMessage(message, users=alts.concat(main)) {
+function sendMessage(message, users=[...ports.alts, ports.main]) {
 	for (const user of users) {
 		user.postMessage(message)
 	}
 }
 
 /**
- * Spawns gems as specified by the parameters for all alts
+ * Spawns the gems specified by the parameters for all alts
  * @function spawnGem
  * @param {number} type ID of a gem type for the main gem
  * @param {number} splice ID of a gem type for the spliced gem
  * @param {number} tier
  * @param {number} amount
+ * @memberof background
  */
 function spawnGem(type, splice, tier, amount) {
 	sendMessage({
@@ -289,16 +283,17 @@ function spawnGem(type, splice, tier, amount) {
 		splice: splice,
 		tier  : tier,
 		amount: amount,
-	}, alts)
+	}, ports.alts)
 }
 
 /**
  * Jumps all alts to mob with a given ID
  * @function jumpMobs
  * @param {number} number Mob ID
+ * @memberof background
  */
 function jumpMobs(number) {
-	sendMessage({text: "jump mobs", number: number}, alts)
+	sendMessage({text: "jump mobs", number: number}, ports.alts)
 }
 
 /**
@@ -306,6 +301,7 @@ function jumpMobs(number) {
  * - Exact settings can be changed by the user under the Currency Send section of the Options Page.
  * @function sendCurrency
  * @param {string} name Username
+ * @memberof background
  */
 function sendCurrency(name) {
 	sendMessage({text: "send currency", recipient: name})
@@ -314,26 +310,26 @@ function sendCurrency(name) {
 /**
  * Closes the banners on all users
  * @function closeBanners
+ * @memberof background
  */
 function closeBanners(){
 	sendMessage({text: "close banners"})
 }
 
 /**
- * - Gets the settings from the storage, Using default values if none are saved, and then calls updateVars
- * - When adding or removing settings, make sure to also update updateVars accordingly and bump VARS_VERSION
+ * - Gets the settings from the storage, Using default values if none are saved, and then calls updateSettings
+ * - When adding or removing settings, make sure to also update updateSettings accordingly and bump SETTINGS_VERSION
  * @async
- * @function getVars
+ * @function getSettings
+ * @memberof background
  */
-async function getVars() {
-	vars = await browser.storage.sync.get()
+async function getSettings() {
+	settings = await browser.storage.sync.get()
 	// If not set, create with default settings
-	if (Object.keys(vars).length === 0) {
-		vars = {
-			version          : VARS_VERSION,
+	if (Object.keys(settings).length === 0) {
+		settings = {
+			version          : SETTINGS_VERSION,
 			eventChannelID   : 3202,
-			startActionsDelay: 1000,
-			buttonDelay      : 500,
 			wireFrequency    : 60,
 			dailyCrystals    : 50,
 			minCraftingQueue : 5,
@@ -345,7 +341,7 @@ async function getVars() {
 			autoHouse        : true,
 			autoCraft        : true,
 			autoHarvestron   : true,
-			joinEvents       : true,
+			joinGauntlets    : true,
 			addCustomBuild   : true,
 			addUsername      : true,
 			addJumpMobs      : true,
@@ -356,11 +352,9 @@ async function getVars() {
 			addSocketX5      : true,
 			resumeCrafting   : true,
 			removeEffects    : false,
-			actionsPending   : false,
 			autoWire         : false,
 			verbose          : false,
 			removeBanner     : false,
-			questCompleting  : null,
 			mainAccount      : "",
 			mainUsername     : "",
 			loginPassword    : "",
@@ -440,33 +434,35 @@ async function getVars() {
 				},
 			],
 		}
-		await browser.storage.sync.set(vars)
+		await browser.storage.sync.set(settings)
 	}
-	updateVars()
+	updateSettings()
 }
-getVars()
+getSettings()
 
 /**
  * Checks settings version and updates the settings if needed
  * @async
- * @function updateVars
+ * @function updateSettings
+ * @memberof background
  */
-async function updateVars() {
-	if (typeof vars.version !== "number") {
-		console.log("Resetting settings - current settings are too old")
+async function updateSettings() {
+	if (typeof settings.version !== "number") {
+		log("Resetting settings - current settings are too old")
 		await browser.storage.sync.clear()
-		getVars()
+		getSettings()
 		return
 	}
 
-	switch (vars.version) {
-		case VARS_VERSION:
+	switch (settings.version) {
+		case SETTINGS_VERSION:
 			break
-		case 2: /* eslint-disable no-fallthrough */ // Falling through to update properly
-			vars.pattern = ""
-			vars.namesList = []
+		/* eslint-disable no-fallthrough */ // Falling through to update properly
+		case 2:
+			settings.pattern = ""
+			settings.namesList = []
 		case 3:
-			vars.tradesList = {
+			settings.tradesList = {
 				fishing      : [],
 				woodcutting  : [],
 				mining       : [],
@@ -476,7 +472,7 @@ async function updateVars() {
 			}
 		case 4:
 			for (const trade of ["food", "wood", "iron", "stone"]) {
-				vars.currencySend.push({
+				settings.currencySend.push({
 					name : trade,
 					send : true,
 					minimumAmount : 100,
@@ -484,64 +480,78 @@ async function updateVars() {
 				})
 			}
 		case 5:
-			vars.autoWire = false
+			settings.autoWire = false
 		case 6:
-			vars.css = {
+			settings.css = {
 				addon : ADDON_CSS,
 				custom: CUSTOM_CSS,
 			},
-			vars.verbose = false
-			vars.containers = ["betabot-default"]
-			vars.wireFrequency = 60
+			settings.verbose = false
+			settings.containers = ["betabot-default"]
+			settings.wireFrequency = 60
 		case 7:
-			vars.containers = {
+			settings.containers = {
 				useAll: true,
 				list  : [],
 			}
-			if (vars.pattern === "romanCaps") vars.pattern = "roman" // Deprecated
+			if (settings.pattern === "romanCaps") settings.pattern = "roman" // Deprecated
 		case 8:
 			// Name Change:
-			vars.autoQuests = vars.doQuests
-			vars.autoHouse  = vars.doBuildingAndHarvy
-			vars.autoCraft  = vars.doCraftQueue
-			delete vars.doQuests
-			delete vars.doBuildingAndHarvy
-			delete vars.doCraftQueue
-			browser.storage.sync.remove(["doQuests", "doBuildingAndHarvy", "doCraftQueue",])
+			settings.autoQuests = settings.doQuests
+			settings.autoHouse  = settings.doBuildingAndHarvy
+			settings.autoCraft  = settings.doCraftQueue
+			delete settings.doQuests
+			delete settings.doBuildingAndHarvy
+			delete settings.doCraftQueue
+			browser.storage.sync.remove(["doQuests", "doBuildingAndHarvy", "doCraftQueue"])
 			// Other updates:
-			vars.minStamina      = 5
-			vars.autoStamina     = true
-			vars.joinEvents      = true
-			vars.addCustomBuild  = true
-			vars.addUsername     = true
-			vars.addJumpMobs     = true
-			vars.addSpawnGems    = true
-			vars.addRequestMoney = true
+			settings.minStamina      = 5
+			settings.autoStamina     = true
+			settings.joinEvents      = true
+			settings.addCustomBuild  = true
+			settings.addUsername     = true
+			settings.addJumpMobs     = true
+			settings.addSpawnGems    = true
+			settings.addRequestMoney = true
 		case 9:
-			vars.attackAt       = 3
-			vars.eventChannelID = 3202
-			vars.addOpenTabs    = true
-			vars.addLoginAlts   = true
-			vars.removeEffects  = true
+			settings.attackAt       = 3
+			settings.eventChannelID = 3202
+			settings.addOpenTabs    = true
+			settings.addLoginAlts   = true
+			settings.removeEffects  = true
 		case 10:
-			vars.resumeCrafting = false
+			settings.resumeCrafting = false
 		case 11:
-			vars.autoHarvestron = true
+			settings.autoHarvestron = true
 		case 12:
-			vars.removeBanner = false
+			settings.removeBanner = false
 		case 13:
-			vars.addSocketX5 = true
+			settings.addSocketX5 = true
+		case 14:
+			// Name Change:
+			settings.joinGauntlets = settings.joinEvents
+			delete settings.joinEvents
+			browser.storage.sync.remove("joinEvents")
+			// Deletions:
+			delete settings.buttonDelay
+			delete settings.actionsPending
+			delete settings.questCompleting
+			delete settings.startActionsDelay
+			browser.storage.sync.remove(["buttonDelay", "actionsPending", "questCompleting", "startActionsDelay"])
+			// Necessary due to algorithm change:
+			settings.loginPassword = ""
 		default:
-			if (vars.css.addon !== ADDON_CSS) {
-				vars.css.addon = ADDON_CSS
+			if (settings.css.addon !== ADDON_CSS) {
+				settings.css.addon = ADDON_CSS
 			}
-			vars.version = VARS_VERSION
-			browser.storage.sync.set(vars) /* eslint-enable no-fallthrough */
+			settings.version = SETTINGS_VERSION
+			browser.storage.sync.set(settings)
+		/* eslint-enable no-fallthrough */
 	}
 }
 
 browser.storage.onChanged.addListener(changes => {
-	getVars()
+	getSettings()
 
 	function objectEquals(object1, object2) { // https://stackoverflow.com/a/6713782
 		if (object1 === object2) return true
@@ -564,9 +574,9 @@ browser.storage.onChanged.addListener(changes => {
 	const keys   = Object.keys(changes)
 	for (let i = 0; i < Object.values(changes).length; i++) {
 		if (objectEquals(values[i].oldValue, values[i].newValue) === false) {
-			console.log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
+			log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
 		}
 	}
 })
 
-console.log("background script finished evaluating")
+log("background script finished evaluating")

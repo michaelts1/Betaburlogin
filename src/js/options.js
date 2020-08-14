@@ -1,16 +1,20 @@
 "use strict"
 
 /**
- * Stores the settings
- * @type {object}
+ * @file Options Page code
  */
-let vars = null
+/**
+ * @namespace options
+ */
+
+let settings = null
 
 /**
  * Abbreviates a number into short form (e.g. 10000 => 10K)
  * @function abbreviateNumber
  * @param {number} num
  * @returns {string} Short form number
+ * @memberof options
  */
 function abbreviateNumber(num) {
 	/**
@@ -19,6 +23,7 @@ function abbreviateNumber(num) {
 	 * @param {number} num
 	 * @returns {number}
 	 * @private
+	 * @memberof options
 	 */
 	const round = num => Math.round(num*1000)/1000
 
@@ -45,6 +50,7 @@ function abbreviateNumber(num) {
  * @function deabbreviateNumber
  * @param {string} input A string containing a short form number
  * @returns {number} Long form number
+ * @memberof options
  */
 function deabbreviateNumber (input) {
 	if (typeof input !== "string") return input
@@ -75,6 +81,7 @@ function deabbreviateNumber (input) {
  * @function displayMessage
  * @param {string} message A message to show to the user
  * @param {number} [time=2500] The amount of time (ms) that the message should be shown for. Defaults to 2500 ms
+ * @memberof options
  */
 function displayMessage(message, time=2500) {
 	$("#form-buttons-output").text(message)
@@ -89,136 +96,150 @@ function displayMessage(message, time=2500) {
  * Gets the settings from storage, and updates the displayed settings accordingly
  * @async
  * @function fillFields
+ * @memberof options
  */
 async function fillFields() {
-	vars = await browser.storage.sync.get()
-	if (browser.contextualIdentities === undefined) {
-		$(`.requires-containers`).html(`<td colspan="2">This feature requires Container Tabs. Please enable Container tabs in Browser Options -&gt; Tabs -&gt; Enable Container Tabs, and reload the page.</td>`)
-	} else {
-		fillContainers()
+	try {
+		settings = await browser.storage.sync.get()
+		if (browser.contextualIdentities === undefined) {
+			$(`.requires-containers`).html(`<td colspan="2">This feature requires Container Tabs. Please enable Container tabs in Browser Options -&gt; Tabs -&gt; Enable Container Tabs, and reload the page.</td>`)
+		} else {
+			fillContainers()
+		}
+
+		$("#pattern")           .val(settings.pattern)
+		$("#attack-at")         .val(settings.attackAt)
+		$("#name-list")         .val(settings.namesList.join(", "))
+		$("#custom-css")        .val(settings.css.custom)
+		$("#min-stamina")       .val(settings.minStamina)
+		$("#alts-number")       .val(settings.altsNumber)
+		$("#main-account")      .val(settings.mainAccount)
+		$("#main-username")     .val(settings.mainUsername)
+		$("#alt-base-name")     .val(settings.altBaseName)
+		$("#login-password")    .val(await insecureCrypt.decrypt(settings.loginPassword, "betabot Totally-not-secure Super NOT secret key!"))
+		$("#wire-frequency")    .val(settings.wireFrequency)
+		$("#daily-crystals")    .val(settings.dailyCrystals)
+		$("#event-channel-id")  .val(settings.eventChannelID)
+		$("#min-crafting-queue").val(settings.minCraftingQueue)
+
+		$("#verbose")          .prop("checked", settings.verbose)
+		$("#auto-wire")        .prop("checked", settings.autoWire)
+		$("#auto-house")       .prop("checked", settings.autoHouse)
+		$("#auto-craft")       .prop("checked", settings.autoCraft)
+		$("#append-name")      .prop("checked", settings.addUsername)
+		$("#auto-quests")      .prop("checked", settings.autoQuests)
+		$("#auto-stamina")     .prop("checked", settings.autoStamina)
+		$("#remove-banner")    .prop("checked", settings.removeBanner)
+		$("#add-socket-x5")    .prop("checked", settings.addSocketX5)
+		$("#add-open-tabs")    .prop("checked", settings.addOpenTabs)
+		$("#add-jump-mobs")    .prop("checked", settings.addJumpMobs)
+		$("#join-gauntlets")   .prop("checked", settings.joinGauntlets)
+		$("#remove-effects")   .prop("checked", settings.removeEffects)
+		$("#add-login-alts")   .prop("checked", settings.addLoginAlts)
+		$("#add-spawn-gems")   .prop("checked", settings.addSpawnGems)
+		$("#resume-crafting")  .prop("checked", settings.resumeCrafting)
+		$("#auto-harvestron")  .prop("checked", settings.autoHarvestron)
+		$("#containers-auto")  .prop("checked", settings.containers.useAll)
+		$("#add-custom-build") .prop("checked", settings.addCustomBuild)
+		$("#add-request-money").prop("checked", settings.addRequestMoney)
+
+		for (const currency of settings.currencySend) {
+			const name = currency.name.replace("_", "-")
+			$(`#${name}-keep`).val(abbreviateNumber(currency.keepAmount))
+			$(`#${name}-keep`).prop("title", currency.keepAmount)
+			$(`#${name}-send`).prop("checked", currency.send)
+		}
+
+		for (const trade of Object.keys(settings.tradesList)) {
+			$(`#${trade}`).val(settings.tradesList[trade].join(", "))
+		}
+
+		updatePrice()
+		displayAltFields()
+	} catch (error) {
+		displayMessage(`Error: ${error.message}`)
+		console.error(error)
 	}
-
-	$("#pattern")           .val(vars.pattern)
-	$("#attack-at")         .val(vars.attackAt)
-	$("#name-list")         .val(vars.namesList.join(", "))
-	$("#custom-css")        .val(vars.css.custom)
-	$("#min-stamina")       .val(vars.minStamina)
-	$("#alts-number")       .val(vars.altsNumber)
-	$("#main-account")      .val(vars.mainAccount)
-	$("#main-username")     .val(vars.mainUsername)
-	$("#alt-base-name")     .val(vars.altBaseName)
-	$("#login-password")    .val(insecureCrypt.decrypt(vars.loginPassword, "betabot Totally-not-secure Super NOT secret key!"))
-	$("#wire-frequency")    .val(vars.wireFrequency)
-	$("#daily-crystals")    .val(vars.dailyCrystals)
-	$("#event-channel-id")  .val(vars.eventChannelID)
-	$("#min-crafting-queue").val(vars.minCraftingQueue)
-
-	$("#verbose")          .prop("checked", vars.verbose)
-	$("#auto-wire")        .prop("checked", vars.autoWire)
-	$("#auto-house")       .prop("checked", vars.autoHouse)
-	$("#auto-craft")       .prop("checked", vars.autoCraft)
-	$("#join-events")      .prop("checked", vars.joinEvents)
-	$("#addUsername")      .prop("checked", vars.addUsername)
-	$("#auto-quests")      .prop("checked", vars.autoQuests)
-	$("#remove-banner")     .prop("checked", vars.removeBanner)
-	$("#auto-stamina")     .prop("checked", vars.autoStamina)
-	$("#add-socket-x5")    .prop("checked", vars.addSocketX5)
-	$("#add-open-tabs")    .prop("checked", vars.addOpenTabs)
-	$("#add-jump-mobs")    .prop("checked", vars.addJumpMobs)
-	$("#remove-effects")   .prop("checked", vars.removeEffects)
-	$("#add-login-alts")   .prop("checked", vars.addLoginAlts)
-	$("#add-spawn-gems")   .prop("checked", vars.addSpawnGems)
-	$("#resume-crafting")  .prop("checked", vars.resumeCrafting)
-	$("#auto-harvestron")  .prop("checked", vars.autoHarvestron)
-	$("#containers-auto")  .prop("checked", vars.containers.useAll)
-	$("#add-custom-build") .prop("checked", vars.addCustomBuild)
-	$("#add-request-money").prop("checked", vars.addRequestMoney)
-
-	for (const currency of vars.currencySend) {
-		const name = currency.name.replace("_", "-")
-		$(`#${name}-keep`).val(abbreviateNumber(currency.keepAmount))
-		$(`#${name}-keep`).prop("title", currency.keepAmount)
-		$(`#${name}-send`).prop("checked", currency.send)
-	}
-
-	for (const trade of Object.keys(vars.tradesList)) {
-		$(`#${trade}`).val(vars.tradesList[trade].join(", "))
-	}
-
-	updatePrice()
-	displayAltFields()
 }
 
 /**
  * Saves the displayed settings to storage
  * @async
  * @function saveChanges
+ * @memberof options
  */
 async function saveChanges() {
 	try {
 		if ($("#settings")[0].reportValidity() === false) {
 			const invalid = $(":invalid")[1] // First invalid field
 			const table = $("table").has(`#${invalid.id}`)[0].id // Containing table id
-			$(`#${table}-tab-button`).click() // Go to its tab
+			$(`#${table}-tab-button`).click() // Go to tab
 
 			console.error("Form is invalid: First invalid field found is", invalid)
 			setTimeout(() => {$("#settings")[0].reportValidity()})
 			throw new Error("Form is invalid")
 		}
 
-		vars.pattern        = $("#pattern").val()
-		vars.css.custom     = $("#custom-css").val()
-		vars.altBaseName    = $("#alt-base-name").val()
-		vars.mainAccount    = $("#main-account").val()
-		vars.mainUsername   = $("#main-username").val()
-		vars.wireFrequency  = $("#wire-frequency").val()
+		settings.pattern        = $("#pattern").val()
+		settings.css.custom     = $("#custom-css").val()
+		settings.altBaseName    = $("#alt-base-name").val()
+		settings.mainAccount    = $("#main-account").val()
+		settings.mainUsername   = $("#main-username").val()
+		settings.wireFrequency  = $("#wire-frequency").val()
 
-		vars.verbose           = $("#verbose").prop("checked")
-		vars.autoWire          = $("#auto-wire").prop("checked")
-		vars.autoHouse         = $("#auto-house").prop("checked")
-		vars.autoCraft         = $("#auto-craft").prop("checked")
-		vars.joinEvents        = $("#join-events").prop("checked")
-		vars.autoQuests        = $("#auto-quests").prop("checked")
-		vars.addSocketX5       = $("#add-socket-x5").prop("checked")
-		vars.autoStamina       = $("#auto-stamina").prop("checked")
-		vars.addJumpMobs       = $("#add-jump-mobs").prop("checked")
-		vars.addUsername       = $("#addUsername").prop("checked")
-		vars.addOpenTabs       = $("#add-open-tabs").prop("checked")
-		vars.removeBanner      = $("#remove-banner").prop("checked")
-		vars.addLoginAlts      = $("#add-login-alts").prop("checked")
-		vars.addSpawnGems      = $("#add-spawn-gems").prop("checked")
-		vars.removeEffects     = $("#remove-effects").prop("checked")
-		vars.resumeCrafting    = $("#resume-crafting").prop("checked")
-		vars.autoHarvestron    = $("#auto-harvestron").prop("checked")
-		vars.addCustomBuild    = $("#add-custom-build").prop("checked")
-		vars.addRequestMoney   = $("#add-request-money").prop("checked")
-		vars.containers.useAll = $("#containers-auto").prop("checked")
+		settings.verbose           = $("#verbose").prop("checked")
+		settings.autoWire          = $("#auto-wire").prop("checked")
+		settings.autoHouse         = $("#auto-house").prop("checked")
+		settings.autoCraft         = $("#auto-craft").prop("checked")
+		settings.autoQuests        = $("#auto-quests").prop("checked")
+		settings.addSocketX5       = $("#add-socket-x5").prop("checked")
+		settings.autoStamina       = $("#auto-stamina").prop("checked")
+		settings.addJumpMobs       = $("#add-jump-mobs").prop("checked")
+		settings.addUsername       = $("#append-name").prop("checked")
+		settings.addOpenTabs       = $("#add-open-tabs").prop("checked")
+		settings.removeBanner      = $("#remove-banner").prop("checked")
+		settings.addLoginAlts      = $("#add-login-alts").prop("checked")
+		settings.addSpawnGems      = $("#add-spawn-gems").prop("checked")
+		settings.joinGauntlets     = $("#join-gauntlets").prop("checked")
+		settings.removeEffects     = $("#remove-effects").prop("checked")
+		settings.resumeCrafting    = $("#resume-crafting").prop("checked")
+		settings.autoHarvestron    = $("#auto-harvestron").prop("checked")
+		settings.addCustomBuild    = $("#add-custom-build").prop("checked")
+		settings.addRequestMoney   = $("#add-request-money").prop("checked")
+		settings.containers.useAll = $("#containers-auto").prop("checked")
 
-		vars.attackAt         = parseInt($("#attack-at").val()) || 3
-		vars.altsNumber       = parseInt($("#alts-number").val()) || 0
-		vars.minStamina       = parseInt($("#min-stamina").val()) || 5
-		vars.dailyCrystals    = parseInt($("#daily-crystals").val()) || 0
-		vars.eventChannelID   = parseInt($("#event-channel-id").val()) || 3202
-		vars.minCraftingQueue = parseInt($("#min-crafting-queue").val()) || 0
+		settings.attackAt         = parseInt($("#attack-at").val()) || 3
+		settings.altsNumber       = parseInt($("#alts-number").val()) || 0
+		settings.minStamina       = parseInt($("#min-stamina").val()) || 5
+		settings.dailyCrystals    = parseInt($("#daily-crystals").val()) || 0
+		settings.eventChannelID   = parseInt($("#event-channel-id").val()) || 3202
+		settings.minCraftingQueue = parseInt($("#min-crafting-queue").val()) || 0
 
-		vars.containers.list = $("[name=containers]:checked").get().map(e => e.id) // Get id's of checked containers
+		settings.containers.list = $("[name=containers]:checked").get().map(e => e.id) // Get id's of checked containers
 
-		$("#name-list").val() === "" ? vars.namesList = [] : vars.namesList = $("#name-list").val().split(", ")
+		$("#name-list").val() === "" ? settings.namesList = [] : settings.namesList = $("#name-list").val().split(", ")
 
-		vars.loginPassword = insecureCrypt.encrypt($("#login-password").val(), "betabot Totally-not-secure Super NOT secret key!")
+		/**
+		 * **Note: DO NOT trust this encryption**. it's very weak and uses a public key for encryption.
+		 * There is a reason why there is still a warning about the password being saved in plain text.
+		 * @name notEncrypted
+		 * @memberof options
+		 */
 
-		for (const currency of vars.currencySend) {
+		settings.loginPassword = await insecureCrypt.encrypt($("#login-password").val(), "betabot Totally-not-secure Super NOT secret key!")
+
+		for (const currency of settings.currencySend) {
 			const name = currency.name.replace("_", "-")
 			const keepAmount = $(`#${name}-keep`).val() || 0
 			currency.keepAmount = deabbreviateNumber(keepAmount)
 			currency.send = $(`#${name}-send`).prop("checked")
 		}
 
-		for (const trade of Object.keys(vars.tradesList)) {
-			vars.tradesList[trade] = $(`#${trade}`).val().split(", ")
+		for (const trade of Object.keys(settings.tradesList)) {
+			settings.tradesList[trade] = $(`#${trade}`).val().split(", ")
 		}
 
-		await browser.storage.sync.set(vars)
+		await browser.storage.sync.set(settings)
 		fillFields()
 
 		displayMessage("Changes saved")
@@ -232,6 +253,7 @@ async function saveChanges() {
 /**
  * Reloads the settings from storage and updates the displayed settings
  * @function cancelChanges
+ * @memberof options
  */
 function cancelChanges() {
 	try {
@@ -247,6 +269,7 @@ function cancelChanges() {
 /**
  * Updates the displayed daily crystal prices
  * @function updatePrice
+ * @memberof options
  */
 function updatePrice() {
 	/**
@@ -255,6 +278,7 @@ function updatePrice() {
 	 * @param {number} n Number of daily crystals
 	 * @returns {number} Cost of daily crystals
 	 * @private
+	 * @memberof options
 	 */
 	const price = n => (n * (2 * 2000000 + (n - 1) * 1000000)) / 2
 	const number = parseInt($("#daily-crystals").val())
@@ -265,6 +289,7 @@ function updatePrice() {
 /**
  * Displays or hides the alt settings as needed
  * @function displayAltFields
+ * @memberof options
  */
 function displayAltFields() {
 	const value = $("#pattern").val()
@@ -284,9 +309,21 @@ function displayAltFields() {
 }
 
 /**
+ * Sets login-related settings as non-required/required
+ * @function loginChanged
+ * @memberof options
+ */
+function loginChanged() {
+	const checked = $("#add-login-alts").prop("checked")
+	$("#login .required")[`${checked ? "remove" : "add"}Class`]("hidden") // .removeClass() or .addClass(), respectively
+	$("#login input[size=15],#pattern").get().forEach(elm => elm.required = checked)
+}
+
+/**
  * Switches settings tab
  * @function changeTab
  * @param {event} event Click event object
+ * @memberof options
  */
 function changeTab(event) {
 	const tabID = event.target.id.replace("-tab-button", "")
@@ -306,6 +343,7 @@ function changeTab(event) {
 /**
  * Resets the code in the custom css textarea
  * @function resetCSS
+ * @memberof options
  */
 function resetCSS() {
 	$("#custom-css").val(
@@ -324,6 +362,7 @@ function resetCSS() {
  * Gets all the containers from and lists them to the user
  * @async
  * @function fillContainers
+ * @memberof options
  */
 async function fillContainers() {
 	const containers = await browser.contextualIdentities.query({}) // Get all containers
@@ -340,7 +379,7 @@ async function fillContainers() {
 		}
 	}
 
-	for (const container of vars.containers.list) { // Check all containers previously saved
+	for (const container of settings.containers.list) { // Check all containers previously saved
 		$(`#${container}`).prop("checked", true)
 	}
 }
@@ -350,7 +389,8 @@ $("#reset-css").click(resetCSS)
 $(".tab-button").click(changeTab)
 $("#save-changes").click(saveChanges)
 $("#cancel-changes").click(cancelChanges)
-$("#daily-crystals").on("input", updatePrice)
 $("#pattern").on("input", displayAltFields)
+$("#daily-crystals").on("input", updatePrice)
+$("#add-login-alts").on("input", loginChanged)
 
 browser.storage.onChanged.addListener(fillFields)

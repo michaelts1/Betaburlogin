@@ -1,35 +1,40 @@
 "use strict"
 
 /**
- * Stores the settings
- * @type {object}
+ * @file Browser action window code
  */
-let vars = null
+/**
+ * @namespace browser-action
+ */
+
+let settings = null
 
 /**
  * Gets the settings from the storage, and updates the displayed settings accordingly
  * @async
  * @function getVars
+ * @memberof browser-action
  */
 async function getVars() {
-	vars = await browser.storage.sync.get()
+	settings = await browser.storage.sync.get()
 
-	$("#auto-quests")    .prop("checked", vars.autoQuests)
-	$("#auto-house")     .prop("checked", vars.autoHouse)
-	$("#auto-craft")     .prop("checked", vars.autoCraft)
-	$("#auto-harvestron").prop("checked", vars.autoHarvestron)
+	$("#auto-quests")    .prop("checked", settings.autoQuests)
+	$("#auto-house")     .prop("checked", settings.autoHouse)
+	$("#auto-craft")     .prop("checked", settings.autoCraft)
+	$("#auto-harvestron").prop("checked", settings.autoHarvestron)
 }
 
 /**
  * Toggles a setting on/off, and saves the new value to the storage
  * @async
  * @function toggle
+ * @memberof browser-action
  */
 async function toggle(event) {
 	const id = event.target.id
 	const setting = id.replaceAll(/-(.)/g, (match, group1) => match.replace(match, group1.toUpperCase())) // auto-house => autoHouse
-	vars[setting] = $(`#${id}`).prop("checked")
-	await browser.storage.sync.set(vars)
+	settings[setting] = $(`#${id}`).prop("checked")
+	await browser.storage.sync.set(settings)
 }
 
 $(getVars)
