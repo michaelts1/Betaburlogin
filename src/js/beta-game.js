@@ -3,6 +3,7 @@
 /**
  * @file Code to run when on Beta Game page
  * @todo [Add] Set `buyCrystals()` to run shortly after page load
+ * @todo [Add] Add gauntlet vars to `vars`
  */
 /**
  * @namespace beta-game
@@ -70,7 +71,7 @@ async function betaGame() {
 
 		settings = await browser.storage.sync.get()
 		vars.isAlt = vars.username !== settings.mainUsername.toLowerCase()
-		vars.mainTrade = getTrade()
+		vars.mainTrade = getTrade(vars.username)
 
 		for (const wireRelated of ["wireFrequency", "mainUsername"]) { // If one of these has changed, reset autoWire
 			if (changes[wireRelated].oldValue !== changes[wireRelated].newValue) {
