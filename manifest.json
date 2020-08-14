@@ -65,7 +65,7 @@
 			"60": "src/images/betaburlogin.png"
 		},
 		"default_title": "Betabur Login",
-		"default_popup": "src/html/browser-action.js.html"
+		"default_popup": "src/html/browser_action.html"
 	},
 
 	"permissions": [
