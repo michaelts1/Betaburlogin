@@ -2,15 +2,6 @@
 
 /**
  * @file Defines helper functions for use in other files
- *
- * @todo [Test] Auto login
- * @todo [Test] checkEvent
- * @todo [Test] Auto Gauntlet
- * @todo [Test] getCustomBuild
- * @todo [Test] Separate settings from settings
- * @todo [Test] Options Page: Saving/loading passwords
- * @todo [Test] Functions with eventListeners.waitFor()
- * @todo [Test] Split each root function to it's own file, and modify manifest.json accordingly
  */
 /**
  * @namespace helpers

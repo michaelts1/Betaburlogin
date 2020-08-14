@@ -14,6 +14,31 @@
  * @memberof beta-game
  */
 async function betaGame() {
+	let settings = await browser.storage.sync.get()
+
+	/**
+	 * - Stores variables and constants to avoid polluting the global space
+	 * - Using a constructor to refer to `this.username`
+	 * @constant vars
+	 * @enum {any}
+	 * @memberof beta-game
+	 */
+	const vars = new function() {
+		this.username          = $("#username").text()
+		this.buttonDelay       = 500
+		this.startActionsDelay = 1000
+		this.questCompleting   = null
+		this.actionsPending    = false
+		this.staminaCooldown   = false
+		this.mainTrade         = getTrade(this.username)
+		this.isAlt             = this.username !== settings.mainUsername.toLowerCase()
+		this.autoWireID        = settings.autoWire ? setInterval(wire, settings.wireFrequency*60*1000, settings.mainUsername) : null
+	}
+
+	if (settings.verbose) {
+		log(`Starting up (Beta Game)\nUsername: ${vars.username}\nAlt: ${vars.isAlt ? "yes" : "no"}\nGauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\nAuto Wire: ${vars.autoWireID ? "on" : "off"}`)
+	}
+
 	/**
 	 * @typedef {helpers.runtimePort} runtimePort
 	 * @memberof beta-game
@@ -33,30 +58,6 @@ async function betaGame() {
 		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
 		if (message.text === "close banners") closeBanner()
 	})
-
-	let settings = await browser.storage.sync.get()
-
-	/**
-	 * Stores variables and constants to avoid polluting the global space
-	 * @constant vars
-	 * @enum {any}
-	 * @memberof beta-game
-	 */
-	const vars = {
-		startActionsDelay: 1000,
-		buttonDelay      : 500,
-		questCompleting  : null,
-		actionsPending   : false,
-		staminaCooldown  : false,
-		username         : $("#username").text(),
-		mainTrade        : getTrade(),
-		isAlt            : vars.username !== settings.mainUsername.toLowerCase(),
-		autoWireID       : settings.autoWire ? setInterval(wire, settings.wireFrequency*60*1000, settings.mainUsername) : null,
-	}
-
-	if (settings.verbose) {
-		log(`Starting up (Beta Game)\nUsername: ${vars.username}\nAlt: ${vars.isAlt ? "yes" : "no"}\nGauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\nAuto Wire: ${vars.autoWireID ? "on" : "off"}`)
-	}
 
 	/**
 	 * Loads new settings from storage
@@ -132,7 +133,7 @@ async function betaGame() {
 
 		const {data} = await eventListeners.waitFor("roa-ws:page:house_all_builds")
 		const items = []
-		data.data.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
+		data.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
 
 		// Create the dropdown list:
 		let select = `<div id="betabot-custom-build">Build a specific item:<select id="betabot-select-build"><option value="" selected>None (Build Fastest)</option>`
@@ -719,15 +720,16 @@ $(document).on("roa-ws:all", function(_, data) {
 	}
 
 	/**
-	 * - Gets the Trade Skill of this user
+	 * - Gets the Trade Skill of a user
 	 * - If the user's Trade Skill is not found, returns `"mining"`
 	 * @function getTrade
+	 * @param {string} username Username to search
 	 * @returns {string} Name of the Trade Skill
 	 * @memberof beta-game
 	 */
-	function getTrade() {
+	function getTrade(username) {
 		for (const trade of Object.keys(settings.tradesList)) {
-			if (settings.tradesList[trade].includes(vars.username.toLowerCase())) {
+			if (settings.tradesList[trade].includes(username.toLowerCase())) {
 				return trade
 			}
 		}

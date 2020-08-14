@@ -99,62 +99,67 @@ function displayMessage(message, time=2500) {
  * @memberof options
  */
 async function fillFields() {
-	settings = await browser.storage.sync.get()
-	if (browser.contextualIdentities === undefined) {
-		$(`.requires-containers`).html(`<td colspan="2">This feature requires Container Tabs. Please enable Container tabs in Browser Options -&gt; Tabs -&gt; Enable Container Tabs, and reload the page.</td>`)
-	} else {
-		fillContainers()
+	try {
+		settings = await browser.storage.sync.get()
+		if (browser.contextualIdentities === undefined) {
+			$(`.requires-containers`).html(`<td colspan="2">This feature requires Container Tabs. Please enable Container tabs in Browser Options -&gt; Tabs -&gt; Enable Container Tabs, and reload the page.</td>`)
+		} else {
+			fillContainers()
+		}
+
+		$("#pattern")           .val(settings.pattern)
+		$("#attack-at")         .val(settings.attackAt)
+		$("#name-list")         .val(settings.namesList.join(", "))
+		$("#custom-css")        .val(settings.css.custom)
+		$("#min-stamina")       .val(settings.minStamina)
+		$("#alts-number")       .val(settings.altsNumber)
+		$("#main-account")      .val(settings.mainAccount)
+		$("#main-username")     .val(settings.mainUsername)
+		$("#alt-base-name")     .val(settings.altBaseName)
+		$("#login-password")    .val(await insecureCrypt.decrypt(settings.loginPassword, "betabot Totally-not-secure Super NOT secret key!"))
+		$("#wire-frequency")    .val(settings.wireFrequency)
+		$("#daily-crystals")    .val(settings.dailyCrystals)
+		$("#event-channel-id")  .val(settings.eventChannelID)
+		$("#min-crafting-queue").val(settings.minCraftingQueue)
+
+		$("#verbose")          .prop("checked", settings.verbose)
+		$("#auto-wire")        .prop("checked", settings.autoWire)
+		$("#auto-house")       .prop("checked", settings.autoHouse)
+		$("#auto-craft")       .prop("checked", settings.autoCraft)
+		$("#append-name")      .prop("checked", settings.addUsername)
+		$("#auto-quests")      .prop("checked", settings.autoQuests)
+		$("#auto-stamina")     .prop("checked", settings.autoStamina)
+		$("#remove-banner")    .prop("checked", settings.removeBanner)
+		$("#add-socket-x5")    .prop("checked", settings.addSocketX5)
+		$("#add-open-tabs")    .prop("checked", settings.addOpenTabs)
+		$("#add-jump-mobs")    .prop("checked", settings.addJumpMobs)
+		$("#join-gauntlets")   .prop("checked", settings.joinGauntlets)
+		$("#remove-effects")   .prop("checked", settings.removeEffects)
+		$("#add-login-alts")   .prop("checked", settings.addLoginAlts)
+		$("#add-spawn-gems")   .prop("checked", settings.addSpawnGems)
+		$("#resume-crafting")  .prop("checked", settings.resumeCrafting)
+		$("#auto-harvestron")  .prop("checked", settings.autoHarvestron)
+		$("#containers-auto")  .prop("checked", settings.containers.useAll)
+		$("#add-custom-build") .prop("checked", settings.addCustomBuild)
+		$("#add-request-money").prop("checked", settings.addRequestMoney)
+
+		for (const currency of settings.currencySend) {
+			const name = currency.name.replace("_", "-")
+			$(`#${name}-keep`).val(abbreviateNumber(currency.keepAmount))
+			$(`#${name}-keep`).prop("title", currency.keepAmount)
+			$(`#${name}-send`).prop("checked", currency.send)
+		}
+
+		for (const trade of Object.keys(settings.tradesList)) {
+			$(`#${trade}`).val(settings.tradesList[trade].join(", "))
+		}
+
+		updatePrice()
+		displayAltFields()
+	} catch (error) {
+		displayMessage(`Error: ${error.message}`)
+		console.error(error)
 	}
-
-	$("#pattern")           .val(settings.pattern)
-	$("#attack-at")         .val(settings.attackAt)
-	$("#name-list")         .val(settings.namesList.join(", "))
-	$("#custom-css")        .val(settings.css.custom)
-	$("#min-stamina")       .val(settings.minStamina)
-	$("#alts-number")       .val(settings.altsNumber)
-	$("#main-account")      .val(settings.mainAccount)
-	$("#main-username")     .val(settings.mainUsername)
-	$("#alt-base-name")     .val(settings.altBaseName)
-	$("#login-password")    .val(await insecureCrypt.decrypt(settings.loginPassword, "betabot Totally-not-secure Super NOT secret key!"))
-	$("#wire-frequency")    .val(settings.wireFrequency)
-	$("#daily-crystals")    .val(settings.dailyCrystals)
-	$("#event-channel-id")  .val(settings.eventChannelID)
-	$("#min-crafting-queue").val(settings.minCraftingQueue)
-
-	$("#verbose")          .prop("checked", settings.verbose)
-	$("#auto-wire")        .prop("checked", settings.autoWire)
-	$("#auto-house")       .prop("checked", settings.autoHouse)
-	$("#auto-craft")       .prop("checked", settings.autoCraft)
-	$("#append-name")      .prop("checked", settings.addUsername)
-	$("#auto-quests")      .prop("checked", settings.autoQuests)
-	$("#auto-stamina")     .prop("checked", settings.autoStamina)
-	$("#remove-banner")    .prop("checked", settings.removeBanner)
-	$("#add-socket-x5")    .prop("checked", settings.addSocketX5)
-	$("#add-open-tabs")    .prop("checked", settings.addOpenTabs)
-	$("#add-jump-mobs")    .prop("checked", settings.addJumpMobs)
-	$("#join-gauntlets")   .prop("checked", settings.joinGauntlets)
-	$("#remove-effects")   .prop("checked", settings.removeEffects)
-	$("#add-login-alts")   .prop("checked", settings.addLoginAlts)
-	$("#add-spawn-gems")   .prop("checked", settings.addSpawnGems)
-	$("#resume-crafting")  .prop("checked", settings.resumeCrafting)
-	$("#auto-harvestron")  .prop("checked", settings.autoHarvestron)
-	$("#containers-auto")  .prop("checked", settings.containers.useAll)
-	$("#add-custom-build") .prop("checked", settings.addCustomBuild)
-	$("#add-request-money").prop("checked", settings.addRequestMoney)
-
-	for (const currency of settings.currencySend) {
-		const name = currency.name.replace("_", "-")
-		$(`#${name}-keep`).val(abbreviateNumber(currency.keepAmount))
-		$(`#${name}-keep`).prop("title", currency.keepAmount)
-		$(`#${name}-send`).prop("checked", currency.send)
-	}
-
-	for (const trade of Object.keys(settings.tradesList)) {
-		$(`#${trade}`).val(settings.tradesList[trade].join(", "))
-	}
-
-	updatePrice()
-	displayAltFields()
 }
 
 /**

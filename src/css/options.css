@@ -21,7 +21,7 @@ body {
 	padding: 10px 0 0;
 }
 
-/* Appears in browser-action.js.html */
+/* Appears in browser-action.html */
 #settings-icon {
 	cursor: pointer;
 	float: right;

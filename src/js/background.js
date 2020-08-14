@@ -125,7 +125,7 @@ browser.runtime.onConnect.addListener(async port => {
 				jumpMobs(message.number)
 			}
 			if (message.text === "spawnGem") {
-				log("${port.name} requested to spawn gems:", message)
+				log(`${port.name} requested to spawn gems: ${message}`)
 				spawnGem(message.type, message.splice, message.tier, message.amount)
 			}
 		})
@@ -538,6 +538,8 @@ async function updateSettings() {
 			delete settings.questCompleting
 			delete settings.startActionsDelay
 			browser.storage.sync.remove(["buttonDelay", "actionsPending", "questCompleting", "startActionsDelay"])
+			// Necessary due to algorithm change:
+			settings.loginPassword = ""
 		default:
 			if (settings.css.addon !== ADDON_CSS) {
 				settings.css.addon = ADDON_CSS
