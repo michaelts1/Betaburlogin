@@ -15,7 +15,7 @@
  * @type {number}
  * @memberof background
  */
-const SETTINGS_VERSION = 15
+const SETTINGS_VERSION = 16
 
 /**
  * - CSS code for Betaburlogin interface changes
@@ -333,6 +333,7 @@ async function getSettings() {
 			wireFrequency    : 60,
 			dailyCrystals    : 50,
 			minCraftingQueue : 5,
+			minCarvingQueue  : 5,
 			minStamina       : 5,
 			attackAt         : 3,
 			altsNumber       : 0,
@@ -340,6 +341,7 @@ async function getSettings() {
 			autoQuests       : true,
 			autoHouse        : true,
 			autoCraft        : true,
+			autoCarve        : true,
 			autoHarvestron   : true,
 			joinGauntlets    : true,
 			addCustomBuild   : true,
@@ -350,7 +352,7 @@ async function getSettings() {
 			addOpenTabs      : true,
 			addLoginAlts     : true,
 			addSocketX5      : true,
-			resumeCrafting   : true,
+			resumeQueue      : true,
 			removeEffects    : false,
 			autoWire         : false,
 			verbose          : false,
@@ -540,6 +542,14 @@ async function updateSettings() {
 			browser.storage.sync.remove(["buttonDelay", "actionsPending", "questCompleting", "startActionsDelay"])
 			// Necessary due to algorithm change:
 			settings.loginPassword = ""
+		case 15:
+			// Name Change:
+			settings.resumeQueue = settings.resumeCrafting
+			delete settings.resumeCrafting
+			browser.storage.sync.remove("resumeCrafting")
+			// Addition:
+			settings.autoCarve       = true
+			settings.minCarvingQueue = 5
 		default:
 			if (settings.css.addon !== ADDON_CSS) {
 				settings.css.addon = ADDON_CSS

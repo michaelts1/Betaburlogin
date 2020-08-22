@@ -2,8 +2,13 @@
 
 /**
  * @file Code to run when on Beta Game page
- * @todo [Add] Set `buyCrystals()` to run shortly after page load
- * @todo [Add] Add gauntlet vars to `vars`
+ * @todo [Add] Set `buyCrys()` to run shortly after page load
+ * @todo [Add] Add a second TS for event (switch after 5 minutes?)
+ * @todo [Test] Auto Carving
+ * @todo [Test] Browser Action
+ * @todo [Test] Resume on Finishing Queue
+ * @todo [Test] Add gauntlet vars to `vars`
+ * @todo [Test] Add SocketX5 also after "roa-ws:page:item_rename"
  */
 /**
  * @namespace beta-game
@@ -34,6 +39,10 @@ async function betaGame() {
 		this.mainTrade         = getTrade(this.username)
 		this.isAlt             = this.username !== settings.mainUsername.toLowerCase()
 		this.autoWireID        = settings.autoWire ? setInterval(wire, settings.wireFrequency*60*1000, settings.mainUsername) : null
+		this.gauntletID         = null
+		this.mainEvent          = false
+		this.gauntletInProgress = false
+		this.motdReceived       = false
 	}
 
 	if (settings.verbose) {
@@ -74,10 +83,10 @@ async function betaGame() {
 		vars.mainTrade = getTrade(vars.username)
 
 		for (const wireRelated of ["wireFrequency", "mainUsername"]) { // If one of these has changed, reset autoWire
-			if (changes[wireRelated].oldValue !== changes[wireRelated].newValue) {
+			if (changes[wireRelated]?.oldValue !== changes[wireRelated]?.newValue) {
 				clearInterval(vars.autoWireID)
 				vars.autoWireID = null
-				log("Resetting vars.autoWireID")
+				log("Resetting autoWire")
 			}
 		}
 
@@ -98,7 +107,7 @@ async function betaGame() {
 	// Event listeners that are currently always on (might change in the future) are below
 	// Event listeners that will be turned on/off as needed are inside toggleInterfaceChanges()
 
-	// Toggle motdReceived on for a short time after receiving motd message
+	// Toggle vars.motdReceived on for a short time after receiving motd message
 	eventListeners.toggle("roa-ws:motd", motd, true)
 	// Advice the user to update the options page after a name change:
 	eventListeners.toggle("roa-ws:page:username_change", usernameChange, true)
@@ -137,10 +146,8 @@ async function betaGame() {
 		data.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
 
 		// Create the dropdown list:
-		let select = `<div id="betabot-custom-build">Build a specific item:<select id="betabot-select-build"><option value="" selected>None (Build Fastest)</option>`
-		for (const item of items) {
-			select += `<option value="${item.i}">${item.n}</option>`
-		}
+		let select = `<div id="betabot-custom-build">Build a specific item: <select id="betabot-select-build"><option value="" selected>None (Build Fastest)</option>`
+		for (const item of items) select += `<option value="${item.i}">${item.n}</option>`
 		$("#houseQuickBuildWrapper").append(select + "</select></div>")
 
 		$("#modalBackground, #modal2Wrapper").prop("style", "") // Return to normal
@@ -573,7 +580,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		await eventListeners.waitFor("roa-ws:page:house_room_item")
 		await delay(vars.buttonDelay)
 		$("#craftingItemLevelMax").click()
-		$("#craftingQuality").val(0) // Set to poor quality
+		$("#craftingQuality").val(0)
 		$("#craftingJobFillQueue").attr("checked", "true")
 
 		await delay(vars.buttonDelay)
@@ -599,6 +606,51 @@ $(document).on("roa-ws:all", function(_, data) {
 			if (/You completed your crafting queue and began (Battling|Fishing|Woodcutting|Mining|Stonecutting) automatically./.test(data.m)) {
 				if (settings.verbose) log("Crafting queue is empty. Refilling now")
 				fillCraftingQueue()
+			}
+		}
+	}
+
+	/**
+	 * Fills the carving queue
+	 * @async
+	 * @function fillCarvingQueue
+	 * @memberof beta-game
+	 */
+	async function fillCarvingQueue() {
+		if (vars.actionsPending) return
+
+		vars.actionsPending = true
+		await delay(vars.startActionsDelay)
+		$(".carvingBenchLink")[0].click()
+
+		await eventListeners.waitFor("roa-ws:page:house_room_item")
+		await delay(vars.buttonDelay)
+		$("#carvingItemLevel").val( $("#carvingItemLevel option:last").val() )
+		$("#carvingJobCountMax").click()
+
+		await delay(vars.buttonDelay)
+		$("#carvingJobStart").click()
+
+		await eventListeners.waitFor("roa-ws:page:carve_item")
+		completeTask()
+	}
+
+	/**
+	 * Checks whether or not the carving queue should be filled
+	 * @function checkCarvingQueue
+	 * @param {event} _ Placeholder parameter
+	 * @param {object} data Event data
+	 * @memberof beta-game
+	 */
+	function checkCarvingQueue(_, data) {
+		if (data.type === "carve" && data.results.a.cq < settings.minCarvingQueue) {
+			if (settings.verbose) log(`There are less than ${settings.minCarvingQueue} gems in the carving queue. Refilling now`)
+			fillCarvingQueue()
+		} else if (data.type === "notification" && settings.resumeCrafting) {
+			// Means the user has not manually stopped carving:
+			if (/You completed your carving queue and began (Battling|Fishing|Woodcutting|Mining|Stonecutting) automatically./.test(data.m)) {
+				if (settings.verbose) log("Carving queue is empty. Refilling now")
+				fillCarvingQueue()
 			}
 		}
 	}
@@ -699,10 +751,6 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @name "Auto Gauntlet Credits"
 	 * @memberof beta-game
 	 */
-	let gauntletID         = null
-	let mainEvent          = false
-	let gauntletInProgress = false
-	let motdReceived       = false
 
 	/**
 	 * Enum for the gauntlet buttons
@@ -745,12 +793,12 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	function changeTrade(_, data) {
-		const d = data.results
-		if (d.carvingTier > 2500 && !mainEvent) {
+		data = data.results
+		if (data.carvingTier > 2500 && !vars.mainEvent) {
 			if (settings.verbose) log("Attacking gauntlet boss (carving tier)")
 			BUTTONS.battle.click()
-		} else if (d.time_remaining < settings.attackAt * 60) {
-			if (!vars.isAlt || (vars.isAlt && !mainEvent)) {
+		} else if (data.time_remaining < settings.attackAt * 60) {
+			if (!vars.isAlt || (vars.isAlt && !vars.mainEvent)) {
 				if (settings.verbose) log("Attacking gauntlet boss (time)")
 				BUTTONS.battle.click()
 			}
@@ -769,19 +817,19 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	async function joinGauntlet(msgContent, msgID) {
-		if (gauntletID === msgID || gauntletInProgress || !["InitEvent", "MainEvent"].includes(msgContent)) return
+		if (vars.gauntletID === msgID || vars.gauntletInProgress || !["InitEvent", "MainEvent"].includes(msgContent)) return
 
-		gauntletID = msgID
-		mainEvent = msgContent === "MainEvent"
-		gauntletInProgress = true
+		vars.gauntletID = msgID
+		vars.mainEvent = msgContent === "MainEvent"
+		vars.gauntletInProgress = true
 
-		if (settings.verbose) log(`Joining ${mainEvent ? "main" : "regular"} gauntlet due to message #${msgID}`)
+		if (settings.verbose) log(`Joining ${vars.mainEvent ? "main" : "regular"} gauntlet due to message #${msgID}`)
 		BUTTONS[vars.mainTrade].click()
 		eventListeners.toggle("roa-ws:event_action", changeTrade, true)
 
 		// If we are still tracking the same gauntlet after 16 minutes, stop tracking it:
 		await delay(16*60*1000)
-		if (gauntletID === msgID) finishGauntlet()
+		if (vars.gauntletID === msgID) finishGauntlet()
 	}
 
 	/**
@@ -797,22 +845,22 @@ $(document).on("roa-ws:all", function(_, data) {
 			await delay(vars.startActionsDelay)
 			// Wait to see if the message is received together with a message of the day,
 			// which means it was only sent due to a chat reconnection, and we should not join the gauntlet.
-			if (motdReceived === false) {
+			if (vars.motdReceived === false) {
 				joinGauntlet(data.m, data.m_id)
 			}
 		}
 	}
 
 	/**
-	 * Sets motdReceived to true for a short time after receiving a message of the day
+	 * Sets vars.motdReceived to true for a short time after receiving a message of the day
 	 * @async
 	 * @function motd
 	 * @memberof beta-game
 	 */
 	async function motd() {
-		motdReceived = true
+		vars.motdReceived = true
 		await delay(vars.startActionsDelay * 5)
-		motdReceived = false
+		vars.motdReceived = false
 	}
 
 	/**
@@ -821,8 +869,8 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	function finishGauntlet() {
-		mainEvent = false
-		gauntletInProgress = false
+		vars.mainEvent = false
+		vars.gauntletInProgress = false
 		eventListeners.toggle("roa-ws:event_action", changeTrade, false)
 	}
 
@@ -895,12 +943,14 @@ $(document).on("roa-ws:all", function(_, data) {
 
 		// Auto Craft:
 		eventListeners.toggle("roa-ws:craft roa-ws:notification", checkCraftingQueue, settings.autoCraft)
+		// Auto Carve:
+		eventListeners.toggle("roa-ws:carve roa-ws:notification", checkCarvingQueue, settings.autoCarve)
 		// Auto Stamina/Quests/House/Harvestron:
 		eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action",
 			checkResults, settings.autoStamina || settings.autoQuests || settings.autoHouse || settings.autoHarvestron)
 		// Socket Gem x5:
 		eventListeners.toggle(
-			"roa-ws:page:item_options roa-ws:page:gem_unsocket_from_item roa-ws:page:gem_unsocket_all_from_item roa-ws:page:gem_socket_to_item",
+			"roa-ws:page:" + ["item_options", "gem_unsocket_from_item", "gem_unsocket_all_from_item", "gem_socket_to_item", "item_rename"].join(" roa-ws:page:"),
 			addSocket5Button, settings.addSocketX5)
 
 		if (vars.isAlt) { // Only run on alts

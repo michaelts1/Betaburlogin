@@ -65,9 +65,14 @@ header {
 }
 
 /* Form Contents */
+
 #settings {
-	margin: 7.5em 0 0;
+	height: 65vh;
+	margin: 7.5em auto auto;
+	overflow-y: auto;
+	width: 28em;
 }
+
 .tab {
 	display: none;
 }
@@ -195,7 +200,6 @@ td {
 }
 
 .options-page table {
-	margin: 2em auto auto;
 	table-layout: fixed;
 	width: 27em;
 }
@@ -230,6 +234,7 @@ td {
 }
 
 /* Tooltips */
+
 .warning,
 .info {
 	float: right;
@@ -297,6 +302,7 @@ td {
 }
 
 /* Buttons */
+
 #form-buttons {
 	display: flex;
 	justify-content: center;
