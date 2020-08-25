@@ -3,7 +3,7 @@
 /**
  * @file Code to run when on Beta Game page
  * @todo [Add] Set `buyCrys()` to run shortly after page load
- * @todo [Add] Add a second TS for event (switch after 5 minutes?)
+ * @todo [Add] "Reset To Default" settings button
  * @todo [Test] Auto Carving
  * @todo [Test] Browser Action
  * @todo [Test] Resume on Finishing Queue
@@ -579,6 +579,7 @@ $(document).on("roa-ws:all", function(_, data) {
 
 		await eventListeners.waitFor("roa-ws:page:house_room_item")
 		await delay(vars.buttonDelay)
+		$("#craftingVetoUnselectAll").click()
 		$("#craftingItemLevelMax").click()
 		$("#craftingQuality").val(0)
 		$("#craftingJobFillQueue").attr("checked", "true")
