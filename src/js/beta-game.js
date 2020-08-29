@@ -3,12 +3,7 @@
 /**
  * @file Code to run when on Beta Game page
  * @todo [Add] Set `buyCrys()` to run shortly after page load
- * @todo [Add] "Reset To Default" settings button
- * @todo [Test] Auto Carving
- * @todo [Test] Browser Action
- * @todo [Test] Resume on Finishing Queue
- * @todo [Test] Add gauntlet vars to `vars`
- * @todo [Test] Add SocketX5 also after "roa-ws:page:item_rename"
+ * @todo [Add] Detect connecting port container id using `port.sender.tab.cookieStoreId`
  */
 /**
  * @namespace beta-game
@@ -24,7 +19,7 @@ async function betaGame() {
 
 	/**
 	 * - Stores variables and constants to avoid polluting the global space
-	 * - Using a constructor to refer to `this.username`
+	 * - Using a constructor to refer to `this.username` during initialization
 	 * @constant vars
 	 * @enum {any}
 	 * @memberof beta-game
@@ -81,6 +76,7 @@ async function betaGame() {
 		settings = await browser.storage.sync.get()
 		vars.isAlt = vars.username !== settings.mainUsername.toLowerCase()
 		vars.mainTrade = getTrade(vars.username)
+		vars.actionsPending = false
 
 		for (const wireRelated of ["wireFrequency", "mainUsername"]) { // If one of these has changed, reset autoWire
 			if (changes[wireRelated]?.oldValue !== changes[wireRelated]?.newValue) {
@@ -570,8 +566,6 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	async function fillCraftingQueue() {
-		if (vars.actionsPending) return
-
 		vars.actionsPending = true
 		await delay(vars.startActionsDelay)
 		// For some weird reason, .click() does not work here ¯\_(ツ)_/¯
@@ -599,6 +593,8 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	function checkCraftingQueue(_, data) {
+		if (vars.actionsPending) return
+
 		if (data.type === "craft" && data.results.a.cq < settings.minCraftingQueue) {
 			if (settings.verbose) log(`There are less than ${settings.minCraftingQueue} items in the crafting queue. Refilling now`)
 			fillCraftingQueue()
@@ -618,15 +614,14 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	async function fillCarvingQueue() {
-		if (vars.actionsPending) return
-
 		vars.actionsPending = true
 		await delay(vars.startActionsDelay)
 		$(".carvingBenchLink")[0].click()
 
 		await eventListeners.waitFor("roa-ws:page:house_room_item")
 		await delay(vars.buttonDelay)
-		$("#carvingItemLevel").val( $("#carvingItemLevel option:last").val() )
+		$("#carvingItemLevel").val($("#carvingItemLevel option:last").val())
+		$("#carvingType").val(65535)
 		$("#carvingJobCountMax").click()
 
 		await delay(vars.buttonDelay)
@@ -644,6 +639,8 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	function checkCarvingQueue(_, data) {
+		if (vars.actionsPending) return
+
 		if (data.type === "carve" && data.results.a.cq < settings.minCarvingQueue) {
 			if (settings.verbose) log(`There are less than ${settings.minCarvingQueue} gems in the carving queue. Refilling now`)
 			fillCarvingQueue()

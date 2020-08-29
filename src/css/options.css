@@ -154,6 +154,11 @@ input[name=containers],
 	margin: .5em;
 }
 
+#reset-div {
+	display: flex;
+	justify-content: center;
+}
+
 #daily-crystals-text {
 	color: var(--input-text-color);
 	text-align: center;
@@ -202,6 +207,10 @@ td {
 .options-page table {
 	table-layout: fixed;
 	width: 27em;
+}
+
+#browser-action {
+	width: 190px
 }
 
 #general-col-1 {width: 60%;}
@@ -356,7 +365,10 @@ button:hover .circle {
 
 #reset-css {
 	margin: .5em .5em 0;
-	width: auto;
+}
+
+#reset-settings {
+	margin: .5em 0;
 }
 
 .hidden {

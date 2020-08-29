@@ -569,21 +569,6 @@
 							<input id="verbose" type="checkbox" size="15">
 						</td>
 					</tr>
-					<tr>
-						<td>
-							<label for="custom-css">CSS Styles</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Betaburlogin will add some CSS code to make the game look better. If you want, you can change that code here."></span>
-						</td>
-						<td>
-							<div id="css-div">
-								<textarea id="custom-css" spellcheck="false" autocomplete="off" rows="10" cols="22"></textarea>
-								<button id="reset-css" type="button">
-									<span class="circle"></span>
-									<span>Reset to default</span>
-								</button>
-							</div>
-						</td>
-					</tr>
 					<tr id="containers-tr" class="requires-containers">
 						<td>
 							Containers
@@ -602,6 +587,35 @@
 						</td>
 						<td>
 							<input id="event-channel-id" pattern="^\d+$" placeholder="Channel ID" size="15">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="custom-css">CSS Styles</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Betaburlogin will add some CSS code to make the game look better. If you want, you can change that code here."></span>
+						</td>
+						<td>
+							<div id="css-div">
+								<textarea id="custom-css" spellcheck="false" autocomplete="off" rows="10" cols="22"></textarea>
+								<button id="reset-css" type="button">
+									<span class="circle"></span>
+									<span>Reset CSS Styles</span>
+								</button>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Reset Settings
+							<span class="info" role="img" aria-label="info" data-tooltip="Reset all settings to default values"></span>
+						</td>
+						<td>
+							<div id="reset-div">
+								<button id="reset-settings" type="button">
+									<span class="circle"></span>
+									<span>Reset Settings</span>
+								</button>
+							</div>
 						</td>
 					</tr>
 				</tbody>

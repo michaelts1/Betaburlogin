@@ -10,7 +10,7 @@
 /**
  * - Current settings version
  * - Bump this number when adding or removing settings, and when changing ADDON_CSS
- * - If the number isn't bumped, the new settings will only have effect on new users
+ * - If the number isn't bumped, the new settings will only have effect after resetting settings
  * @constant SETTINGS_VERSION
  * @type {number}
  * @memberof background
@@ -19,7 +19,7 @@ const SETTINGS_VERSION = 16
 
 /**
  * - CSS code for Betaburlogin interface changes
- * - If you change ADDON_CSS value, make sure to also bump SETTINGS_VERSION, or the changes will only have effect on new users
+ * - If you change ADDON_CSS value, make sure to also bump SETTINGS_VERSION
  * @constant ADDON_CSS
  * @type {string}
  * @memberof background
@@ -241,13 +241,19 @@ function login() {
 		return str
 	}
 
+	/*
+	for (const port of ports.logins) {
+		const i = port.sender.tab.cookieStoreId
+	}
+	const container = port.sender.tab.cookieStoreId //e.g. `firefox-default`, `firefox-container-13`, etc
+	*/
+
+	sendLogin(0, settings.mainAccount)
 	if (settings.pattern === "roman") {
-		sendLogin(0, settings.mainAccount)
 		for (let i = 1; i <= settings.altsNumber; i++) {
 			sendLogin(i, settings.altBaseName+romanize(i))
 		}
 	} else if (settings.pattern === "unique") {
-		sendLogin(0, settings.mainAccount)
 		for (let i = 0; i < settings.namesList.length; i++) {
 			sendLogin(i+1, settings.namesList[i])
 		}
