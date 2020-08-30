@@ -120,14 +120,17 @@ async function fillFields() {
 		$("#wire-frequency")    .val(settings.wireFrequency)
 		$("#daily-crystals")    .val(settings.dailyCrystals)
 		$("#event-channel-id")  .val(settings.eventChannelID)
+		$("#min-carving-queue") .val(settings.minCarvingQueue)
 		$("#min-crafting-queue").val(settings.minCraftingQueue)
 
 		$("#verbose")          .prop("checked", settings.verbose)
 		$("#auto-wire")        .prop("checked", settings.autoWire)
 		$("#auto-house")       .prop("checked", settings.autoHouse)
 		$("#auto-craft")       .prop("checked", settings.autoCraft)
+		$("#auto-carve")       .prop("checked", settings.autoCarve)
 		$("#append-name")      .prop("checked", settings.addUsername)
 		$("#auto-quests")      .prop("checked", settings.autoQuests)
+		$("#resume-queue")     .prop("checked", settings.resumeQueue)
 		$("#auto-stamina")     .prop("checked", settings.autoStamina)
 		$("#remove-banner")    .prop("checked", settings.removeBanner)
 		$("#add-socket-x5")    .prop("checked", settings.addSocketX5)
@@ -137,7 +140,6 @@ async function fillFields() {
 		$("#remove-effects")   .prop("checked", settings.removeEffects)
 		$("#add-login-alts")   .prop("checked", settings.addLoginAlts)
 		$("#add-spawn-gems")   .prop("checked", settings.addSpawnGems)
-		$("#resume-crafting")  .prop("checked", settings.resumeCrafting)
 		$("#auto-harvestron")  .prop("checked", settings.autoHarvestron)
 		$("#containers-auto")  .prop("checked", settings.containers.useAll)
 		$("#add-custom-build") .prop("checked", settings.addCustomBuild)
@@ -180,30 +182,33 @@ async function saveChanges() {
 			throw new Error("Form is invalid")
 		}
 
-		settings.pattern        = $("#pattern").val()
-		settings.css.custom     = $("#custom-css").val()
-		settings.altBaseName    = $("#alt-base-name").val()
-		settings.mainAccount    = $("#main-account").val()
-		settings.mainUsername   = $("#main-username").val()
-		settings.wireFrequency  = $("#wire-frequency").val()
+		settings.pattern         = $("#pattern").val()
+		settings.css.custom      = $("#custom-css").val()
+		settings.altBaseName     = $("#alt-base-name").val()
+		settings.mainAccount     = $("#main-account").val()
+		settings.mainUsername    = $("#main-username").val()
+		settings.wireFrequency   = $("#wire-frequency").val()
+		settings.minCarvingQueue = $("#min-carving-queue").val()
 
 		settings.verbose           = $("#verbose").prop("checked")
 		settings.autoWire          = $("#auto-wire").prop("checked")
 		settings.autoHouse         = $("#auto-house").prop("checked")
 		settings.autoCraft         = $("#auto-craft").prop("checked")
+		settings.autoCarve         = $("#auto-carve").prop("checked")
 		settings.autoQuests        = $("#auto-quests").prop("checked")
 		settings.addSocketX5       = $("#add-socket-x5").prop("checked")
 		settings.autoStamina       = $("#auto-stamina").prop("checked")
 		settings.addJumpMobs       = $("#add-jump-mobs").prop("checked")
 		settings.addUsername       = $("#append-name").prop("checked")
 		settings.addOpenTabs       = $("#add-open-tabs").prop("checked")
+		settings.resumeQueue       = $("#resume-queue").prop("checked")
 		settings.removeBanner      = $("#remove-banner").prop("checked")
 		settings.addLoginAlts      = $("#add-login-alts").prop("checked")
 		settings.addSpawnGems      = $("#add-spawn-gems").prop("checked")
 		settings.joinGauntlets     = $("#join-gauntlets").prop("checked")
 		settings.removeEffects     = $("#remove-effects").prop("checked")
-		settings.resumeCrafting    = $("#resume-crafting").prop("checked")
 		settings.autoHarvestron    = $("#auto-harvestron").prop("checked")
+		settings.resumeQueue       = $("#resume-queue").prop("checked")
 		settings.addCustomBuild    = $("#add-custom-build").prop("checked")
 		settings.addRequestMoney   = $("#add-request-money").prop("checked")
 		settings.containers.useAll = $("#containers-auto").prop("checked")
@@ -384,11 +389,29 @@ async function fillContainers() {
 	}
 }
 
+/**
+ * Resets all settings to default values
+ * @async
+ * @function resetSettings
+ * @memberof options
+ */
+async function resetSettings() {
+	if(window.confirm("Are you sure you want to reset ALL settings?") === false) return
+
+	// Don't update settings before reloading:
+	browser.storage.onChanged.removeListener(fillFields)
+	await browser.storage.sync.clear()
+	log("Resetting settings")
+
+	location.reload()
+}
+
 $(fillFields)
 $("#reset-css").click(resetCSS)
 $(".tab-button").click(changeTab)
 $("#save-changes").click(saveChanges)
 $("#cancel-changes").click(cancelChanges)
+$("#reset-settings").click(resetSettings)
 $("#pattern").on("input", displayAltFields)
 $("#daily-crystals").on("input", updatePrice)
 $("#add-login-alts").on("input", loginChanged)

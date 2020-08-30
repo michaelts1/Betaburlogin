@@ -48,14 +48,6 @@
 					</tr>
 					<tr>
 						<td>
-							<label for="min-stamina">Minimum Stamina</label>
-						</td>
-						<td>
-							<input id="min-stamina" pattern="^\d+$" placeholder="Minimum Stamina" size=15>
-						</td>
-					</tr>
-					<tr>
-						<td>
 							<label for="auto-quests">Auto Quests</label>
 							<span class="info" role="img" aria-label="info" data-tooltip="Automatically complete and start quests."></span>
 						</td>
@@ -101,6 +93,32 @@
 					</tr>
 					<tr>
 						<td>
+							<label for="auto-carve">Auto Carve</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="While carving, automatically fill the carving queue when under the minimum."></span>
+						</td>
+						<td>
+							<input id="auto-carve" type="checkbox">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="resume-queue">Resume on Finishing Queue</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Automatically start crafting/carving again after finishing the queue.&#10;&#10;Sometimes needed since auto crafting/carving might not work after disconnects. If this setting is on, the addon will resume crafting/carving even after disconnects.&#10;&#10;Will only work if Auto Craft/Auto Carve is also on, respectively."></span>
+						</td>
+						<td>
+							<input id="resume-queue" type="checkbox">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="min-stamina">Minimum Stamina</label>
+						</td>
+						<td>
+							<input id="min-stamina" pattern="^\d+$" placeholder="Minimum Stamina" size=15>
+						</td>
+					</tr>
+					<tr>
+						<td>
 							<label for="min-crafting-queue">Minimum Crafting Queue Items</label>
 						</td>
 						<td>
@@ -109,11 +127,10 @@
 					</tr>
 					<tr>
 						<td>
-							<label for="resume-crafting">Craft on Finishing Queue</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Automatically start crafting again after finishing the queue.&#10;&#10;Sometimes needed since auto crafting might not work after disconnects. If this setting is on, the addon will resume crafting even after disconnects.&#10;&#10;Will only work if Auto Craft is also on."></span>
+							<label for="min-carving-queue">Minimum Carving Queue Items</label>
 						</td>
 						<td>
-							<input id="resume-crafting" type="checkbox">
+							<input id="min-carving-queue" pattern="^\d+$" placeholder="Minimum Queue" size=15>
 						</td>
 					</tr>
 					<tr>
@@ -552,21 +569,6 @@
 							<input id="verbose" type="checkbox" size="15">
 						</td>
 					</tr>
-					<tr>
-						<td>
-							<label for="custom-css">CSS Styles</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Betaburlogin will add some CSS code to make the game look better. If you want, you can change that code here."></span>
-						</td>
-						<td>
-							<div id="css-div">
-								<textarea id="custom-css" spellcheck="false" autocomplete="off" rows="10" cols="22"></textarea>
-								<button id="reset-css" type="button">
-									<span class="circle"></span>
-									<span>Reset to default</span>
-								</button>
-							</div>
-						</td>
-					</tr>
 					<tr id="containers-tr" class="requires-containers">
 						<td>
 							Containers
@@ -585,6 +587,35 @@
 						</td>
 						<td>
 							<input id="event-channel-id" pattern="^\d+$" placeholder="Channel ID" size="15">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="custom-css">CSS Styles</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Betaburlogin will add some CSS code to make the game look better. If you want, you can change that code here."></span>
+						</td>
+						<td>
+							<div id="css-div">
+								<textarea id="custom-css" spellcheck="false" autocomplete="off" rows="10" cols="22"></textarea>
+								<button id="reset-css" type="button">
+									<span class="circle"></span>
+									<span>Reset CSS Styles</span>
+								</button>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Reset Settings
+							<span class="info" role="img" aria-label="info" data-tooltip="Reset all settings to default values"></span>
+						</td>
+						<td>
+							<div id="reset-div">
+								<button id="reset-settings" type="button">
+									<span class="circle"></span>
+									<span>Reset Settings</span>
+								</button>
+							</div>
 						</td>
 					</tr>
 				</tbody>

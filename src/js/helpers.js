@@ -154,6 +154,9 @@ const insecureCrypt = {
 			str[i] = decrypt ? str[i] - keyAtIndex : str[i] + keyAtIndex
 		}
 
+		// Make sure there are no negative numbers in the array (a result of incorrect key)
+		str = str.map(e => e < 0 ? 0 : e)
+
 		// Convert to unencrypted string
 		str = String.fromCodePoint(...str)
 
