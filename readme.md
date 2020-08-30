@@ -6,6 +6,7 @@ Firefox addon to allow automation in [Avabur's beta server](https://beta.avabur.
 * Automatic events
 * Automatic quests
 * Automatic stamina
+* Automatic carving
 * Automatic crafting
 * Automatic Harvestron
 * Automatic construction
