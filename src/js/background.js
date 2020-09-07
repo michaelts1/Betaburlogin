@@ -172,13 +172,7 @@ async function openTabs() {
 		containers = containers.filter(e => settings.containers.list.includes(e.name)) // Filter according to settings
 	}
 
-	let altsNumber = 0
-	if (settings.pattern === "unique") {
-		altsNumber += settings.namesList.length
-	}
-	else {
-		altsNumber += settings.altsNumber
-	}
+	const altsNumber = settings.pattern === "unique" ? settings.namesList.length : settings.altsNumber
 
 	browser.tabs.create({url: "https://beta.avabur.com"})
 	for (let i = 0; i < Math.min(containers.length, altsNumber); i++) {
@@ -198,21 +192,6 @@ async function openTabs() {
  * @memberof background
  */
 function login() {
-	/**
-	 * Sends a message to a login port containing a username
-	 * @function sendLogin
-	 * @param {number} i Index of a port inside `ports.logins`
-	 * @param {string} username Username to send to the port
-	 * @private
-	 * @memberof background
-	 */
-	function sendLogin(i, username) {
-		ports.logins[i].postMessage({
-			text: "login",
-			username: username,
-		})
-	}
-
 	/**
 	 * Converts a Latin numeral to Roman numeral (e.g. 9 => "IX")
 	 * @function romanize
@@ -241,12 +220,27 @@ function login() {
 		return str
 	}
 
-	/*
-	for (const port of ports.logins) {
-		const i = port.sender.tab.cookieStoreId
+	/**
+	 * Sends a message to a login port containing a username
+	 * @function sendLogin
+	 * @param {number} i Index of a port inside `ports.logins`
+	 * @param {string} username Username to send to the port
+	 * @private
+	 * @memberof background
+	 */
+	function sendLogin(i, username) {
+		ports.logins[i].postMessage({
+			text: "login",
+			username: username,
+		})
 	}
-	const container = port.sender.tab.cookieStoreId //e.g. `firefox-default`, `firefox-container-13`, etc
-	*/
+
+	// Sort `ports.logins` to get a consistent login order (For example, `firefox-default` will always login with the main account):
+	ports.logins = ports.logins.sort((el1, el2) => {
+		const n1 = parseInt(el1.sender.tab.cookieStoreId.match(/\d+/)) || 0
+		const n2 = parseInt(el2.sender.tab.cookieStoreId.match(/\d+/)) || 0
+		return n1 - n2
+	})
 
 	sendLogin(0, settings.mainAccount)
 	if (settings.pattern === "roman") {
