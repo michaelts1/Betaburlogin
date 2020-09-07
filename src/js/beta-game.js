@@ -3,7 +3,7 @@
 /**
  * @file Code to run when on Beta Game page
  * @todo [Add] Set `buyCrys()` to run shortly after page load
- * @todo [Add] Detect connecting port container id using `port.sender.tab.cookieStoreId`
+ * @todo [Test] Detect connecting login ports based on their container id (using `port.sender.tab.cookieStoreId`)
  */
 /**
  * @namespace beta-game
