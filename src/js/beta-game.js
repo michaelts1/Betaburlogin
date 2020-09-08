@@ -3,6 +3,7 @@
 /**
  * @file Code to run when on Beta Game page
  * @todo [Add] Set `buyCrys()` to run shortly after page load
+ * @todo [Add] Update `ports.main` and `ports.alts` after changing `settings.mainUsername`
  * @todo [Test] Detect connecting login ports based on their container id (using `port.sender.tab.cookieStoreId`)
  */
 /**
@@ -951,31 +952,29 @@ $(document).on("roa-ws:all", function(_, data) {
 			"roa-ws:page:" + ["item_options", "gem_unsocket_from_item", "gem_unsocket_all_from_item", "gem_socket_to_item", "item_rename"].join(" roa-ws:page:"),
 			addSocket5Button, settings.addSocketX5)
 
-		if (vars.isAlt) { // Only run on alts
-			// Spawn Gems For All Alts:
-			eventListeners.toggle("roa-ws:modalContent", addAltsSpawn, settings.addSpawnGems)
+		// Spawn Gems For All Alts:
+		eventListeners.toggle("roa-ws:modalContent", addAltsSpawn, vars.isAlt && settings.addSpawnGems)
 
-			// Jump mobs:
-			if (settings.addJumpMobs && $("#betabot-mob-jump")[0] === undefined) {
-				$("#autoEnemy").after(`
-				<div class="mt10" id="betabot-mob-jump" style="display: block;">
-					<input id="betabot-mob-jump-number" type="number" size=1>
-					<input id="betabot-mob-jump-button" type="button" value="Jump Mobs">
-				</div>`)
+		// Jump mobs:
+		if (vars.isAlt && settings.addJumpMobs && $("#betabot-mob-jump")[0] === undefined) {
+			$("#autoEnemy").after(`
+			<div class="mt10" id="betabot-mob-jump" style="display: block;">
+				<input id="betabot-mob-jump-number" type="number" size=1>
+				<input id="betabot-mob-jump-button" type="button" value="Jump Mobs">
+			</div>`)
 
-				$("#betabot-mob-jump-button").click(() => {
-					const number = parseInt($("#enemyList>option:selected").val()) + parseInt($("#betabot-mob-jump-number").val())
-					const maxNumber = parseInt($(`#enemyList>option:last-child`).val())
-					if (number > maxNumber) {
-						$("#areaName").text("The mob you chose is not in the list!")
-						return
-					}
-					port.postMessage({text: "move to mob", number: number})
-					if (settings.verbose) log(`Requested to move all alts ${number} mobs up`)
-				})
-			} else if (settings.addJumpMobs === false && $("#betabot-mob-jump")[0] !== undefined) {
-				$("#betabot-mob-jump").remove()
-			}
+			$("#betabot-mob-jump-button").click(() => {
+				const number = parseInt($("#enemyList>option:selected").val()) + parseInt($("#betabot-mob-jump-number").val())
+				const maxNumber = parseInt($(`#enemyList>option:last-child`).val())
+				if (number > maxNumber) {
+					$("#areaName").text("The mob you chose is not in the list!")
+					return
+				}
+				port.postMessage({text: "move to mob", number: number})
+				if (settings.verbose) log(`Requested to move all alts ${number} mobs up`)
+			})
+		} else if ((!vars.isAlt || settings.addJumpMobs === false) && $("#betabot-mob-jump")[0] !== undefined) {
+			$("#betabot-mob-jump").remove()
 		}
 	}
 	toggleInterfaceChanges(false)
