@@ -4,6 +4,7 @@
  * @file Code to run when on Beta Game page
  * @todo [Add] Set `buyCrys()` to run shortly after page load
  * @todo [Add] Update `ports.main` and `ports.alts` after changing `settings.mainUsername`
+ * @todo [Add] Only add Socket x5 if the button doesn't exist already
  * @todo [Test] Detect connecting login ports based on their container id (using `port.sender.tab.cookieStoreId`)
  */
 /**
@@ -949,7 +950,9 @@ $(document).on("roa-ws:all", function(_, data) {
 			checkResults, settings.autoStamina || settings.autoQuests || settings.autoHouse || settings.autoHarvestron)
 		// Socket Gem x5:
 		eventListeners.toggle(
-			"roa-ws:page:" + ["item_options", "gem_unsocket_from_item", "gem_unsocket_all_from_item", "gem_socket_to_item", "item_rename"].join(" roa-ws:page:"),
+			"roa-ws:page:" +
+			["item_options", "gem_unsocket_from_item", "gem_unsocket_all_from_item", "gem_socket_to_item", "item_rename", "item_own"]
+				.join(" roa-ws:page:"),
 			addSocket5Button, settings.addSocketX5)
 
 		// Spawn Gems For All Alts:
