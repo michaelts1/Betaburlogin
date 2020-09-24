@@ -15,7 +15,7 @@
  * @type {number}
  * @memberof background
  */
-const SETTINGS_VERSION = 16
+const SETTINGS_VERSION = 17
 
 /**
  * - CSS code for Betaburlogin interface changes
@@ -97,27 +97,30 @@ const ports = {
 let settings = null
 
 browser.runtime.onConnect.addListener(async port => {
-	log(port.name, " connected")
-	const mainUsername = (await browser.storage.sync.get("mainUsername")).mainUsername
+	// Split `name` back to name and role
+	const [name, role] = port.name.split(" ")
+	port.name = name
+	port.role = role
 
-	// If live login
-	if (port.name === "live") {
+	log(`${port.role}${port.name ? ` (${port.name})` : ""} connected`)
+
+	if (port.role === "live") { // If live login
 		ports.live = port
 		port.onMessage.addListener(message => {
 			if (message.text === "open alt tabs") {
 				openTabs()
 			}
 		})
-	} else if (port.name === "login") { // Else, if beta login
+	} else if (port.role === "login") { // Else, if beta login
 		ports.logins.push(port)
 		port.onMessage.addListener(message => {
 			if (message.text === "requesting login") {
 				login()
 			}
 		})
-	} else if (port.name === mainUsername) { // Else, if beta main
+	} else if (port.role === "main") { // Else, if beta main
 		ports.main = port
-	} else { // Else, it's a beta alt
+	} else if (port.role === "alt") { // Else, if beta alt
 		ports.alts.push(port)
 		port.onMessage.addListener(message => {
 			if (message.text === "move to mob") {
@@ -131,7 +134,7 @@ browser.runtime.onConnect.addListener(async port => {
 		})
 	}
 
-	if (port.name !== "live" || port.name !== "login") { // If beta account
+	if (["main", "alt"].includes(port.role)) { // If beta account
 		port.onMessage.addListener(message => {
 			if (message.text === "requesting currency") { // Send currency
 				log(`${port.name} requested currency`)
@@ -145,18 +148,18 @@ browser.runtime.onConnect.addListener(async port => {
 
 	// When a port disconnects, forget it
 	port.onDisconnect.addListener( () => {
-		if (port.name === "live") {
+		if (port.role === "live") {
 			ports.live = null
-		} else if (port.name === "login") {
+		} else if (port.role === "login") {
 			const index = ports.logins.indexOf(port)
 			if (index !== -1) ports.logins.splice(index, 1)
-		} else if (port.name === mainUsername) {
+		} else if (port.role === "main") {
 			ports.main = null
-		} else {
+		} else if (port.role === "alt") {
 			const index = ports.alts.indexOf(port)
 			if (index !== -1) ports.alts.splice(index, 1)
 		}
-		log(port.name, " disconnected!")
+		log(`${port.role}${port.name ? ` (${port.name})` : ""} disconnected`)
 	})
 })
 
@@ -377,7 +380,10 @@ async function getSettings() {
 			},
 			css: {
 				addon : ADDON_CSS,
-				custom: CUSTOM_CSS,
+				custom: {
+					code: CUSTOM_CSS,
+					default: CUSTOM_CSS,
+				},
 			},
 			currencySend: [
 				{
@@ -550,10 +556,27 @@ async function updateSettings() {
 			// Addition:
 			settings.autoCarve       = true
 			settings.minCarvingQueue = 5
+		case 16:
+			settings.css.custom = {
+				code: settings.css.custom,
+				default: CUSTOM_CSS,
+			}
 		default:
+			// Update internal CSS:
 			if (settings.css.addon !== ADDON_CSS) {
 				settings.css.addon = ADDON_CSS
 			}
+			// Update external CSS, but only if the user didn't modify it:
+			if (settings.css.custom.default !== CUSTOM_CSS) {
+				// If the the code is equal to the previous version code, update it:
+				if (settings.css.custom.code === settings.css.custom.default) {
+					settings.css.custom.code = CUSTOM_CSS
+				}
+				// Update the previous version default to the new default
+				settings.css.custom.default = CUSTOM_CSS
+			}
+			// Update settings version
+			log(`Updated settings from version ${settings.version} to version ${SETTINGS_VERSION}`)
 			settings.version = SETTINGS_VERSION
 			browser.storage.sync.set(settings)
 		/* eslint-enable no-fallthrough */

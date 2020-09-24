@@ -23,7 +23,7 @@ async function liveLogin() {
 	 * @type {runtimePort}
 	 * @memberof live-login
 	 */
-	const port = browser.runtime.connect({name: "live"})
+	const port = browser.runtime.connect({name: " live"})
 	const settings = await browser.storage.sync.get(["verbose", "addOpenTabs"])
 
 	if (settings.verbose) log("Starting up (Live Login)")

@@ -110,7 +110,7 @@ async function fillFields() {
 		$("#pattern")           .val(settings.pattern)
 		$("#attack-at")         .val(settings.attackAt)
 		$("#name-list")         .val(settings.namesList.join(", "))
-		$("#custom-css")        .val(settings.css.custom)
+		$("#custom-css")        .val(settings.css.custom.code)
 		$("#min-stamina")       .val(settings.minStamina)
 		$("#alts-number")       .val(settings.altsNumber)
 		$("#main-account")      .val(settings.mainAccount)
@@ -183,11 +183,11 @@ async function saveChanges() {
 		}
 
 		settings.pattern         = $("#pattern").val()
-		settings.css.custom      = $("#custom-css").val()
 		settings.altBaseName     = $("#alt-base-name").val()
 		settings.mainAccount     = $("#main-account").val()
 		settings.mainUsername    = $("#main-username").val()
 		settings.wireFrequency   = $("#wire-frequency").val()
+		settings.css.custom.code = $("#custom-css").val()
 		settings.minCarvingQueue = $("#min-carving-queue").val()
 
 		settings.verbose           = $("#verbose").prop("checked")
@@ -287,7 +287,7 @@ function updatePrice() {
 	 */
 	const price = n => (n * (2 * 2000000 + (n - 1) * 1000000)) / 2
 	const number = parseInt($("#daily-crystals").val())
-	$("#daily-crystals-price").text(abbreviateNumber(price(number)))
+	$("#daily-crystals-price").text(abbreviateNumber(price(number) || 0))
 	$("#daily-crystals + div").prop("title", Intl.NumberFormat().format(price(number)) )
 }
 
@@ -351,16 +351,7 @@ function changeTab(event) {
  * @memberof options
  */
 function resetCSS() {
-	$("#custom-css").val(
-		`#areaContent {
-	height: 350px;
-}
-#questInfo {
-	font-size: 0.95em;
-}
-.navSection li {
-	line-height: 25px;
-}`)
+	$("#custom-css").val(settings.css.custom.default)
 }
 
 /**

@@ -23,7 +23,7 @@ async function betaLogin() {
 	 * @type {runtimePort}
 	 * @memberof beta-login
 	 */
-	const port = browser.runtime.connect({name: "login"})
+	const port = browser.runtime.connect({name: " login"})
 	const settings = await browser.storage.sync.get(["verbose", "addLoginAlts", "loginPassword"])
 
 	/**
