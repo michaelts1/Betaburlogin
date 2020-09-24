@@ -3,9 +3,8 @@
 /**
  * @file Code to run when on Beta Game page
  * @todo [Add] Set `buyCrys()` to run shortly after page load
+ * @todo [Add] Store settings separately instead of using one object
  * @todo [Add] Update `ports.main` and `ports.alts` after changing `settings.mainUsername`
- * @todo [Add] Only add Socket x5 if the button doesn't exist already
- * @todo [Test] Detect connecting login ports based on their container id (using `port.sender.tab.cookieStoreId`)
  */
 /**
  * @namespace beta-game
@@ -27,19 +26,19 @@ async function betaGame() {
 	 * @memberof beta-game
 	 */
 	const vars = new function() {
-		this.username          = $("#username").text()
-		this.buttonDelay       = 500
-		this.startActionsDelay = 1000
-		this.questCompleting   = null
-		this.actionsPending    = false
-		this.staminaCooldown   = false
-		this.mainTrade         = getTrade(this.username)
-		this.isAlt             = this.username !== settings.mainUsername.toLowerCase()
-		this.autoWireID        = settings.autoWire ? setInterval(wire, settings.wireFrequency*60*1000, settings.mainUsername) : null
+		this.buttonDelay        = 500
+		this.startActionsDelay  = 1000
+		this.questCompleting    = null
 		this.gauntletID         = null
 		this.mainEvent          = false
 		this.gauntletInProgress = false
 		this.motdReceived       = false
+		this.actionsPending     = false
+		this.staminaCooldown    = false
+		this.username           = $("#username").text()
+		this.mainTrade          = getTrade(this.username)
+		this.isAlt              = this.username !== settings.mainUsername.toLowerCase()
+		this.autoWireID         = settings.autoWire ? setInterval(wire, settings.wireFrequency*60*1000, settings.mainUsername) : null
 	}
 
 	if (settings.verbose) {
@@ -56,7 +55,7 @@ async function betaGame() {
 	 * @type {runtimePort}
 	 * @memberof beta-game
 	 */
-	const port = browser.runtime.connect({name: vars.username})
+	const port = browser.runtime.connect({name: vars.username + " " + (vars.isAlt ? "alt" : "main")})
 	port.onMessage.addListener(message => {
 		if (settings.verbose) log("Received message:", message)
 
@@ -225,7 +224,7 @@ async function betaGame() {
 	 * @memberof beta-game
 	 */
 	function closeBanner() {
-		if ($("#close_general_notification") === undefined) return // Don't run if the banner is already closed
+		if ($("#close_general_notification")[0] === undefined) return // Don't run if the banner is already closed
 		$("#close_general_notification")[0].click()
 		if (settings.verbose) log("Banner closed")
 	}
@@ -661,8 +660,10 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	function addSocket5Button() {
-		$("#socketThisGem").after(`<button id="betabot-socket-5">Socket Gem x5</button>`)
-		$("#betabot-socket-5").click(socketGems)
+		if ($("#betabot-socket-5")[0] === undefined) {
+			$("#socketThisGem").after(`<button id="betabot-socket-5">Socket Gem x5</button>`)
+			$("#betabot-socket-5").click(socketGems)
+		}
 	}
 
 	/**
@@ -899,11 +900,11 @@ $(document).on("roa-ws:all", function(_, data) {
 		}
 
 		// Custom style:
-		const cssChanged = `data:text/css;base64,${btoa(settings.css.addon + settings.css.custom)}` !== $("#betabot-css")?.prop("href")
+		const cssChanged = `data:text/css;base64,${btoa(settings.css.addon + settings.css.custom.code)}` !== $("#betabot-css")?.prop("href")
 		if (cssChanged) { // If the code has changed, or if it was never injected
 			$("#betabot-css")?.remove() //only remove the element if it exists
 			// Decode CSS into base64 and use it as a link to avoid script injections:
-			$("head").append(`<link id="betabot-css" rel="stylesheet" href="data:text/css;base64,${btoa(settings.css.addon + settings.css.custom)}">`)
+			$("head").append(`<link id="betabot-css" rel="stylesheet" href="data:text/css;base64,${btoa(settings.css.addon + settings.css.custom.code)}">`)
 		}
 
 		// Remove Effects Box:

@@ -249,7 +249,6 @@ td {
 	float: right;
 	height: 1.25em;
 	margin: 0 0 0 5px;
-	position: relative;
 	width: 1.25em;
 }
 
@@ -268,7 +267,6 @@ td {
 	font-size: var(--body-font-size);
 	font-weight: normal;
 	height: 1.4em;
-	position: relative;
 	text-align: left;
 	vertical-align: middle;
 	width: 1.4em;
@@ -279,12 +277,13 @@ td {
 	border-radius: .75em;
 	border: 1px var(--input-border-color) solid;
 	content: attr(data-tooltip);
-	left: -127.5px;
+	left: 23%;
 	min-width: 255px;
 	padding: .5em;
 	position: absolute;
-	top: 1.5em;
+	top: 22.15%;
 	white-space: pre-line;
+	width: 12.5%;
 	z-index: 98;
 }
 
@@ -299,7 +298,6 @@ td {
 
 .required {
 	color: red;
-	position: relative;
 }
 
 .required[data-tooltip] {
