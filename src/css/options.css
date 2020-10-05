@@ -67,7 +67,7 @@ header {
 /* Form Contents */
 
 #settings {
-	height: 65vh;
+	height: 75vh;
 	margin: 7.5em auto auto;
 	overflow-y: auto;
 	width: 28em;
@@ -164,7 +164,7 @@ input[name=containers],
 	text-align: center;
 }
 
-#form-buttons-output {
+#output {
 	color: var(--input-text-color);
 	text-align: center;
 }
@@ -309,11 +309,6 @@ td {
 }
 
 /* Buttons */
-
-#form-buttons {
-	display: flex;
-	justify-content: center;
-}
 
 button {
 	align-items: center;

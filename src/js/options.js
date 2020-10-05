@@ -84,80 +84,88 @@ function deabbreviateNumber (input) {
  * @memberof options
  */
 function displayMessage(message, time=2500) {
-	$("#form-buttons-output").text(message)
-	$("#form-buttons-output").fadeIn(250)
+	const output = $("#output")
+
+	output.text(message)
+	output.fadeIn(250)
 
 	setTimeout( () => {
-		$("#form-buttons-output").fadeOut(750, () => {$("#form-buttons-output").text("")} )
+		output.fadeOut(750, () => {output.text("")} )
 	}, time)
+}
+
+/**
+ * Finds a setting in `settings` based on it's name and path, and returns it's value and type
+ * @function getSettingByPath
+ * @param {string} settingName Name of the setting
+ * @param {string[]} path Path to travel in `settings` in order to get to the setting, splitted to steps (e.g. to find `settings.a.b`, path should be `["a", "b"]`)
+ * @returns {object}
+ * @returns {*} settingValue
+ * @returns {string} settingType
+ */
+function getSettingByPath(settingName, path) {
+	let settingValue = settings
+	let settingType = null
+
+	// Get the setting value by using a pointer to navigate down the tree:
+	for (const key of path) {
+		settingValue = settingValue[key]
+	}
+
+	if (settingName === "loginPassword") {
+		settingType = "encrypted"
+	} else if (typeof settingValue === "boolean") {
+		settingType = "boolean"
+	} else if (typeof settingValue === "number") {
+		settingType = "number"
+	} else if (Array.isArray(settingValue)) {
+		settingType = "array"
+	} else {
+		settingType = "string"
+	}
+	return {settingValue, settingType}
 }
 
 /**
  * Gets the settings from storage, and updates the displayed settings accordingly
  * @async
- * @function fillFields
+ * @function loadSettings
  * @memberof options
  */
-async function fillFields() {
+async function loadSettings() {
 	try {
+		// Load setting:
 		settings = await browser.storage.sync.get()
-		if (browser.contextualIdentities === undefined) {
-			$(`.requires-containers`).html(`<td colspan="2">This feature requires Container Tabs. Please enable Container tabs in Browser Options -&gt; Tabs -&gt; Enable Container Tabs, and reload the page.</td>`)
-		} else {
-			fillContainers()
-		}
 
-		$("#pattern")           .val(settings.pattern)
-		$("#attack-at")         .val(settings.attackAt)
-		$("#name-list")         .val(settings.namesList.join(", "))
-		$("#custom-css")        .val(settings.css.custom.code)
-		$("#min-stamina")       .val(settings.minStamina)
-		$("#alts-number")       .val(settings.altsNumber)
-		$("#main-account")      .val(settings.mainAccount)
-		$("#main-username")     .val(settings.mainUsername)
-		$("#alt-base-name")     .val(settings.altBaseName)
-		$("#login-password")    .val(await insecureCrypt.decrypt(settings.loginPassword, "betabot Totally-not-secure Super NOT secret key!"))
-		$("#wire-frequency")    .val(settings.wireFrequency)
-		$("#daily-crystals")    .val(settings.dailyCrystals)
-		$("#event-channel-id")  .val(settings.eventChannelID)
-		$("#min-carving-queue") .val(settings.minCarvingQueue)
-		$("#min-crafting-queue").val(settings.minCraftingQueue)
+		// Make sure that Contextual Identities is available:
+		browser.contextualIdentities ? fillContainers() : $(`.requires-containers`).html(
+			`<td colspan="2">This feature requires Container Tabs. Please enable Container tabs in Browser Options -&gt; Tabs -&gt; Enable Container Tabs, and reload the page.</td>`)
 
-		$("#verbose")          .prop("checked", settings.verbose)
-		$("#auto-wire")        .prop("checked", settings.autoWire)
-		$("#auto-house")       .prop("checked", settings.autoHouse)
-		$("#auto-craft")       .prop("checked", settings.autoCraft)
-		$("#auto-carve")       .prop("checked", settings.autoCarve)
-		$("#append-name")      .prop("checked", settings.addUsername)
-		$("#auto-quests")      .prop("checked", settings.autoQuests)
-		$("#resume-queue")     .prop("checked", settings.resumeQueue)
-		$("#auto-stamina")     .prop("checked", settings.autoStamina)
-		$("#remove-banner")    .prop("checked", settings.removeBanner)
-		$("#add-socket-x5")    .prop("checked", settings.addSocketX5)
-		$("#add-open-tabs")    .prop("checked", settings.addOpenTabs)
-		$("#add-jump-mobs")    .prop("checked", settings.addJumpMobs)
-		$("#join-gauntlets")   .prop("checked", settings.joinGauntlets)
-		$("#remove-effects")   .prop("checked", settings.removeEffects)
-		$("#add-login-alts")   .prop("checked", settings.addLoginAlts)
-		$("#add-spawn-gems")   .prop("checked", settings.addSpawnGems)
-		$("#auto-harvestron")  .prop("checked", settings.autoHarvestron)
-		$("#containers-auto")  .prop("checked", settings.containers.useAll)
-		$("#add-custom-build") .prop("checked", settings.addCustomBuild)
-		$("#add-request-money").prop("checked", settings.addRequestMoney)
+		$("input").toArray().forEach(async input => {
+			const settingName = input.dataset.setting
+			let {settingValue, type} = getSettingByPath(settingName, settingName.split("."))
 
-		for (const currency of settings.currencySend) {
-			const name = currency.name.replace("_", "-")
-			$(`#${name}-keep`).val(abbreviateNumber(currency.keepAmount))
-			$(`#${name}-keep`).prop("title", currency.keepAmount)
-			$(`#${name}-send`).prop("checked", currency.send)
-		}
+			// Update field according to setting type:
+			switch (type) {
+				case "encrypted":
+					input.value = await insecureCrypt.decrypt(settings[settingName], "betabot Totally-not-secure Super NOT secret key!")
+					break
+				case "boolean":
+					input.checked = settingValue
+					break
+				case "array":
+					input.value = settingValue.join(", ")
+					break
+				case "number":
+					input.value = abbreviateNumber(settingValue)
+					break
+				case "string":
+					input.value = settingValue
+			}
+		})
 
-		for (const trade of Object.keys(settings.tradesList)) {
-			$(`#${trade}`).val(settings.tradesList[trade].join(", "))
-		}
-
-		updatePrice()
-		displayAltFields()
+		//displayAltFields()
+		//displayLoginFields()
 	} catch (error) {
 		displayMessage(`Error: ${error.message}`)
 		console.error(error)
@@ -165,110 +173,84 @@ async function fillFields() {
 }
 
 /**
- * Saves the displayed settings to storage
+ * Auto saves settings after changes
  * @async
- * @function saveChanges
+ * @function saveSetting
+ * @param {event} event `input` event
+ * @param {HTMLInputElement} event.target
  * @memberof options
  */
-async function saveChanges() {
+async function saveSetting({target}) {
+	if (target.reportValidity() === false) {
+		console.error(`#${target.id} is invalid`)
+		return
+	}
+
 	try {
-		if ($("#settings")[0].reportValidity() === false) {
-			const invalid = $(":invalid")[1] // First invalid field
-			const table = $("table").has(`#${invalid.id}`)[0].id // Containing table id
-			$(`#${table}-tab-button`).click() // Go to tab
+		const settingName = target.dataset.setting
+		const path = settingName.split(".")
+		let {settingValue, type} = getSettingByPath(settingName, path)
 
-			console.error("Form is invalid: First invalid field found is", invalid)
-			setTimeout(() => {$("#settings")[0].reportValidity()})
-			throw new Error("Form is invalid")
+		// Adapt value to type:
+		switch (type) {
+			case "encrypted":
+				/**
+				 * **Note: DO NOT trust this encryption**. it's very weak and uses a public key for encryption.
+				 * There is a reason why there is still a warning about the password being saved in plain text.
+				 * @name notEncrypted
+				 * @memberof options
+				 */
+				settingValue = await insecureCrypt.encrypt(target.value, "betabot Totally-not-secure Super NOT secret key!")
+				break
+			case "boolean":
+				settingValue = target.checked
+				break
+			case "array":
+				settingValue = target.value.split(", ")
+				break
+			case "number":
+				settingValue = deabbreviateNumber(target.value) || settingValue
+				break
+			case "string":
+				settingValue = target.value
 		}
-
-		settings.pattern         = $("#pattern").val()
-		settings.altBaseName     = $("#alt-base-name").val()
-		settings.mainAccount     = $("#main-account").val()
-		settings.mainUsername    = $("#main-username").val()
-		settings.wireFrequency   = $("#wire-frequency").val()
-		settings.css.custom.code = $("#custom-css").val()
-		settings.minCarvingQueue = $("#min-carving-queue").val()
-
-		settings.verbose           = $("#verbose").prop("checked")
-		settings.autoWire          = $("#auto-wire").prop("checked")
-		settings.autoHouse         = $("#auto-house").prop("checked")
-		settings.autoCraft         = $("#auto-craft").prop("checked")
-		settings.autoCarve         = $("#auto-carve").prop("checked")
-		settings.autoQuests        = $("#auto-quests").prop("checked")
-		settings.addSocketX5       = $("#add-socket-x5").prop("checked")
-		settings.autoStamina       = $("#auto-stamina").prop("checked")
-		settings.addJumpMobs       = $("#add-jump-mobs").prop("checked")
-		settings.addUsername       = $("#append-name").prop("checked")
-		settings.addOpenTabs       = $("#add-open-tabs").prop("checked")
-		settings.resumeQueue       = $("#resume-queue").prop("checked")
-		settings.removeBanner      = $("#remove-banner").prop("checked")
-		settings.addLoginAlts      = $("#add-login-alts").prop("checked")
-		settings.addSpawnGems      = $("#add-spawn-gems").prop("checked")
-		settings.joinGauntlets     = $("#join-gauntlets").prop("checked")
-		settings.removeEffects     = $("#remove-effects").prop("checked")
-		settings.autoHarvestron    = $("#auto-harvestron").prop("checked")
-		settings.resumeQueue       = $("#resume-queue").prop("checked")
-		settings.addCustomBuild    = $("#add-custom-build").prop("checked")
-		settings.addRequestMoney   = $("#add-request-money").prop("checked")
-		settings.containers.useAll = $("#containers-auto").prop("checked")
-
-		settings.attackAt         = parseInt($("#attack-at").val()) || 3
-		settings.altsNumber       = parseInt($("#alts-number").val()) || 0
-		settings.minStamina       = parseInt($("#min-stamina").val()) || 5
-		settings.dailyCrystals    = parseInt($("#daily-crystals").val()) || 0
-		settings.eventChannelID   = parseInt($("#event-channel-id").val()) || 3202
-		settings.minCraftingQueue = parseInt($("#min-crafting-queue").val()) || 0
-
-		settings.containers.list = $("[name=containers]:checked").get().map(e => e.id) // Get id's of checked containers
-
-		$("#name-list").val() === "" ? settings.namesList = [] : settings.namesList = $("#name-list").val().split(", ")
 
 		/**
-		 * **Note: DO NOT trust this encryption**. it's very weak and uses a public key for encryption.
-		 * There is a reason why there is still a warning about the password being saved in plain text.
-		 * @name notEncrypted
+		 * Changes a setting without modifying the rest of `settings`, even if the setting has a depth higher than 1
+		 * @function changeSetting
+		 * @param {object} settingsObject `settings` or a child of `settings`, containing the setting
+		 * @param {number} index Current index in `path`
 		 * @memberof options
+		 * @private
 		 */
-
-		settings.loginPassword = await insecureCrypt.encrypt($("#login-password").val(), "betabot Totally-not-secure Super NOT secret key!")
-
-		for (const currency of settings.currencySend) {
-			const name = currency.name.replace("_", "-")
-			const keepAmount = $(`#${name}-keep`).val() || 0
-			currency.keepAmount = deabbreviateNumber(keepAmount)
-			currency.send = $(`#${name}-send`).prop("checked")
+		function changeSetting(settingsObject, index) {
+			if (index + 1 === path.length) {
+				settingsObject[path[index]] = settingValue
+			} else {
+				settingsObject[path[index]] = changeSetting(settingsObject[path[index]], index + 1)
+			}
+			return settingsObject
 		}
-
-		for (const trade of Object.keys(settings.tradesList)) {
-			settings.tradesList[trade] = $(`#${trade}`).val().split(", ")
-		}
-
-		await browser.storage.sync.set(settings)
-		fillFields()
+		// Use `[path[0]]` to only set the specific setting (e.g. `css`), and not the whole `settings` object:
+		browser.storage.sync.set(changeSetting(settings, 0)[path[0]])
 
 		displayMessage("Changes saved")
-	}
-	catch (error) {
+	} catch(error) {
 		displayMessage(`Error: ${error.message}`)
 		console.error(error)
 	}
 }
 
 /**
- * Reloads the settings from storage and updates the displayed settings
- * @function cancelChanges
- * @memberof options
+ * Adds a title to the currency send settings fields
+ * @function currencySendTitle
+ * @param {event} event `input` event
+ * @param {HTMLInputElement} event.target
  */
-function cancelChanges() {
-	try {
-		fillFields()
-		displayMessage("Cancelled changes")
-	}
-	catch (error) {
-		displayMessage(`Error: ${error.message}`)
-		console.error(error)
-	}
+function currencySendTitle({target}) {
+	const settingName = target.dataset.setting
+	const {settingValue} = getSettingByPath(settingName, settingName.split("."))
+	$(target).prop("title", settingValue)
 }
 
 /**
@@ -286,7 +268,7 @@ function updatePrice() {
 	 * @memberof options
 	 */
 	const price = n => (n * (2 * 2000000 + (n - 1) * 1000000)) / 2
-	const number = parseInt($("#daily-crystals").val())
+	const number = deabbreviateNumber($("#daily-crystals").val())
 	$("#daily-crystals-price").text(abbreviateNumber(price(number) || 0))
 	$("#daily-crystals + div").prop("title", Intl.NumberFormat().format(price(number)) )
 }
@@ -370,7 +352,7 @@ async function fillContainers() {
 	if ($("[name=containers]").length === 0) { // Only add checkboxes if they don't exist already
 		for (const container of containers) {
 			const name = container.name
-			$("#containers").append(`<input id="${name}" name="containers" type="checkbox"><span id="${name}-icon" class="container-icon"></span><label for="${name}">${name}</label><br>`)
+			$("#containers").append(`<input id="${name}" name="containers" type="checkbox" data-for="containers"><span id="${name}-icon" class="container-icon"></span><label for="${name}">${name}</label><br>`)
 			$(`#${name}-icon`).css({"background-color": container.color, "mask": `url(${container.iconUrl})`, "mask-size": "100%"})
 		}
 	}
@@ -381,6 +363,17 @@ async function fillContainers() {
 }
 
 /**
+ * Saves changes to container settings
+ * @function saveContainers
+ * @memberof options
+ */
+function saveContainers() {
+	browser.storage.sync.set({
+		useAll: $("#containers-auto").prop("checked"),
+		list: $("[name=containers]:checked").get().map(e => e.id), // Get id's of checked containers,
+	})
+}
+/**
  * Resets all settings to default values
  * @async
  * @function resetSettings
@@ -390,21 +383,23 @@ async function resetSettings() {
 	if(window.confirm("Are you sure you want to reset ALL settings?") === false) return
 
 	// Don't update settings before reloading:
-	browser.storage.onChanged.removeListener(fillFields)
+	browser.storage.onChanged.removeListener(loadSettings)
 	await browser.storage.sync.clear()
 	log("Resetting settings")
 
 	location.reload()
 }
 
-$(fillFields)
+$(loadSettings)
 $("#reset-css").click(resetCSS)
 $(".tab-button").click(changeTab)
-$("#save-changes").click(saveChanges)
-$("#cancel-changes").click(cancelChanges)
 $("#reset-settings").click(resetSettings)
+
 $("#pattern").on("input", displayAltFields)
+$("[data-setting]").on("input", saveSetting)
 $("#daily-crystals").on("input", updatePrice)
 $("#add-login-alts").on("input", loginChanged)
+$("#wire [id*=-keep]").on("input", currencySendTitle)
+$("#containers-auto, [name=containers]").on("input", saveContainers)
 
-browser.storage.onChanged.addListener(fillFields)
+browser.storage.onChanged.addListener(loadSettings)

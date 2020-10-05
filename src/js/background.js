@@ -15,7 +15,7 @@
  * @type {number}
  * @memberof background
  */
-const SETTINGS_VERSION = 17
+const SETTINGS_VERSION = 18
 
 /**
  * - CSS code for Betaburlogin interface changes
@@ -335,36 +335,36 @@ async function getSettings() {
 			eventChannelID   : 3202,
 			wireFrequency    : 60,
 			dailyCrystals    : 50,
-			minCraftingQueue : 5,
 			minCarvingQueue  : 5,
+			minCraftingQueue : 5,
 			minStamina       : 5,
 			attackAt         : 3,
 			altsNumber       : 0,
-			autoStamina      : true,
-			autoQuests       : true,
-			autoHouse        : true,
-			autoCraft        : true,
-			autoCarve        : true,
-			autoHarvestron   : true,
-			joinGauntlets    : true,
 			addCustomBuild   : true,
-			addUsername      : true,
 			addJumpMobs      : true,
-			addSpawnGems     : true,
-			addRequestMoney  : true,
 			addOpenTabs      : true,
-			addLoginAlts     : true,
+			addRequestMoney  : true,
 			addSocketX5      : true,
+			addSpawnGems     : true,
+			addUsername      : true,
+			autoCarve        : true,
+			autoCraft        : true,
+			autoHarvestron   : true,
+			autoHouse        : true,
+			autoQuests       : true,
+			autoStamina      : true,
+			joinGauntlets    : true,
 			resumeQueue      : true,
-			removeEffects    : false,
+			addLoginAlts     : false,
 			autoWire         : false,
-			verbose          : false,
 			removeBanner     : false,
+			removeEffects    : false,
+			verbose          : false,
+			altBaseName      : "",
+			loginPassword    : "",
 			mainAccount      : "",
 			mainUsername     : "",
-			loginPassword    : "",
 			pattern          : "",
-			altBaseName      : "",
 			namesList        : [],
 			containers       : {
 				useAll: true,
@@ -385,62 +385,53 @@ async function getSettings() {
 					default: CUSTOM_CSS,
 				},
 			},
-			currencySend: [
-				{
-					name         : "crystals",
+			currencySend: {
+				crystals: {
 					send         : true,
 					minimumAmount: 0,
 					keepAmount   : 0,
 				},
-				{
-					name         : "platinum",
+				platinum: {
 					send         : true,
 					minimumAmount: 100,
 					keepAmount   : 0,
 				},
-				{
-					name         : "gold",
+				gold: {
 					send         : true,
 					minimumAmount: 10000,
 					keepAmount   : 0,
 				},
-				{
-					name         : "crafting_materials",
+				crafting_materials: {
 					send         : true,
 					minimumAmount: 100,
 					keepAmount   : 0,
 				},
-				{
-					name         : "gem_fragments",
+				gem_fragments: {
 					send         : true,
 					minimumAmount: 100,
 					keepAmount   : 0,
 				},
-				{
-					name         : "food",
+				food: {
 					send         : true,
 					minimumAmount: 100,
 					keepAmount   : 10000000,
 				},
-				{
-					name         : "wood",
+				wood: {
 					send         : true,
 					minimumAmount: 100,
 					keepAmount   : 10000000,
 				},
-				{
-					name         : "iron",
+				iron: {
 					send         : true,
 					minimumAmount: 100,
 					keepAmount   : 10000000,
 				},
-				{
-					name         : "stone",
+				stone: {
 					send         : true,
 					minimumAmount: 100,
 					keepAmount   : 10000000,
 				},
-			],
+			},
 		}
 		await browser.storage.sync.set(settings)
 	}
@@ -480,12 +471,11 @@ async function updateSettings() {
 			}
 		case 4:
 			for (const trade of ["food", "wood", "iron", "stone"]) {
-				settings.currencySend.push({
-					name : trade,
+				settings.currencySend[trade] = {
 					send : true,
 					minimumAmount : 100,
 					keepAmount : 10000000,
-				})
+				}
 			}
 		case 5:
 			settings.autoWire = false
@@ -561,6 +551,9 @@ async function updateSettings() {
 				code: settings.css.custom,
 				default: CUSTOM_CSS,
 			}
+		case 17:
+			// Reset currencySend due to drastic changes in it's format
+			settings.currencySend = {}
 		default:
 			// Update internal CSS:
 			if (settings.css.addon !== ADDON_CSS) {

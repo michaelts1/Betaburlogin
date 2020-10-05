@@ -3,8 +3,11 @@
 /**
  * @file Code to run when on Beta Game page
  * @todo [Add] Set `buyCrys()` to run shortly after page load
- * @todo [Add] Store settings separately instead of using one object
  * @todo [Add] Update `ports.main` and `ports.alts` after changing `settings.mainUsername`
+ * @todo [Add] Use `browser.storage.sync.get()` default values in `getSettings()` in background script
+ * @todo [Test] Browser action window
+ * @todo [Test] Auto save settings changes on the options page
+ * @todo [Test] Change settings separately instead of re-saving all of them
  */
 /**
  * @namespace beta-game
@@ -279,12 +282,12 @@ async function betaGame() {
 
 		let sendMessage = `/wire ${target}`
 
-		for (const currency of settings.currencySend) {
-			if (currency.send === false) continue
+		for (const [name, sendSettings] of Object.entries(settings.currencySend)) {
+			if (sendSettings.send === false) continue
 
-			const amount   = $(`.${currency.name}`).attr("title").replace(/,/g, "")
-			const sellable = $(`.${currency.name}`).attr("data-personal").replace(/,/g, "")
-			let amountToSend = amount - currency.keepAmount // Keep this amount
+			const amount   = $(`.${name}`).attr("title").replace(/,/g, "")
+			const sellable = $(`.${name}`).attr("data-personal").replace(/,/g, "")
+			let amountToSend = amount - sendSettings.keepAmount // Keep this amount
 
 			// Don't send more than you can
 			if (amountToSend > sellable) {
@@ -292,8 +295,8 @@ async function betaGame() {
 			}
 
 			// Only send if you have enough
-			if (amountToSend > currency.minimumAmount) {
-				sendMessage += ` ${amountToSend} ${currency.name},`
+			if (amountToSend > sendSettings.minimumAmount) {
+				sendMessage += ` ${amountToSend} ${sendSettings.name},`
 			}
 		}
 

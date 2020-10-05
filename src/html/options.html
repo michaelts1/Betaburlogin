@@ -25,7 +25,7 @@
 		</header>
 
 		<!-- Settings, using <form> to enable validation -->
-		<form id="settings">
+		<article id="settings">
 			<table id="general" class="tab selected">
 				<colgroup>
 					<col id="general-col-1"> <!-- First column in the general table -->
@@ -43,7 +43,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="Automatically replenish stamina when under the minimum."></span>
 						</td>
 						<td>
-							<input id="auto-stamina" type="checkbox">
+							<input id="auto-stamina" type="checkbox" data-setting="autoStamina">
 						</td>
 					</tr>
 					<tr>
@@ -52,7 +52,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="Automatically complete and start quests."></span>
 						</td>
 						<td>
-							<input id="auto-quests" type="checkbox">
+							<input id="auto-quests" type="checkbox" data-setting="autoQuests">
 						</td>
 					</tr>
 					<tr>
@@ -61,7 +61,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="Automatically build house items.&#10;&#10;The addon will first attempt to build a new room. If there are no new rooms to build, it will upgrade item tiers. If there are also no tier upgrades available, the addon will build the fastest item.&#10;&#10;Requires Alarm Clock."></span>
 						</td>
 						<td>
-							<input id="auto-house" type="checkbox">
+							<input id="auto-house" type="checkbox" data-setting="autoHouse">
 						</td>
 					</tr>
 					<tr>
@@ -70,7 +70,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="Adds a field in the house screen which allows you to set a custom item to build instead of always building the quickest."></span>
 						</td>
 						<td>
-							<input id="add-custom-build" type="checkbox">
+							<input id="add-custom-build" type="checkbox" data-setting="addCustomBuild">
 						</td>
 					</tr>
 					<tr>
@@ -79,7 +79,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="Automatically start Harvestron jobs.&#10;&#10;If the user cancels an Harvestron job manually, the addon will wait at least 60 seconds before sending the Harvestron again. This gives the user the opportunity to set the Harvestron to harvest another resource without the addon interfering with him.&#10;&#10;Requires Harvestron (obviously)."></span>
 						</td>
 						<td>
-							<input id="auto-harvestron" type="checkbox">
+							<input id="auto-harvestron" type="checkbox" data-setting="autoHarvestron">
 						</td>
 					</tr>
 					<tr>
@@ -88,7 +88,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="While crafting, automatically fill the crafting queue when under the minimum."></span>
 						</td>
 						<td>
-							<input id="auto-craft" type="checkbox">
+							<input id="auto-craft" type="checkbox" data-setting="autoCraft">
 						</td>
 					</tr>
 					<tr>
@@ -97,7 +97,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="While carving, automatically fill the carving queue when under the minimum."></span>
 						</td>
 						<td>
-							<input id="auto-carve" type="checkbox">
+							<input id="auto-carve" type="checkbox" data-setting="autoCarve">
 						</td>
 					</tr>
 					<tr>
@@ -106,7 +106,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="Automatically start crafting/carving again after finishing the queue.&#10;&#10;Sometimes needed since auto crafting/carving might not work after disconnects. If this setting is on, the addon will resume crafting/carving even after disconnects.&#10;&#10;Will only work if Auto Craft/Auto Carve is also on, respectively."></span>
 						</td>
 						<td>
-							<input id="resume-queue" type="checkbox">
+							<input id="resume-queue" type="checkbox" data-setting="resumeQueue">
 						</td>
 					</tr>
 					<tr>
@@ -114,7 +114,7 @@
 							<label for="min-stamina">Minimum Stamina</label>
 						</td>
 						<td>
-							<input id="min-stamina" pattern="^\d+$" placeholder="Minimum Stamina" size=15>
+							<input id="min-stamina" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Minimum Stamina" size=15 data-setting="minStamina">
 						</td>
 					</tr>
 					<tr>
@@ -122,7 +122,7 @@
 							<label for="min-crafting-queue">Minimum Crafting Queue Items</label>
 						</td>
 						<td>
-							<input id="min-crafting-queue" pattern="^\d+$" placeholder="Minimum Queue" size=15>
+							<input id="min-crafting-queue" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Minimum Queue" size=15 data-setting="minCraftingQueue">
 						</td>
 					</tr>
 					<tr>
@@ -130,7 +130,7 @@
 							<label for="min-carving-queue">Minimum Carving Queue Items</label>
 						</td>
 						<td>
-							<input id="min-carving-queue" pattern="^\d+$" placeholder="Minimum Queue" size=15>
+							<input id="min-carving-queue" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Minimum Queue" size=15 data-setting="minCarvingQueue">
 						</td>
 					</tr>
 					<tr>
@@ -139,7 +139,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="How many crystals to buy every day."></span>
 						</td>
 						<td>
-							<input id="daily-crystals" pattern="^\d+$" placeholder="Crystals Amount" size=15>
+							<input id="daily-crystals" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Crystals Amount" size=15 data-setting="dailyCrystals">
 							<div id="daily-crystals-text">Price: <span id="daily-crystals-price">0</span></div>
 						</td>
 					</tr>
@@ -163,7 +163,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="The name you use to log in with your main account.&#10;&#10;Might be different than your in-game username."></span>
 						</td>
 						<td>
-							<input id="main-account" pattern="^[A-Za-z\d]{3,20}$" placeholder="Login Name" size="15" required>
+							<input id="main-account" pattern="^[A-Za-z\d]{3,20}$" placeholder="Login Name" size="15" data-setting="mainAccount" required>
 						</td>
 					</tr>
 					<tr>
@@ -172,7 +172,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="Your main account in-game username.&#10;&#10;Might be different than the name you use to log in."></span>
 						</td>
 						<td>
-							<input id="main-username" pattern="^[A-Za-z]{3,20}$" placeholder="In-Game Name" size="15" required>
+							<input id="main-username" pattern="^[A-Za-z]{3,20}$" placeholder="In-Game Name" size="15" data-setting="mainUsername" required>
 						</td>
 					</tr>
 					<tr>
@@ -181,7 +181,7 @@
 							<span class="warning" role="img" aria-label="warning" data-tooltip="Warning:&#10;The password is saved in plain text!&#10;&#10;Make sure it's different from passwords you use on other services, including live!"></span>
 						</td>
 						<td>
-							<input id="login-password" pattern=".{6,}" type="password" placeholder="Password" size=15 required>
+							<input id="login-password" pattern=".{6,}" type="password" placeholder="Password" size=15 data-setting="loginPassword" required>
 						</td>
 					</tr>
 					<tr class="requires-containers">
@@ -203,7 +203,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="Number of alts, not including main account."></span>
 						</td>
 						<td>
-							<input id="alts-number" pattern="^\d{1,3}$" placeholder="Number of Alts" size="24">
+							<input id="alts-number" pattern="^\d{1,3}$" placeholder="Number of Alts" size="24" data-setting="altsNumber">
 						</td>
 					</tr>
 					<tr id="alts-base-name" class="requires-containers">
@@ -212,16 +212,16 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="The base name for your alts.&#10;&#10;For example, if your alts are &quot;alti&quot; and &quot;altii&quot;, then the base name is &quot;alt&quot;."></span>
 						</td>
 						<td>
-							<input id="alt-base-name" pattern="^[A-Za-z\d]{3,20}$" placeholder="Alt Base Name" size="24">
+							<input id="alt-base-name" pattern="^[A-Za-z\d]{3,20}$" placeholder="Alt Base Name" size="24" data-setting="altBaseName">
 						</td>
 					</tr>
 					<tr id="alts-unique-names" class="requires-containers">
 						<td>
-							<label for="name-list">Unique Names List</label>
+							<label for="names-list">Unique Names List</label>
 							<span class="info" role="img" aria-label="info" data-tooltip="List of the names of your alts, sperated by commas and spaces.&#10;&#10;Example: &quot;altFish, altTwo, WeirdName, myAlt&quot;."></span>
 						</td>
 						<td>
-							<input id="name-list" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Unique Names List" size="24">
+							<input id="names-list" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Unique Names List" size="24" data-setting="namesList">
 						</td>
 					</tr>
 				</tbody>
@@ -244,7 +244,7 @@
 				<tbody>
 					<tr>
 						<td class="checkbox-td">
-							<input id="auto-wire" type="checkbox">
+							<input id="auto-wire" type="checkbox" data-setting="autoWire">
 						</td>
 						<td colspan="2">
 							<label for="auto-wire">Auto Wire to Main Account Every</label>
@@ -258,101 +258,101 @@
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="crystals-send" type="checkbox">
+							<input id="crystals-send" type="checkbox" data-setting="currencySend.crystals.send">
 						</td>
 						<td>
 							<label for="crystals-send">Crystals</label>
 						</td>
 						<td>
-							<input id="crystals-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15>
+							<input id="crystals-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.crystals.keepAmount">
 						</td>
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="platinum-send" type="checkbox">
+							<input id="platinum-send" type="checkbox" data-setting="currencySend.platinum.send">
 						</td>
 						<td>
 							<label for="platinum-send">Platinum</label>
 						</td>
 						<td>
-							<input id="platinum-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15>
+							<input id="platinum-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.platinum.keepAmount">
 						</td>
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="gold-send" type="checkbox">
+							<input id="gold-send" type="checkbox" data-setting="currencySend.gold.send">
 						</td>
 						<td>
 							<label for="gold-send">Gold</label>
 						</td>
 						<td>
-							<input id="gold-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15>
+							<input id="gold-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.gold.keepAmount">
 						</td>
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="crafting-materials-send" type="checkbox">
+							<input id="crafting-materials-send" type="checkbox" data-setting="currencySend.crafting_materials.send">
 						</td>
 						<td>
 							<label for="crafting-materials-send">Crafting Materials</label>
 						</td>
 						<td>
-							<input id="crafting-materials-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15>
+							<input id="crafting-materials-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.crafting_materials.keepAmount">
 						</td>
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="gem-fragments-send" type="checkbox">
+							<input id="gem-fragments-send" type="checkbox" data-setting="currencySend.gem_fragments.send">
 						</td>
 						<td>
 							<label for="gem-fragments-send">Gem Fragments</label>
 						</td>
 						<td>
-							<input id="gem-fragments-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15>
+							<input id="gem-fragments-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.gem_fragments.keepAmount">
 						</td>
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="food-send" type="checkbox">
+							<input id="food-send" type="checkbox" data-setting="currencySend.food.send">
 						</td>
 						<td>
 							<label for="food-send">Food</label>
 						</td>
 						<td>
-							<input id="food-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15>
+							<input id="food-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.food.keepAmount">
 						</td>
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="wood-send" type="checkbox">
+							<input id="wood-send" type="checkbox" data-setting="currencySend.wood.send">
 						</td>
 						<td>
 							<label for="wood-send">Wood</label>
 						</td>
 						<td>
-							<input id="wood-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15>
+							<input id="wood-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.wood.keepAmount">
 						</td>
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="iron-send" type="checkbox">
+							<input id="iron-send" type="checkbox" data-setting="currencySend.iron.send">
 						</td>
 						<td>
 							<label for="iron-send">Iron</label>
 						</td>
 						<td>
-							<input id="iron-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15>
+							<input id="iron-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.iron.keepAmount">
 						</td>
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="stone-send" type="checkbox">
+							<input id="stone-send" type="checkbox" data-setting="currencySend.stone.send">
 						</td>
 						<td>
 							<label for="stone-send">Stone</label>
 						</td>
 						<td>
-							<input id="stone-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15>
+							<input id="stone-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.stone.keepAmount">
 						</td>
 					</tr>
 				</tbody>
@@ -378,7 +378,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="To automatically join Events, you first have to add all the users that you want to join events to the special event channel. Ask in main chat if you do not know how to do this.&#10;&#10;After you are in the channel, any player can initiate an event by typing in the channel chat &quot;InitEvent&quot;."></span>
 						</td>
 						<td>
-							<input id="join-gauntlets" type="checkbox">
+							<input id="join-gauntlets" type="checkbox" data-setting="joinGauntlets">
 						</td>
 					</tr>
 					<tr>
@@ -388,7 +388,7 @@
 						</td>
 						<td>
 							<!-- Only accept numbers between 0 and 15 -->
-							<input id="attack-at" pattern="(^0?\d$)|(^1[0-5]$)" placeholder="Minutes" size="6"> Minutes Left
+							<input id="attack-at" pattern="(^0?\d$)|(^1[0-5]$)" placeholder="Minutes" size="6" data-setting="attackAt"> Minutes Left
 						</td>
 					</tr>
 					<tr>
@@ -396,7 +396,7 @@
 							<label for="fishing">Fishing</label>
 						</td>
 						<td>
-							<input id="fishing" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Fishing" size="24">
+							<input id="fishing" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Fishing" size="24" data-setting="tradesList.fishing">
 						</td>
 					</tr>
 					<tr>
@@ -404,7 +404,7 @@
 							<label for="woodcutting">Woodcutting</label>
 						</td>
 						<td>
-							<input id="woodcutting" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Woodcutting" size="24">
+							<input id="woodcutting" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Woodcutting" size="24" data-setting="tradesList.woodcutting">
 						</td>
 					</tr>
 					<tr>
@@ -412,7 +412,7 @@
 							<label for="mining">Mining</label>
 						</td>
 						<td>
-							<input id="mining" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Mining" size="24">
+							<input id="mining" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Mining" size="24" data-setting="tradesList.mining">
 						</td>
 					</tr>
 					<tr>
@@ -420,7 +420,7 @@
 							<label for="stonecutting">Stonecutting</label>
 						</td>
 						<td>
-							<input id="stonecutting" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Stonecutting" size="24">
+							<input id="stonecutting" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Stonecutting" size="24" data-setting="tradesList.stonecutting">
 						</td>
 					</tr>
 					<tr>
@@ -428,7 +428,7 @@
 							<label for="crafting">Crafting</label>
 						</td>
 						<td>
-							<input id="crafting" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Crafting" size="24">
+							<input id="crafting" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Crafting" size="24" data-setting="tradesList.crafting">
 						</td>
 					</tr>
 					<tr>
@@ -436,7 +436,7 @@
 							<label for="carving">Carving</label>
 						</td>
 						<td>
-							<input id="carving" pattern="^[A-Za-z\d, ]{3,20}$" placeholder="Carving" size="24">
+							<input id="carving" pattern="^[A-Za-z\d, ]{3,20}$" placeholder="Carving" size="24" data-setting="tradesList.carving">
 						</td>
 					</tr>
 				</tbody>
@@ -461,7 +461,7 @@
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="add-open-tabs" type="checkbox">
+							<input id="add-open-tabs" type="checkbox" data-setting="addOpenTabs">
 						</td>
 						<td>
 							<label for="add-open-tabs">Add Open Beta Tabs Button</label>
@@ -473,7 +473,7 @@
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="add-login-alts" type="checkbox">
+							<input id="add-login-alts" type="checkbox" data-setting="addLoginAlts">
 						</td>
 						<td>
 							<label for="add-login-alts">Add Login All Alts Button</label>
@@ -485,16 +485,16 @@
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="append-name" type="checkbox">
+							<input id="add-username" type="checkbox" data-setting="addUsername">
 						</td>
 						<td>
-							<label for="append-name">Add Username Next to Room Name</label>
+							<label for="add-username">Add Username Next to Room Name</label>
 							<span class="info" role="img" aria-label="info" data-tooltip="Adds the username next to the room name to help see it easily."></span>
 						</td>
 					</tr>
 					<tr class="requires-containers">
 						<td class="checkbox-td">
-							<input id="add-jump-mobs" type="checkbox">
+							<input id="add-jump-mobs" type="checkbox" data-setting="addJumpMobs">
 						</td>
 						<td>
 							<label for="add-jump-mobs">Add Jump Mobs Button for Alts</label>
@@ -503,7 +503,7 @@
 					</tr>
 					<tr class="requires-containers">
 						<td class="checkbox-td">
-							<input id="add-spawn-gems" type="checkbox">
+							<input id="add-spawn-gems" type="checkbox" data-setting="addSpawnGems">
 						</td>
 						<td>
 							<label for="add-spawn-gems">Add Spawn Gems Button for Alts</label>
@@ -512,7 +512,7 @@
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="add-socket-x5" type="checkbox">
+							<input id="add-socket-x5" type="checkbox" data-setting="addSocketX5">
 						</td>
 						<td>
 							<label for="add-socket-x5">Add Socket Gem x5 Button</label>
@@ -521,7 +521,7 @@
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="add-request-money" type="checkbox">
+							<input id="add-request-money" type="checkbox" data-setting="addRequestMoney">
 						</td>
 						<td>
 							<label for="add-request-money">Add Request Currency Button</label>
@@ -530,7 +530,7 @@
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="remove-effects" type="checkbox">
+							<input id="remove-effects" type="checkbox" data-setting="removeEffects">
 						</td>
 						<td>
 							<label for="remove-effects">Remove Effects Box</label>
@@ -539,7 +539,7 @@
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="remove-banner" type="checkbox">
+							<input id="remove-banner" type="checkbox" data-setting="removeBanner">
 						</td>
 						<td>
 							<label for="remove-banner">Remove Banner on Click</label>
@@ -566,7 +566,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="If checked, the addon will log more things to the console.&#10;This is useful for debugging."></span>
 						</td>
 						<td>
-							<input id="verbose" type="checkbox" size="15">
+							<input id="verbose" type="checkbox" size="15" data-setting="verbose">
 						</td>
 					</tr>
 					<tr id="containers-tr" class="requires-containers">
@@ -575,7 +575,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="You can choose which containers the addon will use here.&#10;&#10;Auto means that the first n containers will be used, where n is the number of alts you have."></span>
 						</td>
 						<td>
-							<input id="containers-auto" type="checkbox">
+							<input id="containers-auto" type="checkbox" data-for="containers">
 							<label for="containers-auto">Auto</label>
 							<div id="containers"></div>
 						</td>
@@ -586,7 +586,7 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="Listen to the channel with this ID.&#10;&#10;Typing &quot;InitEvent&quot; in this channel will init a regular event, and typing &quot;MainEvent&quot; will init an event in which only main accounts will attack."></span>
 						</td>
 						<td>
-							<input id="event-channel-id" pattern="^\d+$" placeholder="Channel ID" size="15">
+							<input id="event-channel-id" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Channel ID" size="15" data-setting="eventChannelID">
 						</td>
 					</tr>
 					<tr>
@@ -596,7 +596,7 @@
 						</td>
 						<td>
 							<div id="css-div">
-								<textarea id="custom-css" spellcheck="false" autocomplete="off" rows="10" cols="22"></textarea>
+								<textarea id="custom-css" spellcheck="false" autocomplete="off" rows="10" cols="22" data-setting="css.custom.code"></textarea>
 								<button id="reset-css" type="button">
 									<span class="circle"></span>
 									<span>Reset CSS Styles</span>
@@ -620,21 +620,9 @@
 					</tr>
 				</tbody>
 			</table>
-		</form>
+		</article>
 
-		<!-- Save/Cancel Changes buttons -->
-		<div id="form-buttons">
-			<button id="save-changes" type="button">
-				<span class="circle"></span>
-				<span>Save Changes</span>
-			</button>
-			<button id="cancel-changes" type="button">
-				<span class="circle"></span>
-				<span>Cancel Changes</span>
-			</button>
-		</div>
-		<p id="form-buttons-output"></p>
+		<p id="output"></p>
+		<script src="../js/options.js"></script>
 	</body>
-
-	<script src="../js/options.js"></script>
 </html>
