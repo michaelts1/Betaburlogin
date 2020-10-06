@@ -224,11 +224,12 @@ async function saveSetting({target}) {
 		 * @private
 		 */
 		function changeSetting(settingsObject, index) {
-			if (index + 1 === path.length) {
+			if (index + 1 === path.length) { // If index is the last index, change the setting
 				settingsObject[path[index]] = settingValue
-			} else {
+			} else { // Else, call `changeSetting()` again to modify the next child
 				settingsObject[path[index]] = changeSetting(settingsObject[path[index]], index + 1)
 			}
+			// Return the modified object:
 			return settingsObject
 		}
 		// Use `[path[0]]` to only set the specific setting (e.g. `css`), and not the whole `settings` object:

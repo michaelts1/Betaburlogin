@@ -328,9 +328,9 @@ function closeBanners(){
  */
 async function getSettings() {
 	settings = await browser.storage.sync.get()
-	// If not set, create with default settings
+	// If not set, create with default settings:
 	if (Object.keys(settings).length === 0) {
-		settings = {
+		await browser.storage.sync.set({
 			version          : SETTINGS_VERSION,
 			eventChannelID   : 3202,
 			wireFrequency    : 60,
@@ -432,25 +432,7 @@ async function getSettings() {
 					keepAmount   : 10000000,
 				},
 			},
-		}
-		await browser.storage.sync.set(settings)
-	}
-	updateSettings()
-}
-getSettings()
-
-/**
- * Checks settings version and updates the settings if needed
- * @async
- * @function updateSettings
- * @memberof background
- */
-async function updateSettings() {
-	if (typeof settings.version !== "number") {
-		log("Resetting settings - current settings are too old")
-		await browser.storage.sync.clear()
-		getSettings()
-		return
+		})
 	}
 
 	switch (settings.version) {
@@ -551,9 +533,18 @@ async function updateSettings() {
 				code: settings.css.custom,
 				default: CUSTOM_CSS,
 			}
-		case 17:
-			// Reset currencySend due to drastic changes in it's format
-			settings.currencySend = {}
+		case 17: {
+			// Format change (Array => Object):
+			let tmp = {}
+			for (const currency of settings.currencySend) {
+				tmp[currency.name] = {
+					keepAmount: currency.keepAmount,
+					minimumAmount: currency.minimumAmount,
+					send: currency.send,
+				}
+			}
+			settings.currencySend = tmp
+		}
 		default:
 			// Update internal CSS:
 			if (settings.css.addon !== ADDON_CSS) {
@@ -561,7 +552,7 @@ async function updateSettings() {
 			}
 			// Update external CSS, but only if the user didn't modify it:
 			if (settings.css.custom.default !== CUSTOM_CSS) {
-				// If the the code is equal to the previous version code, update it:
+				// If the the code is equal to the previous version default, update it:
 				if (settings.css.custom.code === settings.css.custom.default) {
 					settings.css.custom.code = CUSTOM_CSS
 				}
@@ -575,6 +566,7 @@ async function updateSettings() {
 		/* eslint-enable no-fallthrough */
 	}
 }
+getSettings()
 
 browser.storage.onChanged.addListener(changes => {
 	getSettings()
