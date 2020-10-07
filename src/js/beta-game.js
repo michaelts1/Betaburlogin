@@ -3,11 +3,10 @@
 /**
  * @file Code to run when on Beta Game page
  * @todo [Add] Set `buyCrys()` to run shortly after page load
- * @todo [Add] Update `ports.main` and `ports.alts` after changing `settings.mainUsername`
- * @todo [Add] Use `browser.storage.sync.get()` default values in `getSettings()` in background script
  * @todo [Test] Browser action window
  * @todo [Test] Auto save settings changes on the options page
  * @todo [Test] Change settings separately instead of re-saving all of them
+ * @todo [Test] Update `ports.main` and `ports.alts` after changing `settings.mainUsername`
  */
 /**
  * @namespace beta-game

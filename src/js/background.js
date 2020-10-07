@@ -104,34 +104,38 @@ browser.runtime.onConnect.addListener(async port => {
 
 	log(`${port.role}${port.name ? ` (${port.name})` : ""} connected`)
 
-	if (port.role === "live") { // If live login
-		ports.live = port
-		port.onMessage.addListener(message => {
-			if (message.text === "open alt tabs") {
-				openTabs()
-			}
-		})
-	} else if (port.role === "login") { // Else, if beta login
-		ports.logins.push(port)
-		port.onMessage.addListener(message => {
-			if (message.text === "requesting login") {
-				login()
-			}
-		})
-	} else if (port.role === "main") { // Else, if beta main
-		ports.main = port
-	} else if (port.role === "alt") { // Else, if beta alt
-		ports.alts.push(port)
-		port.onMessage.addListener(message => {
-			if (message.text === "move to mob") {
-				log(`moving all alts to mob ${message.number}`)
-				jumpMobs(message.number)
-			}
-			if (message.text === "spawnGem") {
-				log(`${port.name} requested to spawn gems: ${message}`)
-				spawnGem(message.type, message.splice, message.tier, message.amount)
-			}
-		})
+	switch (port.role) {
+		case "live":
+			ports.live = port
+			port.onMessage.addListener(message => {
+				if (message.text === "open alt tabs") {
+					openTabs()
+				}
+			})
+			break
+		case "login":
+			ports.logins.push(port)
+			port.onMessage.addListener(message => {
+				if (message.text === "requesting login") {
+					login()
+				}
+			})
+			break
+		case "main":
+			ports.main = port
+			break
+		case "alt":
+			ports.alts.push(port)
+			port.onMessage.addListener(message => {
+				if (message.text === "move to mob") {
+					log(`moving all alts to mob ${message.number}`)
+					jumpMobs(message.number)
+				}
+				if (message.text === "spawnGem") {
+					log(`${port.name} requested to spawn gems: ${message}`)
+					spawnGem(message.type, message.splice, message.tier, message.amount)
+				}
+			})
 	}
 
 	if (["main", "alt"].includes(port.role)) { // If beta account
@@ -571,6 +575,7 @@ getSettings()
 browser.storage.onChanged.addListener(changes => {
 	getSettings()
 
+	// Log changes:
 	function objectEquals(object1, object2) { // https://stackoverflow.com/a/6713782
 		if (object1 === object2) return true
 		if (!(object1 instanceof Object) || !(object2 instanceof Object)) return false
@@ -593,6 +598,21 @@ browser.storage.onChanged.addListener(changes => {
 	for (let i = 0; i < Object.values(changes).length; i++) {
 		if (objectEquals(values[i].oldValue, values[i].newValue) === false) {
 			log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
+		}
+	}
+
+	// Update `ports`:
+	if (ports.main.name !== settings.mainUsername) {
+		// Move old `main` into `alts`:
+		ports.alts.push(ports.main)
+		ports.main = null
+
+		// Find new `main` in `alts`:
+		for (const port of ports.alts) {
+			if (port.name === settings.mainUsername) {
+				ports.main = port
+				ports.alts.splice(ports.alts.indexOf(port), 1)
+			}
 		}
 	}
 })
