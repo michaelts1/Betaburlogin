@@ -51,6 +51,7 @@
 	"background": {
 		"scripts": [
 			"src/js/helpers.js",
+			"src/js/settings.js",
 			"src/js/background.js"
 		]
 	},

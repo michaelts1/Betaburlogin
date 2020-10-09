@@ -924,7 +924,8 @@ $(document).on("roa-ws:all", function(_, data) {
 
 		// Option to build a specific item:
 		if (settings.addCustomBuild && $("#betabot-custom-build")[0] === undefined) {
-			if (refresh) { // Don't activate immediately on page load
+			// Don't activate immediately on page load:
+			if (refresh) {
 				getCustomBuild()
 			} else {
 				eventListeners.waitFor("roa-ws:motd").then(() => { // Wait for the page to load

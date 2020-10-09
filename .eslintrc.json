@@ -57,6 +57,11 @@
 				"max": 1
 			}
 		],
+		"init-declarations": [
+			"error",
+			"always"
+		],
+		"no-var": "error",
 		"no-eval": "error",
 		"no-implied-eval": "error",
 		"no-trailing-spaces": "error",
