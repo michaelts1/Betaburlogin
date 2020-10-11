@@ -81,7 +81,8 @@ async function betaGame() {
 		vars.mainTrade = getTrade(vars.username)
 		vars.actionsPending = false
 
-		for (const wireRelated of ["wireFrequency", "mainUsername"]) { // If one of these has changed, reset autoWire
+		// If one of these has changed, reset autoWire:
+		for (const wireRelated of ["wireFrequency", "mainUsername"]) {
 			if (changes[wireRelated]?.oldValue !== changes[wireRelated]?.newValue) {
 				clearInterval(vars.autoWireID)
 				vars.autoWireID = null
