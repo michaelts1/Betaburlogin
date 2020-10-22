@@ -3,6 +3,7 @@
 /**
  * @file Code to run when on Beta Game page
  * @todo [Add] Set `buyCrys()` to run shortly after page load
+ * @todo [Test] Auto House queuing
  * @todo [Test] Browser action window
  * @todo [Test] Auto save settings changes on the options page
  * @todo [Test] Change settings separately instead of re-saving all of them
@@ -733,7 +734,7 @@ $(document).on("roa-ws:all", function(_, data) {
 				return
 			}
 		}
-		if (settings.autoHouse && data.can_build_house) { // Construction
+		if (settings.autoHouse && (data.house_timers.next <= 1800 || data.can_build_house)) { // Construction
 			vars.actionsPending = true
 			$("li#housing").click()
 			await eventListeners.waitFor("roa-ws:page:house")
