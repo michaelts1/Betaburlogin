@@ -141,12 +141,12 @@ async function loadSettings() {
 		browser.contextualIdentities ? fillContainers() : $(`.requires-containers`).html(
 			`<td colspan="2">This feature requires Container Tabs. Please enable Container tabs in Browser Options -&gt; Tabs -&gt; Enable Container Tabs, and reload the page.</td>`)
 
-		$("input").toArray().forEach(async input => {
+		$("[data-setting]").toArray().forEach(async input => {
 			const settingName = input.dataset.setting
-			let {settingValue, type} = getSettingByPath(settingName, settingName.split("."))
+			let {settingValue, settingType} = getSettingByPath(settingName, settingName.split("."))
 
 			// Update field according to setting type:
-			switch (type) {
+			switch (settingType) {
 				case "encrypted":
 					input.value = await insecureCrypt.decrypt(settings[settingName], "betabot Totally-not-secure Super NOT secret key!")
 					break
@@ -189,10 +189,10 @@ async function saveSetting({target}) {
 	try {
 		const settingName = target.dataset.setting
 		const path = settingName.split(".")
-		let {settingValue, type} = getSettingByPath(settingName, path)
+		let {settingValue, settingType} = getSettingByPath(settingName, path)
 
 		// Adapt value to type:
-		switch (type) {
+		switch (settingType) {
 			case "encrypted":
 				/**
 				 * **Note: DO NOT trust this encryption**. it's very weak and uses a public key for encryption.
@@ -233,7 +233,9 @@ async function saveSetting({target}) {
 			return settingsObject
 		}
 		// Use `[path[0]]` to only set the specific setting (e.g. `css`), and not the whole `settings` object:
-		browser.storage.sync.set(changeSetting(settings, 0)[path[0]])
+		browser.storage.sync.set({
+			[path[0]]: changeSetting(settings, 0)[path[0]],
+		})
 
 		displayMessage("Changes saved")
 	} catch(error) {

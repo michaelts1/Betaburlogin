@@ -191,6 +191,26 @@ async function getSettings() {
 			},
 		})
 	}
+
+	// Update `ports`:
+	if (ports.main || ports.alts.length > 0) { // If there are either alts or main connected
+		if (ports.main?.name !== settings.mainUsername) {
+			// Move old `main` into `alts`:
+			if (ports.main !== null) {
+				ports.alts.push(ports.main)
+				ports.main = null
+			}
+
+			// Find new `main` in `alts`:
+			for (const port of ports.alts) {
+				if (port.name === settings.mainUsername) {
+					ports.main = port
+					ports.alts.splice(ports.alts.indexOf(port), 1)
+				}
+			}
+		}
+	}
+
 	updateSettings()
 }
 
@@ -334,7 +354,13 @@ function updateSettings() {
 	}
 }
 
-browser.storage.onChanged.addListener(changes => {
+/**
+ * Logs changes in `settings` to the console
+ * @function logSettingsChanges
+ * @memberof settings
+ * @param {object} changes
+ */
+function logSettingsChanges(changes) {
 	getSettings()
 
 	// Log changes:
@@ -346,7 +372,7 @@ browser.storage.onChanged.addListener(changes => {
 			if (!{}.hasOwnProperty.call(object1, p)) continue
 			if (!{}.hasOwnProperty.call(object2, p)) return false
 			if (object1[p] === object2[p]) continue
-			if (typeof(object1[p]) !== "object") return false
+			if (typeof object1[p] !== "object") return false
 			if (!objectEquals(object1[p], object2[p])) return false
 		}
 		for (const p in object2) {
@@ -362,19 +388,5 @@ browser.storage.onChanged.addListener(changes => {
 			log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
 		}
 	}
-
-	// Update `ports`:
-	if (ports.main.name !== settings.mainUsername) {
-		// Move old `main` into `alts`:
-		ports.alts.push(ports.main)
-		ports.main = null
-
-		// Find new `main` in `alts`:
-		for (const port of ports.alts) {
-			if (port.name === settings.mainUsername) {
-				ports.main = port
-				ports.alts.splice(ports.alts.indexOf(port), 1)
-			}
-		}
-	}
-})
+}
+browser.storage.onChanged.addListener(logSettingsChanges)

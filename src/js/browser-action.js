@@ -32,13 +32,15 @@ async function getVars() {
  */
 async function toggle({target}) {
 	browser.storage.sync.set({
-		[target.dataset.setting]: target.prop("checked"),
+		[target.dataset.setting]: target.checked,
 	})
 }
 
 $(getVars)
 
 $("input").on("change", toggle)
-$("#settings-icon").click(browser.runtime.openOptionsPage)
+$("#settings-icon").click( () => {
+	browser.runtime.openOptionsPage()
+})
 
 browser.storage.onChanged.addListener(getVars)

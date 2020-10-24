@@ -3,11 +3,9 @@
 /**
  * @file Code to run when on Beta Game page
  * @todo [Add] Set `buyCrys()` to run shortly after page load
- * @todo [Test] Auto House queuing
- * @todo [Test] Browser action window
- * @todo [Test] Auto save settings changes on the options page
- * @todo [Test] Change settings separately instead of re-saving all of them
- * @todo [Test] Update `ports.main` and `ports.alts` after changing `settings.mainUsername`
+ * @todo [Add] Separate code to different folders (game, login, background etc.)
+ * @todo [Add] When updating settings (`refreshSettings`), only change settings in `changes` instead of changing all of them
+ * @todo [Test] Auto House 30m queuing
  */
 /**
  * @namespace beta-game
@@ -87,7 +85,6 @@ async function betaGame() {
 			if (changes[wireRelated]?.oldValue !== changes[wireRelated]?.newValue) {
 				clearInterval(vars.autoWireID)
 				vars.autoWireID = null
-				log("Resetting autoWire")
 			}
 		}
 
@@ -100,8 +97,6 @@ async function betaGame() {
 		}
 
 		toggleInterfaceChanges(true)
-
-		if (settings.verbose) log(`Alt: ${vars.isAlt ? "yes" : "no"}\nGauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\nAuto Wire: ${vars.autoWireID ? "on" : "off"}`)
 	}
 	browser.storage.onChanged.addListener(refreshSettings)
 
