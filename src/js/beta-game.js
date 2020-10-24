@@ -5,7 +5,6 @@
  * @todo [Add] Set `buyCrys()` to run shortly after page load
  * @todo [Add] Separate code to different folders (game, login, background etc.)
  * @todo [Add] When updating settings (`refreshSettings`), only change settings in `changes` instead of changing all of them
- * @todo [Test] Auto House 30m queuing
  */
 /**
  * @namespace beta-game
@@ -729,7 +728,7 @@ $(document).on("roa-ws:all", function(_, data) {
 				return
 			}
 		}
-		if (settings.autoHouse && (data.house_timers.next <= 1800 || data.can_build_house)) { // Construction
+		if (settings.autoHouse && (data.house_timers[0]?.next < 1800 || data.can_build_house)) { // Construction
 			vars.actionsPending = true
 			$("li#housing").click()
 			await eventListeners.waitFor("roa-ws:page:house")
