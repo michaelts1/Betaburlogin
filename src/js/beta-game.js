@@ -291,7 +291,7 @@ async function betaGame() {
 
 			// Only send if you have enough
 			if (amountToSend > sendSettings.minimumAmount) {
-				sendMessage += ` ${amountToSend} ${sendSettings.name},`
+				sendMessage += ` ${amountToSend} ${name},`
 			}
 		}
 
