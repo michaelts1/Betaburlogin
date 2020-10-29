@@ -135,8 +135,11 @@ async function openTabs() {
  */
 function login() {
 	/**
-	 * Converts a Latin numeral to Roman numeral (e.g. 9 => "IX")
+	 * Converts a Latin numeral to Roman numeral
 	 * @function romanize
+	 * @example
+	 * // Returns "IX"
+	 * romanize(9)
 	 * @param {number} num Latin numeral
 	 * @returns {string} String containing a roman numeral
 	 * @private

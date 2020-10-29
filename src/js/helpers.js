@@ -54,8 +54,8 @@ function delay(ms) {
  * @property {function} waitFor Allows asynchronously waiting for events
  * @property {...function[]}
  * - One or more properties using the following format:
- * - string: function[]
- * - Where the string is the name of the event (e.g. "roa-ws:all"), and function[] is an array of functions that will be called when the event is triggered
+ * - `string: function[]`
+ * - Where `string` is the name of the event (e.g. "roa-ws:all"), and `function[]` is an array of functions that will be called when the event is triggered
  * - Example: `eventListeners["roa-ws:page"] = [onPage, getPage, log]` will call onPage(), getPage(), and log() every time "roa-ws:page" is triggered
  * @memberof helpers
  */

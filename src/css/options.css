@@ -296,18 +296,6 @@ td {
 	color: cadetblue;
 }
 
-.required {
-	color: red;
-}
-
-.required[data-tooltip] {
-	border-bottom: 1px dotted black;
-}
-
-.required:hover::after {
-	color: goldenrod;
-}
-
 /* Buttons */
 
 button {

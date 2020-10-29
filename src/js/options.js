@@ -10,8 +10,228 @@
 let settings = null
 
 /**
- * Abbreviates a number into short form (e.g. 10000 => 10K)
+ * A class for setting fields
+ */
+class Setting {
+	/**
+	 * @param {HTMLInputElement} input Input field
+	 */
+	constructor(input) {
+		// Set object properties:
+		this.input = input
+		this.name = input.dataset.setting // Is this really needed? it's almost equivalent to `this.path` and only used in `Setting.getSettingByPath()`
+		this.path = input.dataset.setting.split(".")
+		const {settingType, settingValue} = Setting.getSettingByPath(this.name, this.path)
+		this.type = settingType
+		this.value = settingValue
+		this.lastChanged = new Date().getTime()
+
+		// Set oninput functions:
+		switch (this.input.id) {
+			case "daily-crystals":
+				$(this.input).on("input", updatePrice)
+				break
+			case "add-login-alts":
+				$(this.input).on("input", loginChanged)
+				/* eslint-disable-next-line no-fallthrough */ // Fall through to attach both functions to `this.input.oninput`
+			case "pattern":
+				$(this.input).on("input", displayLoginFields)
+				break
+			case "crystals-keep".match(/.*-keep$/)?.input: // https://stackoverflow.com/a/18881169/
+				$(this.input).on("input", currencySendTitle)
+		}
+		$(this.input).on("input", this.valueChanged)
+
+		// Load setting value:
+		this.load()
+
+		// Keep track of all `Setting` instances:
+		Setting.instances.push(this)
+	}
+
+	/**
+	 * Calls `this.save` after 2 seconds
+	 * @function valueChanged
+	 * @private
+	 * @memberof options
+	 */
+	valueChanged() {
+		this.lastChanged = new Date().getTime()
+		setTimeout(this.save ,2000, this.lastChanged)
+	}
+
+	/**
+	 * Saves setting to sync storage if at least 2 seconds have passed since last input
+	 * @async
+	 * @function save
+	 * @param {number} timestamp Time in ms since epoch to check `this.lastChanged` against
+	 * @private
+	 * @memberof options
+	 */
+	async save(timestamp) {
+		if (this.input.reportValidity() === false) {
+			console.error(`#${this.input.id} is invalid`)
+			return
+		}
+
+		// If less than 2 seconds have passed since last change, return:
+		if (timestamp - this.lastChanged < 2000) return
+
+		// Adapt value to type:
+		switch (this.type) {
+			case "encrypted":
+				/**
+				 * **Note: DO NOT trust this encryption**. it's very weak and uses a public key for encryption.
+				 * There is a reason why there is still a warning about the password being saved in plain text.
+				 * @name notEncrypted
+				 * @memberof options
+				 */
+				this.value = await insecureCrypt.encrypt(this.input.value, "betabot Totally-not-secure Super NOT secret key!")
+				break
+			case "boolean":
+				this.value = this.input.checked
+				break
+			case "array":
+				this.value = this.input.value.split(", ")
+				break
+			case "number":
+				this.value = deabbreviateNumber(this.input.value) || this.value
+				break
+			case "string":
+				this.value = this.input.value
+		}
+
+		// Don't save if the setting didn't change:
+		if (this.value === Setting.getSettingByPath(this.name, this.path).settingValue) return
+
+		/**
+		 * Recursively creates a clone of the child of `settings` containing a specific setting, while using a new value for that setting
+		 * @function changeSetting
+		 * @param {object} settingsObject The `settings` object
+		 * @param {number} index Current index in `path`. When called manually, this should be 0
+		 * @returns {object} New clone of the child of `settings` containing said setting, using the new value for that setting
+		 * @private
+		 * @memberof options
+		 */
+		function changeSetting(settingsObject, index) {
+			if (index + 1 === this.path.length) { // If index is the last index, change the setting
+				settingsObject[this.path[index]] = this.value
+			} else { // Else, call `changeSetting()` again to modify the next child
+				settingsObject[this.path[index]] = changeSetting(settingsObject[this.path[index]], index + 1)
+			}
+			return settingsObject // Return the modified object
+		}
+		/* Change a setting without modifying the rest of `settings`. I am using `[this.path[0]]`
+		   to only set the specific setting (e.g. `css`), and not the whole `settings` object: */
+		browser.storage.sync.set({
+			[this.path[0]]: changeSetting(settings, 0)[this.path[0]],
+		})
+
+		displayMessage("Changes saved")
+	}
+
+	/**
+	 * Loads a setting from sync storage
+	 * @async
+	 * @function Load
+	 * @private
+	 * @memberof options
+	 */
+	async load() {
+		this.value = Setting.getSettingByPath(this.name, this.path).settingValue
+
+		// Update field according to setting type:
+		switch (this.type) {
+			case "encrypted":
+				this.input.value = await insecureCrypt.decrypt(settings[this.name], "betabot Totally-not-secure Super NOT secret key!")
+				break
+			case "boolean":
+				this.input.checked = this.value
+				break
+			case "array":
+				this.input.value = this.value.join(", ")
+				break
+			case "number":
+				this.input.value = this.input.id === "event-channel-id" ? abbreviateNumber(this.value) : this.value
+				break
+			case "string":
+				this.input.value = this.value
+		}
+	}
+
+	/**
+	 * Gets the settings from storage, and updates the displayed settings accordingly
+	 * @async
+	 * @function refreshSettings
+	 * @memberof options
+	 * @static
+	 */
+	static async refreshSettings(changes) {
+		settings = await browser.storage.sync.get()
+
+		for (const changedSetting in changes) Setting.instances[changedSetting].load()
+
+		displayLoginFields()
+		updatePrice()
+		currencySendTitle()
+	}
+
+	/**
+	 * Finds a setting in `settings` based on it's name and path, and returns it's value and type
+	 * @function getSettingByPath
+	 * @param {string} settingName Name of the setting
+	 * @param {string[]} path Path to travel in `settings` in order to get to the setting, splitted to steps (e.g. to find `settings.a.b`, path should be `["a", "b"]`)
+	 * @returns {object}
+	 * @returns {*} settingValue
+	 * @returns {string} settingType
+	 * @static
+	 */
+	static getSettingByPath(settingName, path) {
+		let settingValue = settings
+		let settingType = null
+
+		// Get the setting value by using a pointer to navigate down the tree:
+		for (const key of path) {
+			settingValue = settingValue[key]
+		}
+
+		if (settingName === "loginPassword") {
+			settingType = "encrypted"
+		} else if (typeof settingValue === "boolean") {
+			settingType = "boolean"
+		} else if (typeof settingValue === "number") {
+			settingType = "number"
+		} else if (Array.isArray(settingValue)) {
+			settingType = "array"
+		} else {
+			settingType = "string"
+		}
+		return {settingValue, settingType}
+	}
+
+	/**
+	 * @async
+	 * @function init
+	 * @static
+	 */
+	static async init() {
+		settings = await browser.storage.sync.get()
+		// Make sure that Contextual Identities are available:
+		browser.contextualIdentities ? fillContainers() : $(`.requires-containers`).html(
+			`<td colspan="2">This feature requires Container Tabs. Please enable Container tabs in Browser Options -&gt; Tabs -&gt; Enable Container Tabs, and reload the page.</td>`)
+
+		// Create `Setting` instances:
+		for (const input of $("[data-setting]").toArray()) new Setting(input)
+	}
+}
+Setting.instances = []
+
+/**
+ * Abbreviates a number into short form
  * @function abbreviateNumber
+ * @example
+ * // Returns "10K"
+ * abbreviateNumber(10000)
  * @param {number} num
  * @returns {string} Short form number
  * @memberof options
@@ -46,8 +266,11 @@ function abbreviateNumber(num) {
 }
 
 /**
- * Deabbreviates a number from short form (e.g. 10K => 10000)
+ * Deabbreviates a number from short form
  * @function deabbreviateNumber
+ * @example
+ * // Returns 10000
+ * romanize("10K")
  * @param {string} input A string containing a short form number
  * @returns {number} Long form number
  * @memberof options
@@ -95,156 +318,6 @@ function displayMessage(message, time=2500) {
 }
 
 /**
- * Finds a setting in `settings` based on it's name and path, and returns it's value and type
- * @function getSettingByPath
- * @param {string} settingName Name of the setting
- * @param {string[]} path Path to travel in `settings` in order to get to the setting, splitted to steps (e.g. to find `settings.a.b`, path should be `["a", "b"]`)
- * @returns {object}
- * @returns {*} settingValue
- * @returns {string} settingType
- */
-function getSettingByPath(settingName, path) {
-	let settingValue = settings
-	let settingType = null
-
-	// Get the setting value by using a pointer to navigate down the tree:
-	for (const key of path) {
-		settingValue = settingValue[key]
-	}
-
-	if (settingName === "loginPassword") {
-		settingType = "encrypted"
-	} else if (typeof settingValue === "boolean") {
-		settingType = "boolean"
-	} else if (typeof settingValue === "number") {
-		settingType = "number"
-	} else if (Array.isArray(settingValue)) {
-		settingType = "array"
-	} else {
-		settingType = "string"
-	}
-	return {settingValue, settingType}
-}
-
-/**
- * Gets the settings from storage, and updates the displayed settings accordingly
- * @async
- * @function loadSettings
- * @memberof options
- */
-async function loadSettings() {
-	try {
-		// Load setting:
-		settings = await browser.storage.sync.get()
-
-		// Make sure that Contextual Identities is available:
-		browser.contextualIdentities ? fillContainers() : $(`.requires-containers`).html(
-			`<td colspan="2">This feature requires Container Tabs. Please enable Container tabs in Browser Options -&gt; Tabs -&gt; Enable Container Tabs, and reload the page.</td>`)
-
-		$("[data-setting]").toArray().forEach(async input => {
-			const settingName = input.dataset.setting
-			let {settingValue, settingType} = getSettingByPath(settingName, settingName.split("."))
-
-			// Update field according to setting type:
-			switch (settingType) {
-				case "encrypted":
-					input.value = await insecureCrypt.decrypt(settings[settingName], "betabot Totally-not-secure Super NOT secret key!")
-					break
-				case "boolean":
-					input.checked = settingValue
-					break
-				case "array":
-					input.value = settingValue.join(", ")
-					break
-				case "number":
-					input.value = abbreviateNumber(settingValue)
-					break
-				case "string":
-					input.value = settingValue
-			}
-		})
-
-		//displayAltFields()
-		//displayLoginFields()
-	} catch (error) {
-		displayMessage(`Error: ${error.message}`)
-		console.error(error)
-	}
-}
-
-/**
- * Auto saves settings after changes
- * @async
- * @function saveSetting
- * @param {event} event `input` event
- * @param {HTMLInputElement} event.target
- * @memberof options
- */
-async function saveSetting({target}) {
-	if (target.reportValidity() === false) {
-		console.error(`#${target.id} is invalid`)
-		return
-	}
-
-	try {
-		const settingName = target.dataset.setting
-		const path = settingName.split(".")
-		let {settingValue, settingType} = getSettingByPath(settingName, path)
-
-		// Adapt value to type:
-		switch (settingType) {
-			case "encrypted":
-				/**
-				 * **Note: DO NOT trust this encryption**. it's very weak and uses a public key for encryption.
-				 * There is a reason why there is still a warning about the password being saved in plain text.
-				 * @name notEncrypted
-				 * @memberof options
-				 */
-				settingValue = await insecureCrypt.encrypt(target.value, "betabot Totally-not-secure Super NOT secret key!")
-				break
-			case "boolean":
-				settingValue = target.checked
-				break
-			case "array":
-				settingValue = target.value.split(", ")
-				break
-			case "number":
-				settingValue = deabbreviateNumber(target.value) || settingValue
-				break
-			case "string":
-				settingValue = target.value
-		}
-
-		/**
-		 * Changes a setting without modifying the rest of `settings`, even if the setting has a depth higher than 1
-		 * @function changeSetting
-		 * @param {object} settingsObject `settings` or a child of `settings`, containing the setting
-		 * @param {number} index Current index in `path`
-		 * @memberof options
-		 * @private
-		 */
-		function changeSetting(settingsObject, index) {
-			if (index + 1 === path.length) { // If index is the last index, change the setting
-				settingsObject[path[index]] = settingValue
-			} else { // Else, call `changeSetting()` again to modify the next child
-				settingsObject[path[index]] = changeSetting(settingsObject[path[index]], index + 1)
-			}
-			// Return the modified object:
-			return settingsObject
-		}
-		// Use `[path[0]]` to only set the specific setting (e.g. `css`), and not the whole `settings` object:
-		browser.storage.sync.set({
-			[path[0]]: changeSetting(settings, 0)[path[0]],
-		})
-
-		displayMessage("Changes saved")
-	} catch(error) {
-		displayMessage(`Error: ${error.message}`)
-		console.error(error)
-	}
-}
-
-/**
  * Adds a title to the currency send settings fields
  * @function currencySendTitle
  * @param {event} event `input` event
@@ -252,7 +325,7 @@ async function saveSetting({target}) {
  */
 function currencySendTitle({target}) {
 	const settingName = target.dataset.setting
-	const {settingValue} = getSettingByPath(settingName, settingName.split("."))
+	const {settingValue} = Setting.getSettingByPath(settingName, settingName.split("."))
 	$(target).prop("title", settingValue)
 }
 
@@ -277,24 +350,35 @@ function updatePrice() {
 }
 
 /**
- * Displays or hides the alt settings as needed
- * @function displayAltFields
+ * Displays or hides the login settings as needed
+ * @function displayLoginFields
  * @memberof options
  */
-function displayAltFields() {
-	const value = $("#pattern").val()
-	if (value === "") {
-		$("#number").hide()
-		$("#alts-base-name").hide()
-		$("#alts-unique-names").hide()
-	} else if (value === "roman") {
-		$("#number").show()
-		$("#alts-base-name").show()
-		$("#alts-unique-names").hide()
-	} else if (value === "unique") {
-		$("#number").hide()
-		$("#alts-base-name").hide()
-		$("#alts-unique-names").show()
+function displayLoginFields() {
+	const fieldRows = {
+		number:        $("#alts-number-tr"),
+		pattern:       $("#pattern-tr"),
+		baseName:      $("#alt-base-name-tr"),
+		namesList:     $("#names-list-tr"),
+		mainAccount:   $("#main-account-tr"),
+		loginPassword: $("#login-password-tr"),
+	}
+
+	// Hide everything, then only show what is needed
+	for (const field in fieldRows) fieldRows[field].hide()
+
+	if ($("#add-login-alts").prop("checked")) {
+		fieldRows.pattern.show()
+		fieldRows.mainAccount.show()
+		fieldRows.loginPassword.show()
+		switch ($("#pattern").val()) {
+			case "roman":
+				fieldRows.number.show()
+				fieldRows.baseName.show()
+				break
+			case "unique":
+				fieldRows.namesList.show()
+		}
 	}
 }
 
@@ -386,23 +470,29 @@ async function resetSettings() {
 	if(window.confirm("Are you sure you want to reset ALL settings?") === false) return
 
 	// Don't update settings before reloading:
-	browser.storage.onChanged.removeListener(loadSettings)
+	browser.storage.onChanged.removeListener(Setting.refreshSettings)
 	await browser.storage.sync.clear()
 	log("Resetting settings")
 
 	location.reload()
 }
 
-$(loadSettings)
+$(Setting.init)
+
 $("#reset-css").click(resetCSS)
 $(".tab-button").click(changeTab)
 $("#reset-settings").click(resetSettings)
 
-$("#pattern").on("input", displayAltFields)
-$("[data-setting]").on("input", saveSetting)
-$("#daily-crystals").on("input", updatePrice)
-$("#add-login-alts").on("input", loginChanged)
-$("#wire [id*=-keep]").on("input", currencySendTitle)
 $("#containers-auto, [name=containers]").on("input", saveContainers)
 
-browser.storage.onChanged.addListener(loadSettings)
+window.onbeforeunload = () => {
+	const time = new Date().getTime()
+	for (const setting of Setting.instances) {
+		if (time - setting.lastChanged < 2000) { // If `setting` was last changed less than 2 seconds ago, it still didn't save
+			setting.save()
+			if (settings.verbose) log(`Saved "${setting.name}" before closing`)
+		}
+	}
+}
+
+browser.storage.onChanged.addListener(Setting.refreshSettings)

@@ -2,9 +2,14 @@
 
 /**
  * @file Code to run when on Beta Game page
- * @todo [Add] Set `buyCrys()` to run shortly after page load
  * @todo [Add] Separate code to different folders (game, login, background etc.)
+ * @todo [Add] Figure out a way to avoid double queuing (sometimes the house timer stays after queuing)
  * @todo [Add] When updating settings (`refreshSettings`), only change settings in `changes` instead of changing all of them
+ * @todo [Test] Options Page: Wait for 2 seconds before saving
+ * @todo [Test] Options Page: Don't abbreviate Event Channel ID
+ * @todo [Test] Options Page: Hide or show login fields as needed
+ * @todo [Test] Options Page: Save Changes before closing the tab
+ * @todo [Idea] Set `buyCrys()` to run shortly after page load
  */
 /**
  * @namespace beta-game
@@ -99,8 +104,8 @@ async function betaGame() {
 	}
 	browser.storage.onChanged.addListener(refreshSettings)
 
-	// Event listeners that are currently always on (might change in the future) are below
-	// Event listeners that will be turned on/off as needed are inside toggleInterfaceChanges()
+	/* Event listeners that are currently always on (might change in the future) are below
+	   Event listeners that will be turned on/off as needed are inside toggleInterfaceChanges() */
 
 	// Toggle vars.motdReceived on for a short time after receiving motd message
 	eventListeners.toggle("roa-ws:motd", motd, true)
@@ -359,8 +364,8 @@ $(document).on("roa-ws:all", function(_, data) {
 		$(window).on("message", message => {
 			const origin = message.originalEvent.origin
 			const data = message.originalEvent.data
-			// Make sure we are connecting to the right port
-			// No need to be absolutely sure about it since we don't send sensitive data
+			/* Make sure we are connecting to the right port
+			   No need to be absolutely sure about it since we don't send sensitive data */
 			if (origin === "https://beta.avabur.com" && data === "betabot-ws message") {
 				message.originalEvent.ports[0].onmessage = roaWS
 			}
@@ -842,8 +847,8 @@ $(document).on("roa-ws:all", function(_, data) {
 	async function checkGauntletMessage(_, data) {
 		if (data.c_id === settings.eventChannelID) {
 			await delay(vars.startActionsDelay)
-			// Wait to see if the message is received together with a message of the day,
-			// which means it was only sent due to a chat reconnection, and we should not join the gauntlet.
+			/* Wait to see if the message is received together with a message of the day,
+			   which means it was only sent due to a chat reconnection, and we should not join the gauntlet. */
 			if (vars.motdReceived === false) {
 				joinGauntlet(data.m, data.m_id)
 			}
