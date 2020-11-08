@@ -2,15 +2,6 @@
 
 /**
  * @file Code to run when on Beta Game page
- * @todo [Add] Separate code to different folders (game, login, background etc.)
- * @todo [Add] Figure out a way to avoid double queuing (sometimes the house timer stays after queuing)
- * @todo [Add] When updating settings (`refreshSettings`), only change settings in `changes` instead of changing all of them
- * @todo [Test] Options Page: Wait for 2 seconds before saving
- * @todo [Test] Options Page: Don't abbreviate Event Channel ID
- * @todo [Test] Options Page: Hide or show login fields as needed
- * @todo [Test] Options Page: Save Changes before closing the tab
- * @todo [Idea] Set `buyCrys()` to run shortly after page load
- * @todo [Idea] Socket x5: Only socket the next gem if it's the same type as the last socketed gem
  */
 /**
  * @namespace beta-game
