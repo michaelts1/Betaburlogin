@@ -19,31 +19,30 @@ class Setting {
 	constructor(input) {
 		// Set object properties:
 		this.input = input
-		this.name = input.dataset.setting // Is this really needed? it's almost equivalent to `this.path` and only used in `Setting.getSettingByPath()`
-		this.path = input.dataset.setting.split(".")
+		this.name = input.dataset.setting
+		this.path = input.dataset.setting.split(".") // Is this really needed? its almost equivalent to `this.name`
 		const {settingType, settingValue} = Setting.getSettingByPath(this.name, this.path)
 		this.type = settingType
 		this.value = settingValue
 		this.lastChanged = new Date().getTime()
-		this.runAfterLoad = []
+		this.runAfterChange = []
 
 		// Set functions that will run after any change:
 		switch (this.input.id) {
 			case "daily-crystals":
-				this.runAfterLoad.push(updatePrice)
+				this.runAfterChange.push(updateCrystalsPrice)
 				break
 			case "add-login-alts":
-				this.runAfterLoad.push(loginChanged)
-				/* eslint-disable-next-line no-fallthrough */ // Fall through to push both functions
+				// Fall through
 			case "pattern":
-				this.runAfterLoad.push(displayLoginFields)
+				this.runAfterChange.push(displayLoginFields)
 				break
-			case "crystals-keep".match(/.*-keep$/)?.input: // https://stackoverflow.com/a/18881169/
-				this.runAfterLoad.push(currencySendTitle)
+			case this.input.id.match(/.*-keep$/)?.input: // https://stackoverflow.com/a/18881169/
+				this.runAfterChange.push(currencySendTitle)
 		}
 
-		// Save changes:
-		this.input.oninput = this.valueChanged
+		// Save changes. Using an arrow function because `oninput` functions receive the input element as `this`:
+		this.input.oninput = () => this.valueChanged(this)
 
 		// Load setting value:
 		this.load()
@@ -54,13 +53,16 @@ class Setting {
 
 	/**
 	 * Calls `this.save` after 2 seconds
+	 * @async
 	 * @function valueChanged
 	 * @private
 	 * @memberof options
 	 */
-	valueChanged() {
+	async valueChanged() {
 		this.lastChanged = new Date().getTime()
-		setTimeout(this.save ,2000, this.lastChanged)
+		for (const fun of this.runAfterChange) fun(this.input)
+		await delay(2000)
+		this.save(new Date().getTime())
 	}
 
 	/**
@@ -96,6 +98,9 @@ class Setting {
 				break
 			case "array":
 				this.value = this.input.value.split(", ")
+				if (this.value.length === 1 && this.value[0] === "") { // If `this.value` equals `[ "" ]`
+					this.value = []
+				}
 				break
 			case "number":
 				this.value = deabbreviateNumber(this.input.value) || this.value
@@ -105,7 +110,7 @@ class Setting {
 		}
 
 		// Don't save if the setting didn't change:
-		if (this.value === Setting.getSettingByPath(this.name, this.path).settingValue) return
+		if (objectEquals(this.value, Setting.getSettingByPath(this.name, this.path).settingValue)) return
 
 		/**
 		 * Recursively creates a clone of the child of `settings` containing a specific setting, while using a new value for that setting
@@ -113,10 +118,11 @@ class Setting {
 		 * @param {object} settingsObject The `settings` object
 		 * @param {number} index Current index in `path`. When called manually, this should be 0
 		 * @returns {object} New clone of the child of `settings` containing said setting, using the new value for that setting
+		 * @const
 		 * @private
 		 * @memberof options
 		 */
-		function changeSetting(settingsObject, index) {
+		const changeSetting = (settingsObject, index) => {
 			if (index + 1 === this.path.length) { // If index is the last index, change the setting
 				settingsObject[this.path[index]] = this.value
 			} else { // Else, call `changeSetting()` again to modify the next child
@@ -156,13 +162,13 @@ class Setting {
 				break
 			case "number":
 				// Don't abbreviate if Advance -> Event Channel ID
-				this.input.value = this.input.id === "event-channel-id" ? abbreviateNumber(this.value) : this.value
+				this.input.value = this.input.id === "event-channel-id" ? this.value : abbreviateNumber(this.value)
 				break
 			case "string":
 				this.input.value = this.value
 		}
 
-		for (const fun of this.runAfterLoad) fun()
+		for (const fun of this.runAfterChange) fun(this.input)
 	}
 
 	/**
@@ -172,18 +178,22 @@ class Setting {
 	 * @memberof options
 	 * @static
 	 */
-	static async refreshSettings(changes) {
+	static async refreshSettings() {
 		settings = await browser.storage.sync.get()
 
-		for (const changedSetting in changes) Setting.instances[changedSetting].load()
+		for (const setting of Setting.instances) {
+			if (!objectEquals(setting.value, Setting.getSettingByPath(setting.name, setting.path).settingValue)) {
+				setting.load()
+				if (setting.name.match(/keepAmount$/)) currencySendTitle(setting.input)
+			}
+		}
 
 		displayLoginFields()
-		updatePrice()
-		currencySendTitle()
+		updateCrystalsPrice()
 	}
 
 	/**
-	 * Finds a setting in `settings` based on it's name and path, and returns it's value and type
+	 * Finds a setting in `settings` based on its name and path, and returns its value and type
 	 * @function getSettingByPath
 	 * @param {string} settingName Name of the setting
 	 * @param {string[]} path Path to travel in `settings` in order to get to the setting, splitted to steps (e.g. to find `settings.a.b`, path should be `["a", "b"]`)
@@ -289,7 +299,7 @@ function deabbreviateNumber (input) {
 	const numPart = parts[1]
 	const scale = (parts[2] || "").toUpperCase()
 
-	if (!scale) return input
+	if (!scale) return parseFloat(input)
 
 	const num = parseFloat(numPart.replace(/[^0-9.]/g, ""))
 	const scales = {
@@ -326,10 +336,9 @@ function displayMessage(message, time=2500) {
 /**
  * Adds a title to the currency send settings fields
  * @function currencySendTitle
- * @param {event} event `input` event
- * @param {HTMLInputElement} event.target
+ * @param {HTMLInputElement} target Input element that needs a `title`
  */
-function currencySendTitle({target}) {
+function currencySendTitle(target) {
 	const settingName = target.dataset.setting
 	const {settingValue} = Setting.getSettingByPath(settingName, settingName.split("."))
 	$(target).prop("title", settingValue)
@@ -337,10 +346,10 @@ function currencySendTitle({target}) {
 
 /**
  * Updates the displayed daily crystal prices
- * @function updatePrice
+ * @function updateCrystalsPrice
  * @memberof options
  */
-function updatePrice() {
+function updateCrystalsPrice() {
 	/**
 	 * Returns the cost of buying daily crystals in gold
 	 * @function price
@@ -389,17 +398,6 @@ function displayLoginFields() {
 }
 
 /**
- * Sets login-related settings as non-required/required
- * @function loginChanged
- * @memberof options
- */
-function loginChanged() {
-	const checked = $("#add-login-alts").prop("checked")
-	$("#login .required")[`${checked ? "remove" : "add"}Class`]("hidden") // .removeClass() or .addClass(), respectively
-	$("#login input[size=15],#pattern").get().forEach(elm => elm.required = checked)
-}
-
-/**
  * Switches settings tab
  * @function changeTab
  * @param {event} event Click event object
@@ -437,6 +435,9 @@ function resetCSS() {
  */
 async function fillContainers() {
 	const containers = await browser.contextualIdentities.query({}) // Get all containers
+
+	$("#containers-auto").prop("checked", settings.containers.useAll)
+
 	if (containers.length === 0) { // If there are no containers
 		$("#containers").text("No containers found")
 		return
@@ -453,6 +454,8 @@ async function fillContainers() {
 	for (const container of settings.containers.list) { // Check all containers previously saved
 		$(`#${container}`).prop("checked", true)
 	}
+
+	$("#containers-auto, [name=containers]").on("input", saveContainers)
 }
 
 /**
@@ -462,8 +465,10 @@ async function fillContainers() {
  */
 function saveContainers() {
 	browser.storage.sync.set({
-		useAll: $("#containers-auto").prop("checked"),
-		list: $("[name=containers]:checked").get().map(e => e.id), // Get id's of checked containers,
+		containers: {
+			useAll: $("#containers-auto").prop("checked"),
+			list: $("[name=containers]:checked").get().map(e => e.id), // Get id's of checked containers,
+		},
 	})
 }
 /**
@@ -489,14 +494,11 @@ $("#reset-css").click(resetCSS)
 $(".tab-button").click(changeTab)
 $("#reset-settings").click(resetSettings)
 
-$("#containers-auto, [name=containers]").on("input", saveContainers)
-
 window.onbeforeunload = () => {
 	const time = new Date().getTime()
 	for (const setting of Setting.instances) {
 		if (time - setting.lastChanged < 2000) { // If `setting` was last changed less than 2 seconds ago, it still didn't save
 			setting.save()
-			if (settings.verbose) log(`Saved "${setting.name}" before closing`)
 		}
 	}
 }

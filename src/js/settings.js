@@ -364,27 +364,10 @@ function logSettingsChanges(changes) {
 	getSettings()
 
 	// Log changes:
-	function objectEquals(object1, object2) { // https://stackoverflow.com/a/6713782
-		if (object1 === object2) return true
-		if (!(object1 instanceof Object) || !(object2 instanceof Object)) return false
-		if (object1.constructor !== object2.constructor) return false
-		for (const p in object1) {
-			if (!{}.hasOwnProperty.call(object1, p)) continue
-			if (!{}.hasOwnProperty.call(object2, p)) return false
-			if (object1[p] === object2[p]) continue
-			if (typeof object1[p] !== "object") return false
-			if (!objectEquals(object1[p], object2[p])) return false
-		}
-		for (const p in object2) {
-			if ({}.hasOwnProperty.call(object2, p) && !{}.hasOwnProperty.call(object1, p)) return false
-		}
-		return true
-	}
-
 	const values = Object.values(changes)
 	const keys   = Object.keys(changes)
 	for (let i = 0; i < Object.values(changes).length; i++) {
-		if (objectEquals(values[i].oldValue, values[i].newValue) === false) {
+		if (!objectEquals(values[i].oldValue, values[i].newValue)) {
 			log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
 		}
 	}

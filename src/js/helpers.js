@@ -185,3 +185,28 @@ const insecureCrypt = {
 	 */
 	async decrypt(str, key) { return await this._insecureCrypt(str, key, true) },
 }
+
+/**
+ * @function objectEquals Compares two objects and returns true if they have the same value
+ * @author {@link https://stackoverflow.com/a/6713782|Jean Vincent}
+ * @param {*} object1
+ * @param {*} object2
+ * @returns {Boolean}
+ * @memberof helpers
+ */
+function objectEquals(object1, object2) {
+	if (object1 === object2) return true
+	if (!(object1 instanceof Object) || !(object2 instanceof Object)) return false
+	if (object1.constructor !== object2.constructor) return false
+	for (const p in object1) {
+		if (!{}.hasOwnProperty.call(object1, p)) continue
+		if (!{}.hasOwnProperty.call(object2, p)) return false
+		if (object1[p] === object2[p]) continue
+		if (typeof object1[p] !== "object") return false
+		if (!objectEquals(object1[p], object2[p])) return false
+	}
+	for (const p in object2) {
+		if ({}.hasOwnProperty.call(object2, p) && !{}.hasOwnProperty.call(object1, p)) return false
+	}
+	return true
+}

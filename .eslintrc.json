@@ -10,10 +10,11 @@
 		"ecmaVersion": 11
 	},
 	"globals": {
-		"log": "readonly",
 		"delay": "readonly",
+		"eventListeners": "readonly",
 		"insecureCrypt": "readonly",
-		"eventListeners": "readonly"
+		"log": "readonly",
+		"objectEquals": "readonly"
 	},
 	"rules": {
 		"semi": [
