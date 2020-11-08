@@ -155,6 +155,7 @@ class Setting {
 				this.input.value = this.value.join(", ")
 				break
 			case "number":
+				// Don't abbreviate if Advance -> Event Channel ID
 				this.input.value = this.input.id === "event-channel-id" ? abbreviateNumber(this.value) : this.value
 				break
 			case "string":
