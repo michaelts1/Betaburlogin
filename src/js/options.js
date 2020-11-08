@@ -25,22 +25,25 @@ class Setting {
 		this.type = settingType
 		this.value = settingValue
 		this.lastChanged = new Date().getTime()
+		this.runAfterLoad = []
 
-		// Set oninput functions:
+		// Set functions that will run after any change:
 		switch (this.input.id) {
 			case "daily-crystals":
-				$(this.input).on("input", updatePrice)
+				this.runAfterLoad.push(updatePrice)
 				break
 			case "add-login-alts":
-				$(this.input).on("input", loginChanged)
-				/* eslint-disable-next-line no-fallthrough */ // Fall through to attach both functions to `this.input.oninput`
+				this.runAfterLoad.push(loginChanged)
+				/* eslint-disable-next-line no-fallthrough */ // Fall through to push both functions
 			case "pattern":
-				$(this.input).on("input", displayLoginFields)
+				this.runAfterLoad.push(displayLoginFields)
 				break
 			case "crystals-keep".match(/.*-keep$/)?.input: // https://stackoverflow.com/a/18881169/
-				$(this.input).on("input", currencySendTitle)
+				this.runAfterLoad.push(currencySendTitle)
 		}
-		$(this.input).on("input", this.valueChanged)
+
+		// Save changes:
+		this.input.oninput = this.valueChanged
 
 		// Load setting value:
 		this.load()
@@ -157,6 +160,8 @@ class Setting {
 			case "string":
 				this.input.value = this.value
 		}
+
+		for (const fun of this.runAfterLoad) fun()
 	}
 
 	/**

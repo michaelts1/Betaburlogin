@@ -10,6 +10,7 @@
  * @todo [Test] Options Page: Hide or show login fields as needed
  * @todo [Test] Options Page: Save Changes before closing the tab
  * @todo [Idea] Set `buyCrys()` to run shortly after page load
+ * @todo [Idea] Socket x5: Only socket the next gem if it's the same type as the last socketed gem
  */
 /**
  * @namespace beta-game
