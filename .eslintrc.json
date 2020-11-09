@@ -10,10 +10,11 @@
 		"ecmaVersion": 11
 	},
 	"globals": {
-		"log": "readonly",
 		"delay": "readonly",
+		"eventListeners": "readonly",
 		"insecureCrypt": "readonly",
-		"eventListeners": "readonly"
+		"log": "readonly",
+		"objectEquals": "readonly"
 	},
 	"rules": {
 		"semi": [
@@ -57,8 +58,21 @@
 				"max": 1
 			}
 		],
+		"init-declarations": [
+			"error",
+			"always"
+		],
+		"no-use-before-define": [
+			"error", {
+				"functions": false,
+				"classes": false,
+				"variables": true
+			}
+		],
+		"no-var": "error",
 		"no-eval": "error",
 		"no-implied-eval": "error",
-		"no-trailing-spaces": "error"
+		"no-trailing-spaces": "error",
+		"no-inner-declarations": "off"
 	}
 }

@@ -2,9 +2,6 @@
 
 /**
  * @file Code to run when on Beta Game page
- * @todo [Add] Set `buyCrys()` to run shortly after page load
- * @todo [Add] Store settings separately instead of using one object
- * @todo [Add] Update `ports.main` and `ports.alts` after changing `settings.mainUsername`
  */
 /**
  * @namespace beta-game
@@ -68,41 +65,33 @@ async function betaGame() {
 	/**
 	 * Loads new settings from storage
 	 * @function refreshSettings
-	 * @param {object} changes [StorageChange object](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/StorageChange)
+		* @param {object} changes See {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/onChanged#Parameters|storage.onChanged}
 	 * @memberof beta-game
 	 */
 	async function refreshSettings(changes) {
-		if (settings.verbose) log("Refreshing settings")
+		for (const [name, {newValue}] of Object.entries(changes)) settings[name] = newValue
 
-		settings = await browser.storage.sync.get()
-		vars.isAlt = vars.username !== settings.mainUsername.toLowerCase()
-		vars.mainTrade = getTrade(vars.username)
-		vars.actionsPending = false
-
-		for (const wireRelated of ["wireFrequency", "mainUsername"]) { // If one of these has changed, reset autoWire
-			if (changes[wireRelated]?.oldValue !== changes[wireRelated]?.newValue) {
-				clearInterval(vars.autoWireID)
-				vars.autoWireID = null
-				log("Resetting autoWire")
-			}
+		if ("mainTrade" in changes) {
+			vars.mainTrade = getTrade(vars.username)
 		}
-
-		// Turn on/off autoWire if needed
-		if (vars.autoWireID && !settings.autoWire) {
+		if ("mainUsername" in changes) {
+			vars.isAlt = vars.username !== settings.mainUsername.toLowerCase()
+		}
+		if ("wireFrequency" in changes || "mainUsername" in changes || vars.autoWireID && !settings.autoWire) {
 			clearInterval(vars.autoWireID)
 			vars.autoWireID = null
-		} else if (!vars.autoWireID && settings.autoWire) {
+		}
+		if (!vars.autoWireID && settings.autoWire) {
 			vars.autoWireID = setInterval(wire, settings.wireFrequency*60*1000, settings.mainUsername)
 		}
 
+		vars.actionsPending = false
 		toggleInterfaceChanges(true)
-
-		if (settings.verbose) log(`Alt: ${vars.isAlt ? "yes" : "no"}\nGauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\nAuto Wire: ${vars.autoWireID ? "on" : "off"}`)
 	}
 	browser.storage.onChanged.addListener(refreshSettings)
 
-	// Event listeners that are currently always on (might change in the future) are below
-	// Event listeners that will be turned on/off as needed are inside toggleInterfaceChanges()
+	/* Event listeners that are currently always on (might change in the future) are below
+	   Event listeners that will be turned on/off as needed are inside toggleInterfaceChanges() */
 
 	// Toggle vars.motdReceived on for a short time after receiving motd message
 	eventListeners.toggle("roa-ws:motd", motd, true)
@@ -279,12 +268,12 @@ async function betaGame() {
 
 		let sendMessage = `/wire ${target}`
 
-		for (const currency of settings.currencySend) {
-			if (currency.send === false) continue
+		for (const [name, sendSettings] of Object.entries(settings.currencySend)) {
+			if (sendSettings.send === false) continue
 
-			const amount   = $(`.${currency.name}`).attr("title").replace(/,/g, "")
-			const sellable = $(`.${currency.name}`).attr("data-personal").replace(/,/g, "")
-			let amountToSend = amount - currency.keepAmount // Keep this amount
+			const amount   = $(`.${name}`).attr("title").replace(/,/g, "")
+			const sellable = $(`.${name}`).attr("data-personal").replace(/,/g, "")
+			let amountToSend = amount - sendSettings.keepAmount // Keep this amount
 
 			// Don't send more than you can
 			if (amountToSend > sellable) {
@@ -292,8 +281,8 @@ async function betaGame() {
 			}
 
 			// Only send if you have enough
-			if (amountToSend > currency.minimumAmount) {
-				sendMessage += ` ${amountToSend} ${currency.name},`
+			if (amountToSend > sendSettings.minimumAmount) {
+				sendMessage += ` ${amountToSend} ${name},`
 			}
 		}
 
@@ -361,8 +350,8 @@ $(document).on("roa-ws:all", function(_, data) {
 		$(window).on("message", message => {
 			const origin = message.originalEvent.origin
 			const data = message.originalEvent.data
-			// Make sure we are connecting to the right port
-			// No need to be absolutely sure about it since we don't send sensitive data
+			/* Make sure we are connecting to the right port
+			   No need to be absolutely sure about it since we don't send sensitive data */
 			if (origin === "https://beta.avabur.com" && data === "betabot-ws message") {
 				message.originalEvent.ports[0].onmessage = roaWS
 			}
@@ -730,7 +719,7 @@ $(document).on("roa-ws:all", function(_, data) {
 				return
 			}
 		}
-		if (settings.autoHouse && data.can_build_house) { // Construction
+		if (settings.autoHouse && (/*data.house_timers[0]?.next < 1800 ||*/ data.can_build_house)) { // Construction
 			vars.actionsPending = true
 			$("li#housing").click()
 			await eventListeners.waitFor("roa-ws:page:house")
@@ -747,7 +736,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	}
 
 	/**
-	 * Auto Gauntlet was originally based on [BetaburCheats](https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js)
+	 * Auto Gauntlet was originally based on {@link https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js|BetaburCheats}
 	 * @author {@link https://github.com/dragonminja24|dragonminja24}
 	 * @name "Auto Gauntlet Credits"
 	 * @memberof beta-game
@@ -844,8 +833,8 @@ $(document).on("roa-ws:all", function(_, data) {
 	async function checkGauntletMessage(_, data) {
 		if (data.c_id === settings.eventChannelID) {
 			await delay(vars.startActionsDelay)
-			// Wait to see if the message is received together with a message of the day,
-			// which means it was only sent due to a chat reconnection, and we should not join the gauntlet.
+			/* Wait to see if the message is received together with a message of the day,
+			   which means it was only sent due to a chat reconnection, and we should not join the gauntlet. */
 			if (vars.motdReceived === false) {
 				joinGauntlet(data.m, data.m_id)
 			}
@@ -922,7 +911,8 @@ $(document).on("roa-ws:all", function(_, data) {
 
 		// Option to build a specific item:
 		if (settings.addCustomBuild && $("#betabot-custom-build")[0] === undefined) {
-			if (refresh) { // Don't activate immediately on page load
+			// Don't activate immediately on page load:
+			if (refresh) {
 				getCustomBuild()
 			} else {
 				eventListeners.waitFor("roa-ws:motd").then(() => { // Wait for the page to load

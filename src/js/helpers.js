@@ -10,7 +10,7 @@
 /* eslint-disable no-redeclare, no-unused-vars */ // Defined in this file, used in other files
 
 /**
- * See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/Port)
+ * See {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/Port|MDN Documentation}
  * @typedef {object} runtimePort
  * @property {string=} name Name of the sender
  * @property {object} sender Contains information about the sender of the port
@@ -54,8 +54,8 @@ function delay(ms) {
  * @property {function} waitFor Allows asynchronously waiting for events
  * @property {...function[]}
  * - One or more properties using the following format:
- * - string: function[]
- * - Where the string is the name of the event (e.g. "roa-ws:all"), and function[] is an array of functions that will be called when the event is triggered
+ * - `string: function[]`
+ * - Where `string` is the name of the event (e.g. "roa-ws:all"), and `function[]` is an array of functions that will be called when the event is triggered
  * - Example: `eventListeners["roa-ws:page"] = [onPage, getPage, log]` will call onPage(), getPage(), and log() every time "roa-ws:page" is triggered
  * @memberof helpers
  */
@@ -93,7 +93,7 @@ const eventListeners = {
 	/**
 	 * @typedef {object} waitForEvent
 	 * @property {event} event Event object
-	 * @property {object} data Event data, see [event.data](https://api.jquery.com/event.data/) in jQuery docs
+	 * @property {object} data Event data, see {@link https://api.jquery.com/event.data/|event.data} in jQuery docs
 	 * @memberof helpers
 	 */
 
@@ -184,4 +184,29 @@ const insecureCrypt = {
 	 * @memberof helpers
 	 */
 	async decrypt(str, key) { return await this._insecureCrypt(str, key, true) },
+}
+
+/**
+ * @function objectEquals Compares two objects and returns true if they have the same value
+ * @author {@link https://stackoverflow.com/a/6713782|Jean Vincent}
+ * @param {*} object1
+ * @param {*} object2
+ * @returns {Boolean}
+ * @memberof helpers
+ */
+function objectEquals(object1, object2) {
+	if (object1 === object2) return true
+	if (!(object1 instanceof Object) || !(object2 instanceof Object)) return false
+	if (object1.constructor !== object2.constructor) return false
+	for (const p in object1) {
+		if (!{}.hasOwnProperty.call(object1, p)) continue
+		if (!{}.hasOwnProperty.call(object2, p)) return false
+		if (object1[p] === object2[p]) continue
+		if (typeof object1[p] !== "object") return false
+		if (!objectEquals(object1[p], object2[p])) return false
+	}
+	for (const p in object2) {
+		if ({}.hasOwnProperty.call(object2, p) && !{}.hasOwnProperty.call(object1, p)) return false
+	}
+	return true
 }

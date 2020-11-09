@@ -67,7 +67,7 @@ header {
 /* Form Contents */
 
 #settings {
-	height: 65vh;
+	height: 75.15vh;
 	margin: 7.5em auto auto;
 	overflow-y: auto;
 	width: 28em;
@@ -164,7 +164,7 @@ input[name=containers],
 	text-align: center;
 }
 
-#form-buttons-output {
+#output {
 	color: var(--input-text-color);
 	text-align: center;
 }
@@ -277,7 +277,7 @@ td {
 	border-radius: .75em;
 	border: 1px var(--input-border-color) solid;
 	content: attr(data-tooltip);
-	left: 23%;
+	left: 22.8%;
 	min-width: 255px;
 	padding: .5em;
 	position: absolute;
@@ -296,24 +296,7 @@ td {
 	color: cadetblue;
 }
 
-.required {
-	color: red;
-}
-
-.required[data-tooltip] {
-	border-bottom: 1px dotted black;
-}
-
-.required:hover::after {
-	color: goldenrod;
-}
-
 /* Buttons */
-
-#form-buttons {
-	display: flex;
-	justify-content: center;
-}
 
 button {
 	align-items: center;
