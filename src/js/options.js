@@ -341,7 +341,7 @@ function displayMessage(message, time=2500) {
 function currencySendTitle(target) {
 	const settingName = target.dataset.setting
 	const {settingValue} = Setting.getSettingByPath(settingName, settingName.split("."))
-	$(target).prop("title", settingValue)
+	$(target).prop("title", settingValue.toLocaleString())
 }
 
 /**

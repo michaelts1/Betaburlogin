@@ -65,33 +65,27 @@ async function betaGame() {
 	/**
 	 * Loads new settings from storage
 	 * @function refreshSettings
-	 * @param {object} changes [StorageChange object](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/StorageChange)
+	 * @param {object} changes See [storage.onChanged](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/onChanged#Parameters)
 	 * @memberof beta-game
 	 */
 	async function refreshSettings(changes) {
-		if (settings.verbose) log("Refreshing settings")
+		for (const [name, {newValue}] of Object.entries(changes)) settings[name] = newValue
 
-		settings = await browser.storage.sync.get()
-		vars.isAlt = vars.username !== settings.mainUsername.toLowerCase()
-		vars.mainTrade = getTrade(vars.username)
-		vars.actionsPending = false
-
-		// If one of these has changed, reset autoWire:
-		for (const wireRelated of ["wireFrequency", "mainUsername"]) {
-			if (changes[wireRelated]?.oldValue !== changes[wireRelated]?.newValue) {
-				clearInterval(vars.autoWireID)
-				vars.autoWireID = null
-			}
+		if ("mainTrade" in changes) {
+			vars.mainTrade = getTrade(vars.username)
 		}
-
-		// Turn on/off autoWire if needed
-		if (vars.autoWireID && !settings.autoWire) {
+		if ("mainUsername" in changes) {
+			vars.isAlt = vars.username !== settings.mainUsername.toLowerCase()
+		}
+		if ("wireFrequency" in changes || "mainUsername" in changes || vars.autoWireID && !settings.autoWire) {
 			clearInterval(vars.autoWireID)
 			vars.autoWireID = null
-		} else if (!vars.autoWireID && settings.autoWire) {
+		}
+		if (!vars.autoWireID && settings.autoWire) {
 			vars.autoWireID = setInterval(wire, settings.wireFrequency*60*1000, settings.mainUsername)
 		}
 
+		vars.actionsPending = false
 		toggleInterfaceChanges(true)
 	}
 	browser.storage.onChanged.addListener(refreshSettings)
