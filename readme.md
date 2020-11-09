@@ -20,6 +20,6 @@ Firefox addon to allow automation in [Avabur's beta server](https://beta.avabur.
 * Move username to the middle of the screen
 
 ###### Notes:
-1. This addon Requires [Container Tabs](https://support.mozilla.org/en-US/kb/containers)
+1. [Container Tabs](https://support.mozilla.org/en-US/kb/containers) are required for managing more than one account
 2. All features can be turned on/off. If you find a feature that can't be turned off, please create a [new issue](https://github.com/michaelts1/Betaburlogin/issues/new)
 3. Editing the code to run this addon on the live server will get you banned
