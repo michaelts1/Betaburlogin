@@ -65,7 +65,7 @@ async function betaGame() {
 	/**
 	 * Loads new settings from storage
 	 * @function refreshSettings
-	 * @param {object} changes See [storage.onChanged](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/onChanged#Parameters)
+		* @param {object} changes See {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/onChanged#Parameters|storage.onChanged}
 	 * @memberof beta-game
 	 */
 	async function refreshSettings(changes) {
@@ -736,7 +736,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	}
 
 	/**
-	 * Auto Gauntlet was originally based on [BetaburCheats](https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js)
+	 * Auto Gauntlet was originally based on {@link https://github.com/dragonminja24/betaburCheats/blob/master/betaburCheatsHeavyWeight.js|BetaburCheats}
 	 * @author {@link https://github.com/dragonminja24|dragonminja24}
 	 * @name "Auto Gauntlet Credits"
 	 * @memberof beta-game

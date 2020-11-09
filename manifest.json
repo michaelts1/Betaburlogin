@@ -31,28 +31,28 @@
 				"https://www.avabur.com/",
 				"https://www.avabur.com/?expired=1"
 			],
-			"js": ["src/js/live-login.js"]
+			"js": ["src/js/login/live-login.js"]
 		},
 		{
 			"matches": [
 				"https://beta.avabur.com/?expired=1",
 				"https://beta.avabur.com/"
 			],
-			"js": ["src/js/beta-login.js"]
+			"js": ["src/js/login/beta-login.js"]
 		},
 		{
 			"matches": [
 				"https://beta.avabur.com/game"
 			],
-			"js": ["src/js/beta-game.js"]
+			"js": ["src/js/game/beta-game.js"]
 		}
 	],
 
 	"background": {
 		"scripts": [
 			"src/js/helpers.js",
-			"src/js/settings.js",
-			"src/js/background.js"
+			"src/js/background/settings.js",
+			"src/js/background/background.js"
 		]
 	},
 

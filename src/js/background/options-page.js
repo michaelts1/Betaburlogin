@@ -26,6 +26,7 @@ class Setting {
 		this.value = settingValue
 		this.lastChanged = new Date().getTime()
 		this.runAfterChange = []
+		this.runAfterSave = []
 
 		// Set functions that will run after any change:
 		switch (this.input.id) {
@@ -39,6 +40,10 @@ class Setting {
 				break
 			case this.input.id.match(/.*-keep$/)?.input: // https://stackoverflow.com/a/18881169/
 				this.runAfterChange.push(currencySendTitle)
+				this.runAfterSave.push(async setting => {
+					// Update the displayed value (e.g 1000b => 1T)
+					setting.value = abbreviateNumber(deabbreviateNumber(setting.value))
+				})
 		}
 
 		// Save changes. Using an arrow function because `oninput` functions receive the input element as `this`:
@@ -109,6 +114,8 @@ class Setting {
 				this.value = this.input.value
 		}
 
+		for (const fun of this.runAfterSave) fun(this.input)
+
 		// Don't save if the setting didn't change:
 		if (objectEquals(this.value, Setting.getSettingByPath(this.name, this.path).settingValue)) return
 
@@ -161,7 +168,7 @@ class Setting {
 				this.input.value = this.value.join(", ")
 				break
 			case "number":
-				// Don't abbreviate if Advance -> Event Channel ID
+				// Don't abbreviate if it's the Event Channel ID field:
 				this.input.value = this.input.id === "event-channel-id" ? this.value : abbreviateNumber(this.value)
 				break
 			case "string":
@@ -184,7 +191,6 @@ class Setting {
 		for (const setting of Setting.instances) {
 			if (!objectEquals(setting.value, Setting.getSettingByPath(setting.name, setting.path).settingValue)) {
 				setting.load()
-				if (setting.name.match(/keepAmount$/)) currencySendTitle(setting.input)
 			}
 		}
 
@@ -201,6 +207,7 @@ class Setting {
 	 * @returns {*} settingValue
 	 * @returns {string} settingType
 	 * @static
+	 * @memberof options
 	 */
 	static getSettingByPath(settingName, path) {
 		let settingValue = settings
@@ -229,6 +236,7 @@ class Setting {
 	 * @async
 	 * @function init
 	 * @static
+	 * @memberof options
 	 */
 	static async init() {
 		settings = await browser.storage.sync.get()
@@ -336,12 +344,11 @@ function displayMessage(message, time=2500) {
 /**
  * Adds a title to the currency send settings fields
  * @function currencySendTitle
- * @param {HTMLInputElement} target Input element that needs a `title`
+ * @param {HTMLInputElement} target
+ * @memberof options
  */
 function currencySendTitle(target) {
-	const settingName = target.dataset.setting
-	const {settingValue} = Setting.getSettingByPath(settingName, settingName.split("."))
-	$(target).prop("title", settingValue.toLocaleString())
+	target.title = deabbreviateNumber(target.value).toLocaleString()
 }
 
 /**

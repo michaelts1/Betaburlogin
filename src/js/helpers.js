@@ -10,7 +10,7 @@
 /* eslint-disable no-redeclare, no-unused-vars */ // Defined in this file, used in other files
 
 /**
- * See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/Port)
+ * See {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/Port|MDN Documentation}
  * @typedef {object} runtimePort
  * @property {string=} name Name of the sender
  * @property {object} sender Contains information about the sender of the port
@@ -93,7 +93,7 @@ const eventListeners = {
 	/**
 	 * @typedef {object} waitForEvent
 	 * @property {event} event Event object
-	 * @property {object} data Event data, see [event.data](https://api.jquery.com/event.data/) in jQuery docs
+	 * @property {object} data Event data, see {@link https://api.jquery.com/event.data/|event.data} in jQuery docs
 	 * @memberof helpers
 	 */
 
