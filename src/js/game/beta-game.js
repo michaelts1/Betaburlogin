@@ -2,6 +2,7 @@
 
 /**
  * @file Code to run when on Beta Game page
+ * @todo {@link https://github.com/michaelts1/Betaburlogin/projects}
  */
 /**
  * @namespace beta-game
@@ -665,12 +666,24 @@ $(document).on("roa-ws:all", function(_, data) {
 		log("Socketing gems")
 		vars.actionsPending = true
 
+		let firstGemName = null
 		// Until there are no more empty slots, or until the user closes the modal:
 		while ($("#socketThisGem").is(":visible")) {
 			$("#socketThisGem").click()
 
-			// Wait for roa-ws:page:gem_socket_to_item event and add a small pause, before the next iteration:
-			await eventListeners.waitFor("roa-ws:page:gem_socket_to_item")
+			// Wait for `roa-ws:page:gem_socket_to_item` event:
+			const {data} = await eventListeners.waitFor("roa-ws:page:gem_socket_to_item")
+
+			/* If this is the first gem socketed, assign `firstGemName` the name of this gem.
+			   Since `data.m` contains a very long html string, we need to extract the gem name.
+			   A successful result might look like: "Tier 200 Diamond of Agile Mastery" */
+			firstGemName = firstGemName ?? (new DOMParser()).parseFromString(data.m, "text/html").body.children[0].textContent
+			const nextGemName = $("#socketableGems option").filter(":selected").text().match(/.*?(?= \()/)[0]
+
+			// Only socket the next gem if it the same as the first socketed gem:
+			if (nextGemName !== firstGemName) break
+
+			// Add a small pause before the next iteration:
 			await delay(settings.actionsDelay)
 		}
 
