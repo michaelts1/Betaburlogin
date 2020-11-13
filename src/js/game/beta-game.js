@@ -33,6 +33,7 @@ async function betaGame() {
 		this.motdReceived       = false
 		this.actionsPending     = false
 		this.staminaCooldown    = false
+		this.houseItemQueued    = false
 		this.username           = $("#username").text()
 		this.mainTrade          = getTrade(this.username)
 		this.isAlt              = this.username !== settings.mainUsername.toLowerCase()
@@ -702,7 +703,8 @@ $(document).on("roa-ws:all", function(_, data) {
 	async function checkResults(_, data) {
 		data = data.results.p
 
-		if (settings.autoStamina && data.autos_remaining < settings.minStamina && !vars.staminaCooldown) { // Stamina
+		// Stamina:
+		if (settings.autoStamina && data.autos_remaining < settings.minStamina && !vars.staminaCooldown) {
 			if (settings.verbose) log("Replenishing stamina")
 			$("#replenishStamina").click()
 			vars.staminaCooldown = true
@@ -711,10 +713,11 @@ $(document).on("roa-ws:all", function(_, data) {
 			return
 		}
 
-		// Actions that should always be performed go before this
+		// Actions that should always be performed go before this line:
 		if (vars.actionsPending) return
 
-		if (settings.autoQuests) { // Quests
+		// Quests:
+		if (settings.autoQuests) {
 			if (data.bq_info2?.c >= data.bq_info2.r) {
 				vars.questCompleting = "kill"
 			} else if (data.tq_info2?.c >= data.tq_info2.r) {
@@ -732,14 +735,23 @@ $(document).on("roa-ws:all", function(_, data) {
 				return
 			}
 		}
-		if (settings.autoHouse && (/*data.house_timers[0]?.next < 1800 ||*/ data.can_build_house)) { // Construction
-			vars.actionsPending = true
-			$("li#housing").click()
-			await eventListeners.waitFor("roa-ws:page:house")
-			selectBuild()
-			return
+		// Construction:
+		if (settings.autoHouse) {
+			switch (true) {
+				case data.house_timers[0]?.next < 1800 && !vars.houseItemQueued:
+					vars.houseItemQueued = true
+					setTimeout( () => vars.houseItemQueued = false, 30*60*1000)
+					// Fall through
+				case data.can_build_house:
+					vars.actionsPending = true
+					$("li#housing").click()
+					await eventListeners.waitFor("roa-ws:page:house")
+					selectBuild()
+					return
+			}
 		}
-		if (settings.autoHarvestron && data.can_house_harvest) { // Harvestron
+		// Harvestron:
+		if (settings.autoHarvestron && data.can_house_harvest) {
 			vars.actionsPending = true
 			$("#harvestronNotifier")[0].click()
 			await eventListeners.waitFor("roa-ws:page:house_room_item")
