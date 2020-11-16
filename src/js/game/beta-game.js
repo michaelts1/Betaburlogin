@@ -40,9 +40,8 @@ async function betaGame() {
 		this.autoWireID         = settings.autoWire ? setInterval(wire, settings.wireFrequency*60*1000, settings.mainUsername) : null
 	}
 
-	if (settings.verbose) {
-		log(`Starting up (Beta Game)\nUsername: ${vars.username}\nAlt: ${vars.isAlt ? "yes" : "no"}\nGauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\nAuto Wire: ${vars.autoWireID ? "on" : "off"}`)
-	}
+	if (settings.verbose) log(`Starting up (Beta Game)\nUsername: ${vars.username}\nAlt: ${vars.isAlt ? "yes" : "no"}
+Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\nAuto Wire: ${vars.autoWireID ? "on" : "off"}`)
 
 	/**
 	 * @typedef {helpers.runtimePort} runtimePort
@@ -112,7 +111,7 @@ async function betaGame() {
 	function usernameChange(_, data) {
 		if (data.s === 0) return // Unsuccessful name change
 
-		log(`User has changed name from ${vars.username} to ${data.u}`)
+		if (settings.verbose) log(`User has changed name from ${vars.username} to ${data.u}`)
 		$.alert(`It looks like you have changed your username from ${vars.username} to ${data.u}.
 			If you used the old username in BetaburLogin settings page, you might want to
 			update these settings`, "Name Changed")
@@ -139,7 +138,7 @@ async function betaGame() {
 		$("#houseQuickBuildWrapper").append(select + "</select></div>")
 
 		$("#modalBackground, #modal2Wrapper").prop("style", "") // Return to normal
-		log("Added Custom Build select menu")
+		if (settings.verbose) log("Added Custom Build select menu")
 		completeTask()
 	}
 
@@ -234,7 +233,7 @@ async function betaGame() {
 		if (settings.verbose) log(`Spawning ${amount} level ${tier*10} gems with type value of ${type} and splice value of ${splice}`)
 
 		if (tier > parseInt($("#level").text()) * 10 || amount > 60 || type === 65535 || splice === 65535 || type === splice) {
-			log("Invalid request. Aborting spawn")
+			if (settings.verbose) log("Invalid request. Aborting spawn")
 			return
 		}
 
@@ -461,7 +460,6 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	async function selectBuild() {
-		if (settings.verbose) log("Selecting build")
 		const itemId = parseInt($("#betabot-select-build").val())
 
 		await delay(vars.startActionsDelay)
@@ -664,12 +662,11 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	async function socketGems() {
-		log("Socketing gems")
 		vars.actionsPending = true
-
 		let firstGemName = null
+
 		// Until there are no more empty slots, or until the user closes the modal:
-		while ($("#socketThisGem").is(":visible")) {
+		while ($("#socketableGems option").eq(0).is(":visible")) {
 			$("#socketThisGem").click()
 
 			// Wait for `roa-ws:page:gem_socket_to_item` event:
@@ -677,19 +674,21 @@ $(document).on("roa-ws:all", function(_, data) {
 
 			/* If this is the first gem socketed, assign `firstGemName` the name of this gem.
 			   Since `data.m` contains a very long html string, we need to extract the gem name.
-			   A successful result might look like: "Tier 200 Diamond of Agile Mastery" */
+			   `firstGemName` should look like "Tier 200 Diamond of Agile Mastery" */
 			firstGemName = firstGemName ?? (new DOMParser()).parseFromString(data.m, "text/html").body.children[0].textContent
-			const nextGemName = $("#socketableGems option").filter(":selected").text().match(/.*?(?= \()/)[0]
 
-			// Only socket the next gem if it the same as the first socketed gem:
+			// If `$("#socketableGems option")` length is `0`, use `null`:
+			const nextGemName = ($("#socketableGems option").filter(":selected").text().match(/.*?(?= \()/) ?? [null])[0]
+
+			// Only socket the next gem if it the same type as the first socketed gem:
 			if (nextGemName !== firstGemName) break
 
 			// Add a small pause before the next iteration:
-			await delay(settings.actionsDelay)
+			await delay(settings.startActionsDelay)
 		}
 
 		vars.actionsPending = false
-		log("Socketing complete")
+		if (settings.verbose) log("Finished socketing gems")
 	}
 
 	/**
@@ -739,6 +738,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		if (settings.autoHouse) {
 			switch (true) {
 				case data.house_timers[0]?.next < 1800 && !vars.houseItemQueued:
+					if (settings.verbose) log("House timer less than 30 minutes, queuing another item")
 					vars.houseItemQueued = true
 					setTimeout( () => vars.houseItemQueued = false, 30*60*1000)
 					// Fall through

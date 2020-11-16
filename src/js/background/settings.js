@@ -364,6 +364,8 @@ function logSettingsChanges(changes) {
 	getSettings()
 
 	// Log changes:
+	if (!settings.verbose) return
+
 	const values = Object.values(changes)
 	const keys   = Object.keys(changes)
 	for (let i = 0; i < Object.values(changes).length; i++) {
