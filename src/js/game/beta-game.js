@@ -66,7 +66,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 	/**
 	 * Loads new settings from storage
 	 * @function refreshSettings
-		* @param {object} changes See {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/onChanged#Parameters|storage.onChanged}
+	 * @param {object} changes See {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/onChanged#Parameters|storage.onChanged}
 	 * @memberof beta-game
 	 */
 	async function refreshSettings(changes) {
