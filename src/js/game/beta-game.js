@@ -60,6 +60,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 		if (message.text === "send currency") wire(message.recipient)
 		if (message.text === "jump mobs") jumpMobs(message.number)
 		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
+		if (message.text === "list of active alts") spreadCurrency(message.alts)
 		if (message.text === "close banners") closeBanner()
 	})
 
@@ -173,7 +174,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 	 * @memberof beta-game
 	 */
 	function appendName() {
-		if ($("#betabot-clear-username")[0] === undefined) {
+		if (!$("#betabot-clear-username")[0]) {
 			$("#roomName").append(`<span id="betabot-clear-username">${vars.username}</span>`)
 			if (settings.verbose) log("Appended username to room name")
 		}
@@ -214,7 +215,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 	 * @memberof beta-game
 	 */
 	function closeBanner() {
-		if ($("#close_general_notification")[0] === undefined) return // Don't run if the banner is already closed
+		if (!$("#close_general_notification")[0]) return // Don't run if the banner is already closed
 		$("#close_general_notification")[0].click()
 		if (settings.verbose) log("Banner closed")
 	}
@@ -257,8 +258,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 	}
 
 	/**
-	 * - Sends currency to another user
-	 * - Exact settings can be changed by the user under the Currency Send section of the Options Page.
+	 * - Sends currency to another user (according to the user's currency send settings)
 	 * @function wire
 	 * @param {string} target Wire recipient
 	 * @memberof beta-game
@@ -270,16 +270,14 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 		let sendMessage = `/wire ${target}`
 
 		for (const [name, sendSettings] of Object.entries(settings.currencySend)) {
-			if (sendSettings.send === false) continue
+			if (!sendSettings.send) continue
 
 			const amount   = $(`.${name}`).attr("title").replace(/,/g, "")
 			const sellable = $(`.${name}`).attr("data-personal").replace(/,/g, "")
 			let amountToSend = amount - sendSettings.keepAmount // Keep this amount
 
 			// Don't send more than you can
-			if (amountToSend > sellable) {
-				amountToSend = sellable
-			}
+			if (amountToSend > sellable) amountToSend = sellable
 
 			// Only send if you have enough
 			if (amountToSend > sendSettings.minimumAmount) {
@@ -290,6 +288,43 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 		if (sendMessage !== `/wire ${target}`) {
 			$("#chatMessage").text(sendMessage)
 			$("#chatSendMessage").click()
+		}
+	}
+
+	/**
+	 * Spreads all currencies evenly across all alts (according to the user's currency send settings)
+	 * @function spreadCurrency
+	 * @param {string[]} alts Alt names to spread the currency across (e.g. `["altI", "altII"]`)
+	 */
+	function spreadCurrency(alts) {
+		// Don't spread to yourself:
+		alts.filter(name => name !== vars.username)
+
+		let sendMessage = ""
+
+		// Calculate the amounts:
+		for (const [currencyName, sendSettings] of Object.entries(settings.currencySend)) {
+			const totalAmount = $(`.${currencyName}`).attr("title").replace(/,/g, "")
+			const marketable = $(`.${currencyName}`).attr("data-personal").replace(/,/g, "")
+
+			// Keep the specified amount to yourself:
+			let amountToSend = totalAmount - sendSettings.keepAmount
+			// Only send what you can:
+			if (amountToSend > marketable) amountToSend = marketable
+			// Divide what you can send by the amount of alts:
+			amountToSend = amountToSend / alts.length
+			// Only continue if you have enough to send:
+			if (amountToSend > sendSettings.minimumAmount) {
+				sendMessage += ` ${amountToSend} ${currencyName},`
+			}
+		}
+
+		for (let i = 0; i < alts.length; i++) {
+			// Wait for 6 seconds between each wire, since wiring is limited to 5 wires per 30 seconds:
+			setTimeout( () => {
+				$("#chatMessage").text(`/wire ${alts[i]} ${sendMessage}`)
+				$("#chatSendMessage").click()
+			}, 6000*i)
 		}
 	}
 
@@ -649,7 +684,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	function addSocket5Button() {
-		if ($("#betabot-socket-5")[0] === undefined) {
+		if (!$("#betabot-socket-5")[0]) {
 			$("#socketThisGem").after(`<button id="betabot-socket-5">Socket Gem x5</button>`)
 			$("#betabot-socket-5").click(socketGems)
 		}
@@ -860,7 +895,7 @@ $(document).on("roa-ws:all", function(_, data) {
 			await delay(vars.startActionsDelay)
 			/* Wait to see if the message is received together with a message of the day,
 			   which means it was only sent due to a chat reconnection, and we should not join the gauntlet. */
-			if (vars.motdReceived === false) {
+			if (!vars.motdReceived) {
 				joinGauntlet(data.m, data.m_id)
 			}
 		}
@@ -896,12 +931,22 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	async function toggleInterfaceChanges(refresh) {
-		// Request Currency Button:
-		if (settings.addRequestMoney && $("#betabot-request-currency")[0] === undefined) {
-			$("#username").after(`<button id="betabot-request-currency"><a>Request Currency</a></button>`)
-			$("#betabot-request-currency").click(() => { port.postMessage({text: "requesting currency"}) })
-		} else if (settings.addRequestMoney === false && $("#betabot-request-currency")[0] !== undefined) {
-			$("#betabot-request-currency").remove()
+		// Add an empty div after the username:
+		if(!refresh) $("#username").after(`<div id="betabot-next-to-name"></div>`)
+
+		// Button next to name:
+		{
+			if (settings.buttonNextToName === "request" && !$("#betabot-request-currency")[0]) {
+				$("betabot-next-to-name").empty()
+				$("#betabot-next-to-name").append(`<button id="betabot-request-currency"><a>Request Currency</a></button>`)
+				$("#betabot-request-currency").click(() => port.postMessage({text: "requesting currency"}) )
+			} else if (settings.buttonNextToName === "spread" && !$("#betabot-spread-button")[0]) {
+				$("betabot-next-to-name").empty()
+				$("#betabot-next-to-name").append(`<button id="betabot-spread-button"><a>Spread Currency</a></button>`)
+				$("#betabot-spread-button").click(() => port.postMessage({text: "requesting a list of active alts"}) )
+			} else if (!settings.buttonNextToName) {
+				$("betabot-next-to-name").empty()
+			}
 		}
 
 		// Make it easier to see what alt it is:
@@ -922,9 +967,9 @@ $(document).on("roa-ws:all", function(_, data) {
 		}
 
 		// Remove Effects Box:
-		if (settings.removeEffects && $("#effectInfo")[0] !== undefined) {
+		if (settings.removeEffects && $("#effectInfo")[0]) {
 			$("#effectInfo").remove()
-		} else if (settings.removeEffects === false && $("#effectInfo")[0] === undefined) {
+		} else if (!settings.removeEffects && !$("#effectInfo")[0]) {
 			$("#gauntletInfo").after(`
 			<div id="effectInfo" style="display: block;">
 				<div class="ui-element border2">
@@ -935,7 +980,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		}
 
 		// Option to build a specific item:
-		if (settings.addCustomBuild && $("#betabot-custom-build")[0] === undefined) {
+		if (settings.addCustomBuild && !$("#betabot-custom-build")[0]) {
 			// Don't activate immediately on page load:
 			if (refresh) {
 				getCustomBuild()
@@ -944,7 +989,7 @@ $(document).on("roa-ws:all", function(_, data) {
 					getCustomBuild()
 				})
 			}
-		} else if (settings.addCustomBuild === false && $("#betabot-custom-build")[0] !== undefined) {
+		} else if (!settings.addCustomBuild && $("#betabot-custom-build")[0]) {
 			$("#betabot-custom-build").remove()
 		}
 
@@ -975,7 +1020,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		eventListeners.toggle("roa-ws:modalContent", addAltsSpawn, vars.isAlt && settings.addSpawnGems)
 
 		// Jump mobs:
-		if (vars.isAlt && settings.addJumpMobs && $("#betabot-mob-jump")[0] === undefined) {
+		if (vars.isAlt && settings.addJumpMobs && !$("#betabot-mob-jump")[0]) {
 			$("#autoEnemy").after(`
 			<div class="mt10" id="betabot-mob-jump" style="display: block;">
 				<input id="betabot-mob-jump-number" type="number" size=1>
@@ -992,7 +1037,7 @@ $(document).on("roa-ws:all", function(_, data) {
 				port.postMessage({text: "move to mob", number: number})
 				if (settings.verbose) log(`Requested to move all alts ${number} mobs up`)
 			})
-		} else if ((!vars.isAlt || settings.addJumpMobs === false) && $("#betabot-mob-jump")[0] !== undefined) {
+		} else if ((!settings.addJumpMobs || !vars.isAlt) && $("#betabot-mob-jump")[0]) {
 			$("#betabot-mob-jump").remove()
 		}
 	}

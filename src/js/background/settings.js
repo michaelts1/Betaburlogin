@@ -17,7 +17,7 @@
  * @type {number}
  * @memberof settings
  */
-const SETTINGS_VERSION = 18
+const SETTINGS_VERSION = 19
 
 /**
  * - CSS code for Betaburlogin interface changes
@@ -100,7 +100,6 @@ async function getSettings() {
 			addCustomBuild   : true,
 			addJumpMobs      : true,
 			addOpenTabs      : true,
-			addRequestMoney  : true,
 			addSocketX5      : true,
 			addSpawnGems     : true,
 			addUsername      : true,
@@ -117,6 +116,7 @@ async function getSettings() {
 			removeBanner     : false,
 			removeEffects    : false,
 			verbose          : false,
+			buttonNextToName : "",
 			altBaseName      : "",
 			loginPassword    : "",
 			mainAccount      : "",
@@ -332,6 +332,9 @@ function updateSettings() {
 			}
 			settings.currencySend = tmp
 		}
+		case 18:
+			// `addRequestMoney` is now one of the options in `buttonNextToName`:
+			settings.buttonNextToName = settings.addRequestMoney ? "request" : ""
 		default:
 			// Update internal CSS:
 			if (settings.css.addon !== ADDON_CSS) {

@@ -62,41 +62,41 @@ browser.runtime.onConnect.addListener(async port => {
 		case "alt":
 			ports.alts.push(port)
 			port.onMessage.addListener(message => {
-				if (message.text === "move to mob") {
-					log(`moving all alts to mob ${message.number}`)
-					jumpMobs(message.number)
-				}
-				if (message.text === "spawnGem") {
-					log(`${port.name} requested to spawn gems: ${message}`)
-					spawnGem(message.type, message.splice, message.tier, message.amount)
+				switch (message.text) {
+					case "move to mob":
+						jumpMobs(message.number)
+						break
+					case "spawnGem":
+						spawnGem(message.type, message.splice, message.tier, message.amount)
 				}
 			})
 	}
 
 	if (["main", "alt"].includes(port.role)) { // If beta account
 		port.onMessage.addListener(message => {
-			if (message.text === "requesting currency") { // Send currency
-				log(`${port.name} requested currency`)
-				sendCurrency(port.name)
-			}
-			if (message.text === "banner closed") {
-				closeBanners()
+			switch (message.text) {
+				case "requesting currency":
+					sendCurrency(port.name)
+					break
+				case "banner closed":
+					closeBanners()
+					break
+				case "requesting a list of active alts":
+					port.postMessage({
+						text: "list of active alts",
+						alts: [ports.main.name, ...ports.alts.map(alt => alt.name)],
+					})
 			}
 		})
 	}
 
-	// When a port disconnects, forget it
+	// When a port disconnects, forget it:
 	port.onDisconnect.addListener( () => {
-		if (port.role === "live") {
-			ports.live = null
-		} else if (port.role === "login") {
-			const index = ports.logins.indexOf(port)
-			if (index !== -1) ports.logins.splice(index, 1)
-		} else if (port.role === "main") {
-			ports.main = null
-		} else if (port.role === "alt") {
-			const index = ports.alts.indexOf(port)
-			if (index !== -1) ports.alts.splice(index, 1)
+		if (["live", "main"].includes(port.role)) {
+			ports[port.role] = null
+		} else if (["alt", "login"].includes(port.role)) {
+			const index = ports[port.role + "s"].indexOf(port)
+			if (index !== -1) ports[port.role + "s"].splice(index, 1)
 		}
 		log(`${port.role}${port.name ? ` (${port.name})` : ""} disconnected`)
 	})
@@ -110,7 +110,7 @@ browser.runtime.onConnect.addListener(async port => {
  */
 async function openTabs() {
 	let containers = await browser.contextualIdentities.query({}) // Get all containers
-	if (settings.containers.useAll === false) {
+	if (!settings.containers.useAll) {
 		containers = containers.filter(e => settings.containers.list.includes(e.name)) // Filter according to settings
 	}
 
