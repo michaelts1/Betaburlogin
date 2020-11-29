@@ -36,10 +36,10 @@ const ADDON_CSS =
 	content: ": ";
 	font-size: 14px;
 }
-#betabot-request-currency {
+#betabot-next-to-name {
 	margin-left: 10px;
 }
-#betabot-request-currency a {
+#betabot-next-to-name a {
 	line-height: 10px;
 	padding: 3px;
 	text-decoration: none;
@@ -335,6 +335,8 @@ function updateSettings() {
 		case 18:
 			// `addRequestMoney` is now one of the options in `buttonNextToName`:
 			settings.buttonNextToName = settings.addRequestMoney ? "request" : ""
+			delete settings.addRequestMoney
+			browser.storage.sync.remove("addRequestMoney")
 		default:
 			// Update internal CSS:
 			if (settings.css.addon !== ADDON_CSS) {

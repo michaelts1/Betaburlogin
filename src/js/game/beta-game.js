@@ -298,12 +298,15 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 	 */
 	function spreadCurrency(alts) {
 		// Don't spread to yourself:
-		alts.filter(name => name !== vars.username)
+		alts = alts.filter(name => name !== vars.username).sort()
 
+		log(`Spreading currencies among ${alts.length} other users`)
 		let sendMessage = ""
 
 		// Calculate the amounts:
 		for (const [currencyName, sendSettings] of Object.entries(settings.currencySend)) {
+			if (!sendSettings.send) continue
+
 			const totalAmount = $(`.${currencyName}`).attr("title").replace(/,/g, "")
 			const marketable = $(`.${currencyName}`).attr("data-personal").replace(/,/g, "")
 
@@ -312,7 +315,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 			// Only send what you can:
 			if (amountToSend > marketable) amountToSend = marketable
 			// Divide what you can send by the amount of alts:
-			amountToSend = amountToSend / alts.length
+			amountToSend = Math.floor(amountToSend / alts.length)
 			// Only continue if you have enough to send:
 			if (amountToSend > sendSettings.minimumAmount) {
 				sendMessage += ` ${amountToSend} ${currencyName},`
@@ -932,20 +935,20 @@ $(document).on("roa-ws:all", function(_, data) {
 	 */
 	async function toggleInterfaceChanges(refresh) {
 		// Add an empty div after the username:
-		if(!refresh) $("#username").after(`<div id="betabot-next-to-name"></div>`)
+		if(!refresh) $("#username").after(`<span id="betabot-next-to-name"></span>`)
 
 		// Button next to name:
 		{
 			if (settings.buttonNextToName === "request" && !$("#betabot-request-currency")[0]) {
-				$("betabot-next-to-name").empty()
+				$("#betabot-next-to-name").empty()
 				$("#betabot-next-to-name").append(`<button id="betabot-request-currency"><a>Request Currency</a></button>`)
 				$("#betabot-request-currency").click(() => port.postMessage({text: "requesting currency"}) )
 			} else if (settings.buttonNextToName === "spread" && !$("#betabot-spread-button")[0]) {
-				$("betabot-next-to-name").empty()
+				$("#betabot-next-to-name").empty()
 				$("#betabot-next-to-name").append(`<button id="betabot-spread-button"><a>Spread Currency</a></button>`)
 				$("#betabot-spread-button").click(() => port.postMessage({text: "requesting a list of active alts"}) )
 			} else if (!settings.buttonNextToName) {
-				$("betabot-next-to-name").empty()
+				$("#betabot-next-to-name").empty()
 			}
 		}
 
