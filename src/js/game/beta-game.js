@@ -300,7 +300,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 		// Don't spread to yourself:
 		alts = alts.filter(name => name !== vars.username).sort()
 
-		log(`Spreading currencies among ${alts.length} other users`)
+		if (settings.verbose) log(`Spreading currencies among ${alts.length} other users`)
 		let sendMessage = ""
 
 		// Calculate the amounts:
