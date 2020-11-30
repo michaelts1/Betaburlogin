@@ -1,8 +1,10 @@
 {
 	"manifest_version": 2,
 	"name": "Betabur Login",
-	"version": "1.0.0.0beta7",
+	"version": "1.0.0.0beta8",
 	"description": "Helps logging in with all the alts on beta.avabur.com",
+	"author": "Michael T",
+	"homepage_url": "https://www.github.com/michaelts1/Betaburlogin",
 
 	"applications": {
 		"gecko": {

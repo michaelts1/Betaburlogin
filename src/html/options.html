@@ -520,15 +520,6 @@
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="add-request-money" type="checkbox" data-setting="addRequestMoney">
-						</td>
-						<td>
-							<label for="add-request-money">Add Request Currency Button</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Adds a &quot;Request Currency&quot; button on all users.&#10;&#10;Clicking the button will cause all other users to send their excess currencies (according to the currency send settings) to the requesting user."></span>
-						</td>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
 							<input id="remove-effects" type="checkbox" data-setting="removeEffects">
 						</td>
 						<td>
@@ -536,13 +527,24 @@
 							<span class="info" role="img" aria-label="info" data-tooltip="Removes the &quot;Effects&quot; box under the battle stats section."></span>
 						</td>
 					</tr>
-					<tr>
+					<tr class="requires-containers">
 						<td class="checkbox-td">
 							<input id="remove-banner" type="checkbox" data-setting="removeBanner">
 						</td>
 						<td>
 							<label for="remove-banner">Remove Banner on Click</label>
 							<span class="info" role="img" aria-label="info" data-tooltip="When closing the banner, also close the banner on all other alts."></span>
+						</td>
+					</tr>
+					<tr id="button-next-to-name-tr" class="requires-containers">
+						<td colspan="2">
+							<label for="button-next-to-name">Button Next To Name:</label>
+							<select id="button-next-to-name" data-setting="buttonNextToName">
+								<option value="" selected>None</option>
+								<option value="request">Request Currency</option>
+								<option value="spread">Spread Currency</option>
+							</select>
+							<span class="info" role="img" aria-label="info" data-tooltip="You can choose what button, if any, will be shown next to the in-game username on all of your users.&#10;&#10;Request Currency: When clicking this button, all other users will send their excess currencies (according to your currency send settings) to the requesting user.&#10;Spread Currency: When clicking this button, the spreading user will spread its excess currencies (according to your currency send settings) evenly among all of your users."></span>
 						</td>
 					</tr>
 				</tbody>

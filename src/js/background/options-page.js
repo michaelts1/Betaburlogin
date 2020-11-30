@@ -79,7 +79,7 @@ class Setting {
 	 * @memberof options
 	 */
 	async save(timestamp) {
-		if (this.input.reportValidity() === false) {
+		if (!this.input.reportValidity()) {
 			console.error(`#${this.input.id} is invalid`)
 			return
 		}
@@ -485,7 +485,7 @@ function saveContainers() {
  * @memberof options
  */
 async function resetSettings() {
-	if(window.confirm("Are you sure you want to reset ALL settings?") === false) return
+	if(!window.confirm("Are you sure you want to reset ALL settings?")) return
 
 	// Don't update settings before reloading:
 	browser.storage.onChanged.removeListener(Setting.refreshSettings)

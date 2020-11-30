@@ -2,6 +2,7 @@
 
 /**
  * @file Code to run when on Beta Game page
+ * @todo {@link https://github.com/michaelts1/Betaburlogin/projects}
  */
 /**
  * @namespace beta-game
@@ -32,15 +33,15 @@ async function betaGame() {
 		this.motdReceived       = false
 		this.actionsPending     = false
 		this.staminaCooldown    = false
+		this.houseItemQueued    = false
 		this.username           = $("#username").text()
 		this.mainTrade          = getTrade(this.username)
 		this.isAlt              = this.username !== settings.mainUsername.toLowerCase()
 		this.autoWireID         = settings.autoWire ? setInterval(wire, settings.wireFrequency*60*1000, settings.mainUsername) : null
 	}
 
-	if (settings.verbose) {
-		log(`Starting up (Beta Game)\nUsername: ${vars.username}\nAlt: ${vars.isAlt ? "yes" : "no"}\nGauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\nAuto Wire: ${vars.autoWireID ? "on" : "off"}`)
-	}
+	if (settings.verbose) log(`Starting up (Beta Game)\nUsername: ${vars.username}\nAlt: ${vars.isAlt ? "yes" : "no"}
+Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\nAuto Wire: ${vars.autoWireID ? "on" : "off"}`)
 
 	/**
 	 * @typedef {helpers.runtimePort} runtimePort
@@ -59,13 +60,14 @@ async function betaGame() {
 		if (message.text === "send currency") wire(message.recipient)
 		if (message.text === "jump mobs") jumpMobs(message.number)
 		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
+		if (message.text === "list of active alts") spreadCurrency(message.alts)
 		if (message.text === "close banners") closeBanner()
 	})
 
 	/**
 	 * Loads new settings from storage
 	 * @function refreshSettings
-		* @param {object} changes See {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/onChanged#Parameters|storage.onChanged}
+	 * @param {object} changes See {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/onChanged#Parameters|storage.onChanged}
 	 * @memberof beta-game
 	 */
 	async function refreshSettings(changes) {
@@ -110,7 +112,7 @@ async function betaGame() {
 	function usernameChange(_, data) {
 		if (data.s === 0) return // Unsuccessful name change
 
-		log(`User has changed name from ${vars.username} to ${data.u}`)
+		if (settings.verbose) log(`User has changed name from ${vars.username} to ${data.u}`)
 		$.alert(`It looks like you have changed your username from ${vars.username} to ${data.u}.
 			If you used the old username in BetaburLogin settings page, you might want to
 			update these settings`, "Name Changed")
@@ -137,7 +139,7 @@ async function betaGame() {
 		$("#houseQuickBuildWrapper").append(select + "</select></div>")
 
 		$("#modalBackground, #modal2Wrapper").prop("style", "") // Return to normal
-		log("Added Custom Build select menu")
+		if (settings.verbose) log("Added Custom Build select menu")
 		completeTask()
 	}
 
@@ -172,7 +174,7 @@ async function betaGame() {
 	 * @memberof beta-game
 	 */
 	function appendName() {
-		if ($("#betabot-clear-username")[0] === undefined) {
+		if (!$("#betabot-clear-username")[0]) {
 			$("#roomName").append(`<span id="betabot-clear-username">${vars.username}</span>`)
 			if (settings.verbose) log("Appended username to room name")
 		}
@@ -213,7 +215,7 @@ async function betaGame() {
 	 * @memberof beta-game
 	 */
 	function closeBanner() {
-		if ($("#close_general_notification")[0] === undefined) return // Don't run if the banner is already closed
+		if (!$("#close_general_notification")[0]) return // Don't run if the banner is already closed
 		$("#close_general_notification")[0].click()
 		if (settings.verbose) log("Banner closed")
 	}
@@ -232,7 +234,7 @@ async function betaGame() {
 		if (settings.verbose) log(`Spawning ${amount} level ${tier*10} gems with type value of ${type} and splice value of ${splice}`)
 
 		if (tier > parseInt($("#level").text()) * 10 || amount > 60 || type === 65535 || splice === 65535 || type === splice) {
-			log("Invalid request. Aborting spawn")
+			if (settings.verbose) log("Invalid request. Aborting spawn")
 			return
 		}
 
@@ -256,8 +258,7 @@ async function betaGame() {
 	}
 
 	/**
-	 * - Sends currency to another user
-	 * - Exact settings can be changed by the user under the Currency Send section of the Options Page.
+	 * - Sends currency to another user (according to the user's currency send settings)
 	 * @function wire
 	 * @param {string} target Wire recipient
 	 * @memberof beta-game
@@ -269,16 +270,14 @@ async function betaGame() {
 		let sendMessage = `/wire ${target}`
 
 		for (const [name, sendSettings] of Object.entries(settings.currencySend)) {
-			if (sendSettings.send === false) continue
+			if (!sendSettings.send) continue
 
 			const amount   = $(`.${name}`).attr("title").replace(/,/g, "")
 			const sellable = $(`.${name}`).attr("data-personal").replace(/,/g, "")
 			let amountToSend = amount - sendSettings.keepAmount // Keep this amount
 
 			// Don't send more than you can
-			if (amountToSend > sellable) {
-				amountToSend = sellable
-			}
+			if (amountToSend > sellable) amountToSend = sellable
 
 			// Only send if you have enough
 			if (amountToSend > sendSettings.minimumAmount) {
@@ -289,6 +288,46 @@ async function betaGame() {
 		if (sendMessage !== `/wire ${target}`) {
 			$("#chatMessage").text(sendMessage)
 			$("#chatSendMessage").click()
+		}
+	}
+
+	/**
+	 * Spreads all currencies evenly across all alts (according to the user's currency send settings)
+	 * @function spreadCurrency
+	 * @param {string[]} alts Alt names to spread the currency across (e.g. `["altI", "altII"]`)
+	 */
+	function spreadCurrency(alts) {
+		// Don't spread to yourself:
+		alts = alts.filter(name => name !== vars.username).sort()
+
+		if (settings.verbose) log(`Spreading currencies among ${alts.length} other users`)
+		let sendMessage = ""
+
+		// Calculate the amounts:
+		for (const [currencyName, sendSettings] of Object.entries(settings.currencySend)) {
+			if (!sendSettings.send) continue
+
+			const totalAmount = $(`.${currencyName}`).attr("title").replace(/,/g, "")
+			const marketable = $(`.${currencyName}`).attr("data-personal").replace(/,/g, "")
+
+			// Keep the specified amount to yourself:
+			let amountToSend = totalAmount - sendSettings.keepAmount
+			// Only send what you can:
+			if (amountToSend > marketable) amountToSend = marketable
+			// Divide what you can send by the amount of alts:
+			amountToSend = Math.floor(amountToSend / alts.length)
+			// Only continue if you have enough to send:
+			if (amountToSend > sendSettings.minimumAmount) {
+				sendMessage += ` ${amountToSend} ${currencyName},`
+			}
+		}
+
+		for (let i = 0; i < alts.length; i++) {
+			// Wait for 6 seconds between each wire, since wiring is limited to 5 wires per 30 seconds:
+			setTimeout( () => {
+				$("#chatMessage").text(`/wire ${alts[i]} ${sendMessage}`)
+				$("#chatSendMessage").click()
+			}, 6000*i)
 		}
 	}
 
@@ -459,7 +498,6 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	async function selectBuild() {
-		if (settings.verbose) log("Selecting build")
 		const itemId = parseInt($("#betabot-select-build").val())
 
 		await delay(vars.startActionsDelay)
@@ -649,7 +687,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	function addSocket5Button() {
-		if ($("#betabot-socket-5")[0] === undefined) {
+		if (!$("#betabot-socket-5")[0]) {
 			$("#socketThisGem").after(`<button id="betabot-socket-5">Socket Gem x5</button>`)
 			$("#betabot-socket-5").click(socketGems)
 		}
@@ -662,20 +700,33 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	async function socketGems() {
-		log("Socketing gems")
 		vars.actionsPending = true
+		let firstGemName = null
 
 		// Until there are no more empty slots, or until the user closes the modal:
-		while ($("#socketThisGem").is(":visible")) {
+		while ($("#socketableGems option").eq(0).is(":visible")) {
 			$("#socketThisGem").click()
 
-			// Wait for roa-ws:page:gem_socket_to_item event and add a small pause, before the next iteration:
-			await eventListeners.waitFor("roa-ws:page:gem_socket_to_item")
-			await delay(settings.actionsDelay)
+			// Wait for `roa-ws:page:gem_socket_to_item` event:
+			const {data} = await eventListeners.waitFor("roa-ws:page:gem_socket_to_item")
+
+			/* If this is the first gem socketed, assign `firstGemName` the name of this gem.
+			   Since `data.m` contains a very long html string, we need to extract the gem name.
+			   `firstGemName` should look like "Tier 200 Diamond of Agile Mastery" */
+			firstGemName = firstGemName ?? (new DOMParser()).parseFromString(data.m, "text/html").body.children[0].textContent
+
+			// If `$("#socketableGems option")` length is `0`, use `null`:
+			const nextGemName = ($("#socketableGems option").filter(":selected").text().match(/.*?(?= \()/) ?? [null])[0]
+
+			// Only socket the next gem if it the same type as the first socketed gem:
+			if (nextGemName !== firstGemName) break
+
+			// Add a small pause before the next iteration:
+			await delay(settings.startActionsDelay)
 		}
 
 		vars.actionsPending = false
-		log("Socketing complete")
+		if (settings.verbose) log("Finished socketing gems")
 	}
 
 	/**
@@ -689,7 +740,8 @@ $(document).on("roa-ws:all", function(_, data) {
 	async function checkResults(_, data) {
 		data = data.results.p
 
-		if (settings.autoStamina && data.autos_remaining < settings.minStamina && !vars.staminaCooldown) { // Stamina
+		// Stamina:
+		if (settings.autoStamina && data.autos_remaining < settings.minStamina && !vars.staminaCooldown) {
 			if (settings.verbose) log("Replenishing stamina")
 			$("#replenishStamina").click()
 			vars.staminaCooldown = true
@@ -698,10 +750,11 @@ $(document).on("roa-ws:all", function(_, data) {
 			return
 		}
 
-		// Actions that should always be performed go before this
+		// Actions that should always be performed go before this line:
 		if (vars.actionsPending) return
 
-		if (settings.autoQuests) { // Quests
+		// Quests:
+		if (settings.autoQuests) {
 			if (data.bq_info2?.c >= data.bq_info2.r) {
 				vars.questCompleting = "kill"
 			} else if (data.tq_info2?.c >= data.tq_info2.r) {
@@ -719,14 +772,24 @@ $(document).on("roa-ws:all", function(_, data) {
 				return
 			}
 		}
-		if (settings.autoHouse && (/*data.house_timers[0]?.next < 1800 ||*/ data.can_build_house)) { // Construction
-			vars.actionsPending = true
-			$("li#housing").click()
-			await eventListeners.waitFor("roa-ws:page:house")
-			selectBuild()
-			return
+		// Construction:
+		if (settings.autoHouse) {
+			switch (true) {
+				case data.house_timers[0]?.next < 1800 && !vars.houseItemQueued:
+					if (settings.verbose) log("House timer less than 30 minutes, queuing another item")
+					vars.houseItemQueued = true
+					setTimeout( () => vars.houseItemQueued = false, 30*60*1000)
+					// Fall through
+				case data.can_build_house:
+					vars.actionsPending = true
+					$("li#housing").click()
+					await eventListeners.waitFor("roa-ws:page:house")
+					selectBuild()
+					return
+			}
 		}
-		if (settings.autoHarvestron && data.can_house_harvest) { // Harvestron
+		// Harvestron:
+		if (settings.autoHarvestron && data.can_house_harvest) {
 			vars.actionsPending = true
 			$("#harvestronNotifier")[0].click()
 			await eventListeners.waitFor("roa-ws:page:house_room_item")
@@ -835,7 +898,7 @@ $(document).on("roa-ws:all", function(_, data) {
 			await delay(vars.startActionsDelay)
 			/* Wait to see if the message is received together with a message of the day,
 			   which means it was only sent due to a chat reconnection, and we should not join the gauntlet. */
-			if (vars.motdReceived === false) {
+			if (!vars.motdReceived) {
 				joinGauntlet(data.m, data.m_id)
 			}
 		}
@@ -871,12 +934,22 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	async function toggleInterfaceChanges(refresh) {
-		// Request Currency Button:
-		if (settings.addRequestMoney && $("#betabot-request-currency")[0] === undefined) {
-			$("#username").after(`<button id="betabot-request-currency"><a>Request Currency</a></button>`)
-			$("#betabot-request-currency").click(() => { port.postMessage({text: "requesting currency"}) })
-		} else if (settings.addRequestMoney === false && $("#betabot-request-currency")[0] !== undefined) {
-			$("#betabot-request-currency").remove()
+		// Add an empty div after the username:
+		if(!refresh) $("#username").after(`<span id="betabot-next-to-name"></span>`)
+
+		// Button next to name:
+		{
+			if (settings.buttonNextToName === "request" && !$("#betabot-request-currency")[0]) {
+				$("#betabot-next-to-name").empty()
+				$("#betabot-next-to-name").append(`<button id="betabot-request-currency"><a>Request Currency</a></button>`)
+				$("#betabot-request-currency").click(() => port.postMessage({text: "requesting currency"}) )
+			} else if (settings.buttonNextToName === "spread" && !$("#betabot-spread-button")[0]) {
+				$("#betabot-next-to-name").empty()
+				$("#betabot-next-to-name").append(`<button id="betabot-spread-button"><a>Spread Currency</a></button>`)
+				$("#betabot-spread-button").click(() => port.postMessage({text: "requesting a list of active alts"}) )
+			} else if (!settings.buttonNextToName) {
+				$("#betabot-next-to-name").empty()
+			}
 		}
 
 		// Make it easier to see what alt it is:
@@ -897,9 +970,9 @@ $(document).on("roa-ws:all", function(_, data) {
 		}
 
 		// Remove Effects Box:
-		if (settings.removeEffects && $("#effectInfo")[0] !== undefined) {
+		if (settings.removeEffects && $("#effectInfo")[0]) {
 			$("#effectInfo").remove()
-		} else if (settings.removeEffects === false && $("#effectInfo")[0] === undefined) {
+		} else if (!settings.removeEffects && !$("#effectInfo")[0]) {
 			$("#gauntletInfo").after(`
 			<div id="effectInfo" style="display: block;">
 				<div class="ui-element border2">
@@ -910,7 +983,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		}
 
 		// Option to build a specific item:
-		if (settings.addCustomBuild && $("#betabot-custom-build")[0] === undefined) {
+		if (settings.addCustomBuild && !$("#betabot-custom-build")[0]) {
 			// Don't activate immediately on page load:
 			if (refresh) {
 				getCustomBuild()
@@ -919,7 +992,7 @@ $(document).on("roa-ws:all", function(_, data) {
 					getCustomBuild()
 				})
 			}
-		} else if (settings.addCustomBuild === false && $("#betabot-custom-build")[0] !== undefined) {
+		} else if (!settings.addCustomBuild && $("#betabot-custom-build")[0]) {
 			$("#betabot-custom-build").remove()
 		}
 
@@ -950,7 +1023,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		eventListeners.toggle("roa-ws:modalContent", addAltsSpawn, vars.isAlt && settings.addSpawnGems)
 
 		// Jump mobs:
-		if (vars.isAlt && settings.addJumpMobs && $("#betabot-mob-jump")[0] === undefined) {
+		if (vars.isAlt && settings.addJumpMobs && !$("#betabot-mob-jump")[0]) {
 			$("#autoEnemy").after(`
 			<div class="mt10" id="betabot-mob-jump" style="display: block;">
 				<input id="betabot-mob-jump-number" type="number" size=1>
@@ -967,7 +1040,7 @@ $(document).on("roa-ws:all", function(_, data) {
 				port.postMessage({text: "move to mob", number: number})
 				if (settings.verbose) log(`Requested to move all alts ${number} mobs up`)
 			})
-		} else if ((!vars.isAlt || settings.addJumpMobs === false) && $("#betabot-mob-jump")[0] !== undefined) {
+		} else if ((!settings.addJumpMobs || !vars.isAlt) && $("#betabot-mob-jump")[0]) {
 			$("#betabot-mob-jump").remove()
 		}
 	}
