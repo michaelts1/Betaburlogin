@@ -125,6 +125,9 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 	 * @memberof beta-game
 	 */
 	async function getCustomBuild() {
+		// Don't run if there is no house:
+		if (!$("#housing").is(":visible")) return
+
 		vars.actionsPending = true
 		$("#modalBackground, #modal2Wrapper").prop("style", "display: none !important;") // Hide the interface for the duration of this process
 		$("#allHouseUpgrades")[0].click()
