@@ -125,6 +125,9 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 	 * @memberof beta-game
 	 */
 	async function getCustomBuild() {
+		// Don't run if there is no house:
+		if (!$("#housing").is(":visible")) return
+
 		vars.actionsPending = true
 		$("#modalBackground, #modal2Wrapper").prop("style", "display: none !important;") // Hide the interface for the duration of this process
 		$("#allHouseUpgrades")[0].click()
@@ -775,12 +778,12 @@ $(document).on("roa-ws:all", function(_, data) {
 		// Construction:
 		if (settings.autoHouse) {
 			switch (true) {
-				case data.house_timers[0]?.next < 1800 && !vars.houseItemQueued:
+				case data?.house_timers[0]?.next < 1800 && !vars.houseItemQueued:
 					if (settings.verbose) log("House timer less than 30 minutes, queuing another item")
 					vars.houseItemQueued = true
 					setTimeout( () => vars.houseItemQueued = false, 30*60*1000)
 					// Fall through
-				case data.can_build_house:
+				case data?.can_build_house:
 					vars.actionsPending = true
 					$("li#housing").click()
 					await eventListeners.waitFor("roa-ws:page:house")
