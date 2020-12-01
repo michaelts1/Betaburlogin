@@ -130,16 +130,20 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 
 		vars.actionsPending = true
 		$("#modalBackground, #modal2Wrapper").prop("style", "display: none !important;") // Hide the interface for the duration of this process
-		$("#allHouseUpgrades")[0].click()
 
-		const {data} = await eventListeners.waitFor("roa-ws:page:house_all_builds")
-		const items = []
-		data.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
+		// Only run if the user has bought a house (needed in case the user's level >= 10):
+		if ($("#allHouseUpgrades").is(":visible")) {
+			$("#allHouseUpgrades")[0].click()
 
-		// Create the dropdown list:
-		let select = `<div id="betabot-custom-build">Build a specific item: <select id="betabot-select-build"><option value="" selected>None (Build Fastest)</option>`
-		for (const item of items) select += `<option value="${item.i}">${item.n}</option>`
-		$("#houseQuickBuildWrapper").append(select + "</select></div>")
+			const {data} = await eventListeners.waitFor("roa-ws:page:house_all_builds")
+			const items = []
+			data.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
+
+			// Create the dropdown list:
+			let select = `<div id="betabot-custom-build">Build a specific item: <select id="betabot-select-build"><option value="" selected>None (Build Fastest)</option>`
+			for (const item of items) select += `<option value="${item.i}">${item.n}</option>`
+			$("#houseQuickBuildWrapper").append(select + "</select></div>")
+		}
 
 		$("#modalBackground, #modal2Wrapper").prop("style", "") // Return to normal
 		if (settings.verbose) log("Added Custom Build select menu")
