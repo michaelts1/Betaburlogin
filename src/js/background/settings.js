@@ -17,7 +17,7 @@
  * @type {number}
  * @memberof settings
  */
-const SETTINGS_VERSION = 19
+const SETTINGS_VERSION = 20
 
 /**
  * - CSS code for Betaburlogin interface changes
@@ -84,65 +84,95 @@ let settings = null
  * @memberof settings
  */
 async function getSettings() {
-	settings = await browser.storage.sync.get()
-	// If not set, create with default settings:
-	if (Object.keys(settings).length === 0) {
-		await browser.storage.sync.set({
-			version          : SETTINGS_VERSION,
-			eventChannelID   : 3202,
-			wireFrequency    : 60,
-			dailyCrystals    : 50,
-			minCarvingQueue  : 5,
-			minCraftingQueue : 5,
-			minStamina       : 5,
-			attackAt         : 3,
-			altsNumber       : 0,
-			addCustomBuild   : true,
-			addJumpMobs      : true,
-			addOpenTabs      : true,
-			addSocketX5      : true,
-			addSpawnGems     : true,
-			addUsername      : true,
-			autoCarve        : true,
-			autoCraft        : true,
-			autoHarvestron   : true,
-			autoHouse        : true,
-			autoQuests       : true,
-			autoStamina      : true,
-			joinGauntlets    : true,
-			resumeQueue      : true,
-			addLoginAlts     : false,
-			autoWire         : false,
-			removeBanner     : false,
-			removeEffects    : false,
-			verbose          : false,
-			buttonNextToName : "",
-			altBaseName      : "",
-			loginPassword    : "",
-			mainAccount      : "",
-			mainUsername     : "",
-			pattern          : "",
-			namesList        : [],
-			containers       : {
+	settings = await browser.storage.sync.get({version: 0})
+	updateSettings()
+
+	// Update `ports`:
+	if (ports.main || ports.alts.length > 0) { // If there are either alts or main connected
+		if (ports.main?.name !== settings.mainUsername) {
+			// Move old `main` into `alts`:
+			if (ports.main !== null) {
+				ports.alts.push(ports.main)
+				ports.main = null
+			}
+
+			// Find new `main` in `alts`:
+			for (const port of ports.alts) {
+				if (port.name === settings.mainUsername) {
+					ports.main = port
+					ports.alts.splice(ports.alts.indexOf(port), 1)
+				}
+			}
+		}
+	}
+}
+
+/**
+ * Checks settings version and updates the settings if needed
+ * @async
+ * @function updateSettings
+ * @memberof settings
+ */
+function updateSettings() {
+	switch (settings.version) {
+		case SETTINGS_VERSION:
+			break
+		case 0: // If no Settings are set
+			settings.eventChannelID    = 3202
+			settings.wireFrequency     = 60
+			settings.dailyCrystals     = 50
+			settings.minCarvingQueue   = 5
+			settings.minCraftingQueue  = 5
+			settings.minStamina        = 5
+			settings.attackAt          = 3
+			settings.altsNumber        = 0
+			settings.addAdvertCalendar = true
+			settings.addCustomBuild    = true
+			settings.addJumpMobs       = true
+			settings.addOpenTabs       = true
+			settings.addSpawnGems      = true
+			settings.addUsername       = true
+			settings.autoCarve         = true
+			settings.autoCraft         = true
+			settings.autoHarvestron    = true
+			settings.autoHouse         = true
+			settings.autoQuests        = true
+			settings.autoStamina       = true
+			settings.joinGauntlets     = true
+			settings.resumeQueue       = true
+			settings.addSocketX5       = false
+			settings.addLoginAlts      = false
+			settings.autoWire          = false
+			settings.removeBanner      = false
+			settings.removeEffects     = false
+			settings.verbose           = false
+			settings.buttonNextToName  = ""
+			settings.altBaseName       = ""
+			settings.loginPassword     = ""
+			settings.mainAccount       = ""
+			settings.mainUsername      = ""
+			settings.pattern           = ""
+			settings.namesList         = []
+			settings.containers        = {
 				useAll: true,
 				list  : [],
-			},
-			tradesList      : {
+			}
+			settings.tradesList = {
 				fishing     : [],
 				woodcutting : [],
 				mining      : [],
 				stonecutting: [],
 				crafting    : [],
 				carving     : [],
-			},
-			css: {
+			}
+			settings.css = {
 				addon : ADDON_CSS,
 				custom: {
 					code: CUSTOM_CSS,
 					default: CUSTOM_CSS,
 				},
-			},
-			currencySend: {
+			}
+			settings.currencySend = {
 				crystals: {
 					send         : true,
 					minimumAmount: 0,
@@ -188,43 +218,16 @@ async function getSettings() {
 					minimumAmount: 100,
 					keepAmount   : 10000000,
 				},
-			},
-		})
-	}
-
-	// Update `ports`:
-	if (ports.main || ports.alts.length > 0) { // If there are either alts or main connected
-		if (ports.main?.name !== settings.mainUsername) {
-			// Move old `main` into `alts`:
-			if (ports.main !== null) {
-				ports.alts.push(ports.main)
-				ports.main = null
 			}
 
-			// Find new `main` in `alts`:
-			for (const port of ports.alts) {
-				if (port.name === settings.mainUsername) {
-					ports.main = port
-					ports.alts.splice(ports.alts.indexOf(port), 1)
-				}
-			}
-		}
-	}
+			settings.css.addon = ADDON_CSS
+			settings.css.custom.code = CUSTOM_CSS
+			settings.css.custom.default = CUSTOM_CSS
+			settings.version = SETTINGS_VERSION
 
-	updateSettings()
-}
-
-/**
- * Checks settings version and updates the settings if needed
- * @async
- * @function updateSettings
- * @memberof settings
- */
-function updateSettings() {
-	switch (settings.version) {
-		case SETTINGS_VERSION:
+			browser.storage.sync.set(settings)
 			break
-		/* eslint-disable no-fallthrough */ // Falling through to update properly
+			/* eslint-disable no-fallthrough */ // Falling through to update properly
 		case 2:
 			settings.pattern = ""
 			settings.namesList = []
@@ -337,6 +340,8 @@ function updateSettings() {
 			settings.buttonNextToName = settings.addRequestMoney ? "request" : ""
 			delete settings.addRequestMoney
 			browser.storage.sync.remove("addRequestMoney")
+		case 19:
+			settings.addAdvertCalendar = true
 		default:
 			// Update internal CSS:
 			if (settings.css.addon !== ADDON_CSS) {

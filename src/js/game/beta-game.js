@@ -93,7 +93,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 	browser.storage.onChanged.addListener(refreshSettings)
 
 	/* Event listeners that are currently always on (might change in the future) are below
-	   Event listeners that will be turned on/off as needed are inside toggleInterfaceChanges() */
+		Event listeners that will be turned on/off as needed are inside toggleInterfaceChanges() */
 
 	// Toggle vars.motdReceived on for a short time after receiving motd message
 	eventListeners.toggle("roa-ws:motd", motd, true)
@@ -397,7 +397,7 @@ $(document).on("roa-ws:all", function(_, data) {
 			const origin = message.originalEvent.origin
 			const data = message.originalEvent.data
 			/* Make sure we are connecting to the right port
-			   No need to be absolutely sure about it since we don't send sensitive data */
+				No need to be absolutely sure about it since we don't send sensitive data */
 			if (origin === "https://beta.avabur.com" && data === "betabot-ws message") {
 				message.originalEvent.ports[0].onmessage = roaWS
 			}
@@ -718,8 +718,8 @@ $(document).on("roa-ws:all", function(_, data) {
 			const {data} = await eventListeners.waitFor("roa-ws:page:gem_socket_to_item")
 
 			/* If this is the first gem socketed, assign `firstGemName` the name of this gem.
-			   Since `data.m` contains a very long html string, we need to extract the gem name.
-			   `firstGemName` should look like "Tier 200 Diamond of Agile Mastery" */
+				Since `data.m` contains a very long html string, we need to extract the gem name.
+				`firstGemName` should look like "Tier 200 Diamond of Agile Mastery" */
 			firstGemName = firstGemName ?? (new DOMParser()).parseFromString(data.m, "text/html").body.children[0].textContent
 
 			// If `$("#socketableGems option")` length is `0`, use `null`:
@@ -904,7 +904,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		if (data.c_id === settings.eventChannelID) {
 			await delay(vars.startActionsDelay)
 			/* Wait to see if the message is received together with a message of the day,
-			   which means it was only sent due to a chat reconnection, and we should not join the gauntlet. */
+				which means it was only sent due to a chat reconnection, and we should not join the gauntlet. */
 			if (!vars.motdReceived) {
 				joinGauntlet(data.m, data.m_id)
 			}
@@ -941,8 +941,11 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	async function toggleInterfaceChanges(refresh) {
-		// Add an empty div after the username:
-		if(!refresh) $("#username").after(`<span id="betabot-next-to-name"></span>`)
+		// Only execute once after page load:
+		if(!refresh) {
+			// Add an empty div after the username:
+			$("#username").after(`<span id="betabot-next-to-name"></span>`)
+		}
 
 		// Button next to name:
 		{
@@ -1019,6 +1022,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		// Auto Stamina/Quests/House/Harvestron:
 		eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action",
 			checkResults, settings.autoStamina || settings.autoQuests || settings.autoHouse || settings.autoHarvestron)
+
 		// Socket Gem x5:
 		eventListeners.toggle(
 			"roa-ws:page:" +
@@ -1028,6 +1032,22 @@ $(document).on("roa-ws:all", function(_, data) {
 
 		// Spawn Gems For All Alts:
 		eventListeners.toggle("roa-ws:modalContent", addAltsSpawn, vars.isAlt && settings.addSpawnGems)
+
+		// Advent calendar:
+		eventListeners.toggle("roa-ws:event_calendar", (_, data) => {
+			if (data.month === 11) {
+				$("#eventCalendarWrapper .mt10.center").append(` <button id="betabot-collect-advent-button"><a>Receive Your Prize</a></button>`)
+				$("#betabot-collect-advent-button").click( () => {
+					/* A hackish way to trigger the handler function for clicking the link (Which will
+						only run when clicking the link inside `#modal2Content`). Figured this out thanks to
+						{@link|https://stackoverflow.com/a/2518441} and by reverse engineering the games code */
+
+					jQuery._data( $("#modal2Content")[0], "events" ).click // Array of objects (one object for each click handler)
+						.filter(obj => obj.selector === ".advent_calendar_collect")[0] // Filter the object related to `.advent_calendar_collect` event handler
+						.handler(new MouseEvent("click")) // Call the handler function with a `MouseEvent` object
+				})
+			}
+		}, settings.addAdvertCalendar)
 
 		// Jump mobs:
 		if (vars.isAlt && settings.addJumpMobs && !$("#betabot-mob-jump")[0]) {
