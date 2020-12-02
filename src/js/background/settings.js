@@ -27,7 +27,11 @@ const SETTINGS_VERSION = 20
  * @memberof settings
  */
 const ADDON_CSS =
-`#betabot-clear-username {
+`.betabot a {	
+	padding: 3px;
+	text-decoration: none;
+}
+#betabot-clear-username {
 	color: yellow;
 	font-size: 25px;
 	line-height: 10px;
@@ -41,8 +45,6 @@ const ADDON_CSS =
 }
 #betabot-next-to-name a {
 	line-height: 10px;
-	padding: 3px;
-	text-decoration: none;
 }
 #betabot-mob-jump-button {
 	font-size: 14px;
