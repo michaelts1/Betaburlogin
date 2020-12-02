@@ -140,7 +140,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 			data.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
 
 			// Create the dropdown list:
-			let select = `<div id="betabot-custom-build">Build a specific item: <select id="betabot-select-build"><option value="" selected>None (Build Fastest)</option>`
+			let select = `<div id="betabot-custom-build" class="betabot">Build a specific item: <select id="betabot-select-build" class="betabot"><option value="" selected>None (Build Fastest)</option>`
 			for (const item of items) select += `<option value="${item.i}">${item.n}</option>`
 			$("#houseQuickBuildWrapper").append(select + "</select></div>")
 		}
@@ -159,7 +159,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 	 */
 	function addAltsSpawn(_, data) {
 		if (data.title === "Spawn Gems") {
-			$("#gemSpawnConfirm").after(`<input id="betabot-spawn-gem" type="button" style="padding:6.5px; margin: 0 -.5em 0 .5em;" value="Spawn For All Alts">`)
+			$("#gemSpawnConfirm").after(`<input id="betabot-spawn-gem" class="betabot" type="button" style="padding:6.5px; margin: 0 -.5em 0 .5em;" value="Spawn For All Alts">`)
 
 			$("#betabot-spawn-gem").click(() => {
 				const msg = {
@@ -182,7 +182,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 	 */
 	function appendName() {
 		if (!$("#betabot-clear-username")[0]) {
-			$("#roomName").append(`<span id="betabot-clear-username">${vars.username}</span>`)
+			$("#roomName").append(`<span id="betabot-clear-username" class="betabot">${vars.username}</span>`)
 			if (settings.verbose) log("Appended username to room name")
 		}
 	}
@@ -695,7 +695,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 */
 	function addSocket5Button() {
 		if (!$("#betabot-socket-5")[0]) {
-			$("#socketThisGem").after(`<button id="betabot-socket-5">Socket Gem x5</button>`)
+			$("#socketThisGem").after(`<button id="betabot-socket-5" class="betabot">Socket Gem x5</button>`)
 			$("#betabot-socket-5").click(socketGems)
 		}
 	}
@@ -944,18 +944,18 @@ $(document).on("roa-ws:all", function(_, data) {
 		// Only execute once after page load:
 		if(!refresh) {
 			// Add an empty div after the username:
-			$("#username").after(`<span id="betabot-next-to-name"></span>`)
+			$("#username").after(`<span id="betabot-next-to-name" class="betabot"></span>`)
 		}
 
 		// Button next to name:
 		{
 			if (settings.buttonNextToName === "request" && !$("#betabot-request-currency")[0]) {
 				$("#betabot-next-to-name").empty()
-				$("#betabot-next-to-name").append(`<button id="betabot-request-currency"><a>Request Currency</a></button>`)
+				$("#betabot-next-to-name").append(`<button id="betabot-request-currency" class="betabot"><a>Request Currency</a></button>`)
 				$("#betabot-request-currency").click(() => port.postMessage({text: "requesting currency"}) )
 			} else if (settings.buttonNextToName === "spread" && !$("#betabot-spread-button")[0]) {
 				$("#betabot-next-to-name").empty()
-				$("#betabot-next-to-name").append(`<button id="betabot-spread-button"><a>Spread Currency</a></button>`)
+				$("#betabot-next-to-name").append(`<button id="betabot-spread-button" class="betabot"><a>Spread Currency</a></button>`)
 				$("#betabot-spread-button").click(() => port.postMessage({text: "requesting a list of active alts"}) )
 			} else if (!settings.buttonNextToName) {
 				$("#betabot-next-to-name").empty()
@@ -976,7 +976,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		if (cssChanged) { // If the code has changed, or if it was never injected
 			$("#betabot-css")?.remove() //only remove the element if it exists
 			// Decode CSS into base64 and use it as a link to avoid script injections:
-			$("head").append(`<link id="betabot-css" rel="stylesheet" href="data:text/css;base64,${btoa(settings.css.addon + settings.css.custom.code)}">`)
+			$("head").append(`<link id="betabot-css" class="betabot" rel="stylesheet" href="data:text/css;base64,${btoa(settings.css.addon + settings.css.custom.code)}">`)
 		}
 
 		// Remove Effects Box:
@@ -1036,7 +1036,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		// Advent calendar:
 		eventListeners.toggle("roa-ws:event_calendar", (_, data) => {
 			if (data.month === 11) {
-				$("#eventCalendarWrapper .mt10.center").append(` <button id="betabot-collect-advent-button"><a>Receive Your Prize</a></button>`)
+				$("#eventCalendarWrapper .mt10.center").append(` <button id="betabot-collect-advent-button" class="betabot"><a>Receive Your Prize</a></button>`)
 				$("#betabot-collect-advent-button").click( () => {
 					/* A hackish way to trigger the handler function for clicking the link (Which will
 						only run when clicking the link inside `#modal2Content`). Figured this out thanks to
@@ -1052,9 +1052,9 @@ $(document).on("roa-ws:all", function(_, data) {
 		// Jump mobs:
 		if (vars.isAlt && settings.addJumpMobs && !$("#betabot-mob-jump")[0]) {
 			$("#autoEnemy").after(`
-			<div class="mt10" id="betabot-mob-jump" style="display: block;">
-				<input id="betabot-mob-jump-number" type="number" size=1>
-				<input id="betabot-mob-jump-button" type="button" value="Jump Mobs">
+			<div class="mt10" id="betabot-mob-jump" class="betabot" style="display: block;">
+				<input id="betabot-mob-jump-number" class="betabot" type="number" size=1>
+				<input id="betabot-mob-jump-button" class="betabot" type="button" value="Jump Mobs">
 			</div>`)
 
 			$("#betabot-mob-jump-button").click(() => {
