@@ -27,7 +27,7 @@ const SETTINGS_VERSION = 20
  * @memberof settings
  */
 const ADDON_CSS =
-`.betabot a {	
+`.betabot a {
 	padding: 3px;
 	text-decoration: none;
 }
