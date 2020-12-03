@@ -62,6 +62,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
 		if (message.text === "list of active alts") spreadCurrency(message.alts)
 		if (message.text === "close banners") closeBanner()
+		if (message.text === "open advent calendar") receiveAdventCalendar()
 	})
 
 	/**
@@ -737,6 +738,18 @@ $(document).on("roa-ws:all", function(_, data) {
 	}
 
 	/**
+	 * A hackish way to trigger the handler function for `a.advent_calendar_collect` link inside `#modal2Content`
+	 * (Which will usually only exist after opening `#modal2Content`). Figured this out thanks to
+	 * {@link|https://stackoverflow.com/a/2518441} and by reverse engineering the games code
+	 * @function receiveAdventCalendar
+	 */
+	function receiveAdventCalendar() {
+		jQuery._data($("#modal2Content")[0], "events").click // Array of objects (one object for each click handler)
+			.filter(obj => obj.selector === ".advent_calendar_collect")[0] // Filter the object related to `.advent_calendar_collect` event handler
+			.handler(new MouseEvent("click"))
+	}
+
+	/**
 	 * Checks action results for needed actions
 	 * @async
 	 * @function checkResults
@@ -1037,15 +1050,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		eventListeners.toggle("roa-ws:event_calendar", (_, data) => {
 			if (data.month === 11) {
 				$("#eventCalendarWrapper .mt10.center").append(` <button id="betabot-collect-advent-button" class="betabot"><a>Receive Your Prize</a></button>`)
-				$("#betabot-collect-advent-button").click( () => {
-					/* A hackish way to trigger the handler function for clicking the link (Which will
-						only run when clicking the link inside `#modal2Content`). Figured this out thanks to
-						{@link|https://stackoverflow.com/a/2518441} and by reverse engineering the games code */
-
-					jQuery._data( $("#modal2Content")[0], "events" ).click // Array of objects (one object for each click handler)
-						.filter(obj => obj.selector === ".advent_calendar_collect")[0] // Filter the object related to `.advent_calendar_collect` event handler
-						.handler(new MouseEvent("click")) // Call the handler function with a `MouseEvent` object
-				})
+				$("#betabot-collect-advent-button").click(() => port.postMessage({text: "receive advent calendar awards"}))
 			}
 		}, settings.addAdvertCalendar)
 

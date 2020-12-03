@@ -86,6 +86,9 @@ browser.runtime.onConnect.addListener(async port => {
 						text: "list of active alts",
 						alts: [ports.main.name, ...ports.alts.map(alt => alt.name)],
 					})
+					break
+				case "receive advent calendar awards":
+					sendMessage({text: "open advent calendar"})
 			}
 		})
 	}
