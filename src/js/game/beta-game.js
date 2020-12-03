@@ -702,6 +702,19 @@ $(document).on("roa-ws:all", function(_, data) {
 	}
 
 	/**
+	 * Adds a button to open the advent calendar on all alts at once
+	 * @function addAdvertCalendar
+	 * @param {event} _ Placeholder parameter
+	 * @param {object} data Event data
+	 */
+	function addAdvertCalendar (_, data) {
+		if (data.month === 11) {
+			$("#eventCalendarWrapper .mt10.center").append(` <button id="betabot-collect-advent-button" class="betabot"><a>Receive Your Prize</a></button>`)
+			$("#betabot-collect-advent-button").click(() => port.postMessage({ text: "receive advent calendar awards" }))
+		}
+	}
+
+	/**
 	 * Socket gems into an item
 	 * @async
 	 * @function socketGems
@@ -1047,12 +1060,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		eventListeners.toggle("roa-ws:modalContent", addAltsSpawn, vars.isAlt && settings.addSpawnGems)
 
 		// Advent calendar:
-		eventListeners.toggle("roa-ws:event_calendar", (_, data) => {
-			if (data.month === 11) {
-				$("#eventCalendarWrapper .mt10.center").append(` <button id="betabot-collect-advent-button" class="betabot"><a>Receive Your Prize</a></button>`)
-				$("#betabot-collect-advent-button").click(() => port.postMessage({text: "receive advent calendar awards"}))
-			}
-		}, settings.addAdvertCalendar)
+		eventListeners.toggle("roa-ws:page:event_calendar", addAdvertCalendar, settings.addAdvertCalendar)
 
 		// Jump mobs:
 		if (vars.isAlt && settings.addJumpMobs && !$("#betabot-mob-jump")[0]) {
