@@ -743,7 +743,7 @@ $(document).on("roa-ws:all", function(_, data) {
 			if (nextGemName !== firstGemName) break
 
 			// Add a small pause before the next iteration:
-			await delay(settings.startActionsDelay)
+			await delay(vars.startActionsDelay)
 		}
 
 		vars.actionsPending = false
