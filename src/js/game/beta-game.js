@@ -708,7 +708,8 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @param {object} data Event data
 	 */
 	function addAdvertCalendar (_, data) {
-		if (data.month === 11) {
+		// `data.month` can be either a `Number` or a `String` representing a `Number`, so can't use strict equality here:
+		if (data.month == 11) {
 			$("#eventCalendarWrapper .mt10.center").append(` <button id="betabot-collect-advent-button" class="betabot"><a>Receive Your Prize</a></button>`)
 			$("#betabot-collect-advent-button").click(() => port.postMessage({ text: "receive advent calendar awards" }))
 		}
@@ -751,15 +752,28 @@ $(document).on("roa-ws:all", function(_, data) {
 	}
 
 	/**
-	 * A hackish way to trigger the handler function for `a.advent_calendar_collect` link inside `#modal2Content`
-	 * (Which will usually only exist after opening `#modal2Content`). Figured this out thanks to
-	 * {@link|https://stackoverflow.com/a/2518441} and by reverse engineering the games code
+	 * Gets the daily Advent Calendar reward in one click link
 	 * @function receiveAdventCalendar
 	 */
-	function receiveAdventCalendar() {
-		jQuery._data($("#modal2Content")[0], "events").click // Array of objects (one object for each click handler)
-			.filter(obj => obj.selector === ".advent_calendar_collect")[0] // Filter the object related to `.advent_calendar_collect` event handler
-			.handler(new MouseEvent("click"))
+	async function receiveAdventCalendar() {
+		if (settings.verbose) log("Collecting Advent Calendar reward")
+		vars.actionsPending = true
+
+		await delay(vars.startActionsDelay)
+		$("#eventCalendarLink").click()
+
+		await eventListeners.waitFor("roa-ws:page:event_calendar")
+		$(".calendar-day.current-day a")[0].click()
+
+		await eventListeners.waitFor("roa-ws:page:event_view")
+		await delay(vars.buttonDelay)
+		$(".advent_calendar_collect")[0].click()
+
+		await eventListeners.waitFor("roa-ws:page:advent_calendar_collect")
+		await delay(vars.buttonDelay)
+
+		$(".closeModal.col-xs-12").click()
+		completeTask()
 	}
 
 	/**

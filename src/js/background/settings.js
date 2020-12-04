@@ -86,7 +86,8 @@ let settings = null
  * @memberof settings
  */
 async function getSettings() {
-	settings = await browser.storage.sync.get({version: 0})
+	settings = await browser.storage.sync.get()
+	if (!settings.version) settings.version = 0
 	updateSettings()
 
 	// Update `ports`:
