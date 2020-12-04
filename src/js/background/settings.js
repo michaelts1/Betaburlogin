@@ -117,6 +117,8 @@ async function getSettings() {
  * @memberof settings
  */
 function updateSettings() {
+	let deletedSettings = []
+
 	switch (settings.version) {
 		case SETTINGS_VERSION:
 			break
@@ -277,7 +279,7 @@ function updateSettings() {
 			delete settings.doQuests
 			delete settings.doBuildingAndHarvy
 			delete settings.doCraftQueue
-			browser.storage.sync.remove(["doQuests", "doBuildingAndHarvy", "doCraftQueue"])
+			deletedSettings.push("doQuests", "doBuildingAndHarvy", "doCraftQueue")
 			// Other updates:
 			settings.minStamina = 5
 			settings.autoStamina = true
@@ -305,20 +307,20 @@ function updateSettings() {
 			// Name Change:
 			settings.joinGauntlets = settings.joinEvents
 			delete settings.joinEvents
-			browser.storage.sync.remove("joinEvents")
+			deletedSettings.push("joinEvents")
 			// Deletions:
 			delete settings.buttonDelay
 			delete settings.actionsPending
 			delete settings.questCompleting
 			delete settings.startActionsDelay
-			browser.storage.sync.remove(["buttonDelay", "actionsPending", "questCompleting", "startActionsDelay"])
+			deletedSettings.push("buttonDelay", "actionsPending", "questCompleting", "startActionsDelay")
 			// Necessary due to algorithm change:
 			settings.loginPassword = ""
 		case 15:
 			// Name Change:
 			settings.resumeQueue = settings.resumeCrafting
 			delete settings.resumeCrafting
-			browser.storage.sync.remove("resumeCrafting")
+			deletedSettings.push("resumeCrafting")
 			// Addition:
 			settings.autoCarve = true
 			settings.minCarvingQueue = 5
@@ -343,7 +345,7 @@ function updateSettings() {
 			// `addRequestMoney` is now one of the options in `buttonNextToName`:
 			settings.buttonNextToName = settings.addRequestMoney ? "request" : ""
 			delete settings.addRequestMoney
-			browser.storage.sync.remove("addRequestMoney")
+			deletedSettings.push("addRequestMoney")
 		case 19:
 			settings.addAdvertCalendar = true
 		default:
@@ -364,6 +366,7 @@ function updateSettings() {
 			log(`Updated settings from version ${settings.version} to version ${SETTINGS_VERSION}`)
 			settings.version = SETTINGS_VERSION
 			browser.storage.sync.set(settings)
+			browser.storage.sync.remove(deletedSettings)
 		/* eslint-enable no-fallthrough */
 	}
 }
