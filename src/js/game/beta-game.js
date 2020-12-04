@@ -709,9 +709,9 @@ $(document).on("roa-ws:all", function(_, data) {
 	 */
 	function addAdvertCalendar (_, data) {
 		// `data.month` can be either a `Number` or a `String` representing a `Number`, so can't use strict equality here:
-		if (data.month == 11) {
-			$("#eventCalendarWrapper .mt10.center").append(` <button id="betabot-collect-advent-button" class="betabot"><a>Receive Your Prize</a></button>`)
-			$("#betabot-collect-advent-button").click(() => port.postMessage({ text: "receive advent calendar awards" }))
+		if (data.month == 11 && !$("#betabot-collect-advent")[0]) {
+			$("#eventCalendarWrapper .mt10.center").append(` <button id="betabot-collect-advent" class="betabot"><a>Receive Your Prize</a></button>`)
+			$("#betabot-collect-advent").click(() => port.postMessage({ text: "receive advent calendar awards" }))
 		}
 	}
 
@@ -982,7 +982,7 @@ $(document).on("roa-ws:all", function(_, data) {
 	 */
 	async function toggleInterfaceChanges(refresh) {
 		// Only execute once after page load:
-		if(!refresh) {
+		if(!refresh && !$("#betabot-next-to-name")[0]) {
 			// Add an empty div after the username:
 			$("#username").after(`<span id="betabot-next-to-name" class="betabot"></span>`)
 		}
