@@ -229,6 +229,7 @@ function updateSettings() {
 			settings.version = SETTINGS_VERSION
 
 			browser.storage.sync.set(settings)
+			log("Created settings with default values")
 			break
 			/* eslint-disable no-fallthrough */ // Falling through to update properly
 		case 2:

@@ -40,8 +40,12 @@ async function betaGame() {
 		this.autoWireID         = settings.autoWire ? setInterval(wire, settings.wireFrequency*60*1000, settings.mainUsername) : null
 	}
 
-	if (settings.verbose) log(`Starting up (Beta Game)\nUsername: ${vars.username}\nAlt: ${vars.isAlt ? "yes" : "no"}
+	if (settings.verbose) {
+		log(`Starting up (Beta Game)\nUsername: ${vars.username}\nAlt: ${vars.isAlt ? "yes" : "no"}
 Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\nAuto Wire: ${vars.autoWireID ? "on" : "off"}`)
+	} else {
+		log("Starting up")
+	}
 
 	/**
 	 * @typedef {helpers.runtimePort} runtimePort
