@@ -123,120 +123,88 @@ function updateSettings() {
 		case SETTINGS_VERSION:
 			break
 		case 0: // If no Settings are set
-			settings.eventChannelID    = 3202
-			settings.wireFrequency     = 60
-			settings.dailyCrystals     = 50
-			settings.minCarvingQueue   = 5
-			settings.minCraftingQueue  = 5
-			settings.minStamina        = 5
-			settings.attackAt          = 3
-			settings.altsNumber        = 0
-			settings.addAdvertCalendar = true
-			settings.addCustomBuild    = true
-			settings.addJumpMobs       = true
-			settings.addOpenTabs       = true
-			settings.addSpawnGems      = true
-			settings.addUsername       = true
-			settings.autoCarve         = true
-			settings.autoCraft         = true
-			settings.autoHarvestron    = true
-			settings.autoHouse         = true
-			settings.autoQuests        = true
-			settings.autoStamina       = true
-			settings.joinGauntlets     = true
-			settings.resumeQueue       = true
-			settings.addSocketX5       = false
-			settings.addLoginAlts      = false
-			settings.autoWire          = false
-			settings.removeBanner      = false
-			settings.removeEffects     = false
-			settings.verbose           = false
-			settings.buttonNextToName  = ""
-			settings.altBaseName       = ""
-			settings.loginPassword     = ""
-			settings.mainAccount       = ""
-			settings.mainUsername      = ""
-			settings.pattern           = ""
-			settings.namesList         = []
-			settings.containers        = {
+			// Settings that are equal to `true` by default:
+			for (const setting of ["addAdvertCalendar", "addCustomBuild",
+				"addJumpMobs", "addOpenTabs", "addSpawnGems", "addUsername",
+				"autoCarve", "autoCraft", "autoHarvestron", "autoHouse",
+				"autoQuests", "autoStamina", "joinGauntlets", "resumeQueue"]) {
+				settings[setting] = true
+			}
+
+			// Settings that are equal to `false` by default:
+			for (const setting of ["addSocketX5", "addLoginAlts", "autoWire",
+				"removeBanner", "removeEffects", "verbose"]) {
+				settings[setting] = false
+			}
+
+			// Settings that are equal to `""` (empty string) by default:
+			for (const setting of ["buttonNextToName", "altBaseName",
+				"loginPassword", "mainAccount", "mainUsername", "pattern"]) {
+				settings[setting] = ""
+			}
+
+			// Currency send settings:
+			settings.currencySend = {}
+			for (const currency of ["crystals", "platinum", "gold",
+				"crafting_materials", "gem_fragments", "food", "wood",
+				"iron", "stone"]) {
+				settings.currencySend[currency] = {
+					send: true,
+					minimumAmount: 100,
+					keepAmount: 0,
+				}
+			}
+			// Override some of the previously set values:
+			settings.currencySend.crystals.minimumAmount = 0
+			settings.currencySend.gold.minimumAmount = 10000
+			for (const name of ["food", "wood", "iron", "stone"]) {
+				settings.currencySend[name].keepAmount = 100000000
+			}
+
+			// Numeric settings:
+			settings.altsNumber       = 0
+			settings.attackAt         = 3
+			settings.dailyCrystals    = 50
+			settings.eventChannelID   = 3202
+			settings.minCarvingQueue  = 5
+			settings.minCraftingQueue = 5
+			settings.minStamina       = 5
+			settings.wireFrequency    = 60
+
+			// Misc settings:
+			settings.namesList = []
+
+			// Containers settings:
+			settings.containers = {
+				list: [],
 				useAll: true,
-				list  : [],
 			}
-			settings.tradesList = {
-				fishing     : [],
-				woodcutting : [],
-				mining      : [],
-				stonecutting: [],
-				crafting    : [],
-				carving     : [],
+
+			// Event trades settings:
+			settings.tradesList = {}
+			for (const ts of ["fishing", "woodcutting", "mining",
+				"stonecutting", "crafting", "carving"]) {
+				settings.tradesList[ts] = []
 			}
+
+			// CSS settings:
 			settings.css = {
-				addon : ADDON_CSS,
+				addon: ADDON_CSS,
 				custom: {
 					code: CUSTOM_CSS,
 					default: CUSTOM_CSS,
 				},
 			}
-			settings.currencySend = {
-				crystals: {
-					send         : true,
-					minimumAmount: 0,
-					keepAmount   : 0,
-				},
-				platinum: {
-					send         : true,
-					minimumAmount: 100,
-					keepAmount   : 0,
-				},
-				gold: {
-					send         : true,
-					minimumAmount: 10000,
-					keepAmount   : 0,
-				},
-				crafting_materials: {
-					send         : true,
-					minimumAmount: 100,
-					keepAmount   : 0,
-				},
-				gem_fragments: {
-					send         : true,
-					minimumAmount: 100,
-					keepAmount   : 0,
-				},
-				food: {
-					send         : true,
-					minimumAmount: 100,
-					keepAmount   : 10000000,
-				},
-				wood: {
-					send         : true,
-					minimumAmount: 100,
-					keepAmount   : 10000000,
-				},
-				iron: {
-					send         : true,
-					minimumAmount: 100,
-					keepAmount   : 10000000,
-				},
-				stone: {
-					send         : true,
-					minimumAmount: 100,
-					keepAmount   : 10000000,
-				},
-			}
 
-			settings.css.addon = ADDON_CSS
-			settings.css.custom.code = CUSTOM_CSS
-			settings.css.custom.default = CUSTOM_CSS
+			// Finalizing settings:
 			settings.version = SETTINGS_VERSION
-
 			browser.storage.sync.set(settings)
 			log("Created settings with default values")
 			break
-			/* eslint-disable no-fallthrough */ // Falling through to update properly
 		case 2:
 			settings.pattern = ""
 			settings.namesList = []
+			/* eslint-disable no-fallthrough */ // Falling through to update properly
 		case 3:
 			settings.tradesList = {
 				fishing: [],
