@@ -6,6 +6,8 @@
 	--button-color: darkgray;
 	--input-border-color: silver;
 	--input-text-color: lightseagreen;
+	--settings-margin-top: 7.5em;
+	--settings-width: 28em;
 	--text-color: darkslategray;
 	--tooltip-background-color: floralwhite;
 }
@@ -68,9 +70,9 @@ header {
 
 #settings {
 	height: 75.15vh;
-	margin: 7.5em auto auto;
+	margin: var(--settings-margin-top) auto auto;
 	overflow-y: auto;
-	width: 28em;
+	width: var(--settings-width);
 }
 
 .tab {
@@ -277,15 +279,20 @@ td {
 	border-radius: .75em;
 	border: 1px var(--input-border-color) solid;
 	content: attr(data-tooltip);
-	left: 22.8%;
-	min-width: 255px;
 	padding: .5em;
 	position: absolute;
-	top: 22.15%;
+	right: calc(50% + (var(--settings-width)) / 2);
+	top: calc(var(--settings-margin-top) + 15px);
 	white-space: pre-line;
-	width: 12.5%;
+	width: 300px;
 	z-index: 98;
 }
+@media(max-width: 1150px) {
+	[data-tooltip]:hover::after {
+		width: 200px;
+	}
+}
+
 
 .warning:hover::after {
 	color: indianred;

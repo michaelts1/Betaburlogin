@@ -40,8 +40,12 @@ async function betaGame() {
 		this.autoWireID         = settings.autoWire ? setInterval(wire, settings.wireFrequency*60*1000, settings.mainUsername) : null
 	}
 
-	if (settings.verbose) log(`Starting up (Beta Game)\nUsername: ${vars.username}\nAlt: ${vars.isAlt ? "yes" : "no"}
+	if (settings.verbose) {
+		log(`Starting up (Beta Game)\nUsername: ${vars.username}\nAlt: ${vars.isAlt ? "yes" : "no"}
 Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\nAuto Wire: ${vars.autoWireID ? "on" : "off"}`)
+	} else {
+		log("Starting up")
+	}
 
 	/**
 	 * @typedef {helpers.runtimePort} runtimePort
@@ -62,6 +66,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 		if (message.text === "spawn gems") spawnGems(message.tier, message.type, message.splice, message.amount)
 		if (message.text === "list of active alts") spreadCurrency(message.alts)
 		if (message.text === "close banners") closeBanner()
+		if (message.text === "open advent calendar") receiveAdventCalendar()
 	})
 
 	/**
@@ -93,7 +98,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 	browser.storage.onChanged.addListener(refreshSettings)
 
 	/* Event listeners that are currently always on (might change in the future) are below
-	   Event listeners that will be turned on/off as needed are inside toggleInterfaceChanges() */
+		Event listeners that will be turned on/off as needed are inside toggleInterfaceChanges() */
 
 	// Toggle vars.motdReceived on for a short time after receiving motd message
 	eventListeners.toggle("roa-ws:motd", motd, true)
@@ -130,16 +135,20 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 
 		vars.actionsPending = true
 		$("#modalBackground, #modal2Wrapper").prop("style", "display: none !important;") // Hide the interface for the duration of this process
-		$("#allHouseUpgrades")[0].click()
 
-		const {data} = await eventListeners.waitFor("roa-ws:page:house_all_builds")
-		const items = []
-		data.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
+		// Only run if the user has bought a house (needed in case the user's level >= 10):
+		if ($("#allHouseUpgrades").is(":visible")) {
+			$("#allHouseUpgrades")[0].click()
 
-		// Create the dropdown list:
-		let select = `<div id="betabot-custom-build">Build a specific item: <select id="betabot-select-build"><option value="" selected>None (Build Fastest)</option>`
-		for (const item of items) select += `<option value="${item.i}">${item.n}</option>`
-		$("#houseQuickBuildWrapper").append(select + "</select></div>")
+			const {data} = await eventListeners.waitFor("roa-ws:page:house_all_builds")
+			const items = []
+			data.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
+
+			// Create the dropdown list:
+			let select = `<div id="betabot-custom-build" class="betabot">Build a specific item: <select id="betabot-select-build" class="betabot"><option value="" selected>None (Build Fastest)</option>`
+			for (const item of items) select += `<option value="${item.i}">${item.n}</option>`
+			$("#houseQuickBuildWrapper").append(select + "</select></div>")
+		}
 
 		$("#modalBackground, #modal2Wrapper").prop("style", "") // Return to normal
 		if (settings.verbose) log("Added Custom Build select menu")
@@ -155,7 +164,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 	 */
 	function addAltsSpawn(_, data) {
 		if (data.title === "Spawn Gems") {
-			$("#gemSpawnConfirm").after(`<input id="betabot-spawn-gem" type="button" style="padding:6.5px; margin: 0 -.5em 0 .5em;" value="Spawn For All Alts">`)
+			$("#gemSpawnConfirm").after(`<input id="betabot-spawn-gem" class="betabot" type="button" style="padding:6.5px; margin: 0 -.5em 0 .5em;" value="Spawn For All Alts">`)
 
 			$("#betabot-spawn-gem").click(() => {
 				const msg = {
@@ -178,7 +187,7 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 	 */
 	function appendName() {
 		if (!$("#betabot-clear-username")[0]) {
-			$("#roomName").append(`<span id="betabot-clear-username">${vars.username}</span>`)
+			$("#roomName").append(`<span id="betabot-clear-username" class="betabot">${vars.username}</span>`)
 			if (settings.verbose) log("Appended username to room name")
 		}
 	}
@@ -393,7 +402,7 @@ $(document).on("roa-ws:all", function(_, data) {
 			const origin = message.originalEvent.origin
 			const data = message.originalEvent.data
 			/* Make sure we are connecting to the right port
-			   No need to be absolutely sure about it since we don't send sensitive data */
+				No need to be absolutely sure about it since we don't send sensitive data */
 			if (origin === "https://beta.avabur.com" && data === "betabot-ws message") {
 				message.originalEvent.ports[0].onmessage = roaWS
 			}
@@ -691,8 +700,22 @@ $(document).on("roa-ws:all", function(_, data) {
 	 */
 	function addSocket5Button() {
 		if (!$("#betabot-socket-5")[0]) {
-			$("#socketThisGem").after(`<button id="betabot-socket-5">Socket Gem x5</button>`)
+			$("#socketThisGem").after(`<button id="betabot-socket-5" class="betabot">Socket Gem x5</button>`)
 			$("#betabot-socket-5").click(socketGems)
+		}
+	}
+
+	/**
+	 * Adds a button to open the advent calendar on all alts at once
+	 * @function addAdvertCalendar
+	 * @param {event} _ Placeholder parameter
+	 * @param {object} data Event data
+	 */
+	function addAdvertCalendar (_, data) {
+		// `data.month` can be either a `Number` or a `String` representing a `Number`, so can't use strict equality here:
+		if (data.month == 11 && !$("#betabot-collect-advent")[0]) {
+			$("#eventCalendarWrapper .mt10.center").append(` <button id="betabot-collect-advent" class="betabot"><a>Receive Your Prize</a></button>`)
+			$("#betabot-collect-advent").click(() => port.postMessage({ text: "receive advent calendar awards" }))
 		}
 	}
 
@@ -714,8 +737,8 @@ $(document).on("roa-ws:all", function(_, data) {
 			const {data} = await eventListeners.waitFor("roa-ws:page:gem_socket_to_item")
 
 			/* If this is the first gem socketed, assign `firstGemName` the name of this gem.
-			   Since `data.m` contains a very long html string, we need to extract the gem name.
-			   `firstGemName` should look like "Tier 200 Diamond of Agile Mastery" */
+				Since `data.m` contains a very long html string, we need to extract the gem name.
+				`firstGemName` should look like "Tier 200 Diamond of Agile Mastery" */
 			firstGemName = firstGemName ?? (new DOMParser()).parseFromString(data.m, "text/html").body.children[0].textContent
 
 			// If `$("#socketableGems option")` length is `0`, use `null`:
@@ -725,11 +748,36 @@ $(document).on("roa-ws:all", function(_, data) {
 			if (nextGemName !== firstGemName) break
 
 			// Add a small pause before the next iteration:
-			await delay(settings.startActionsDelay)
+			await delay(vars.startActionsDelay)
 		}
 
 		vars.actionsPending = false
 		if (settings.verbose) log("Finished socketing gems")
+	}
+
+	/**
+	 * Gets the daily Advent Calendar reward in one click link
+	 * @function receiveAdventCalendar
+	 */
+	async function receiveAdventCalendar() {
+		if (settings.verbose) log("Collecting Advent Calendar reward")
+		vars.actionsPending = true
+
+		await delay(vars.startActionsDelay)
+		$("#eventCalendarLink").click()
+
+		await eventListeners.waitFor("roa-ws:page:event_calendar")
+		$(".calendar-day.current-day a")[0].click()
+
+		await eventListeners.waitFor("roa-ws:page:event_view")
+		await delay(vars.buttonDelay)
+		$(".advent_calendar_collect")[0].click()
+
+		await eventListeners.waitFor("roa-ws:page:advent_calendar_collect")
+		await delay(vars.buttonDelay)
+
+		$(".closeModal.col-xs-12").click()
+		completeTask()
 	}
 
 	/**
@@ -900,7 +948,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		if (data.c_id === settings.eventChannelID) {
 			await delay(vars.startActionsDelay)
 			/* Wait to see if the message is received together with a message of the day,
-			   which means it was only sent due to a chat reconnection, and we should not join the gauntlet. */
+				which means it was only sent due to a chat reconnection, and we should not join the gauntlet. */
 			if (!vars.motdReceived) {
 				joinGauntlet(data.m, data.m_id)
 			}
@@ -937,18 +985,21 @@ $(document).on("roa-ws:all", function(_, data) {
 	 * @memberof beta-game
 	 */
 	async function toggleInterfaceChanges(refresh) {
-		// Add an empty div after the username:
-		if(!refresh) $("#username").after(`<span id="betabot-next-to-name"></span>`)
+		// Only execute once after page load:
+		if(!refresh && !$("#betabot-next-to-name")[0]) {
+			// Add an empty div after the username:
+			$("#username").after(`<span id="betabot-next-to-name" class="betabot"></span>`)
+		}
 
 		// Button next to name:
 		{
 			if (settings.buttonNextToName === "request" && !$("#betabot-request-currency")[0]) {
 				$("#betabot-next-to-name").empty()
-				$("#betabot-next-to-name").append(`<button id="betabot-request-currency"><a>Request Currency</a></button>`)
+				$("#betabot-next-to-name").append(`<button id="betabot-request-currency" class="betabot"><a>Request Currency</a></button>`)
 				$("#betabot-request-currency").click(() => port.postMessage({text: "requesting currency"}) )
 			} else if (settings.buttonNextToName === "spread" && !$("#betabot-spread-button")[0]) {
 				$("#betabot-next-to-name").empty()
-				$("#betabot-next-to-name").append(`<button id="betabot-spread-button"><a>Spread Currency</a></button>`)
+				$("#betabot-next-to-name").append(`<button id="betabot-spread-button" class="betabot"><a>Spread Currency</a></button>`)
 				$("#betabot-spread-button").click(() => port.postMessage({text: "requesting a list of active alts"}) )
 			} else if (!settings.buttonNextToName) {
 				$("#betabot-next-to-name").empty()
@@ -969,7 +1020,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		if (cssChanged) { // If the code has changed, or if it was never injected
 			$("#betabot-css")?.remove() //only remove the element if it exists
 			// Decode CSS into base64 and use it as a link to avoid script injections:
-			$("head").append(`<link id="betabot-css" rel="stylesheet" href="data:text/css;base64,${btoa(settings.css.addon + settings.css.custom.code)}">`)
+			$("head").append(`<link id="betabot-css" class="betabot" rel="stylesheet" href="data:text/css;base64,${btoa(settings.css.addon + settings.css.custom.code)}">`)
 		}
 
 		// Remove Effects Box:
@@ -1015,6 +1066,7 @@ $(document).on("roa-ws:all", function(_, data) {
 		// Auto Stamina/Quests/House/Harvestron:
 		eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action",
 			checkResults, settings.autoStamina || settings.autoQuests || settings.autoHouse || settings.autoHarvestron)
+
 		// Socket Gem x5:
 		eventListeners.toggle(
 			"roa-ws:page:" +
@@ -1025,12 +1077,15 @@ $(document).on("roa-ws:all", function(_, data) {
 		// Spawn Gems For All Alts:
 		eventListeners.toggle("roa-ws:modalContent", addAltsSpawn, vars.isAlt && settings.addSpawnGems)
 
+		// Advent calendar:
+		eventListeners.toggle("roa-ws:page:event_calendar", addAdvertCalendar, settings.addAdvertCalendar)
+
 		// Jump mobs:
 		if (vars.isAlt && settings.addJumpMobs && !$("#betabot-mob-jump")[0]) {
 			$("#autoEnemy").after(`
-			<div class="mt10" id="betabot-mob-jump" style="display: block;">
-				<input id="betabot-mob-jump-number" type="number" size=1>
-				<input id="betabot-mob-jump-button" type="button" value="Jump Mobs">
+			<div class="mt10" id="betabot-mob-jump" class="betabot" style="display: block;">
+				<input id="betabot-mob-jump-number" class="betabot" type="number" size=1>
+				<input id="betabot-mob-jump-button" class="betabot" type="button" value="Jump Mobs">
 			</div>`)
 
 			$("#betabot-mob-jump-button").click(() => {
