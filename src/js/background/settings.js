@@ -351,11 +351,9 @@ function logSettingsChanges(changes) {
 	// Log changes:
 	if (!settings.verbose) return
 
-	const values = Object.values(changes)
-	const keys   = Object.keys(changes)
-	for (let i = 0; i < Object.values(changes).length; i++) {
-		if (!objectEquals(values[i].oldValue, values[i].newValue)) {
-			log(keys[i], "changed from", values[i].oldValue, "to", values[i].newValue)
+	for (let key in changes) {
+		if (!objectEquals(changes[key].oldValue, changes[key].newValue)) {
+			log(`${key} changed from ${changes[key].oldValue} to ${changes[key].newValue}`)
 		}
 	}
 }
