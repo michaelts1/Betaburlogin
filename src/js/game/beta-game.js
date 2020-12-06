@@ -130,28 +130,27 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 	 * @memberof beta-game
 	 */
 	async function getCustomBuild() {
-		// Don't run if there is no house:
-		if (!$("#housing").is(":visible")) return
-
 		vars.actionsPending = true
 		$("#modalBackground, #modal2Wrapper").prop("style", "display: none !important;") // Hide the interface for the duration of this process
+		$("#housing").click()
 
 		// Only run if the user has bought a house (needed in case the user's level >= 10):
 		if ($("#allHouseUpgrades").is(":visible")) {
 			$("#allHouseUpgrades")[0].click()
 
-			const {data} = await eventListeners.waitFor("roa-ws:page:house_all_builds")
+			const {data: {q_b}} = await eventListeners.waitFor("roa-ws:page:house_all_builds")
 			const items = []
-			data.q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
+			q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
 
 			// Create the dropdown list:
 			let select = `<div id="betabot-custom-build" class="betabot">Build a specific item: <select id="betabot-select-build" class="betabot"><option value="" selected>None (Build Fastest)</option>`
 			for (const item of items) select += `<option value="${item.i}">${item.n}</option>`
 			$("#houseQuickBuildWrapper").append(select + "</select></div>")
+
+			if (settings.verbose) log("Added Custom Build select menu")
 		}
 
 		$("#modalBackground, #modal2Wrapper").prop("style", "") // Return to normal
-		if (settings.verbose) log("Added Custom Build select menu")
 		completeTask()
 	}
 
@@ -1038,8 +1037,8 @@ $(document).on("roa-ws:all", function(_, data) {
 
 		// Option to build a specific item:
 		if (settings.addCustomBuild && !$("#betabot-custom-build")[0]) {
-			// Don't activate immediately on page load:
-			if (refresh) {
+			// Don't activate immediately on page load, nor if there is no house:
+			if (refresh && !$("#housing").is(":visible")) {
 				getCustomBuild()
 			} else {
 				eventListeners.waitFor("roa-ws:motd").then(() => { // Wait for the page to load

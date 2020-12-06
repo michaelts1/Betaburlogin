@@ -96,10 +96,13 @@ browser.runtime.onConnect.addListener(async port => {
 	// When a port disconnects, forget it:
 	port.onDisconnect.addListener( () => {
 		if (["live", "main"].includes(port.role)) {
+			delete ports[port.role]
 			ports[port.role] = null
 		} else if (["alt", "login"].includes(port.role)) {
-			const index = ports[port.role + "s"].indexOf(port)
-			if (index !== -1) ports[port.role + "s"].splice(index, 1)
+			const role = port.role + "s"
+			const index = ports[role].indexOf(port)
+			delete ports[role][index]
+			if (index !== -1) ports[role].splice(index, 1)
 		}
 		log(`${port.role}${port.name ? ` (${port.name})` : ""} disconnected`)
 	})
