@@ -97,16 +97,6 @@ Gauntlet: ${settings.joinGauntlets ? "Join" : "Don't join"}, ${vars.mainTrade}\n
 	}
 	browser.storage.onChanged.addListener(refreshSettings)
 
-	/* Event listeners that are currently always on (might change in the future) are below
-		Event listeners that will be turned on/off as needed are inside toggleInterfaceChanges() */
-
-	// Toggle vars.motdReceived on for a short time after receiving motd message
-	eventListeners.toggle("roa-ws:motd", motd, true)
-	// Advice the user to update the options page after a name change:
-	eventListeners.toggle("roa-ws:page:username_change", usernameChange, true)
-	// Don't start new quests/harvestron jobs for 60 seconds after manually cancelling one:
-	eventListeners.toggle("roa-ws:page:quest_forfeit roa-ws:page:house_harvest_job_cancel", questOrHarvestronCancelled, true)
-
 	/**
 	 * Advises the user to update settings when changing name
 	 * @function usernameChange
@@ -988,6 +978,16 @@ $(document).on("roa-ws:all", function(_, data) {
 		if(!refresh && !$("#betabot-next-to-name")[0]) {
 			// Add an empty div after the username:
 			$("#username").after(`<span id="betabot-next-to-name" class="betabot"></span>`)
+
+			/* Event listeners that are currently always on (might change in the future) are
+				here Event listeners that will be turned on/off as needed are further bellow */
+			// Toggle vars.motdReceived on for a short time after receiving motd message
+			eventListeners.toggle("roa-ws:motd", motd, true)
+			// Advice the user to update the options page after a name change:
+			eventListeners.toggle("roa-ws:page:username_change", usernameChange, true)
+			// Don't start new quests/harvestron jobs for 60 seconds after manually cancelling one:
+			eventListeners.toggle("roa-ws:page:quest_forfeit roa-ws:page:house_harvest_job_cancel", questOrHarvestronCancelled, true)
+
 		}
 
 		// Button next to name:
