@@ -124,7 +124,7 @@ function updateSettings() {
 			break
 		case 0: // If no Settings are set
 			// Settings that are equal to `true` by default:
-			for (const setting of ["addAdvertCalendar", "addCustomBuild",
+			for (const setting of ["addAdventCalendar", "addCustomBuild",
 				"addJumpMobs", "addOpenTabs", "addSpawnGems", "addUsername",
 				"autoCarve", "autoCraft", "autoHarvestron", "autoHouse",
 				"autoQuests", "autoStamina", "joinGauntlets", "resumeQueue"]) {
@@ -162,14 +162,13 @@ function updateSettings() {
 			}
 
 			// Numeric settings:
-			settings.altsNumber       = 0
-			settings.attackAt         = 3
-			settings.dailyCrystals    = 50
-			settings.eventChannelID   = 3202
-			settings.minCarvingQueue  = 5
-			settings.minCraftingQueue = 5
-			settings.minStamina       = 5
-			settings.wireFrequency    = 60
+			settings.altsNumber     = 0
+			settings.attackAt       = 3
+			settings.dailyCrystals  = 50
+			settings.eventChannelID = 3202
+			settings.minQueue       = 5
+			settings.minStamina     = 5
+			settings.wireFrequency  = 60
 
 			// Misc settings:
 			settings.namesList = []
@@ -244,9 +243,6 @@ function updateSettings() {
 			settings.autoQuests = settings.doQuests
 			settings.autoHouse = settings.doBuildingAndHarvy
 			settings.autoCraft = settings.doCraftQueue
-			delete settings.doQuests
-			delete settings.doBuildingAndHarvy
-			delete settings.doCraftQueue
 			deletedSettings.push("doQuests", "doBuildingAndHarvy", "doCraftQueue")
 			// Other updates:
 			settings.minStamina = 5
@@ -274,20 +270,14 @@ function updateSettings() {
 		case 14:
 			// Name Change:
 			settings.joinGauntlets = settings.joinEvents
-			delete settings.joinEvents
 			deletedSettings.push("joinEvents")
 			// Deletions:
-			delete settings.buttonDelay
-			delete settings.actionsPending
-			delete settings.questCompleting
-			delete settings.startActionsDelay
 			deletedSettings.push("buttonDelay", "actionsPending", "questCompleting", "startActionsDelay")
 			// Necessary due to algorithm change:
 			settings.loginPassword = ""
 		case 15:
 			// Name Change:
 			settings.resumeQueue = settings.resumeCrafting
-			delete settings.resumeCrafting
 			deletedSettings.push("resumeCrafting")
 			// Addition:
 			settings.autoCarve = true
@@ -312,10 +302,15 @@ function updateSettings() {
 		case 18:
 			// `addRequestMoney` is now one of the options in `buttonNextToName`:
 			settings.buttonNextToName = settings.addRequestMoney ? "request" : ""
-			delete settings.addRequestMoney
 			deletedSettings.push("addRequestMoney")
 		case 19:
 			settings.addAdvertCalendar = true
+		case 20:
+			// Name change:
+			settings.addAdventCalendar = settings.addAdvertCalendar
+			// Merging:
+			settings.minQueue = Math.max(settings.minCraftingQueue, settings.minCarvingQueue)
+			deletedSettings.push("addAdvertCalendar", "minCraftingQueue", "minCarvingQueue")
 		default:
 			// Update internal CSS:
 			if (settings.css.addon !== ADDON_CSS) {
@@ -327,12 +322,15 @@ function updateSettings() {
 				if (settings.css.custom.code === settings.css.custom.default) {
 					settings.css.custom.code = CUSTOM_CSS
 				}
-				// Update the previous version default to the new default
+				// Update the previous version default to the new default:
 				settings.css.custom.default = CUSTOM_CSS
 			}
-			// Update settings version
+			// Update settings version:
 			log(`Updated settings from version ${settings.version} to version ${SETTINGS_VERSION}`)
 			settings.version = SETTINGS_VERSION
+
+			// Update settings storage:
+			for (const setting of deletedSettings) delete settings[setting]
 			browser.storage.sync.set(settings)
 			browser.storage.sync.remove(deletedSettings)
 		/* eslint-enable no-fallthrough */

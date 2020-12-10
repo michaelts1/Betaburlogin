@@ -199,14 +199,14 @@ function objectEquals(object1, object2) {
 	if (!(object1 instanceof Object) || !(object2 instanceof Object)) return false
 	if (object1.constructor !== object2.constructor) return false
 	for (const p in object1) {
-		if (!{}.hasOwnProperty.call(object1, p)) continue
-		if (!{}.hasOwnProperty.call(object2, p)) return false
+		if (!object1.hasOwnProperty(p)) continue
+		if (!object2.hasOwnProperty(p)) return false
 		if (object1[p] === object2[p]) continue
 		if (typeof object1[p] !== "object") return false
 		if (!objectEquals(object1[p], object2[p])) return false
 	}
 	for (const p in object2) {
-		if ({}.hasOwnProperty.call(object2, p) && !{}.hasOwnProperty.call(object1, p)) return false
+		if (object2.hasOwnProperty(p) && !object1.hasOwnProperty(p)) return false
 	}
 	return true
 }
