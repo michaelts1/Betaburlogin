@@ -10,8 +10,8 @@
 
 // Defined in beta-game-functions.js:
 /*
-	global betabot, calendar, closeBanner, gauntlet, gems, house, jumpMobs,
-	port:writable, professionQueues, settings:writable, username, vars, wiring
+	global betabot, calendar, closeBanner, gauntlet, gems, house, port:writable,
+	professionQueues, settings:writable, username, vars, wiring
 */
 
 /**
@@ -103,28 +103,6 @@ async function toggleInterfaceChanges(refresh) {
 
 	// Advent calendar:
 	eventListeners.toggle("roa-ws:page:event_calendar", calendar.addAdventCalendar, settings.addAdventCalendar)
-
-	// Jump mobs:
-	if (username.isAlt() && settings.addJumpMobs && !$("#betabot-mob-jump")[0]) {
-		$("#autoEnemy").after(`
-		<div class="mt10" id="betabot-mob-jump" class="betabot" style="display: block;">
-			<input id="betabot-mob-jump-number" class="betabot" type="number" size=1>
-			<input id="betabot-mob-jump-button" class="betabot" type="button" value="Jump Mobs">
-		</div>`)
-
-		$("#betabot-mob-jump-button").click(() => {
-			const number = parseInt($("#enemyList>option:selected").val()) + parseInt($("#betabot-mob-jump-number").val())
-			const maxNumber = parseInt($(`#enemyList>option:last-child`).val())
-			if (number > maxNumber) {
-				$("#areaName").text("The mob you chose is not in the list!")
-				return
-			}
-			port.postMessage({text: "move to mob", number: number})
-			if (settings.verbose) log(`Requested to move all alts ${number} mobs up`)
-		})
-	} else if ((!settings.addJumpMobs || !username.isAlt()) && $("#betabot-mob-jump")[0]) {
-		$("#betabot-mob-jump").remove()
-	}
 }
 
 /**
@@ -161,7 +139,6 @@ browser.storage.sync.get().then(result => {
 		if (settings.verbose) log("Received message:", message)
 
 		if (message.text === "close banners") closeBanner()
-		if (message.text === "jump mobs") jumpMobs(message.number)
 		if (message.text === "list of active alts") wiring.spreadCurrency(message.alts)
 		if (message.text === "open advent calendar") calendar.receiveAdventCalendar()
 		if (message.text === "send currency") wiring.wire(message.recipient)

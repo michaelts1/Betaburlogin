@@ -63,9 +63,6 @@ browser.runtime.onConnect.addListener(async port => {
 			ports.alts.push(port)
 			port.onMessage.addListener(message => {
 				switch (message.text) {
-					case "move to mob":
-						jumpMobs(message.number)
-						break
 					case "spawnGem":
 						spawnGem(message.type, message.splice, message.tier, message.amount)
 				}

@@ -19,6 +19,7 @@
 				<div id="login-tab-button" class="tab-button">Accounts</div>
 				<div id="wire-tab-button" class="tab-button">Currency Send</div>
 				<div id="event-tab-button" class="tab-button">Auto Event</div>
+				<div id="climb-tab-button" class="tab-button">Auto Climb</div>
 				<div id="interface-tab-button" class="tab-button">Interface</div>
 				<div id="advanced-tab-button" class="tab-button">Advanced</div>
 			</div>
@@ -420,6 +421,71 @@
 						</td>
 						<td>
 							<input id="carving" pattern="^[A-Za-z\d, ]{3,20}$" placeholder="Carving" size="24" data-setting="tradesList.carving">
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<table id="climb" class="tab">
+				<colgroup>
+					<col id="climb-col-1">
+					<col id="climb-col-3">
+				</colgroup>
+				<thead>
+					<tr>
+						<th colspan="2">
+							Auto Climb Settings
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>
+							<label for="auto-climb">Auto Climb</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Automatically try to climb mobs after each battle quest."></span>
+						</td>
+						<td>
+							<input id="auto-climb" type="checkbox" data-setting="autoClimb.climb">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="jump-amount">Jump Amount</label>
+							<span class="info" role="img" aria-label="info" data-tooltip=""></span>
+						</td>
+						<td>
+							<!-- Only accept numbers between 1 and 22 -->
+							<input id="jump-amount" pattern="^([1-9]|1[0-9]|2[0-2])$" placeholder="Jump Amount" size="15" data-setting="autoClimb.jumpAmount">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="min-win-rate">Minimum Win Rate</label>
+							<span class="info" role="img" aria-label="info" data-tooltip=""></span>
+						</td>
+						<td>
+							<!-- Only accept numbers between 51 and 100 -->
+							<input id="min-win-rate" pattern="^(5[1-9]|[69][0-9]|100)$" placeholder="Minimum Win Rate" size="15" data-setting="autoClimb.minimumWinrate">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="max-win-rate">Maximum Win Rate</label>
+							<span class="info" role="img" aria-label="info" data-tooltip=""></span>
+						</td>
+						<td>
+							<!-- Only accept numbers between 90 and 100 -->
+							<input id="max-win-rate" pattern="^(9[0-9]|100)$" placeholder="Maximum Win Rate" size="15" data-setting="autoClimb.maximumWinrate">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="min-actions">Minimum Actions</label>
+							<span class="info" role="img" aria-label="info" data-tooltip=""></span>
+						</td>
+						<td>
+							<!-- Only accept numbers between 5 and 1000 -->
+							<input id="min-actions" pattern="^([5-9]|[1-9]\d\d?|1000)$" placeholder="Minimum Actions" size="15" data-setting="autoClimb.minimumActions">
 						</td>
 					</tr>
 				</tbody>

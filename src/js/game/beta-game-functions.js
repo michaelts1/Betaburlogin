@@ -21,6 +21,7 @@
  */
 
 /* eslint-disable no-unused-vars */ // Defined in this file, used in beta-game.js
+/* eslint-disable no-use-before-define */ // Functions here will only run after all other functions and objects were initialized
 
 /**
  * - Stores variables and constants to avoid polluting the global space
@@ -710,6 +711,7 @@ const professionQueues = {
  * @property {boolean} staminaCooldown Tracks recent stamina replenishes
  * @property {function} questOrHarvestronCancelled Stops tracking quests/harvestron for 60 seconds after manual cancel
  * @property {function} finishQuest Finishes a quest and start a new one
+ * @property {function} startQuest Starts a new quest
  * @property {function} startHarvestron Starts a new Harvestron Job
  * @property {function} buyCrys Buys crystals for gold from the crystal shop
  * @property {function} checkResults Checks action results
@@ -743,7 +745,7 @@ const betabot = {
 	},
 
 	/**
-	 * Finishes a quest and starts a new one
+	 * Finishes a quest
 	 * @async
 	 * @function betabot.finishQuest
 	 * @param {string} type Quest type
@@ -752,21 +754,39 @@ const betabot = {
 	async finishQuest(type) {
 		vars.actionsPending = true
 
-		await delay(vars.buttonDelay)
+		await delay(vars.startActionsDelay)
 		$("a.questCenter")[0].click()
 
+		// Complete the quest:
 		await eventListeners.waitFor("roa-ws:page:quests")
-		await delay(vars.startActionsDelay)
+		await delay(vars.buttonDelay)
 		if (settings.verbose) log(`Completing a ${type} quest`)
-		$(`input.completeQuest[data-questtype=${type}]`).click() // Complete the quest
-
+		$(`input.completeQuest[data-questtype=${type}]`).click()
 		await eventListeners.waitFor("roa-ws:page:quests")
+
+		// Try climbing or start a new quest
+		if (settings.autoClimb) {
+			completeTask()
+			mobClimbing.checkClimbing()
+		} else {
+			this.startQuest(type)
+		}
+	},
+
+	/**
+	 * Start a new quest
+	 * @async
+	 * @function betabot.startQuest
+	 * @param {string} type Quest type
+	 * @memberof beta-game-functions
+	 */
+	async startQuest(type) {
+		// Start a new quest:
 		await delay(vars.buttonDelay)
 		if (settings.verbose) log(`Starting a ${type} quest`)
-		$(`input.questRequest[data-questtype=${type}][value="Begin Quest"]`).click() // Start new quest
-
+		$(`input.questRequest[data-questtype=${type}][value="Begin Quest"]`).click()
 		await eventListeners.waitFor("roa-ws:page:quests")
-		await delay(vars.buttonDelay)
+
 		completeTask()
 	},
 
@@ -878,6 +898,152 @@ const betabot = {
 }
 
 /**
+ * Mob climbing related functions and variables
+ * @const mobClimbing
+ * @property {function} getCurrentWinRate Returns an object containing winrate and number of actions tracked
+ * @property {function} checkClimbing Checks to see if we should climb
+ * @property {function} checkStability Checks to see if we should stop climbing
+ * @property {function} finishClimbing Stops tracking winrate and starts a new quest
+ * @property {function} move Climbs/descends mobs
+ * @memberof beta-game-functions
+ */
+const mobClimbing = {
+	/**
+	 * Returns an object containing the win rate (in percentages), and the number of actions tracked so far
+	 * @function mobClimbing.getCurrentWinRate
+	 * @returns {object}
+	 * @returns {number} winRate
+	 * @returns {number} numberOfActions
+	 * @memberof beta-game-functions
+	 */
+	getCurrentWinRate() {
+		const kills = parseFloat($("#gainsKills").data("value"))
+		const deaths = parseFloat($("#gainsDeaths").data("value"))
+		const numberOfActions = kills + deaths
+		return {
+			numberOfActions,
+			winRate: (kills / (numberOfActions) * 100).toFixed(2),
+		}
+	},
+
+	/**
+	 * Checks to see if we should climb mobs
+	 * @function mobClimbing.checkClimbing
+	 * @memberof beta-game-functions
+	 */
+	checkClimbing() {
+		const {winRate, numberOfActions} = this.getCurrentWinRate()
+		// If we didn't lose at all for at least 50 actions, climb mobs. Else, reset the statistics and start a new quest.
+		if (numberOfActions >= settings.autoClimb.minimumActions && winRate === settings.autoClimb.maximumWinrate) {
+			if (settings.verbose) log(`Quest complete with high winrate, trying to climb mobs`)
+			this.move("up")
+		} else {
+			$("#clearBattleStats").click()
+			this.finishClimbing()
+		}
+	},
+
+	/**
+	 * Climbs/descends mobs
+	 * @async
+	 * @function mobClimbing.move
+	 * @param {string} direction If `direction` is "up", climbs up. If `direction` is "down", descends down
+	 * @memberof beta-game-functions
+	 */
+	async move(direction) {
+		vars.actionsPending = true
+
+		await delay(vars.startActionsDelay)
+		$("#battleGrounds").click()
+
+		await eventListeners.waitFor("roa-ws:page:town_battleGrounds")
+		const currentMob = parseInt($(`#enemyList option:selected`).val())
+		const minNumber = parseInt($(`#enemyList option:first-child`).val())
+		const maxNumber = parseInt($(`#enemyList option:last-child`).val())
+		const i = settings.autoClimb.jumpAmount
+		const nextMob = direction === "up" ? currentMob + i : currentMob - i
+
+		// If the next mob is not on the list:
+		if (nextMob > maxNumber || nextMob < minNumber) {
+			const gold = parseInt($(".right.mygold.gold").data("personal").replaceAll(",", ""))
+			// If we don't have enough gold for travel, don't climb:
+			if (gold < 100*1000*1000) {
+				$("#loadBattle").click()
+				this.finishClimbing()
+				return
+			}
+
+			$("#basePage").click()
+			await eventListeners.waitFor("roa-ws:page:town")
+			await delay(vars.buttonDelay)
+
+			$("#loadTravel").click()
+			await eventListeners.waitFor("roa-ws:page:town_travel")
+			await delay(vars.buttonDelay)
+
+			const currentArea = parseInt($("#area_list option:selected").val())
+			const nextArea = direction === "up" ? currentArea + 1 : currentArea - 1
+
+			$("#area_list option").eq(nextArea).attr("selected", "selected")
+			$("#travel_confirm").click()
+
+			await eventListeners.waitFor("roa-ws:page:travel")
+			await delay(vars.buttonDelay)
+			$("#battleGrounds").click()
+
+			await eventListeners.waitFor("roa-ws:page:town_battlegrounds")
+			await delay(vars.buttonDelay)
+		}
+		$(`#enemyList`).find(`[value=${nextMob}]`).attr("selected", "selected")
+
+		await delay(vars.buttonDelay)
+		$("#autoEnemy").click()
+
+		if (direction === "up") {
+			// Track stability:
+			$("#clearBattleStats").click()
+			eventListeners.toggle("roa-ws:battle", this.checkStability, true)
+		} else {
+			// Stop tracking stability (if we are tracking it) and start a new quest:
+			this.finishClimbing()
+		}
+
+		vars.actionsPending = false
+	},
+
+	/**
+	 * checks to see if we should stop climbing
+	 * @function mobClimbing.checkStability
+	 * @memberof beta-game-functions
+	 */
+	checkStability() {
+		const {winRate, numberOfActions} = this.getCurrentWinRate
+
+		if (winRate < 50) { // If we are severely losing, descend
+			this.move("down")
+		} else if (numberOfActions >= settings.autoClimb.minimumActions) { // If we are not severely losing, track for at least 50 actions
+			if (winRate === settings.autoClimb.maximumWinrate) { // If we are still winning 100% of the time, try climbing again
+				this.move("up")
+			} else if (winRate < settings.autoClimb.minimumWinrate) { // If we are winning less than 95% of the time, descend
+				this.move("down")
+			} else { // If we are between 95% and 100% winrate, finish climbing
+				this.finishClimbing()
+			}
+		}
+	},
+
+	/**
+	 * Stops tracking winrate and starts a new quest
+	 * @function mobClimbing.finishClimbing
+	 * @memberof beta-game-functions
+	 */
+	finishClimbing() {
+		betabot.startQuest("kill")
+		eventListeners.toggle("roa-ws:battle", this.checkStability, false)
+	},
+}
+
+/**
  * Closes the banner
  * @function closeBanner
  * @memberof beta-game-functions
@@ -898,22 +1064,4 @@ async function completeTask() {
 	await delay(vars.startActionsDelay)
 	vars.actionsPending = false
 	$(".closeModal").click()
-}
-
-/**
- * Jumps to a mob with a given ID
- * @async
- * @function jumpMobs
- * @param {number} number Mob ID
- * @memberof beta-game-functions
- */
-async function jumpMobs(number) {
-	if (settings.verbose) log(`Jumping to mob number ${number}`)
-	await delay(vars.startActionsDelay)
-	$("#battleGrounds").click()
-
-	await eventListeners.waitFor("roa-ws:page:town_battlegrounds")
-	$(`#enemyList > option[value|=${number}]`).attr("selected", "selected")
-	await delay(vars.buttonDelay)
-	$("#autoEnemy").click()
 }

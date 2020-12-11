@@ -20,7 +20,7 @@ class Setting {
 		// Set object properties:
 		this.input = input
 		this.name = input.dataset.setting
-		this.path = input.dataset.setting.split(".") // Is this really needed? its almost equivalent to `this.name`
+		this.path = input.dataset.setting.split(".") /** @todo Is this really needed? its almost equivalent to `this.name` */
 		const {settingType, settingValue} = Setting.getSettingByPath(this.name, this.path)
 		this.type = settingType
 		this.value = settingValue

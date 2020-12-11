@@ -46,10 +46,6 @@ const ADDON_CSS =
 #betabot-next-to-name a {
 	line-height: 10px;
 }
-#betabot-mob-jump-button {
-	font-size: 14px;
-	padding: 6.5px;
-}
 #betabot-spawn-gem[disabled] {
 	opacity: 0.5;
 }
@@ -125,9 +121,9 @@ function updateSettings() {
 		case 0: // If no Settings are set
 			// Settings that are equal to `true` by default:
 			for (const setting of ["addAdventCalendar", "addCustomBuild",
-				"addJumpMobs", "addOpenTabs", "addSpawnGems", "addUsername",
-				"autoCarve", "autoCraft", "autoHarvestron", "autoHouse",
-				"autoQuests", "autoStamina", "joinGauntlets", "resumeQueue"]) {
+				"addOpenTabs", "addSpawnGems", "addUsername", "autoCarve",
+				"autoCraft", "autoHarvestron", "autoHouse", "autoQuests",
+				"autoStamina", "joinGauntlets", "resumeQueue"]) {
 				settings[setting] = true
 			}
 
@@ -193,6 +189,15 @@ function updateSettings() {
 					code: CUSTOM_CSS,
 					default: CUSTOM_CSS,
 				},
+			}
+
+			// Auto climb settings:
+			settings.autoClimb = {
+				climb: false,
+				jumpAmount: 11,
+				maximumWinrate: 100,
+				minimumActions: 50,
+				minimumWinrate: 95,
 			}
 
 			// Finalizing settings:
@@ -311,6 +316,16 @@ function updateSettings() {
 			// Merging:
 			settings.minQueue = Math.max(settings.minCraftingQueue, settings.minCarvingQueue)
 			deletedSettings.push("addAdvertCalendar", "minCraftingQueue", "minCarvingQueue")
+
+			// Auto climb:
+			settings.autoClimb = {
+				climb: settings.addJumpMobs,
+				jumpAmount: 11,
+				maximumWinrate: 100,
+				minimumActions: 50,
+				minimumWinrate: 95,
+			}
+			deletedSettings.push("addJumpMobs")
 		default:
 			// Update internal CSS:
 			if (settings.css.addon !== ADDON_CSS) {
