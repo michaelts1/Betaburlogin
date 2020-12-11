@@ -46,7 +46,10 @@
 			"matches": [
 				"https://beta.avabur.com/game"
 			],
-			"js": ["src/js/game/beta-game.js"]
+			"js": [
+				"src/js/login/beta-login-functions.js",
+				"src/js/game/beta-game.js"
+			]
 		}
 	],
 

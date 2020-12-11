@@ -22,18 +22,16 @@
  */
 async function toggleInterfaceChanges(refresh) {
 	// Button next to name:
-	{
-		if (settings.buttonNextToName === "request" && !$("#betabot-request-currency")[0]) {
-			$("#betabot-next-to-name").empty()
-			$("#betabot-next-to-name").append(`<button id="betabot-request-currency" class="betabot"><a>Request Currency</a></button>`)
-			$("#betabot-request-currency").click(() => port.postMessage({text: "requesting currency"}) )
-		} else if (settings.buttonNextToName === "spread" && !$("#betabot-spread-button")[0]) {
-			$("#betabot-next-to-name").empty()
-			$("#betabot-next-to-name").append(`<button id="betabot-spread-button" class="betabot"><a>Spread Currency</a></button>`)
-			$("#betabot-spread-button").click(() => port.postMessage({text: "requesting a list of active alts"}) )
-		} else if (!settings.buttonNextToName) {
-			$("#betabot-next-to-name").empty()
-		}
+	if (settings.buttonNextToName === "request" && !$("#betabot-request-currency")[0]) {
+		$("#betabot-next-to-name").empty()
+		$("#betabot-next-to-name").append(`<button id="betabot-request-currency" class="betabot"><a>Request Currency</a></button>`)
+		$("#betabot-request-currency").click(() => port.postMessage({text: "requesting currency"}) )
+	} else if (settings.buttonNextToName === "spread" && !$("#betabot-spread-button")[0]) {
+		$("#betabot-next-to-name").empty()
+		$("#betabot-next-to-name").append(`<button id="betabot-spread-button" class="betabot"><a>Spread Currency</a></button>`)
+		$("#betabot-spread-button").click(() => port.postMessage({text: "requesting a list of active alts"}) )
+	} else {
+		$("#betabot-next-to-name").empty()
 	}
 
 	// Make it easier to see what alt it is:
@@ -130,7 +128,7 @@ async function toggleInterfaceChanges(refresh) {
 }
 
 /**
- * Loads new settings from storage
+ * Updates `settings` after changes
  * @async
  * @function refreshSettings
  * @param {object} changes See {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/onChanged#Parameters|storage.onChanged}
@@ -187,40 +185,25 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 </script>`)
 
 	/** @todo Maybe we can use `$(window).one()` here? */
-	$(window).on("message", message => {
-		const origin = message.originalEvent.origin
-		const data = message.originalEvent.data
+	$(window).on("message", ({originalEvent: {origin, data, ports}}) => {
 		/* Make sure we are connecting to the right port. No need to be
 			absolutely sure about it since we don't send sensitive data */
-		if (origin === "https://beta.avabur.com" && data === "betabot-ws message") {
-			/**
-			 * Broadcasts events from the page to the content script. Based on RoA-WSHookUp
-			 * @author {@link https://github.com/edvordo/RoA-WSHookUp|Edvordo}
-			 * @license MIT License
-			 */
-			message.originalEvent.ports[0].onmessage = event => {
-				const data = event.data
-				let etype = "roa-ws:"
-				for (const item of data) {
-					let etypepage = ""
-					etype = "roa-ws:"
-					if (item.hasOwnProperty("type")) {
-						etype += item.type
-						// In case its a "page" type message create additional event, e.g. "roa-ws:page:boosts"
-						if (item.type === "page" && item.hasOwnProperty("page") && typeof item.page === "string") {
-							etypepage = etype + ":" + item.page
-						}
-					} else {
-						etype += "general"
-					}
+		if (origin !== "https://beta.avabur.com" || data !== "betabot-ws message") return
 
-					$(document).trigger(etype, item)
-					if (etypepage) {
-						$(document).trigger(etypepage, item)
-					}
+		/**
+		 * Broadcasts events from the page to the content script. Based on RoA-WSHookUp
+		 * @author {@link https://github.com/edvordo/RoA-WSHookUp|Edvordo}
+		 * @license MIT License
+		 */
+		ports[0].onmessage = ({data}) => {
+			for (const item of data) {
+				let etype = "roa-ws:" + (item.type ?? "general")
+				if (item.type === "page" && typeof item.page === "string") {
+					$(document).trigger(etype + ":" + item.page, item)
 				}
-				$(document).trigger("roa-ws:all", data)
+				$(document).trigger(etype, item)
 			}
+			$(document).trigger("roa-ws:all", data)
 		}
 	})
 
