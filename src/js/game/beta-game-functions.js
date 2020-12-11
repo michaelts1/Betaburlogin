@@ -707,10 +707,15 @@ const professionQueues = {
 /**
  * Automation related functions and variables (excluding housing)
  * @const betabot
+ * @property {boolean} staminaCooldown Tracks recent stamina replenishes
+ * @property {function} questOrHarvestronCancelled Stops tracking quests/harvestron for 60 seconds after manual cancel
+ * @property {function} finishQuest Finishes a quest and start a new one
+ * @property {function} startHarvestron Starts a new Harvestron Job
+ * @property {function} buyCrys Buys crystals for gold from the crystal shop
+ * @property {function} checkResults Checks action results
  * @memberof beta-game-functions
  */
 const betabot = {
-	questCompleting: null,
 	staminaCooldown: false,
 	/**
 	 * Stops tracking Harvestron/Quests for 60 seconds after manually cancelling
@@ -741,21 +746,27 @@ const betabot = {
 	 * Finishes a quest and starts a new one
 	 * @async
 	 * @function betabot.finishQuest
+	 * @param {string} type Quest type
 	 * @memberof beta-game-functions
 	 */
-	async finishQuest() {
+	async finishQuest(type) {
+		vars.actionsPending = true
+
+		await delay(vars.buttonDelay)
+		$("a.questCenter")[0].click()
+
+		await eventListeners.waitFor("roa-ws:page:quests")
 		await delay(vars.startActionsDelay)
-		if (settings.verbose) log(`Completing a ${this.questCompleting} quest`)
-		$(`input.completeQuest[data-questtype=${this.questCompleting}]`).click() // Complete the quest
+		if (settings.verbose) log(`Completing a ${type} quest`)
+		$(`input.completeQuest[data-questtype=${type}]`).click() // Complete the quest
 
 		await eventListeners.waitFor("roa-ws:page:quests")
 		await delay(vars.buttonDelay)
-		if (settings.verbose) log(`Starting a ${this.questCompleting} quest`)
-		$(`input.questRequest[data-questtype=${this.questCompleting}][value="Begin Quest"]`).click() // Start new quest
+		if (settings.verbose) log(`Starting a ${type} quest`)
+		$(`input.questRequest[data-questtype=${type}][value="Begin Quest"]`).click() // Start new quest
 
 		await eventListeners.waitFor("roa-ws:page:quests")
 		await delay(vars.buttonDelay)
-		this.questCompleting = null
 		completeTask()
 	},
 
@@ -825,20 +836,17 @@ const betabot = {
 
 		// Quests:
 		if (settings.autoQuests) {
+			let type = null
 			if (data.bq_info2?.c >= data.bq_info2.r) {
-				this.questCompleting = "kill"
+				type = "kill"
 			} else if (data.tq_info2?.c >= data.tq_info2.r) {
-				this.questCompleting = "tradeskill"
+				type = "tradeskill"
 			} else if (data.pq_info2?.c >= data.pq_info2.r) {
-				this.questCompleting = "profession"
+				type = "profession"
 			}
 
-			if (this.questCompleting != null) {
-				vars.actionsPending = true
-				await delay(vars.buttonDelay)
-				$("a.questCenter")[0].click()
-				await eventListeners.waitFor("roa-ws:page:quests")
-				this.finishQuest()
+			if (type) {
+				this.finishQuest(type)
 				return
 			}
 		}
