@@ -47,7 +47,7 @@
 				"https://beta.avabur.com/game"
 			],
 			"js": [
-				"src/js/login/beta-login-functions.js",
+				"src/js/game/beta-game-functions.js",
 				"src/js/game/beta-game.js"
 			]
 		}

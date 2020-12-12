@@ -235,16 +235,6 @@ function spawnGem(type, splice, tier, amount) {
 }
 
 /**
- * Jumps all alts to mob with a given ID
- * @function jumpMobs
- * @param {number} number Mob ID
- * @memberof background
- */
-function jumpMobs(number) {
-	sendMessage({text: "jump mobs", number: number}, ports.alts)
-}
-
-/**
  * - Causes all users to send their currency to the given name.
  * - Exact settings can be changed by the user under the Currency Send section of the Options Page.
  * @function sendCurrency
