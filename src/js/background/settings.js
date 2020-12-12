@@ -119,31 +119,16 @@ function updateSettings() {
 		case SETTINGS_VERSION:
 			break
 		case 0: // If no Settings are set
-			// Settings that are equal to `true` by default:
-			for (const setting of ["addAdventCalendar", "addCustomBuild",
-				"addOpenTabs", "addSpawnGems", "addUsername", "autoCarve",
-				"autoCraft", "autoHarvestron", "autoHouse", "autoQuests",
-				"autoStamina", "joinGauntlets", "resumeQueue"]) {
-				settings[setting] = true
-			}
-
-			// Settings that are equal to `false` by default:
-			for (const setting of ["addSocketX5", "addLoginAlts", "autoWire",
-				"removeBanner", "removeEffects", "verbose"]) {
-				settings[setting] = false
-			}
-
-			// Settings that are equal to `""` (empty string) by default:
-			for (const setting of ["buttonNextToName", "altBaseName",
-				"loginPassword", "mainAccount", "mainUsername", "pattern"]) {
-				settings[setting] = ""
-			}
+			settings.altBaseName = ""
+			settings.altsNumber = 0
+			settings.dailyCrystals = 50
+			settings.mainAccount = ""
+			settings.mainUsername = ""
 
 			// Currency send settings:
 			settings.currencySend = {}
 			for (const currency of ["crystals", "platinum", "gold",
-				"crafting_materials", "gem_fragments", "food", "wood",
-				"iron", "stone"]) {
+				"crafting_materials", "gem_fragments"]) {
 				settings.currencySend[currency] = {
 					send: true,
 					minimumAmount: 100,
@@ -153,62 +138,11 @@ function updateSettings() {
 			// Override some of the previously set values:
 			settings.currencySend.crystals.minimumAmount = 0
 			settings.currencySend.gold.minimumAmount = 10000
-			for (const name of ["food", "wood", "iron", "stone"]) {
-				settings.currencySend[name].keepAmount = 100000000
-			}
 
-			// Numeric settings:
-			settings.altsNumber     = 0
-			settings.attackAt       = 3
-			settings.dailyCrystals  = 50
-			settings.eventChannelID = 3202
-			settings.minQueue       = 5
-			settings.minStamina     = 5
-			settings.wireFrequency  = 60
-
-			// Misc settings:
-			settings.namesList = []
-
-			// Containers settings:
-			settings.containers = {
-				list: [],
-				useAll: true,
-			}
-
-			// Event trades settings:
-			settings.tradesList = {}
-			for (const ts of ["fishing", "woodcutting", "mining",
-				"stonecutting", "crafting", "carving"]) {
-				settings.tradesList[ts] = []
-			}
-
-			// CSS settings:
-			settings.css = {
-				addon: ADDON_CSS,
-				custom: {
-					code: CUSTOM_CSS,
-					default: CUSTOM_CSS,
-				},
-			}
-
-			// Auto climb settings:
-			settings.autoClimb = {
-				climb: false,
-				jumpAmount: 11,
-				maximumWinrate: 100,
-				minimumActions: 50,
-				minimumWinrate: 95,
-			}
-
-			// Finalizing settings:
-			settings.version = SETTINGS_VERSION
-			browser.storage.sync.set(settings)
-			log("Created settings with default values")
-			break
+			/* eslint-disable no-fallthrough */ // Falling through to update properly
 		case 2:
 			settings.pattern = ""
 			settings.namesList = []
-			/* eslint-disable no-fallthrough */ // Falling through to update properly
 		case 3:
 			settings.tradesList = {
 				fishing: [],
@@ -229,103 +163,149 @@ function updateSettings() {
 		case 5:
 			settings.autoWire = false
 		case 6:
-			settings.css = {
-				addon: ADDON_CSS,
-				custom: CUSTOM_CSS,
-			},
 			settings.verbose = false
-			settings.containers = ["betabot-default"]
 			settings.wireFrequency = 60
 		case 7:
 			settings.containers = {
-				useAll: true,
 				list: [],
+				useAll: true,
 			}
-			if (settings.pattern === "romanCaps")
-				settings.pattern = "roman" // Deprecated
+			// Deprecation:
+			if (settings.pattern === "romanCaps") {
+				settings.pattern = "roman"
+			}
 		case 8:
 			// Name Change:
-			settings.autoQuests = settings.doQuests
-			settings.autoHouse = settings.doBuildingAndHarvy
-			settings.autoCraft = settings.doCraftQueue
-			deletedSettings.push("doQuests", "doBuildingAndHarvy", "doCraftQueue")
+			if (settings.doQuests === undefined) {
+				settings.autoQuests = true
+			} else {
+				settings.autoQuests = settings.doQuests
+				deletedSettings.push("doQuests")
+			}
+			if (settings.doBuildingAndHarvy === undefined) {
+				settings.autoHouse = true
+			} else {
+				settings.autoHouse = settings.doBuildingAndHarvy
+				deletedSettings.push("doBuildingAndHarvy")
+			}
+			if (settings.doCraftQueue === undefined) {
+				settings.autoCraft = true
+			} else {
+				settings.autoCraft = settings.doCraftQueue
+				deletedSettings.push("doCraftQueue")
+			}
 			// Other updates:
 			settings.minStamina = 5
 			settings.autoStamina = true
-			settings.joinEvents = true
 			settings.addCustomBuild = true
 			settings.addUsername = true
-			settings.addJumpMobs = true
 			settings.addSpawnGems = true
-			settings.addRequestMoney = true
 		case 9:
 			settings.attackAt = 3
 			settings.eventChannelID = 3202
 			settings.addOpenTabs = true
-			settings.addLoginAlts = true
-			settings.removeEffects = true
+			settings.addLoginAlts = false
+			settings.removeEffects = false
 		case 10:
-			settings.resumeCrafting = false
+			// No changes here anymore
 		case 11:
 			settings.autoHarvestron = true
 		case 12:
 			settings.removeBanner = false
 		case 13:
-			settings.addSocketX5 = true
+			settings.addSocketX5 = false
 		case 14:
 			// Name Change:
-			settings.joinGauntlets = settings.joinEvents
-			deletedSettings.push("joinEvents")
+			if (settings.joinEvents === undefined) {
+				settings.joinGauntlets = true
+			} else {
+				settings.joinGauntlets = settings.joinEvents
+				deletedSettings.push("joinEvents")
+			}
 			// Deletions:
-			deletedSettings.push("buttonDelay", "actionsPending", "questCompleting", "startActionsDelay")
-			// Necessary due to algorithm change:
+			if (settings.buttonDelay) deletedSettings.push("buttonDelay")
+			if (settings.actionsPending) deletedSettings.push("actionsPending")
+			if (settings.questCompleting) deletedSettings.push("questCompleting")
+			if (settings.startActionsDelay) deletedSettings.push("startActionsDelay")
+			// Reset:
 			settings.loginPassword = ""
 		case 15:
 			// Name Change:
-			settings.resumeQueue = settings.resumeCrafting
-			deletedSettings.push("resumeCrafting")
+			if (settings.resumeCrafting === undefined) {
+				settings.resumeQueue = true
+			} else {
+				settings.resumeQueue = settings.resumeCrafting
+				deletedSettings.push("resumeCrafting")
+			}
 			// Addition:
 			settings.autoCarve = true
-			settings.minCarvingQueue = 5
 		case 16:
-			settings.css.custom = {
-				code: settings.css.custom,
-				default: CUSTOM_CSS,
-			}
-		case 17: {
-			// Format change (Array => Object):
-			let tmp = {}
-			for (const currency of settings.currencySend) {
-				tmp[currency.name] = {
-					keepAmount: currency.keepAmount,
-					minimumAmount: currency.minimumAmount,
-					send: currency.send,
+			if (settings.css === undefined) {
+				settings.css = {
+					addon: ADDON_CSS,
+					custom: {
+						code: settings.css.custom,
+						default: CUSTOM_CSS,
+					},
+				}
+			} else {
+				settings.css.custom = {
+					code: settings.css.custom,
+					default: CUSTOM_CSS,
 				}
 			}
-			settings.currencySend = tmp
-		}
+		case 17:
+			// Format change (Array => Object):
+			if (Array.isArray(settings.currencySend)) {
+				let tmp = {}
+				for (const currency of settings.currencySend) {
+					tmp[currency.name] = {
+						keepAmount: currency.keepAmount,
+						minimumAmount: currency.minimumAmount,
+						send: currency.send,
+					}
+				}
+				settings.currencySend = tmp
+			}
 		case 18:
 			// `addRequestMoney` is now one of the options in `buttonNextToName`:
-			settings.buttonNextToName = settings.addRequestMoney ? "request" : ""
-			deletedSettings.push("addRequestMoney")
+			if (settings.addRequestMoney === undefined) {
+				settings.buttonNextToName = ""
+			} else {
+				settings.buttonNextToName = settings.addRequestMoney ? "request" : ""
+				deletedSettings.push("addRequestMoney")
+			}
 		case 19:
-			settings.addAdvertCalendar = true
+			// No changes here anymore
 		case 20:
 			// Name change:
-			settings.addAdventCalendar = settings.addAdvertCalendar
+			if (settings.addAdvertCalendar == undefined) {
+				settings.addAdventCalendar = true
+			} else {
+				settings.addAdventCalendar = settings.addAdvertCalendar
+				deletedSettings.push("addAdvertCalendar")
+			}
+
 			// Merging:
-			settings.minQueue = Math.max(settings.minCraftingQueue, settings.minCarvingQueue)
-			deletedSettings.push("addAdvertCalendar", "minCraftingQueue", "minCarvingQueue")
+			if (settings.minCraftingQueue === undefined && settings.minCarvingQueue === undefined) {
+				settings.minQueue = 5
+			} else {
+				settings.minQueue = Math.max(settings.minCraftingQueue ?? 0, settings.minCarvingQueue ?? 0)
+				deletedSettings.push("minCraftingQueue", "minCarvingQueue")
+			}
 
 			// Auto climb:
 			settings.autoClimb = {
-				climb: settings.addJumpMobs,
+				climb: false,
 				jumpAmount: 11,
 				maximumWinrate: 100,
 				minimumActions: 50,
 				minimumWinrate: 95,
 			}
-			deletedSettings.push("addJumpMobs")
+			if (settings.addJumpMobs !== undefined) {
+				settings.autoClimb.climb = settings.addJumpMobs,
+				deletedSettings.push("addJumpMobs")
+			}
 		default:
 			// Update internal CSS:
 			if (settings.css.addon !== ADDON_CSS) {
