@@ -781,8 +781,10 @@ const betabot = {
 	 * @memberof beta-game-functions
 	 */
 	async startQuest(type) {
-		// Start a new quest:
+		$("a.questCenter")[0].click()
+		await eventListeners.waitFor("roa-ws:page:quests")
 		await delay(vars.buttonDelay)
+
 		if (settings.verbose) log(`Starting a ${type} quest`)
 		$(`input.questRequest[data-questtype=${type}][value="Begin Quest"]`).click()
 		await eventListeners.waitFor("roa-ws:page:quest_request")
@@ -1051,7 +1053,11 @@ const mobClimbing = {
 	 * @memberof beta-game-functions
 	 */
 	finishClimbing() {
-		betabot.startQuest("kill")
+		if (settings.autoQuests) {
+			betabot.startQuest("kill")
+		} else {
+			vars.actionsPending = false
+		}
 		eventListeners.toggle("roa-ws:battle", this.checkStability, false)
 		if (settings.verbose) log("Finished climbing mobs")
 	},
