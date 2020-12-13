@@ -10,8 +10,8 @@
 
 // Defined in beta-game-functions.js:
 /*
-	global betabot, calendar, closeBanner, gauntlet, gems, house, port:writable,
-	professionQueues, settings:writable, username, vars, wiring
+	global betabot, calendar, closeBanner, gauntlet, gems, house, mobClimbing,
+	port:writable, professionQueues, settings:writable, username, vars, wiring
 */
 
 /**
@@ -101,8 +101,11 @@ async function toggleInterfaceChanges(refresh) {
 	// Spawn Gems For All Alts:
 	eventListeners.toggle("roa-ws:modalContent", gems.addAltsSpawn, username.isAlt() && settings.addSpawnGems)
 
-	// Advent calendar:
+	// Advent Calendar:
 	eventListeners.toggle("roa-ws:page:event_calendar", calendar.addAdventCalendar, settings.addAdventCalendar)
+
+	// Auto Mob Climbing:
+	eventListeners.toggle("roa-ws:page:quest_complete", mobClimbing.checkClimbing, settings.autoClimb.climb)
 }
 
 /**

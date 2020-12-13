@@ -706,7 +706,7 @@ const professionQueues = {
 }
 
 /**
- * Automation related functions and variables (excluding housing)
+ * Automation related functions and variables (excluding housing and crafting/carving)
  * @const betabot
  * @property {boolean} staminaCooldown Tracks recent stamina replenishes
  * @property {function} questOrHarvestronCancelled Stops tracking quests/harvestron for 60 seconds after manual cancel
@@ -719,6 +719,7 @@ const professionQueues = {
  */
 const betabot = {
 	staminaCooldown: false,
+
 	/**
 	 * Stops tracking Harvestron/Quests for 60 seconds after manually cancelling
 	 * @async
@@ -762,12 +763,11 @@ const betabot = {
 		await delay(vars.buttonDelay)
 		if (settings.verbose) log(`Completing a ${type} quest`)
 		$(`input.completeQuest[data-questtype=${type}]`).click()
-		await eventListeners.waitFor("roa-ws:page:quests")
+		await eventListeners.waitFor("roa-ws:page:quest_complete")
 
-		// Try climbing or start a new quest
+		// If auto climbing is on, stop here. Else, start a new quest:
 		if (settings.autoClimb) {
-			completeTask()
-			mobClimbing.checkClimbing()
+			vars.actionsPending = false
 		} else {
 			this.startQuest(type)
 		}
@@ -785,7 +785,7 @@ const betabot = {
 		await delay(vars.buttonDelay)
 		if (settings.verbose) log(`Starting a ${type} quest`)
 		$(`input.questRequest[data-questtype=${type}][value="Begin Quest"]`).click()
-		await eventListeners.waitFor("roa-ws:page:quests")
+		await eventListeners.waitFor("roa-ws:page:quest_request")
 
 		completeTask()
 	},
@@ -934,12 +934,13 @@ const mobClimbing = {
 	 */
 	checkClimbing() {
 		const {winRate, numberOfActions} = this.getCurrentWinRate()
-		// If we didn't lose at all for at least 50 actions, climb mobs. Else, reset the statistics and start a new quest.
-		if (numberOfActions >= settings.autoClimb.minimumActions && winRate === settings.autoClimb.maximumWinrate) {
-			if (settings.verbose) log(`Quest complete with high winrate, trying to climb mobs`)
+		// If we were above the maximum winrate for enough actions, climb mobs. Else, reset the statistics and start a new quest.
+		if (numberOfActions >= settings.autoClimb.minimumActions && winRate >= settings.autoClimb.maximumWinrate) {
+			if (settings.verbose) log("Quest complete with high winrate, trying to climb mobs")
 			this.move("up")
 		} else {
 			$("#clearBattleStats").click()
+			if (settings.verbose) log("Quest complete, but winrate is not high enough. Resetting statistics")
 			this.finishClimbing()
 		}
 	},
@@ -992,6 +993,7 @@ const mobClimbing = {
 
 	/**
 	 * Travels to another zone
+	 * @async
 	 * @function mobClimbing.travel
 	 * @param {number} amount Amount of zones to travel (as an offset from current zone). Can be either positive or negative
 	 * @memberof beta-game-functions
@@ -1032,12 +1034,12 @@ const mobClimbing = {
 
 		if (numberOfActions > 2 && winRate < 50) { // If we are severely losing, descend
 			this.move("down")
-		} else if (numberOfActions >= settings.autoClimb.minimumActions) { // If we are not severely losing, track for at least 50 actions
-			if (winRate === settings.autoClimb.maximumWinrate) { // If we are still winning 100% of the time, try climbing again
+		} else if (numberOfActions >= settings.autoClimb.minimumActions) { // If we are not severely losing, track for as many actions as specified in the settings
+			if (winRate >= settings.autoClimb.maximumWinrate) { // If we are still winning more than the maximum winrate, try climbing again
 				this.move("up")
-			} else if (winRate < settings.autoClimb.minimumWinrate) { // If we are winning less than 95% of the time, descend
+			} else if (winRate < settings.autoClimb.minimumWinrate) { // If the winrate is less than the minimum, descend
 				this.move("down")
-			} else { // If we are between 95% and 100% winrate, finish climbing
+			} else { // If we are between the minimum and the maximum winrate, finish climbing
 				this.finishClimbing()
 			}
 		}
@@ -1051,6 +1053,7 @@ const mobClimbing = {
 	finishClimbing() {
 		betabot.startQuest("kill")
 		eventListeners.toggle("roa-ws:battle", this.checkStability, false)
+		if (settings.verbose) log("Finished climbing mobs")
 	},
 }
 
