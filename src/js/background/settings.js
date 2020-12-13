@@ -17,7 +17,7 @@
  * @type {number}
  * @memberof settings
  */
-const SETTINGS_VERSION = 20
+const SETTINGS_VERSION = 21
 
 /**
  * - CSS code for Betaburlogin interface changes
@@ -297,7 +297,8 @@ function updateSettings() {
 			// Auto climb:
 			settings.autoClimb = {
 				climb: false,
-				jumpAmount: 11,
+				jumpAmountMain: 11,
+				jumpAmountAlts: 5,
 				maximumWinrate: 100,
 				minimumActions: 50,
 				minimumWinrate: 95,

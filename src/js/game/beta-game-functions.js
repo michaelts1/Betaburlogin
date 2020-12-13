@@ -902,9 +902,10 @@ const betabot = {
  * @const mobClimbing
  * @property {function} getCurrentWinRate Returns an object containing winrate and number of actions tracked
  * @property {function} checkClimbing Checks to see if we should climb
+ * @property {function} move Climbs/descends mobs
+ * @property {function} travel Travels to another zone
  * @property {function} checkStability Checks to see if we should stop climbing
  * @property {function} finishClimbing Stops tracking winrate and starts a new quest
- * @property {function} move Climbs/descends mobs
  * @memberof beta-game-functions
  */
 const mobClimbing = {
@@ -965,29 +966,7 @@ const mobClimbing = {
 
 		// If the next mob is not on the list:
 		if (nextMob > maxNumber || nextMob < minNumber) {
-			const gold = parseInt($(".right.mygold.gold").data("personal").replaceAll(",", ""))
-			// If we don't have enough gold for travel, don't climb:
-			if (gold < 100*1000*1000) {
-				$("#loadBattle").click()
-				this.finishClimbing()
-				return
-			}
-
-			$("#basePage").click()
-			await eventListeners.waitFor("roa-ws:page:town")
-			await delay(vars.buttonDelay)
-
-			$("#loadTravel").click()
-			await eventListeners.waitFor("roa-ws:page:town_travel")
-			await delay(vars.buttonDelay)
-
-			const currentArea = parseInt($("#area_list option:selected").val())
-			const nextArea = direction === "up" ? currentArea + 1 : currentArea - 1
-
-			$("#area_list option").eq(nextArea).attr("selected", "selected")
-			$("#travel_confirm").click()
-
-			await eventListeners.waitFor("roa-ws:page:travel")
+			await this.travel(direction === "up" ? 1 : -1)
 			await delay(vars.buttonDelay)
 			$("#battleGrounds").click()
 
@@ -1012,6 +991,38 @@ const mobClimbing = {
 	},
 
 	/**
+	 * Travels to another zone
+	 * @function mobClimbing.travel
+	 * @param {number} amount Amount of zones to travel (as an offset from current zone). Can be either positive or negative
+	 * @memberof beta-game-functions
+	 */
+	async travel(amount) {
+		const gold = parseInt($(".right.mygold.gold").data("personal").replaceAll(",", ""))
+		// If we don't have enough gold for travel, don't climb:
+		if (gold < 100*1000*1000) {
+			$("#loadBattle").click()
+			this.finishClimbing()
+			return
+		}
+
+		$("#basePage").click()
+		await eventListeners.waitFor("roa-ws:page:town")
+		await delay(vars.buttonDelay)
+
+		$("#loadTravel").click()
+		await eventListeners.waitFor("roa-ws:page:town_travel")
+		await delay(vars.buttonDelay)
+
+		const currentArea = parseInt($("#area_list option:selected").val())
+		const nextArea = currentArea + amount
+
+		$("#area_list option").eq(nextArea).attr("selected", "selected")
+		$("#travel_confirm").click()
+
+		await eventListeners.waitFor("roa-ws:page:travel")
+	},
+
+	/**
 	 * checks to see if we should stop climbing
 	 * @function mobClimbing.checkStability
 	 * @memberof beta-game-functions
@@ -1019,7 +1030,7 @@ const mobClimbing = {
 	checkStability() {
 		const {winRate, numberOfActions} = this.getCurrentWinRate
 
-		if (winRate < 50) { // If we are severely losing, descend
+		if (numberOfActions > 2 && winRate < 50) { // If we are severely losing, descend
 			this.move("down")
 		} else if (numberOfActions >= settings.autoClimb.minimumActions) { // If we are not severely losing, track for at least 50 actions
 			if (winRate === settings.autoClimb.maximumWinrate) { // If we are still winning 100% of the time, try climbing again

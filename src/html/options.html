@@ -103,6 +103,7 @@
 					<tr>
 						<td>
 							<label for="min-stamina">Minimum Stamina</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Stamina will be replenished when under this number."></span>
 						</td>
 						<td>
 							<input id="min-stamina" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Minimum Stamina" size=15 data-setting="minStamina">
@@ -442,7 +443,7 @@
 					<tr>
 						<td>
 							<label for="auto-climb">Auto Climb</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Automatically try to climb mobs after each battle quest."></span>
+							<span class="info" role="img" aria-label="info" data-tooltip="Automatically try to climb mobs after each battle quest.&#10;&#10;Technical Details:&#10;* After completing a battle quest, if the win rate is higher than &quot;Maximum Win Rate&quot;, tries to jump &quot;Jump Amount&quot; mobs forward.&#10;* After &quot;Minimum Actions&quot; actions, if the win rate is still above &quot;Maximum Win Rate&quot;, tries to jump again. Else, if the win rate is lower than &quot;Minimum Win Rate&quot;, descends back to the previous mob. If the winrate is between these two values, stays on that mob and start a new battle quest.&#10;* Travels between areas if needed (but only if you have enough gold).&#10;* You can configure different &quot;Jump Amount&quot; values for your main and alt accounts."></span>
 						</td>
 						<td>
 							<input id="auto-climb" type="checkbox" data-setting="autoClimb.climb">
@@ -450,38 +451,48 @@
 					</tr>
 					<tr>
 						<td>
-							<label for="jump-amount">Jump Amount</label>
-							<span class="info" role="img" aria-label="info" data-tooltip=""></span>
+							<label for="main-jump-amount">Main Jump Offset</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Any number between 1 and 22. Applies to main account only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Amount is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22."></span>
 						</td>
 						<td>
 							<!-- Only accept numbers between 1 and 22 -->
-							<input id="jump-amount" pattern="^([1-9]|1[0-9]|2[0-2])$" placeholder="Jump Amount" size="15" data-setting="autoClimb.jumpAmount">
+							<input id="main-jump-amount" pattern="^([1-9]|1\d|2[0-2])$" placeholder="Jump Amount" size="15" data-setting="autoClimb.jumpAmountMain">
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<label for="min-win-rate">Minimum Win Rate</label>
-							<span class="info" role="img" aria-label="info" data-tooltip=""></span>
+							<label for="alt-jump-amount">Alts Jump Offset</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Any number between 1 and 22. Applies to alt accounts only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Amount is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22."></span>
 						</td>
 						<td>
-							<!-- Only accept numbers between 51 and 100 -->
-							<input id="min-win-rate" pattern="^(5[1-9]|[69][0-9]|100)$" placeholder="Minimum Win Rate" size="15" data-setting="autoClimb.minimumWinrate">
+							<!-- Only accept numbers between 1 and 22 -->
+							<input id="alt-jump-amount" pattern="^([1-9]|1\d|2[0-2])$" placeholder="Jump Amount" size="15" data-setting="autoClimb.jumpAmountAlts">
 						</td>
 					</tr>
 					<tr>
 						<td>
 							<label for="max-win-rate">Maximum Win Rate</label>
-							<span class="info" role="img" aria-label="info" data-tooltip=""></span>
+							<span class="info" role="img" aria-label="info" data-tooltip="Any number between 95 and 100&#10;&#10;Betaburlogin will start climbing mobs if the win rate is higher than this number.&#10;For example, if Maximum Win Rate is 99.5, Betaburlogin will start climbing if the win rate is higher than 99.5%."></span>
+						</td>
+						<td>
+							<!-- Only accept numbers between 95 and 100 -->
+							<input id="max-win-rate" pattern="^(9[5-9]|9[5-9]\.\d+|100)$" placeholder="Maximum Win Rate" size="15" data-setting="autoClimb.maximumWinrate">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="min-win-rate">Minimum Win Rate</label>
+							<span class="info" role="img" aria-label="info" data-tooltip="Any number between 90 and 100&#10;&#10;Betaburlogin will stop climbing mobs once it can't climb anymore without the win rate dropping below this number.&#10;For example, if Minimum Win Rate is 98, Betaburlogin will stop climbing mobs if the next jump will bring the winrate bellow 98%."></span>
 						</td>
 						<td>
 							<!-- Only accept numbers between 90 and 100 -->
-							<input id="max-win-rate" pattern="^(9[0-9]|100)$" placeholder="Maximum Win Rate" size="15" data-setting="autoClimb.maximumWinrate">
+							<input id="min-win-rate" pattern="^(9\d|9\d\.\d+|100)$" placeholder="Minimum Win Rate" size="15" data-setting="autoClimb.minimumWinrate">
 						</td>
 					</tr>
 					<tr>
 						<td>
 							<label for="min-actions">Minimum Actions</label>
-							<span class="info" role="img" aria-label="info" data-tooltip=""></span>
+							<span class="info" role="img" aria-label="info" data-tooltip="Any number between 5 and 1000.&#10;&#10;Number of actions to track the winrate for before settling on a mob.&#10;For example, if Minimum Actions is 50, Betaburlogin will make sure that the winrate is high enough for at least 50 actions before settling on a mob."></span>
 						</td>
 						<td>
 							<!-- Only accept numbers between 5 and 1000 -->
