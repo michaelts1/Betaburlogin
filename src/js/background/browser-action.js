@@ -20,20 +20,25 @@ async function getVars() {
 	for (const item of $("input")) {
 		$(item).prop("checked", settings[item.dataset.setting])
 	}
+	$("#auto-climb").prop("checked", settings.autoClimb.climb)
 }
 
 /**
  * Toggles a setting on/off, and saves the new value to the storage
- * @async
  * @function toggle
  * @param {event} event `change` event
  * @param {HTMLInputElement} event.target
  * @memberof browser-action
  */
-async function toggle({target}) {
-	browser.storage.sync.set({
-		[target.dataset.setting]: target.checked,
-	})
+function toggle({target}) {
+	if (target.dataset.setting === "autoClimb.climb") {
+		settings.autoClimb.climb = target.checked
+		browser.storage.sync.set({"autoClimb": settings.autoClimb})
+	} else {
+		browser.storage.sync.set({
+			[target.dataset.setting]: target.checked,
+		})
+	}
 }
 
 $(getVars)

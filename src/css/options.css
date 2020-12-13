@@ -24,6 +24,21 @@ body {
 }
 
 /* Appears in browser-action.html */
+
+#browser-action h2 {
+	margin: .5em 0 .5em;
+}
+
+#browser-action {
+	width: 230px
+}
+
+#browser-action th {
+	padding: .1em;
+	font-size: 14pt;
+	font-family: sans-serif	;
+}
+
 #settings-icon {
 	cursor: pointer;
 	float: right;
@@ -209,10 +224,6 @@ td {
 .options-page table {
 	table-layout: fixed;
 	width: 27em;
-}
-
-#browser-action {
-	width: 190px
 }
 
 #general-col-1 {width: 60%;}

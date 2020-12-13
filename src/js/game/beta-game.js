@@ -22,16 +22,23 @@
  */
 async function toggleInterfaceChanges(refresh) {
 	// Button next to name:
-	if (settings.buttonNextToName === "request" && !$("#betabot-request-currency")[0]) {
-		$("#betabot-next-to-name").empty()
-		$("#betabot-next-to-name").append(`<button id="betabot-request-currency" class="betabot"><a>Request Currency</a></button>`)
-		$("#betabot-request-currency").click(() => port.postMessage({text: "requesting currency"}) )
-	} else if (settings.buttonNextToName === "spread" && !$("#betabot-spread-button")[0]) {
-		$("#betabot-next-to-name").empty()
-		$("#betabot-next-to-name").append(`<button id="betabot-spread-button" class="betabot"><a>Spread Currency</a></button>`)
-		$("#betabot-spread-button").click(() => port.postMessage({text: "requesting a list of active alts"}) )
-	} else {
-		$("#betabot-next-to-name").empty()
+	switch (settings.buttonNextToName) {
+		case "request":
+			if (!$("#betabot-request-currency")[0]) {
+				$("#betabot-next-to-name").empty()
+				$("#betabot-next-to-name").append(`<button id="betabot-request-currency" class="betabot"><a>Request Currency</a></button>`)
+				$("#betabot-request-currency").click(() => port.postMessage({text: "requesting currency"}) )
+			}
+			break
+		case "spread":
+			if (!$("#betabot-spread-button")[0]) {
+				$("#betabot-next-to-name").empty()
+				$("#betabot-next-to-name").append(`<button id="betabot-spread-button" class="betabot"><a>Spread Currency</a></button>`)
+				$("#betabot-spread-button").click(() => port.postMessage({text: "requesting a list of active alts"}) )
+			}
+			break
+		default:
+			$("#betabot-next-to-name").empty()
 	}
 
 	// Make it easier to see what alt it is:
@@ -83,10 +90,9 @@ async function toggleInterfaceChanges(refresh) {
 		eventListeners.toggle("roa-ws:message", gauntlet.checkGauntletMessage, settings.joinGauntlets)
 	}
 
-	// Auto Craft:
-	eventListeners.toggle("roa-ws:craft roa-ws:notification", professionQueues.checkCraftingQueue, settings.autoCraft)
-	// Auto Carve:
-	eventListeners.toggle("roa-ws:carve roa-ws:notification", professionQueues.checkCarvingQueue, settings.autoCarve)
+	// Auto Craft/Carve:
+	eventListeners.toggle("roa-ws:craft roa-ws:carve roa-ws:notification", professionQueues.checkQueue, settings.autoCraft || settings.autoCarve)
+
 	// Auto Stamina/Quests/House/Harvestron:
 	eventListeners.toggle("roa-ws:battle roa-ws:harvest roa-ws:carve roa-ws:craft roa-ws:event_action",
 		betabot.checkResults, settings.autoStamina || settings.autoQuests || settings.autoHouse || settings.autoHarvestron)
@@ -105,7 +111,7 @@ async function toggleInterfaceChanges(refresh) {
 	eventListeners.toggle("roa-ws:page:event_calendar", calendar.addAdventCalendar, settings.addAdventCalendar)
 
 	// Auto Mob Climbing:
-	eventListeners.toggle("roa-ws:page:quest_complete", mobClimbing.checkClimbing, settings.autoClimb.climb)
+	eventListeners.toggle("roa-ws:battle", mobClimbing.checkClimbing, settings.autoClimb.climb)
 }
 
 /**

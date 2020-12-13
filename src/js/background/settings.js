@@ -304,7 +304,6 @@ function updateSettings() {
 				minimumWinrate: 95,
 			}
 			if (settings.addJumpMobs !== undefined) {
-				settings.autoClimb.climb = settings.addJumpMobs,
 				deletedSettings.push("addJumpMobs")
 			}
 		default:
@@ -347,7 +346,7 @@ function logSettingsChanges(changes) {
 
 	for (let key in changes) {
 		if (!objectEquals(changes[key].oldValue, changes[key].newValue)) {
-			log(`${key} changed from ${changes[key].oldValue} to ${changes[key].newValue}`)
+			log(key, "changed from", changes[key].oldValue, "to", changes[key].newValue)
 		}
 	}
 }

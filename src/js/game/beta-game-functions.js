@@ -24,8 +24,7 @@
 /* eslint-disable no-use-before-define */ // Functions here will only run after all other functions and objects were initialized
 
 /**
- * - Stores variables and constants to avoid polluting the global space
- * - Using a constructor to refer to `this.username` during initialization
+ * Stores variables and constants to avoid polluting the global space
  * @constant vars
  * @enum {any}
  * @memberof beta-game-functions
@@ -67,7 +66,7 @@ let port = null
 const username = {
 	name: $("#username").text(),
 
-	keepUsernameVisible: new MutationObserver(this.appendName),
+	keepUsernameVisible: null,
 
 	/**
 	 * Returns `true` if the current user is an alt, and returns `false` otherwise
@@ -75,7 +74,7 @@ const username = {
 	 * @returns {boolean}
 	 * @memberof beta-game-functions
 	 */
-	isAlt: () => username !== settings.mainUsername,
+	isAlt: () => username.name !== settings.mainUsername,
 
 	/**
 	 * Advises the user to update settings when changing name
@@ -105,6 +104,7 @@ const username = {
 		}
 	},
 }
+username.keepUsernameVisible = new MutationObserver(username.appendName)
 
 /**
  * House related functions and variables
@@ -128,7 +128,7 @@ const house = {
 	 */
 	async addCustomBuild() {
 		vars.actionsPending = true
-		$("#modalBackground, #modal2Wrapper").prop("style", "display: none !important;") // Hide the interface for the duration of this process
+		$("#modalBackground, #modal2Wrapper").prop("style", "display: none !important;") // Hide the interface for the duration of this function
 		$("#housing").click()
 
 		// Only run if the user has bought a house (needed in case the user's level >= 10):
@@ -167,7 +167,7 @@ const house = {
 		if (!isNaN(itemId)) {
 			$("#allHouseUpgrades")[0].click()
 			await eventListeners.waitFor("roa-ws:page:house_all_builds")
-			this.customBuild(itemId)
+			house.customBuild(itemId)
 		} else if ($("#houseRoomCanBuild").is(":visible")) {
 			if (settings.verbose) log("Building a new room")
 			$("#houseBuildRoom")[0].click()
@@ -176,11 +176,11 @@ const house = {
 		} else if ($("#houseQuickBuildList li:first .houseViewRoom").length === 1) {
 			$("#houseQuickBuildList li:first .houseViewRoom")[0].click()
 			await eventListeners.waitFor("roa-ws:page:house_room")
-			this.buildItem()
+			house.buildItem()
 		} else {
 			$("#houseQuickBuildList li:first .houseViewRoomItem")[0].click()
 			await eventListeners.waitFor("roa-ws:page:house_room_item")
-			this.upgradeItem()
+			house.upgradeItem()
 		}
 	},
 
@@ -283,9 +283,9 @@ const gauntlet = {
 	 * @memberof beta-game-functions
 	 */
 	async motd() {
-		this.gauntVars.motdReceived = true
+		gauntlet.gauntVars.motdReceived = true
 		await delay(5000)
-		this.gauntVars.motdReceived = false
+		gauntlet.gauntVars.motdReceived = false
 	},
 
 	/**
@@ -319,10 +319,10 @@ const gauntlet = {
 				message of the day, which means it was only sent due to
 				a chat reconnection, and we should not join the gauntlet */
 			await delay(vars.startActionsDelay)
-			if (!this.gauntVars.motdReceived) {
-				if (this.gauntVars.gauntletID !== data.m_id || !this.gauntVars.gauntletInProgress ||
+			if (!gauntlet.gauntVars.motdReceived) {
+				if (gauntlet.gauntVars.gauntletID !== data.m_id || !gauntlet.gauntVars.gauntletInProgress ||
 					["InitEvent", "MainEvent"].includes(data.m)) {
-					this.joinGauntlet(data.m, data.m_id)
+					gauntlet.joinGauntlet(data.m, data.m_id)
 				}
 			}
 		}
@@ -337,17 +337,17 @@ const gauntlet = {
 	 * @memberof beta-game-functions
 	 */
 	async joinGauntlet(msgContent, msgID) {
-		this.gauntVars.gauntletID = msgID
-		this.gauntVars.mainGauntlet = msgContent === "MainEvent"
-		this.gauntVars.gauntletInProgress = true
+		gauntlet.gauntVars.gauntletID = msgID
+		gauntlet.gauntVars.mainGauntlet = msgContent === "MainEvent"
+		gauntlet.gauntVars.gauntletInProgress = true
 
-		if (settings.verbose) log(`Joining ${this.gauntVars.mainGauntlet ? "main" : "regular"} gauntlet due to message #${msgID}`)
-		this.BUTTONS[this.getTrade].click()
-		eventListeners.toggle("roa-ws:event_action", this.changeTrade, true)
+		if (settings.verbose) log(`Joining ${gauntlet.gauntVars.mainGauntlet ? "main" : "regular"} gauntlet due to message #${msgID}`)
+		gauntlet.BUTTONS[gauntlet.getTrade].click()
+		eventListeners.toggle("roa-ws:event_action", gauntlet.changeTrade, true)
 
 		// If we are still tracking the same gauntlet after 16 minutes, stop tracking it:
 		await delay(16*60*1000)
-		if (this.gauntVars.gauntletID === msgID) this.finishGauntlet()
+		if (gauntlet.gauntVars.gauntletID === msgID) gauntlet.finishGauntlet()
 	},
 
 	/**
@@ -359,18 +359,18 @@ const gauntlet = {
 	 */
 	changeTrade(_, data) {
 		data = data.results
-		if (data.carvingTier > 2500 && !this.gauntVars.mainGauntlet) {
+		if (data.carvingTier > 2500 && !gauntlet.gauntVars.mainGauntlet) {
 			if (settings.verbose) log("Attacking gauntlet boss (carving tier)")
 			gauntlet.BUTTONS.battle.click()
 		} else if (data.time_remaining < settings.attackAt * 60) {
-			if (!username.isAlt() || !this.gauntVars.mainGauntlet) {
+			if (!username.isAlt() || !gauntlet.gauntVars.mainGauntlet) {
 				if (settings.verbose) log("Attacking gauntlet boss (time)")
 				gauntlet.BUTTONS.battle.click()
 			}
 		} else { // Don't execute the rest of the function
 			return
 		}
-		this.finishGauntlet()
+		gauntlet.finishGauntlet()
 	},
 
 	/**
@@ -379,9 +379,9 @@ const gauntlet = {
 	 * @memberof beta-game-functions
 	 */
 	finishGauntlet() {
-		this.gauntVars.mainGauntlet = false
-		this.gauntVars.gauntletInProgress = false
-		eventListeners.toggle("roa-ws:event_action", this.changeTrade, false)
+		gauntlet.gauntVars.mainGauntlet = false
+		gauntlet.gauntVars.gauntletInProgress = false
+		eventListeners.toggle("roa-ws:event_action", gauntlet.changeTrade, false)
 	},
 }
 
@@ -465,7 +465,7 @@ const gems = {
 	addSocket5Button() {
 		if (!$("#betabot-socket-5")[0]) {
 			$("#socketThisGem").after(`<button id="betabot-socket-5" class="betabot">Socket Gem x5</button>`)
-			$("#betabot-socket-5").click(this.socketGems)
+			$("#betabot-socket-5").click(gems.socketGems)
 		}
 	},
 
@@ -662,11 +662,14 @@ const professionQueues = {
 	checkQueue(_, data) {
 		if (vars.actionsPending) return
 
+		// If auto Craft/Carve is off, return:
+		if (settings[`auto${data.type[0].toUpperCase() + data.type.substring(1)}`] === false) return
+
 		const expr = /You completed your (crafting|carving) queue and began (Battling|Fishing|Woodcutting|Mining|Stonecutting) automatically./
 		if ((["carve", "craft"].includes(data.type) && data.results.a.cq < settings.minQueue) ||
 			data.type === "notification" && settings.resumeQueue && expr.test(data.m)) {
 			if (settings.verbose) log("Refilling queue")
-			this.fillQueue(data.type)
+			professionQueues.fillQueue(data.type)
 		}
 	},
 
@@ -709,6 +712,8 @@ const professionQueues = {
  * Automation related functions and variables (excluding housing and crafting/carving)
  * @const betabot
  * @property {boolean} staminaCooldown Tracks recent stamina replenishes
+ * @property {boolean} questCooldown Tracks recent quest cancels
+ * @property {boolean} harvestronCooldown Tracks recent harvestron job cancels
  * @property {function} questOrHarvestronCancelled Stops tracking quests/harvestron for 60 seconds after manual cancel
  * @property {function} finishQuest Finishes a quest and start a new one
  * @property {function} startQuest Starts a new quest
@@ -719,6 +724,8 @@ const professionQueues = {
  */
 const betabot = {
 	staminaCooldown: false,
+	questCooldown: false,
+	harvestronCooldown: false,
 
 	/**
 	 * Stops tracking Harvestron/Quests for 60 seconds after manually cancelling
@@ -732,17 +739,15 @@ const betabot = {
 		let key = null
 		if (type === "quest_forfeit") {
 			if (settings.verbose) log("Quest forfeited. Waiting 60 seconds before checking for quests again")
-			key = "autoQuest"
+			key = "questCooldown"
 		} else if (type === "house_harvest_job_cancel") {
 			if (settings.verbose) log("Harvestron job cancelled. Waiting 60 seconds before checking the Harvestron again")
-			key = "autoHarvestron"
+			key = "harvestronCooldown"
 		}
 
-		if (settings[key]) {
-			settings[key] = false
-			await delay(60*1000)
-			settings[key] = (await browser.storage.sync.get(key))[key]
-		}
+		betabot[key] = true
+		await delay(60*1000)
+		betabot[key] = false
 	},
 
 	/**
@@ -767,9 +772,10 @@ const betabot = {
 
 		// If auto climbing is on, stop here. Else, start a new quest:
 		if (settings.autoClimb) {
+			$(".closeModal").click()
 			vars.actionsPending = false
 		} else {
-			this.startQuest(type)
+			betabot.startQuest(type)
 		}
 	},
 
@@ -844,12 +850,12 @@ const betabot = {
 		data = data.results.p
 
 		// Stamina:
-		if (settings.autoStamina && data.autos_remaining < settings.minStamina && !this.staminaCooldown) {
+		if (settings.autoStamina && data.autos_remaining < settings.minStamina && !betabot.staminaCooldown) {
 			if (settings.verbose) log("Replenishing stamina")
 			$("#replenishStamina").click()
-			this.staminaCooldown = true
+			betabot.staminaCooldown = true
 			await delay(2500)
-			this.staminaCooldown = false
+			betabot.staminaCooldown = false
 			return
 		}
 
@@ -857,7 +863,7 @@ const betabot = {
 		if (vars.actionsPending) return
 
 		// Quests:
-		if (settings.autoQuests) {
+		if (settings.autoQuests && !betabot.questCooldown) {
 			let type = null
 			if (data.bq_info2?.c >= data.bq_info2.r) {
 				type = "kill"
@@ -868,7 +874,7 @@ const betabot = {
 			}
 
 			if (type) {
-				this.finishQuest(type)
+				betabot.finishQuest(type)
 				return
 			}
 		}
@@ -889,11 +895,11 @@ const betabot = {
 			}
 		}
 		// Harvestron:
-		if (settings.autoHarvestron && data.can_house_harvest) {
+		if (settings.autoHarvestron && data.can_house_harvest && !betabot.harvestronCooldown) {
 			vars.actionsPending = true
 			$("#harvestronNotifier")[0].click()
 			await eventListeners.waitFor("roa-ws:page:house_room_item")
-			this.startHarvestron()
+			betabot.startHarvestron()
 			return
 		}
 	},
@@ -902,6 +908,7 @@ const betabot = {
 /**
  * Mob climbing related functions and variables
  * @const mobClimbing
+ * @property {boolean} climbing Tracks current climbing status
  * @property {function} getCurrentWinRate Returns an object containing winrate and number of actions tracked
  * @property {function} checkClimbing Checks to see if we should climb
  * @property {function} move Climbs/descends mobs
@@ -911,6 +918,8 @@ const betabot = {
  * @memberof beta-game-functions
  */
 const mobClimbing = {
+	climbing: false,
+
 	/**
 	 * Returns an object containing the win rate (in percentages), and the number of actions tracked so far
 	 * @function mobClimbing.getCurrentWinRate
@@ -920,30 +929,42 @@ const mobClimbing = {
 	 * @memberof beta-game-functions
 	 */
 	getCurrentWinRate() {
-		const kills = parseFloat($("#gainsKills").data("value"))
-		const deaths = parseFloat($("#gainsDeaths").data("value"))
+		const kills = parseFloat($("#gainsKills")[0].dataset.value)
+		const deaths = parseFloat($("#gainsDeaths")[0].dataset.value)
 		const numberOfActions = kills + deaths
-		return {
+		const result = {
 			numberOfActions,
-			winRate: (kills / (numberOfActions) * 100).toFixed(2),
+			winRate: Math.round((kills / (numberOfActions) * 100) * 100) / 100,
 		}
+		return result
 	},
 
 	/**
 	 * Checks to see if we should climb mobs
 	 * @function mobClimbing.checkClimbing
+	 * @param {event} _ Placeholder parameter
+	 * @param {object} data Event data
 	 * @memberof beta-game-functions
 	 */
-	checkClimbing() {
-		const {winRate, numberOfActions} = this.getCurrentWinRate()
-		// If we were above the maximum winrate for enough actions, climb mobs. Else, reset the statistics and start a new quest.
-		if (numberOfActions >= settings.autoClimb.minimumActions && winRate >= settings.autoClimb.maximumWinrate) {
-			if (settings.verbose) log("Quest complete with high winrate, trying to climb mobs")
-			this.move("up")
-		} else {
-			$("#clearBattleStats").click()
-			if (settings.verbose) log("Quest complete, but winrate is not high enough. Resetting statistics")
-			this.finishClimbing()
+	checkClimbing(_, data) {
+		// Pseudo-code: If (quest active || quest cancelled by user || in middle of climbing || actions are pending) return
+		if (data.results.p.bq_info2?.a === 0 || betabot.questCooldown || mobClimbing.climbing || vars.actionsPending) return
+
+		const {winRate, numberOfActions} = mobClimbing.getCurrentWinRate()
+		if (numberOfActions >= settings.autoClimb.minimumActions) {
+			if (winRate >= settings.autoClimb.maximumWinrate) {
+				if (settings.verbose) log("No quest, and high winrate. Trying to climb mobs")
+				mobClimbing.climbing = true
+				mobClimbing.move("up")
+			} else if (winRate < settings.autoClimb.minimumWinrate) {
+				if (settings.verbose) log("No quest, and winrate is too low. Descending down some mobs")
+				mobClimbing.climbing = true
+				mobClimbing.move("down")
+			} else {
+				if (settings.verbose) log("No quest, but winrate is not high enough. Resetting statistics")
+				$("#clearBattleStats")[0].click()
+				mobClimbing.finishClimbing()
+			}
 		}
 	},
 
@@ -960,7 +981,7 @@ const mobClimbing = {
 		await delay(vars.startActionsDelay)
 		$("#battleGrounds").click()
 
-		await eventListeners.waitFor("roa-ws:page:town_battleGrounds")
+		await eventListeners.waitFor("roa-ws:page:town_battlegrounds")
 		const currentMob = parseInt($(`#enemyList option:selected`).val())
 		const minNumber = parseInt($(`#enemyList option:first-child`).val())
 		const maxNumber = parseInt($(`#enemyList option:last-child`).val())
@@ -969,7 +990,7 @@ const mobClimbing = {
 
 		// If the next mob is not on the list:
 		if (nextMob > maxNumber || nextMob < minNumber) {
-			await this.travel(direction === "up" ? 1 : -1)
+			await mobClimbing.travel(direction === "up" ? 1 : -1)
 			await delay(vars.buttonDelay)
 			$("#battleGrounds").click()
 
@@ -980,14 +1001,14 @@ const mobClimbing = {
 
 		await delay(vars.buttonDelay)
 		$("#autoEnemy").click()
+		$("#clearBattleStats")[0].click()
 
 		if (direction === "up") {
 			// Track stability:
-			$("#clearBattleStats").click()
-			eventListeners.toggle("roa-ws:battle", this.checkStability, true)
+			eventListeners.toggle("roa-ws:battle", mobClimbing.checkStability, true)
 		} else {
 			// Stop tracking stability (if we are tracking it) and start a new quest:
-			this.finishClimbing()
+			mobClimbing.finishClimbing()
 		}
 
 		vars.actionsPending = false
@@ -1005,7 +1026,7 @@ const mobClimbing = {
 		// If we don't have enough gold for travel, don't climb:
 		if (gold < 100*1000*1000) {
 			$("#loadBattle").click()
-			this.finishClimbing()
+			mobClimbing.finishClimbing()
 			return
 		}
 
@@ -1032,34 +1053,46 @@ const mobClimbing = {
 	 * @memberof beta-game-functions
 	 */
 	checkStability() {
-		const {winRate, numberOfActions} = this.getCurrentWinRate
+		const {winRate, numberOfActions} = mobClimbing.getCurrentWinRate()
 
 		if (numberOfActions > 2 && winRate < 50) { // If we are severely losing, descend
-			this.move("down")
+			mobClimbing.move("down")
 		} else if (numberOfActions >= settings.autoClimb.minimumActions) { // If we are not severely losing, track for as many actions as specified in the settings
 			if (winRate >= settings.autoClimb.maximumWinrate) { // If we are still winning more than the maximum winrate, try climbing again
-				this.move("up")
+				// Allow the user to stop the process mid-way:
+				if (settings.autoClimb.climb) {
+					if (settings.verbose) log("Trying to climb even further")
+					mobClimbing.move("up")
+				} else {
+					mobClimbing.finishClimbing()
+				}
 			} else if (winRate < settings.autoClimb.minimumWinrate) { // If the winrate is less than the minimum, descend
-				this.move("down")
+				mobClimbing.move("down")
 			} else { // If we are between the minimum and the maximum winrate, finish climbing
-				this.finishClimbing()
+				mobClimbing.finishClimbing()
 			}
 		}
 	},
 
 	/**
 	 * Stops tracking winrate and starts a new quest
+	 * @async
 	 * @function mobClimbing.finishClimbing
 	 * @memberof beta-game-functions
 	 */
-	finishClimbing() {
+	async finishClimbing() {
+		if (settings.verbose) log("Finished climbing mobs")
+		eventListeners.toggle("roa-ws:battle", mobClimbing.checkStability, false)
+
 		if (settings.autoQuests) {
 			betabot.startQuest("kill")
 		} else {
 			vars.actionsPending = false
 		}
-		eventListeners.toggle("roa-ws:battle", this.checkStability, false)
-		if (settings.verbose) log("Finished climbing mobs")
+
+		// Only try climbing again in one hour:
+		if (!settings.autoQuests) await delay(60*60*1000)
+		mobClimbing.climbing = false
 	},
 }
 

@@ -381,7 +381,7 @@
 							<label for="fishing">Fishing</label>
 						</td>
 						<td>
-							<input id="fishing" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Fishing" size="24" data-setting="tradesList.fishing">
+							<input id="fishing" pattern="^[A-Za-z, ]{3,}$" placeholder="Fishing" size="24" data-setting="tradesList.fishing">
 						</td>
 					</tr>
 					<tr>
@@ -389,7 +389,7 @@
 							<label for="woodcutting">Woodcutting</label>
 						</td>
 						<td>
-							<input id="woodcutting" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Woodcutting" size="24" data-setting="tradesList.woodcutting">
+							<input id="woodcutting" pattern="^[A-Za-z, ]{3,}$" placeholder="Woodcutting" size="24" data-setting="tradesList.woodcutting">
 						</td>
 					</tr>
 					<tr>
@@ -397,7 +397,7 @@
 							<label for="mining">Mining</label>
 						</td>
 						<td>
-							<input id="mining" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Mining" size="24" data-setting="tradesList.mining">
+							<input id="mining" pattern="^[A-Za-z, ]{3,}$" placeholder="Mining" size="24" data-setting="tradesList.mining">
 						</td>
 					</tr>
 					<tr>
@@ -405,7 +405,7 @@
 							<label for="stonecutting">Stonecutting</label>
 						</td>
 						<td>
-							<input id="stonecutting" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Stonecutting" size="24" data-setting="tradesList.stonecutting">
+							<input id="stonecutting" pattern="^[A-Za-z, ]{3,}$" placeholder="Stonecutting" size="24" data-setting="tradesList.stonecutting">
 						</td>
 					</tr>
 					<tr>
@@ -413,7 +413,7 @@
 							<label for="crafting">Crafting</label>
 						</td>
 						<td>
-							<input id="crafting" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Crafting" size="24" data-setting="tradesList.crafting">
+							<input id="crafting" pattern="^[A-Za-z, ]{3,}$" placeholder="Crafting" size="24" data-setting="tradesList.crafting">
 						</td>
 					</tr>
 					<tr>
@@ -421,7 +421,7 @@
 							<label for="carving">Carving</label>
 						</td>
 						<td>
-							<input id="carving" pattern="^[A-Za-z\d, ]{3,20}$" placeholder="Carving" size="24" data-setting="tradesList.carving">
+							<input id="carving" pattern="^[A-Za-z, ]{3,20}$" placeholder="Carving" size="24" data-setting="tradesList.carving">
 						</td>
 					</tr>
 				</tbody>
@@ -443,7 +443,7 @@
 					<tr>
 						<td>
 							<label for="auto-climb">Auto Climb</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Automatically try to climb mobs after each battle quest.&#10;&#10;Technical Details:&#10;* After completing a battle quest, if the win rate is higher than &quot;Maximum Win Rate&quot;, tries to jump &quot;Jump Amount&quot; mobs forward.&#10;* After &quot;Minimum Actions&quot; actions, if the win rate is still above &quot;Maximum Win Rate&quot;, tries to jump again. Else, if the win rate is lower than &quot;Minimum Win Rate&quot;, descends back to the previous mob. If the winrate is between these two values, stays on that mob and start a new battle quest.&#10;* Travels between areas if needed (but only if you have enough gold).&#10;* You can configure different &quot;Jump Amount&quot; values for your main and alt accounts."></span>
+							<span class="info" role="img" aria-label="info" data-tooltip="Automatically try to climb mobs after each battle quest.&#10;&#10;Technical Details:&#10;* After completing a battle quest, if the win rate is higher than &quot;Maximum Win Rate&quot;, tries to jump &quot;Jump Offset&quot; mobs forward.&#10;* After &quot;Minimum Actions&quot; actions, if the win rate is still above &quot;Maximum Win Rate&quot;, tries to jump again. Else, if the win rate is lower than &quot;Minimum Win Rate&quot;, descends back to the previous mob. If the winrate is between these two values, stays on that mob and start a new battle quest.&#10;* Travels between areas if needed (but only if you have enough gold).&#10;* You can configure different &quot;Jump Offset&quot; values for your main and alt accounts."></span>
 						</td>
 						<td>
 							<input id="auto-climb" type="checkbox" data-setting="autoClimb.climb">
@@ -452,21 +452,21 @@
 					<tr>
 						<td>
 							<label for="main-jump-amount">Main Jump Offset</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Any number between 1 and 22. Applies to main account only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Amount is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22."></span>
+							<span class="info" role="img" aria-label="info" data-tooltip="Any number between 1 and 22. Applies to main account only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Offset is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22."></span>
 						</td>
 						<td>
 							<!-- Only accept numbers between 1 and 22 -->
-							<input id="main-jump-amount" pattern="^([1-9]|1\d|2[0-2])$" placeholder="Jump Amount" size="15" data-setting="autoClimb.jumpAmountMain">
+							<input id="main-jump-amount" pattern="^([1-9]|1\d|2[0-2])$" placeholder="Jump Offset" size="15" data-setting="autoClimb.jumpAmountMain">
 						</td>
 					</tr>
 					<tr>
 						<td>
 							<label for="alt-jump-amount">Alts Jump Offset</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Any number between 1 and 22. Applies to alt accounts only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Amount is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22."></span>
+							<span class="info" role="img" aria-label="info" data-tooltip="Any number between 1 and 22. Applies to alt accounts only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Offset is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22."></span>
 						</td>
 						<td>
 							<!-- Only accept numbers between 1 and 22 -->
-							<input id="alt-jump-amount" pattern="^([1-9]|1\d|2[0-2])$" placeholder="Jump Amount" size="15" data-setting="autoClimb.jumpAmountAlts">
+							<input id="alt-jump-amount" pattern="^([1-9]|1\d|2[0-2])$" placeholder="Jump Offset" size="15" data-setting="autoClimb.jumpAmountAlts">
 						</td>
 					</tr>
 					<tr>
@@ -563,15 +563,6 @@
 					</tr>
 					<tr class="requires-containers">
 						<td class="checkbox-td">
-							<input id="add-jump-mobs" type="checkbox" data-setting="addJumpMobs">
-						</td>
-						<td>
-							<label for="add-jump-mobs">Add Jump Mobs Button for Alts</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Adds a &quot;Jump Mobs&quot; button to the mob selection screen on alts.&#10;&#10;Fill a number on the left and click the button to make all of your alts jump up the number of mobs specified.&#10;&#10;Can also be used with negative values to jump down."></span>
-						</td>
-					</tr>
-					<tr class="requires-containers">
-						<td class="checkbox-td">
 							<input id="add-spawn-gems" type="checkbox" data-setting="addSpawnGems">
 						</td>
 						<td>
@@ -608,10 +599,10 @@
 					</tr>
 					<tr>
 						<td class="checkbox-td">
-							<input id="add-advert-calendar" type="checkbox" data-setting="addAdvertCalendar">
+							<input id="add-advent-calendar" type="checkbox" data-setting="addAdventCalendar">
 						</td>
 						<td>
-							<label for="add-advert-calendar">Add Advert Calendar Button</label>
+							<label for="add-advent-calendar">Add Advent Calendar Button</label>
 							<span class="info" role="img" aria-label="info" data-tooltip="On December, add a button on the calendar to easily get the daily prize on all alts with one click."></span>
 						</td>
 					</tr>
