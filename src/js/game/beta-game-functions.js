@@ -772,8 +772,9 @@ const betabot = {
 
 		// If auto climbing is on, stop here. Else, start a new quest:
 		if (settings.autoClimb) {
-			$(".closeModal").click()
 			vars.actionsPending = false
+			await eventListeners.waitFor("roa-ws:page:quests")
+			$(".closeModal").click()
 		} else {
 			betabot.startQuest(type)
 		}
@@ -1034,7 +1035,7 @@ const mobClimbing = {
 		await eventListeners.waitFor("roa-ws:page:town")
 		await delay(vars.buttonDelay)
 
-		$("#loadTravel").click()
+		$("#loadTravel")[0].click()
 		await eventListeners.waitFor("roa-ws:page:town_travel")
 		await delay(vars.buttonDelay)
 
