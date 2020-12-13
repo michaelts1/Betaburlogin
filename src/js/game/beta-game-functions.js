@@ -961,7 +961,7 @@ const mobClimbing = {
 		const currentMob = parseInt($(`#enemyList option:selected`).val())
 		const minNumber = parseInt($(`#enemyList option:first-child`).val())
 		const maxNumber = parseInt($(`#enemyList option:last-child`).val())
-		const i = settings.autoClimb.jumpAmount
+		const i = username.isAlt() ? settings.autoClimb.jumpAmountAlts : settings.autoClimb.jumpAmountMain
 		const nextMob = direction === "up" ? currentMob + i : currentMob - i
 
 		// If the next mob is not on the list:
