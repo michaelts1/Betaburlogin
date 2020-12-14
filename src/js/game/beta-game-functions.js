@@ -771,7 +771,7 @@ const betabot = {
 		await eventListeners.waitFor("roa-ws:page:quest_complete")
 
 		// If auto climbing is on, don't start a new battle quest:
-		if (settings.autoClimb && type === "kill") {
+		if (settings.autoClimb.climb && type === "kill") {
 			vars.actionsPending = false
 			await eventListeners.waitFor("roa-ws:page:quests")
 			$(".closeModal").click()
@@ -944,28 +944,14 @@ const mobClimbing = {
 	 * @function mobClimbing.checkClimbing
 	 * @param {event} _ Placeholder parameter
 	 * @param {object} data Event data
+	 * @param {object} data.results.p
 	 * @memberof beta-game-functions
 	 */
-	checkClimbing(_, data) {
-		// Pseudo-code: If (quest active || quest cancelled by user || in middle of climbing || actions are pending) return
-		if (data.results.p.bq_info2?.a === 0 || betabot.questCooldown || mobClimbing.climbing || vars.actionsPending) return
+	checkClimbing(_, {results: {p}}) {
+		// Pseudo-code: If (quest active/cancelled by user, or in middle of climbing, or actions are pending), then return
+		if (p.bq_info2?.a === 0 || betabot.questCooldown || mobClimbing.climbing || vars.actionsPending) return
 
-		const {winRate, numberOfActions} = mobClimbing.getCurrentWinRate()
-		if (numberOfActions >= settings.autoClimb.minimumActions) {
-			if (winRate >= settings.autoClimb.maximumWinrate) {
-				if (settings.verbose) log("No quest, and high winrate. Trying to climb mobs")
-				mobClimbing.climbing = true
-				mobClimbing.move("up")
-			} else if (winRate < settings.autoClimb.minimumWinrate) {
-				if (settings.verbose) log("No quest, and winrate is too low. Descending down some mobs")
-				mobClimbing.climbing = true
-				mobClimbing.move("down")
-			} else {
-				if (settings.verbose) log("No quest, but winrate is not high enough. Resetting statistics")
-				$("#clearBattleStats")[0].click()
-				mobClimbing.finishClimbing()
-			}
-		}
+		mobClimbing.checkStability()
 	},
 
 	/**
@@ -1053,25 +1039,40 @@ const mobClimbing = {
 	 * @memberof beta-game-functions
 	 */
 	checkStability() {
+		// Allow the user to stop climbing manually:
+		if (!settings.autoClimb.climb) {
+			mobClimbing.finishClimbing()
+		}
+
 		const {winRate, numberOfActions} = mobClimbing.getCurrentWinRate()
 
-		if (numberOfActions > 2 && winRate < 50) { // If we are severely losing, descend
+		// If we are severely losing, climb down:
+		if (numberOfActions > 5 && winRate < 75) {
 			mobClimbing.move("down")
-		} else if (numberOfActions >= settings.autoClimb.minimumActions) { // If we are not severely losing, track for as many actions as specified in the settings
-			if (winRate >= settings.autoClimb.maximumWinrate) { // If we are still winning more than the maximum winrate, try climbing again
-				// Allow the user to stop the process mid-way:
-				if (settings.autoClimb.climb) {
-					if (settings.verbose) log("Trying to climb even further")
-					mobClimbing.move("up")
-				} else {
-					mobClimbing.finishClimbing()
-				}
-			} else if (winRate < settings.autoClimb.minimumWinrate) { // If the winrate is less than the minimum, descend
-				mobClimbing.move("down")
-			} else { // If we are between the minimum and the maximum winrate, finish climbing
-				mobClimbing.finishClimbing()
-			}
+			return
 		}
+
+		if (numberOfActions < settings.autoClimb.minimumActions) return
+
+		/* If we are winning more than the maximum, climb up.
+		   If we are winning less than the minimum, climb down.
+		   Else, finish climbing */
+
+		let direction = ""
+		if (winRate >= settings.autoClimb.maximumWinrate) {
+			direction = "up"
+		} else if (winRate < settings.autoClimb.minimumWinrate) {
+			direction = "down"
+		} else {
+			if (settings.verbose) log("Staying on this mob and resetting statistics")
+			$("#clearBattleStats")[0].click()
+			mobClimbing.finishClimbing()
+			return
+		}
+
+		mobClimbing.climbing = true
+		if (settings.verbose) log(`Climbing ${direction}`)
+		mobClimbing.move(direction)
 	},
 
 	/**

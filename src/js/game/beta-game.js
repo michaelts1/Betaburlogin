@@ -173,7 +173,7 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 	/** @todo Maybe we can use `$(window).one()` here? */
 	$(window).on("message", ({originalEvent: {origin, data, ports}}) => {
 		/* Make sure we are connecting to the right port. No need to be
-			absolutely sure about it since we don't send sensitive data */
+		   absolutely sure about it since we don't send sensitive data */
 		if (origin !== "https://beta.avabur.com" || data !== "betabot-ws message") return
 
 		/**
@@ -216,7 +216,7 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 	setInterval(betabot.buyCrys, 1000 * 60 * 60 * 24)
 
 	/* Event listeners that are currently always on (might change in the future) are
-		here. Event listeners that will be turned on/off as needed are inside `toggleInterfaceChanges` */
+	   here. Event listeners that will be turned on/off as needed are inside `toggleInterfaceChanges` */
 
 	// Toggle vars.motdReceived on for a short time after receiving motd message:
 	eventListeners.toggle("roa-ws:motd", gauntlet.motd, true)
