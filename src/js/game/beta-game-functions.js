@@ -793,7 +793,7 @@ const betabot = {
 		await delay(vars.buttonDelay)
 
 		if (settings.verbose) log(`Starting a ${type} quest`)
-		$(`input.questRequest[data-questtype=${type}][value="Begin Quest"]`).click()
+		$(`.questRequest[data-questtype=${type}]`).click()
 		await eventListeners.waitFor("roa-ws:page:quest_request")
 
 		completeTask()
@@ -981,9 +981,8 @@ const mobClimbing = {
 			$("#battleGrounds").click()
 
 			await eventListeners.waitFor("roa-ws:page:town_battlegrounds")
-			await delay(vars.buttonDelay)
 		}
-		$(`#enemyList`).find(`[value=${nextMob}]`).attr("selected", "selected")
+		$(`#enemyList`).val(nextMob)
 
 		await delay(vars.buttonDelay)
 		$("#autoEnemy").click()
@@ -994,6 +993,7 @@ const mobClimbing = {
 			eventListeners.toggle("roa-ws:battle", mobClimbing.checkStability, true)
 		} else {
 			// Stop tracking stability (if we are tracking it) and start a new quest:
+			await eventListeners.waitFor("roa-ws:battle")
 			mobClimbing.finishClimbing()
 		}
 
