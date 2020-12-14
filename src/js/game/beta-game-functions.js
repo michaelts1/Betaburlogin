@@ -770,8 +770,8 @@ const betabot = {
 		$(`input.completeQuest[data-questtype=${type}]`).click()
 		await eventListeners.waitFor("roa-ws:page:quest_complete")
 
-		// If auto climbing is on, stop here. Else, start a new quest:
-		if (settings.autoClimb) {
+		// If auto climbing is on, don't start a new battle quest:
+		if (settings.autoClimb && type === "kill") {
 			vars.actionsPending = false
 			await eventListeners.waitFor("roa-ws:page:quests")
 			$(".closeModal").click()
@@ -852,7 +852,6 @@ const betabot = {
 
 		// Stamina:
 		if (settings.autoStamina && data.autos_remaining < settings.minStamina && !betabot.staminaCooldown) {
-			if (settings.verbose) log("Replenishing stamina")
 			$("#replenishStamina").click()
 			betabot.staminaCooldown = true
 			await delay(2500)
