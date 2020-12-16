@@ -125,13 +125,9 @@ async function refreshSettings(changes) {
 	// Update `settings`:
 	for (const [name, {newValue}] of Object.entries(changes)) settings[name] = newValue
 
-	// Change auto wire if necessary:
-	if ("wireFrequency" in changes || "mainUsername" in changes || wiring.autoWireID && !settings.autoWire) {
-		clearInterval(wiring.autoWireID)
-		wiring.autoWireID = null
-	}
-	if (!wiring.autoWireID && settings.autoWire) {
-		wiring.autoWireID = setInterval(wiring.wire, settings.wireFrequency*60*1000, settings.mainUsername)
+	// Restart auto wire:
+	if ("wireFrequency" in changes && settings.autoWire) {
+		setTimeout(wiring.wire, settings.wireFrequency*60*1000)
 	}
 
 	// Reset `actionsPending` and call `toggleInterfaceChanges`:

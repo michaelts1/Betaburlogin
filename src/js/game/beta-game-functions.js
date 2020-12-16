@@ -238,7 +238,11 @@ const house = {
 			$("#houseRoomItemUpgradeLevel").click()
 		}
 
-		await eventListeners.waitFor("roa-ws:page:house_room_item_upgrade_tier roa-ws:page:house_room_item_upgrade_level")
+		// If we somehow tried to queue an item when there are more than 30 minutes left, cancel the queue (`s` stands for success):
+		const {s} = await eventListeners.waitFor("roa-ws:page:house_room_item_upgrade_tier roa-ws:page:house_room_item_upgrade_level")
+		if (!s) {
+			$(".button.red").click()
+		}
 		completeTask()
 	},
 }
@@ -509,22 +513,39 @@ const gems = {
 /**
  * Wiring related functions and variables
  * @const wiring
- * @property {number?} autoWireID
+ * @property {number} autoWireLastTimestamp
  * @property {function} wire Sends currency to another user
  * @property {function} spreadCurrency Spreads currency among other users
  * @memberof beta-game-functions
  */
 const wiring = {
-	autoWireID: null,
+	autoWireLastTimestamp: Date.now(),
 
 	/**
-	 * - Sends currency to another user (according to the user's currency send settings)
+	 * Sends currency to another user (according to the Currency Send settings)
 	 * @function wiring.wire
-	 * @param {string} target Wire recipient
+	 * @param {string} [target] Wire recipient. If omitted, defaults to `settings.mainUsername`
 	 * @memberof beta-game-functions
 	 */
 	wire(target) {
+		// Don't allow wiring to oneself:
 		if (target === username.name) return
+
+		// If this is an automatic wire:
+		if (settings.autoWire && !target) {
+			// Make sure enough time has passed since last run:
+			const wiringInterval = settings.wireFrequency*60*1000
+			if (Date.now() - wiring.autoWireLastTimestamp < wiringInterval) return
+
+			// Update last run timestamp:
+			wiring.autoWireLastTimestamp = Date.now()
+			// Set `target` to main username:
+			target = settings.mainUsername
+
+			// Call `wire()` again:
+			setTimeout(wiring.wire, wiringInterval + 100)
+		}
+
 		if (settings.verbose) log(`Wiring ${target}`)
 
 		let sendMessage = `/wire ${target}`
