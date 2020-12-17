@@ -194,8 +194,8 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 		$("#username").after(`<span id="betabot-next-to-name" class="betabot"></span>`)
 	}
 
-	// Set up auto wire:
-	settings.autoWire = settings.autoWire ? setInterval(wiring.wire, settings.wireFrequency*60*1000, settings.mainUsername) : null,
+	// Start up auto wire:
+	setTimeout(wiring.wire, settings.wireFrequency*60*1000)
 
 	// Set up auto gauntlet:
 	eventListeners.waitFor("roa-ws:motd").then(() => { // Start after a delay to avoid being triggered by old messages
@@ -209,7 +209,7 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 	})
 
 	// Buy crystals every 24 hours:
-	setInterval(betabot.buyCrys, 1000 * 60 * 60 * 24)
+	setTimeout(betabot.buyCrys, 1000*60*60*24)
 
 	/* Event listeners that are currently always on (might change in the future) are
 	   here. Event listeners that will be turned on/off as needed are inside `toggleInterfaceChanges` */

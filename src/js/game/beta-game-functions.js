@@ -137,7 +137,7 @@ const house = {
 
 			const {data: {q_b}} = await eventListeners.waitFor("roa-ws:page:house_all_builds")
 			const items = []
-			q_b.map(el1 => items.filter(el2 => el2.i == el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
+			q_b.map(el1 => items.filter(el2 => el2.i === el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
 
 			// Create the dropdown list:
 			let select = `<div id="betabot-custom-build" class="betabot">Build a specific item: <select id="betabot-select-build" class="betabot"><option value="" selected>None (Build Fastest)</option>`
@@ -630,7 +630,7 @@ const calendar = {
 	 * @memberof beta-game-functions
 	 */
 	addAdventCalendar (_, data) {
-		// `data.month` can be either a `Number` or a `String` representing a `Number`, so can't use strict equality here:
+		/* eslint-disable-next-line eqeqeq */ // `data.month` can be either a `Number` or a `String` containing a number, so can't use strict equality here:
 		if (data.month == 11 && !$("#betabot-collect-advent")[0]) {
 			$("#eventCalendarWrapper .mt10.center").append(` <button id="betabot-collect-advent" class="betabot"><a>Receive Your Prize</a></button>`)
 			$("#betabot-collect-advent").click(() => port.postMessage({ text: "receive advent calendar awards" }))
@@ -858,6 +858,8 @@ const betabot = {
 			if (settings.verbose) log(`Bought ${leftToBuy} daily crystals`)
 		}
 		completeTask()
+
+		setTimeout(betabot.buyCrys, 1000*60*60*24)
 	},
 
 	/**

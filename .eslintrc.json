@@ -25,6 +25,7 @@
 			"error",
 			"always"
 		],
+		"eqeqeq": "error",
 		"indent": [
 			"error",
 			"tab",

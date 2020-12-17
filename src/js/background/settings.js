@@ -114,6 +114,20 @@ async function getSettings() {
  */
 function updateSettings() {
 	let deletedSettings = []
+	/**
+	 * Changes a setting name, and use a default value if the old setting does not exist
+	 * @param {String} oldName Old setting name
+	 * @param {String} newName New setting name
+	 * @param {*} defaultValue Default value that will be used if the old setting is not defined
+	 */
+	function changeSettingName(oldName, newName, defaultValue) {
+		if (settings.hasOwnProperty(oldName)) {
+			settings[newName] = settings[oldName]
+			deletedSettings.push("doCraftQueue")
+		} else {
+			settings[newName] = defaultValue
+		}
+	}
 
 	switch (settings.version) {
 		case SETTINGS_VERSION:
@@ -175,25 +189,9 @@ function updateSettings() {
 				settings.pattern = "roman"
 			}
 		case 8:
-			// Name Change:
-			if (settings.doQuests === undefined) {
-				settings.autoQuests = true
-			} else {
-				settings.autoQuests = settings.doQuests
-				deletedSettings.push("doQuests")
-			}
-			if (settings.doBuildingAndHarvy === undefined) {
-				settings.autoHouse = true
-			} else {
-				settings.autoHouse = settings.doBuildingAndHarvy
-				deletedSettings.push("doBuildingAndHarvy")
-			}
-			if (settings.doCraftQueue === undefined) {
-				settings.autoCraft = true
-			} else {
-				settings.autoCraft = settings.doCraftQueue
-				deletedSettings.push("doCraftQueue")
-			}
+			changeSettingName("doQuests", "autoQuests", true)
+			changeSettingName("doBuildingAndHarvy", "autoHouse", true)
+			changeSettingName("doCraftQueue", "autoCraft", true)
 			// Other updates:
 			settings.minStamina = 5
 			settings.autoStamina = true
@@ -215,13 +213,7 @@ function updateSettings() {
 		case 13:
 			settings.addSocketX5 = false
 		case 14:
-			// Name Change:
-			if (settings.joinEvents === undefined) {
-				settings.joinGauntlets = true
-			} else {
-				settings.joinGauntlets = settings.joinEvents
-				deletedSettings.push("joinEvents")
-			}
+			changeSettingName("joinEvents", "joinGauntlets", true)
 			// Deletions:
 			if (settings.buttonDelay) deletedSettings.push("buttonDelay")
 			if (settings.actionsPending) deletedSettings.push("actionsPending")
@@ -230,13 +222,7 @@ function updateSettings() {
 			// Reset:
 			settings.loginPassword = ""
 		case 15:
-			// Name Change:
-			if (settings.resumeCrafting === undefined) {
-				settings.resumeQueue = true
-			} else {
-				settings.resumeQueue = settings.resumeCrafting
-				deletedSettings.push("resumeCrafting")
-			}
+			changeSettingName("resumeCrafting", "resumeQueue", true)
 			// Addition:
 			settings.autoCarve = true
 		case 16:
@@ -278,13 +264,7 @@ function updateSettings() {
 		case 19:
 			// No changes here anymore
 		case 20:
-			// Name change:
-			if (settings.addAdvertCalendar == undefined) {
-				settings.addAdventCalendar = true
-			} else {
-				settings.addAdventCalendar = settings.addAdvertCalendar
-				deletedSettings.push("addAdvertCalendar")
-			}
+			changeSettingName("addAdvertCalendar", "addAdventCalendar", true)
 
 			// Merging:
 			if (settings.minCraftingQueue === undefined && settings.minCarvingQueue === undefined) {
