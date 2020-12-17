@@ -8,7 +8,8 @@
 
 	"applications": {
 		"gecko": {
-			"id": "betaburloginID@example.com"
+			"id": "betaburloginID@example.com",
+			"strict_min_version": "74.0a1"
 		}
 	},
 

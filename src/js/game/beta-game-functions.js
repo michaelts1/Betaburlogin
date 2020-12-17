@@ -1031,7 +1031,7 @@ const mobClimbing = {
 	 * @memberof beta-game-functions
 	 */
 	async travel(amount) {
-		const gold = parseInt($(".right.mygold.gold").data("personal").replaceAll(",", ""))
+		const gold = parseInt($(".right.mygold.gold").data("personal").replace(/,/g, ""))
 		// If we don't have enough gold for travel, don't climb:
 		if (gold < 100*1000*1000) {
 			$("#loadBattle").click()
