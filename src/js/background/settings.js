@@ -275,13 +275,15 @@ function updateSettings() {
 			}
 
 			// Auto climb:
-			settings.autoClimb = {
-				climb: false,
-				jumpAmountMain: 11,
-				jumpAmountAlts: 5,
-				maximumWinrate: 100,
-				minimumActions: 50,
-				minimumWinrate: 95,
+			if (settings.autoClimb === undefined) {
+				settings.autoClimb = {
+					climb: false,
+					jumpAmountMain: 11,
+					jumpAmountAlts: 1,
+					maximumWinrate: 100,
+					minimumActions: 100,
+					minimumWinrate: 97.5,
+				}
 			}
 			if (settings.addJumpMobs !== undefined) {
 				deletedSettings.push("addJumpMobs")
