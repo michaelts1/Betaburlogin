@@ -528,9 +528,6 @@ const wiring = {
 	 * @memberof beta-game-functions
 	 */
 	wire(target) {
-		// Don't allow wiring to oneself:
-		if (target === username.name) return
-
 		// If this is an automatic wire:
 		if (settings.autoWire && !target) {
 			// Make sure enough time has passed since last run:
@@ -545,6 +542,9 @@ const wiring = {
 			// Call `wire()` again:
 			setTimeout(wiring.wire, wiringInterval + 100)
 		}
+
+		// Don't allow wiring to oneself:
+		if (target === username.name) return
 
 		if (settings.verbose) log(`Wiring ${target}`)
 
