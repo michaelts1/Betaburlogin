@@ -240,8 +240,11 @@ const house = {
 
 		// If we somehow tried to queue an item when there are more than 30 minutes left, cancel the queue (`s` stands for success):
 		const {s} = await eventListeners.waitFor("roa-ws:page:house_room_item_upgrade_tier roa-ws:page:house_room_item_upgrade_level")
-		if (!s) {
-			$(".button.red").click()
+		if (s === 0) {
+			// Click "No" after the confirm window shows up:
+			setTimeout(() => {
+				$(".button.red").click()
+			}, 100)
 		}
 		completeTask()
 	},
@@ -532,7 +535,11 @@ const wiring = {
 		if (settings.autoWire && !target) {
 			// Make sure enough time has passed since last run:
 			const wiringInterval = settings.wireFrequency*60*1000
-			if (Date.now() - wiring.autoWireLastTimestamp < wiringInterval) return
+			// Add one second to wiringInterval, to allow slight mistimings:
+			if (Date.now() - wiring.autoWireLastTimestamp < wiringInterval + 1000) {
+				log(`Automatic wiring occurred before time. Stopping now`)
+				return
+			}
 
 			// Update last run timestamp:
 			wiring.autoWireLastTimestamp = Date.now()
@@ -540,7 +547,7 @@ const wiring = {
 			target = settings.mainUsername
 
 			// Call `wire()` again:
-			setTimeout(wiring.wire, wiringInterval + 100)
+			setTimeout(wiring.wire, wiringInterval)
 		}
 
 		// Don't allow wiring to oneself:
