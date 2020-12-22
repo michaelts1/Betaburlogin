@@ -75,10 +75,10 @@ async function toggleInterfaceChanges(refresh) {
 	if (settings.addCustomBuild && !$("#betabot-custom-build")[0]) {
 		// Don't activate immediately on page load, nor if there is no house:
 		if (refresh && !$("#housing").is(":visible")) {
-			house.addCustomBuild
+			house.addCustomBuild()
 		} else {
 			eventListeners.waitFor("roa-ws:motd").then(() => { // Wait for the page to load
-				house.addCustomBuild
+				house.addCustomBuild()
 			})
 		}
 	} else if (!settings.addCustomBuild && $("#betabot-custom-build")[0]) {
