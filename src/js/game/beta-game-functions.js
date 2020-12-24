@@ -128,16 +128,20 @@ const house = {
 	 */
 	async addCustomBuild() {
 		vars.actionsPending = true
-		$("#modalBackground, #modal2Wrapper").prop("style", "display: none !important;") // Hide the interface for the duration of this function
+		// Hide the interface for the duration of this function:
+		$("#modalBackground, #modalWrapper, #modal2Wrapper").addClass("betabot-hidden")
+
 		$("#housing").click()
+		await eventListeners.waitFor("roa-ws:page:house")
 
 		// Only run if the user has bought a house (needed in case the user's level >= 10):
-		if ($("#allHouseUpgrades").is(":visible")) {
+		if ($("#allHouseUpgrades")[0]) {
 			$("#allHouseUpgrades")[0].click()
 
 			const {data: {q_b}} = await eventListeners.waitFor("roa-ws:page:house_all_builds")
 			const items = []
-			q_b.map(el1 => items.filter(el2 => el2.i === el1.i).length > 0 ? null : items.push(el1)) // Filter duplicates - https://stackoverflow.com/a/53543804
+			// Filter duplicates (https://stackoverflow.com/a/53543804):
+			q_b.map(el1 => items.filter(el2 => el2.i === el1.i).length > 0 ? null : items.push(el1))
 
 			// Create the dropdown list:
 			let select = `<div id="betabot-custom-build" class="betabot">Build a specific item: <select id="betabot-select-build" class="betabot"><option value="" selected>None (Build Fastest)</option>`
@@ -147,8 +151,13 @@ const house = {
 			if (settings.verbose) log("Added Custom Build select menu")
 		}
 
-		$("#modalBackground, #modal2Wrapper").prop("style", "") // Return to normal
+		// Close house pages:
+		$("#modal2Wrapper .closeModal").click()
 		completeTask()
+
+		// Reshow the interface (For some reason I can't go above 999 ms delay):
+		await delay(999)
+		$("#modalBackground, #modalWrapper, #modal2Wrapper").removeClass("betabot-hidden")
 	},
 
 	/**
@@ -238,15 +247,16 @@ const house = {
 			$("#houseRoomItemUpgradeLevel").click()
 		}
 
+		completeTask()
+
 		// If we somehow tried to queue an item when there are more than 30 minutes left, cancel the queue (`s` stands for success):
-		const {s} = await eventListeners.waitFor("roa-ws:page:house_room_item_upgrade_tier roa-ws:page:house_room_item_upgrade_level")
+		const {data: {s}} = await eventListeners.waitFor("roa-ws:page:house_room_item_upgrade_tier roa-ws:page:house_room_item_upgrade_level")
 		if (s === 0) {
-			// Click "No" after the confirm window shows up:
+			// Click "No" after the confirmation window shows up:
 			setTimeout(() => {
 				$(".button.red").click()
 			}, 100)
 		}
-		completeTask()
 	},
 }
 
@@ -531,32 +541,41 @@ const wiring = {
 	 * @memberof beta-game-functions
 	 */
 	wire(target) {
+		log("Wire function 0")
 		// If this is an automatic wire:
 		if (settings.autoWire && !target) {
+			log("Wire function 1")
 			// Make sure enough time has passed since last run:
 			const wiringInterval = settings.wireFrequency*60*1000
 			// Add one second to wiringInterval, to allow slight mistimings:
+			log("Wire function 2")
 			if (Date.now() - wiring.autoWireLastTimestamp < wiringInterval + 1000) {
 				log(`Automatic wiring occurred before time. Stopping now`)
 				return
 			}
+			log("Wire function 3")
 
 			// Update last run timestamp:
 			wiring.autoWireLastTimestamp = Date.now()
 			// Set `target` to main username:
 			target = settings.mainUsername
 
+			log("Wire function 4")
 			// Call `wire()` again:
 			setTimeout(wiring.wire, wiringInterval)
+			log("Wire function 5")
 		}
 
+		log("Wire function 6")
 		// Don't allow wiring to oneself:
 		if (target === username.name) return
 
+		log("Wire function 7")
 		if (settings.verbose) log(`Wiring ${target}`)
 
 		let sendMessage = `/wire ${target}`
 
+		log("Wire function 8")
 		for (const [name, sendSettings] of Object.entries(settings.currencySend)) {
 			if (!sendSettings.send) continue
 
@@ -573,10 +592,12 @@ const wiring = {
 			}
 		}
 
+		log("Wire function 9")
 		if (sendMessage !== `/wire ${target}`) {
 			$("#chatMessage").text(sendMessage)
 			$("#chatSendMessage").click()
 		}
+		log("Wire function 10")
 	},
 
 	/**
@@ -613,7 +634,7 @@ const wiring = {
 
 		for (let i = 0; i < alts.length; i++) {
 			// Wait for 6 seconds between each wire, since wiring is limited to 5 wires per 30 seconds:
-			setTimeout( () => {
+			setTimeout(() => {
 				$("#chatMessage").text(`/wire ${alts[i]} ${sendMessage}`)
 				$("#chatSendMessage").click()
 			}, 6000*i)
@@ -914,7 +935,7 @@ const betabot = {
 				case data?.house_timers[0]?.next < 1800 && !house.houseItemQueued:
 					if (settings.verbose) log("House timer less than 30 minutes, queuing another item")
 					house.houseItemQueued = true
-					setTimeout( () => house.houseItemQueued = false, 30*60*1000)
+					setTimeout(() => house.houseItemQueued = false, 30*60*1000)
 					// Fall through
 				case data?.can_build_house:
 					vars.actionsPending = true

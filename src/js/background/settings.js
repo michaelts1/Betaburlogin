@@ -31,6 +31,9 @@ const ADDON_CSS =
 	padding: 3px;
 	text-decoration: none;
 }
+.betabot-hidden {
+	display: none !important;
+}
 #betabot-clear-username {
 	color: yellow;
 	font-size: 25px;

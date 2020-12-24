@@ -72,9 +72,10 @@ async function toggleInterfaceChanges(refresh) {
 	}
 
 	// Option to build a specific item:
-	if (settings.addCustomBuild && !$("#betabot-custom-build")[0]) {
-		// Don't activate immediately on page load, nor if there is no house:
-		if (refresh && !$("#housing").is(":visible")) {
+	// Don't run if setting is off, if there is no need to, or if there is no house:
+	if (settings.addCustomBuild && !$("#betabot-custom-build")[0] && $("#housing").is(":visible")) {
+		// Don't activate immediately on page load:
+		if (refresh) {
 			house.addCustomBuild()
 		} else {
 			eventListeners.waitFor("roa-ws:motd").then(() => { // Wait for the page to load

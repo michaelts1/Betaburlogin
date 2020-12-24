@@ -336,7 +336,7 @@ function displayMessage(message, time=2500) {
 	output.text(message)
 	output.fadeIn(250)
 
-	setTimeout( () => {
+	setTimeout(() => {
 		output.fadeOut(750, () => {output.text("")} )
 	}, time)
 }

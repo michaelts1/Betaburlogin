@@ -91,7 +91,7 @@ browser.runtime.onConnect.addListener(async port => {
 	}
 
 	// When a port disconnects, forget it:
-	port.onDisconnect.addListener( () => {
+	port.onDisconnect.addListener(() => {
 		if (["live", "main"].includes(port.role)) {
 			delete ports[port.role]
 			ports[port.role] = null
@@ -121,7 +121,7 @@ async function openTabs() {
 
 	browser.tabs.create({url: "https://beta.avabur.com"})
 	for (let i = 0; i < Math.min(containers.length, altsNumber); i++) {
-		setTimeout( () => {
+		setTimeout(() => {
 			browser.tabs.create({
 				cookieStoreId: containers[i].cookieStoreId,
 				url: "https://beta.avabur.com",

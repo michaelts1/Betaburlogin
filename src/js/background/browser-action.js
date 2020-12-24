@@ -44,7 +44,7 @@ function toggle({target}) {
 $(getVars)
 
 $("input").on("change", toggle)
-$("#settings-icon").click( () => {
+$("#settings-icon").click(() => {
 	browser.runtime.openOptionsPage()
 })
 
