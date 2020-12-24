@@ -541,41 +541,31 @@ const wiring = {
 	 * @memberof beta-game-functions
 	 */
 	wire(target) {
-		log("Wire function 0")
 		// If this is an automatic wire:
 		if (settings.autoWire && !target) {
-			log("Wire function 1")
 			// Make sure enough time has passed since last run:
 			const wiringInterval = settings.wireFrequency*60*1000
 			// Add one second to wiringInterval, to allow slight mistimings:
-			log("Wire function 2")
 			if (Date.now() - wiring.autoWireLastTimestamp < wiringInterval + 1000) {
-				log(`Automatic wiring occurred before time. Stopping now`)
 				return
 			}
-			log("Wire function 3")
 
 			// Update last run timestamp:
 			wiring.autoWireLastTimestamp = Date.now()
 			// Set `target` to main username:
 			target = settings.mainUsername
 
-			log("Wire function 4")
 			// Call `wire()` again:
 			setTimeout(wiring.wire, wiringInterval)
-			log("Wire function 5")
 		}
 
-		log("Wire function 6")
 		// Don't allow wiring to oneself:
 		if (target === username.name) return
 
-		log("Wire function 7")
 		if (settings.verbose) log(`Wiring ${target}`)
 
 		let sendMessage = `/wire ${target}`
 
-		log("Wire function 8")
 		for (const [name, sendSettings] of Object.entries(settings.currencySend)) {
 			if (!sendSettings.send) continue
 
@@ -592,12 +582,10 @@ const wiring = {
 			}
 		}
 
-		log("Wire function 9")
 		if (sendMessage !== `/wire ${target}`) {
 			$("#chatMessage").text(sendMessage)
 			$("#chatSendMessage").click()
 		}
-		log("Wire function 10")
 	},
 
 	/**
