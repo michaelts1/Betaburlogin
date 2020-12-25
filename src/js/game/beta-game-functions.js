@@ -174,21 +174,12 @@ const house = {
 			is available, build it. Else, if new item is available,
 			build it. Else, upgrade existing item */
 		if (!isNaN(itemId)) {
-			$("#allHouseUpgrades")[0].click()
-			await eventListeners.waitFor("roa-ws:page:house_all_builds")
 			house.customBuild(itemId)
 		} else if ($("#houseRoomCanBuild").is(":visible")) {
-			if (settings.verbose) log("Building a new room")
-			$("#houseBuildRoom")[0].click()
-			await eventListeners.waitFor("roa-ws:page:house_build_room")
-			completeTask()
+			house.buildRoom()
 		} else if ($("#houseQuickBuildList li:first .houseViewRoom").length === 1) {
-			$("#houseQuickBuildList li:first .houseViewRoom")[0].click()
-			await eventListeners.waitFor("roa-ws:page:house_room")
 			house.buildItem()
 		} else {
-			$("#houseQuickBuildList li:first .houseViewRoomItem")[0].click()
-			await eventListeners.waitFor("roa-ws:page:house_room_item")
 			house.upgradeItem()
 		}
 	},
@@ -202,6 +193,10 @@ const house = {
 	 */
 	async customBuild(itemId) {
 		if (settings.verbose) log(`Upgrading custom item with id ${itemId}`)
+
+		$("#allHouseUpgrades")[0].click()
+
+		await eventListeners.waitFor("roa-ws:page:house_all_builds")
 		await delay(vars.buttonDelay)
 		$(`#modal2Content a[data-itemtype=${itemId}]`)[0].click()
 
@@ -214,6 +209,21 @@ const house = {
 	},
 
 	/**
+	 * Builds a new room
+	 * @async
+	 * @function house.buildRoom
+	 * @memberof beta-game-functions
+	 */
+	async buildRoom() {
+		if (settings.verbose) log("Building a new room")
+
+		$("#houseBuildRoom")[0].click()
+
+		await eventListeners.waitFor("roa-ws:page:house_build_room")
+		completeTask()
+	},
+
+	/**
 	 * Builds a new item
 	 * @async
 	 * @function house.buildItem
@@ -222,6 +232,9 @@ const house = {
 	async buildItem() {
 		if (settings.verbose) log("Building a new item")
 
+		$("#houseQuickBuildList li:first .houseViewRoom")[0].click()
+
+		await eventListeners.waitFor("roa-ws:page:house_room")
 		await delay(vars.startActionsDelay)
 		$("#houseBuildRoomItem").click()
 
@@ -236,6 +249,9 @@ const house = {
 	 * @memberof beta-game-functions
 	 */
 	async upgradeItem() {
+		$("#houseQuickBuildList li:first .houseViewRoomItem")[0].click()
+
+		await eventListeners.waitFor("roa-ws:page:house_room_item")
 		await delay(vars.startActionsDelay)
 
 		// If tier upgrade is available, upgrade it. Else, do a regular upgrade:
@@ -545,8 +561,9 @@ const wiring = {
 		if (settings.autoWire && !target) {
 			// Make sure enough time has passed since last run:
 			const wiringInterval = settings.wireFrequency*60*1000
-			// Add one second to wiringInterval, to allow slight mistimings:
-			if (Date.now() - wiring.autoWireLastTimestamp < wiringInterval + 1000) {
+			// Subtract one second from wiringInterval, to allow slight mistimings:
+			if (Date.now() - wiring.autoWireLastTimestamp < wiringInterval - 1000) {
+				//log(`Automatic wiring occurred before time. Stopping now`)
 				return
 			}
 
