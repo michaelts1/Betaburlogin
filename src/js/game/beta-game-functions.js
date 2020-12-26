@@ -144,11 +144,13 @@ const house = {
 			q_b.map(el1 => items.filter(el2 => el2.i === el1.i).length > 0 ? null : items.push(el1))
 
 			// Create the dropdown list:
-			let select = `<div id="betabot-custom-build" class="betabot">Build a specific item: <select id="betabot-select-build" class="betabot"><option value="" selected>None (Build Fastest)</option>`
-			for (const item of items) select += `<option value="${item.i}">${item.n}</option>`
-			$("#houseQuickBuildWrapper").append(select + "</select></div>")
+			if (!$("#betabot-custom-build")[0]) {
+				let select = `<div id="betabot-custom-build" class="betabot">Build a specific item: <select id="betabot-select-build" class="betabot"><option value="" selected>None (Build Fastest)</option>`
+				for (const item of items) select += `<option value="${item.i}">${item.n}</option>`
+				$("#houseQuickBuildWrapper").append(select + "</select></div>")
 
-			if (settings.verbose) log("Added Custom Build select menu")
+				if (settings.verbose) log("Added Custom Build select menu")
+			}
 		}
 
 		// Close house pages:
@@ -171,8 +173,8 @@ const house = {
 		await delay(vars.startActionsDelay)
 
 		/* If a custom build is specified, upgrade it. Else, if new room
-			is available, build it. Else, if new item is available,
-			build it. Else, upgrade existing item */
+		   is available, build it. Else, if new item is available,
+		   build it. Else, upgrade existing item */
 		if (!isNaN(itemId)) {
 			house.customBuild(itemId)
 		} else if ($("#houseRoomCanBuild").is(":visible")) {
@@ -349,8 +351,8 @@ const gauntlet = {
 	async checkGauntletMessage(_, data) {
 		if (data.c_id === settings.eventChannelID) {
 			/* Wait to see if the message is received together with a
-				message of the day, which means it was only sent due to
-				a chat reconnection, and we should not join the gauntlet */
+			   message of the day, which means it was only sent due to
+			   a chat reconnection, and we should not join the gauntlet */
 			await delay(vars.startActionsDelay)
 			if (!gauntlet.gauntVars.motdReceived) {
 				if (gauntlet.gauntVars.gauntletID !== data.m_id || !gauntlet.gauntVars.gauntletInProgress ||
@@ -520,8 +522,8 @@ const gems = {
 			const {data} = await eventListeners.waitFor("roa-ws:page:gem_socket_to_item")
 
 			/* If this is the first gem socketed, assign `firstGemName` the name of this gem.
-				Since `data.m` contains a very long html string, we need to extract the gem name.
-				`firstGemName` should look like "Tier 200 Diamond of Agile Mastery" */
+			   Since `data.m` contains a very long html string, we need to extract the gem name.
+			   `firstGemName` should look like "Tier 200 Diamond of Agile Mastery" */
 			firstGemName = firstGemName ?? (new DOMParser()).parseFromString(data.m, "text/html").body.children[0].textContent
 
 			// If `$("#socketableGems option")` length is `0`, use `null`:
