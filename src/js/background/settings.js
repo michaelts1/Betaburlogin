@@ -285,7 +285,7 @@ function updateSettings() {
 					jumpAmountAlts: 1,
 					maximumWinrate: 100,
 					minimumActions: 100,
-					minimumWinrate: 97.5,
+					minimumWinrate: 99,
 				}
 			}
 			if (settings.addJumpMobs !== undefined) {
