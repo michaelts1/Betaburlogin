@@ -21,7 +21,7 @@ class Setting {
 		this.input = input
 		this.name = input.dataset.setting
 		this.path = input.dataset.setting.split(".") /** @todo Is this really needed? its almost equivalent to `this.name` */
-		const {settingType, settingValue} = Setting.getSettingByPath(this.name, this.path)
+		const {settingType, settingValue} = Setting.getSettingByName(this.name)
 		this.type = settingType
 		this.value = settingValue
 		this.lastChanged = new Date().getTime()
@@ -117,30 +117,31 @@ class Setting {
 		for (const fun of this.runAfterSave) fun(this.input)
 
 		// Don't save if the setting didn't change:
-		if (objectEquals(this.value, Setting.getSettingByPath(this.name, this.path).settingValue)) return
+		if (objectEquals(this.value, Setting.getSettingByName(this.name).settingValue)) return
 
 		/**
 		 * Recursively creates a clone of the child of `settings` containing a specific setting, while using a new value for that setting
 		 * @function changeSetting
-		 * @param {object} settingsObject The `settings` object
-		 * @param {number} index Current index in `path`. When called manually, this should be 0
+		 * @param {Setting} setting A setting that needs to be changed
+		 * @param {object} _settingsObject A copy of `settings`. Should be omitted when called manually
+		 * @param {number} _index Current index in `path`. Should be omitted when called manually
 		 * @returns {object} New clone of the child of `settings` containing said setting, using the new value for that setting
 		 * @const
 		 * @private
 		 * @memberof options
 		 */
-		const changeSetting = (settingsObject, index) => {
-			if (index + 1 === this.path.length) { // If index is the last index, change the setting
-				settingsObject[this.path[index]] = this.value
+		const changeSetting = (setting, _settingsObject = settings, _index = 0) => {
+			if (_index + 1 === setting.path.length) { // If index is the last index, change the setting
+				_settingsObject[setting.path[_index]] = setting.value
 			} else { // Else, call `changeSetting()` again to modify the next child
-				settingsObject[this.path[index]] = changeSetting(settingsObject[this.path[index]], index + 1)
+				_settingsObject[setting.path[_index]] = changeSetting(setting, _settingsObject[setting.path[_index]], _index + 1)
 			}
-			return settingsObject // Return the modified object
+			return _settingsObject // Return the modified object
 		}
 		/* Change a setting without modifying the rest of `settings`. I am using `[this.path[0]]`
 		   to only set the specific setting (e.g. `css`), and not the whole `settings` object: */
 		browser.storage.sync.set({
-			[this.path[0]]: changeSetting(settings, 0)[this.path[0]],
+			[this.path[0]]: changeSetting(this)[this.path[0]],
 		})
 
 		displayMessage("Changes saved")
@@ -154,7 +155,7 @@ class Setting {
 	 * @memberof options
 	 */
 	async load() {
-		this.value = Setting.getSettingByPath(this.name, this.path).settingValue
+		this.value = Setting.getSettingByName(this.name).settingValue
 
 		// Update field according to setting type:
 		switch (this.type) {
@@ -189,7 +190,7 @@ class Setting {
 		settings = await browser.storage.sync.get()
 
 		for (const setting of Setting.instances) {
-			if (!objectEquals(setting.value, Setting.getSettingByPath(setting.name, setting.path).settingValue)) {
+			if (!objectEquals(setting.value, Setting.getSettingByName(setting.name).settingValue)) {
 				setting.load()
 			}
 		}
@@ -200,21 +201,20 @@ class Setting {
 
 	/**
 	 * Finds a setting in `settings` based on its name and path, and returns its value and type
-	 * @function getSettingByPath
+	 * @function getSettingByName
 	 * @param {string} settingName Name of the setting
-	 * @param {string[]} path Path to travel in `settings` in order to get to the setting, splitted to steps (e.g. to find `settings.a.b`, path should be `["a", "b"]`)
 	 * @returns {object}
 	 * @returns {*} settingValue
 	 * @returns {string} settingType
 	 * @static
 	 * @memberof options
 	 */
-	static getSettingByPath(settingName, path) {
+	static getSettingByName(settingName) {
 		let settingValue = settings
 		let settingType = null
 
 		// Get the setting value by using a pointer to navigate down the tree:
-		for (const key of path) {
+		for (const key of settingName.split(".")) {
 			settingValue = settingValue[key]
 		}
 
