@@ -84,7 +84,7 @@ header {
 /* Form Contents */
 
 #settings {
-	height: 75.15vh;
+	max-height: 75.15vh;
 	margin: var(--settings-margin-top) auto auto;
 	overflow-y: auto;
 	width: var(--settings-width);
