@@ -719,7 +719,7 @@ const professionQueues = {
 		if (vars.actionsPending) return
 
 		// If auto Craft/Carve is off, return:
-		if (settings[`auto${data.type[0].toUpperCase() + data.type.substring(1)}`] === false) return
+		if (settings[`auto${capitalize(data.type)}`] === false) return
 
 		const expr = /You completed your (crafting|carving) queue and began (Battling|Fishing|Woodcutting|Mining|Stonecutting) automatically./
 		if ((["carve", "craft"].includes(data.type) && data.results.a.cq < settings.minQueue) ||

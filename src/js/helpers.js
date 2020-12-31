@@ -210,3 +210,13 @@ function objectEquals(object1, object2) {
 	}
 	return true
 }
+
+/**
+ * @function capitalize
+ * @param {string} str
+ * @returns {string}
+ * @memberof helpers
+ */
+function capitalize(str) {
+	return str[0].toUpperCase() + str.substring(1)
+}

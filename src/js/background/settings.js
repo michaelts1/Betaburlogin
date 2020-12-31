@@ -174,7 +174,7 @@ function updateSettings() {
 				settings.currencySend[trade] = {
 					send: true,
 					minimumAmount: 100,
-					keepAmount: 10000000,
+					keepAmount: 100000000,
 				}
 			}
 		case 5:
@@ -233,7 +233,7 @@ function updateSettings() {
 				settings.css = {
 					addon: ADDON_CSS,
 					custom: {
-						code: settings.css.custom,
+						code: CUSTOM_CSS,
 						default: CUSTOM_CSS,
 					},
 				}

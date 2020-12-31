@@ -10,6 +10,7 @@
 		"ecmaVersion": 11
 	},
 	"globals": {
+		"capitalize": "readonly",
 		"delay": "readonly",
 		"eventListeners": "readonly",
 		"insecureCrypt": "readonly",
