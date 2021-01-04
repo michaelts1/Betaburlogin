@@ -15,683 +15,543 @@
 			<!-- Tabs navigation -->
 			<div id="tabs-buttons">
 				<div class="tab-button"></div>
-				<div id="general-tab-button" class="tab-button selected">General</div>
-				<div id="login-tab-button" class="tab-button">Accounts</div>
-				<div id="wire-tab-button" class="tab-button">Currency Send</div>
-				<div id="event-tab-button" class="tab-button">Auto Event</div>
-				<div id="climb-tab-button" class="tab-button">Auto Climb</div>
-				<div id="interface-tab-button" class="tab-button">Interface</div>
-				<div id="advanced-tab-button" class="tab-button">Advanced</div>
 			</div>
 		</header>
 
-		<article id="settings">
-			<table id="general" class="tab selected">
-				<colgroup>
-					<col id="general-col-1"> <!-- First column in the general table -->
-					<col id="general-col-2"> <!-- Second column in the general table -->
-				</colgroup>
-				<thead>
-					<tr>
-						<th colspan="2">General Settings</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>
-							<label for="auto-stamina">Auto Stamina</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Automatically replenish stamina when under the minimum."></span>
-						</td>
-						<td>
-							<input id="auto-stamina" type="checkbox" data-setting="autoStamina">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="auto-quests">Auto Quests</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Automatically complete and start quests."></span>
-						</td>
-						<td>
-							<input id="auto-quests" type="checkbox" data-setting="autoQuests">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="auto-house">Auto House</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Automatically build house items.&#10;&#10;The addon will first attempt to build a new room. If there are no new rooms to build, it will upgrade item tiers. If there are also no tier upgrades available, the addon will build the fastest item.&#10;&#10;Requires Alarm Clock."></span>
-						</td>
-						<td>
-							<input id="auto-house" type="checkbox" data-setting="autoHouse">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="auto-harvestron">Auto Harvestron</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Automatically start Harvestron jobs.&#10;&#10;If the user cancels an Harvestron job manually, the addon will wait at least 60 seconds before sending the Harvestron again. This gives the user the opportunity to set the Harvestron to harvest another resource without the addon interfering with him.&#10;&#10;Requires Harvestron (obviously)."></span>
-						</td>
-						<td>
-							<input id="auto-harvestron" type="checkbox" data-setting="autoHarvestron">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="auto-craft">Auto Craft</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="While crafting, automatically fill the crafting queue when under the minimum."></span>
-						</td>
-						<td>
-							<input id="auto-craft" type="checkbox" data-setting="autoCraft">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="auto-carve">Auto Carve</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="While carving, automatically fill the carving queue when under the minimum."></span>
-						</td>
-						<td>
-							<input id="auto-carve" type="checkbox" data-setting="autoCarve">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="resume-queue">Resume on Finishing Queue</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Automatically start crafting/carving again after finishing the queue.&#10;&#10;Sometimes needed since auto crafting/carving might not work after disconnects. If this setting is on, the addon will resume crafting/carving even after disconnects.&#10;&#10;Will only work if Auto Craft/Auto Carve is also on, respectively."></span>
-						</td>
-						<td>
-							<input id="resume-queue" type="checkbox" data-setting="resumeQueue">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="min-stamina">Minimum Stamina</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Stamina will be replenished when under this number."></span>
-						</td>
-						<td>
-							<input id="min-stamina" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Minimum Stamina" size=15 data-setting="minStamina">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="min-queue">Minimum Queue Items</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Minimum number of items to keep in the queue when crafting/carving. If there are less items in the queue than this number, it will be refilled."></span>
-						</td>
-						<td>
-							<input id="min-queue" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Minimum Queue" size=15 data-setting="minQueue">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="daily-crystals">Daily Crystals Amount</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="How many crystals to buy every day."></span>
-						</td>
-						<td>
-							<input id="daily-crystals" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Crystals Amount" size=15 data-setting="dailyCrystals">
-							<div id="daily-crystals-text">Price: <span id="daily-crystals-price">0</span></div>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+		<table id="general" data-name="General" data-cols="2">
+			<tr>
+				<td>
+					<label for="auto-stamina" data-info="Automatically replenish stamina when under the minimum.">Auto Stamina</label>
+				</td>
+				<td>
+					<input id="auto-stamina" type="checkbox" data-setting="autoStamina">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="auto-quests" data-info="Automatically complete and start quests.">Auto Quests</label>
+				</td>
+				<td>
+					<input id="auto-quests" type="checkbox" data-setting="autoQuests">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="auto-house" data-info="Automatically build house items.&#10;&#10;The addon will first attempt to build a new room. If there are no new rooms to build, it will upgrade item tiers. If there are also no tier upgrades available, the addon will build the fastest item.&#10;&#10;Requires Alarm Clock.">Auto House</label>
+				</td>
+				<td>
+					<input id="auto-house" type="checkbox" data-setting="autoHouse">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="auto-harvestron" data-info="Automatically start Harvestron jobs.&#10;&#10;If the user cancels an Harvestron job manually, the addon will wait at least 60 seconds before sending the Harvestron again. This gives the user the opportunity to set the Harvestron to harvest another resource without the addon interfering with him.&#10;&#10;Requires Harvestron (obviously).">Auto Harvestron</label>
+				</td>
+				<td>
+					<input id="auto-harvestron" type="checkbox" data-setting="autoHarvestron">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="auto-craft" data-info="While crafting, automatically fill the crafting queue when under the minimum.">Auto Craft</label>
+				</td>
+				<td>
+					<input id="auto-craft" type="checkbox" data-setting="autoCraft">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="auto-carve" data-info="While carving, automatically fill the carving queue when under the minimum.">Auto Carve</label>
+				</td>
+				<td>
+					<input id="auto-carve" type="checkbox" data-setting="autoCarve">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="resume-queue" data-info="Automatically start crafting/carving again after finishing the queue.&#10;&#10;Sometimes needed since auto crafting/carving might not work after disconnects. If this setting is on, the addon will resume crafting/carving even after disconnects.&#10;&#10;Will only work if Auto Craft/Auto Carve is also on, respectively.">Resume on Finishing Queue</label>
+				</td>
+				<td>
+					<input id="resume-queue" type="checkbox" data-setting="resumeQueue">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="min-stamina" data-info="Stamina will be replenished when under this number.">Minimum Stamina</label>
+				</td>
+				<td>
+					<input id="min-stamina" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Minimum Stamina" size=15 data-setting="minStamina">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="min-queue" data-info="Minimum number of items to keep in the queue when crafting/carving. If there are less items in the queue than this number, it will be refilled.">Minimum Queue Items</label>
+				</td>
+				<td>
+					<input id="min-queue" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Minimum Queue" size=15 data-setting="minQueue">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="daily-crystals" data-info="How many crystals to buy every day.">Daily Crystals Amount</label>
+				</td>
+				<td>
+					<input id="daily-crystals" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Crystals Amount" size=15 data-setting="dailyCrystals">
+					<div id="daily-crystals-text">Price: <span id="daily-crystals-price">0</span></div>
+				</td>
+			</tr>
+		</table>
 
-			<table id="login" class="tab">
-				<colgroup>
-					<col id="login-col-1">
-					<col id="login-col-2">
-				</colgroup>
-				<thead>
-					<tr>
-						<th colspan="2">Login Settings</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr id="main-account-tr">
-						<td>
-							<label for="main-account">Main Login Name</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="3-20 characters. Letters and numbers.&#10;&#10;The name you use to log in with your main account.&#10;&#10;Might be different than your in-game username."></span>
-						</td>
-						<td>
-							<input id="main-account" pattern="^[A-Za-z\d]{3,20}$" placeholder="Login Name" size="15" data-setting="mainAccount" required>
-						</td>
-					</tr>
-					<tr id="main-username-tr">
-						<td>
-							<label for="main-username">Main In-Game Name</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="3-20 characters. Only letters.&#10;&#10;Your main account in-game username.&#10;&#10;Might be different than the name you use to log in."></span>
-						</td>
-						<td>
-							<input id="main-username" pattern="^[A-Za-z]{3,20}$" placeholder="In-Game Name" size="15" data-setting="mainUsername" required>
-						</td>
-					</tr>
-					<tr id="login-password-tr">
-						<td>
-							<label for="login-password">Login Password</label>
-							<span class="warning" role="img" aria-label="warning" data-tooltip="6+ characters. Case sensitive.&#10;&#10;Warning:&#10;The password is saved in plain text!&#10;&#10;Make sure it's different from passwords you use on other services, including live!"></span>
-						</td>
-						<td>
-							<input id="login-password" pattern=".{6,}" type="password" placeholder="Password" size=15 data-setting="loginPassword" required>
-						</td>
-					</tr>
-					<tr id="pattern-tr" class="requires-containers">
-						<td>
-							<label for="pattern">Name Pattern</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="The name pattern for your alts.&#10;&#10;Examples:&#10;Roman Numerals: &quot;altI&quot; and &quot;altii&quot;.&#10;Unique Names: &quot;altCraft&quot; and &quot;testAccount&quot;."></span>
-						</td>
-						<td>
-							<select id="pattern" data-setting="pattern">
-								<option value="" selected hidden>Select Name Pattern</option>
-								<option value="roman">Roman Numerals</option>
-								<option value="unique">Unique Names</option>
-							</select>
-						</td>
-					</tr>
-					<tr id="alts-number-tr" class="requires-containers">
-						<td>
-							<label for="alts-number">Number of Alts</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Number of alts, not including main account."></span>
-						</td>
-						<td>
-							<input id="alts-number" pattern="^\d{1,3}$" placeholder="Number of Alts" size="24" data-setting="altsNumber">
-						</td>
-					</tr>
-					<tr id="alt-base-name-tr" class="requires-containers">
-						<td>
-							<label for="alt-base-name">Alts Base Name</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="The base name for your alts.&#10;&#10;For example, if your alts are &quot;alti&quot; and &quot;altii&quot;, then the base name is &quot;alt&quot;."></span>
-						</td>
-						<td>
-							<input id="alt-base-name" pattern="^[A-Za-z\d]{3,20}$" placeholder="Alt Base Name" size="24" data-setting="altBaseName">
-						</td>
-					</tr>
-					<tr id="names-list-tr" class="requires-containers">
-						<td>
-							<label for="names-list">Unique Names List</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="List of the names of your alts, sperated by commas and spaces.&#10;&#10;Example: &quot;altFish, altTwo, WeirdName, myAlt&quot;."></span>
-						</td>
-						<td>
-							<input id="names-list" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Unique Names List" size="24" data-setting="namesList">
-						</td>
-					</tr>
-				</tbody>
-			</table>
+		<table id="login" data-name="Accounts" data-cols="2">
+			<tr id="main-account-tr">
+				<td>
+					<label for="main-account" data-info="3-20 characters. Letters and numbers.&#10;&#10;The name you use to log in with your main account.&#10;&#10;Might be different than your in-game username.">Main Login Name</label>
+				</td>
+				<td>
+					<input id="main-account" pattern="^[A-Za-z\d]{3,20}$" placeholder="Login Name" size="15" data-setting="mainAccount" required>
+				</td>
+			</tr>
+			<tr id="main-username-tr">
+				<td>
+					<label for="main-username" data-info="3-20 characters. Only letters.&#10;&#10;Your main account in-game username.&#10;&#10;Might be different than the name you use to log in.">Main In-Game Name</label>
+				</td>
+				<td>
+					<input id="main-username" pattern="^[A-Za-z]{3,20}$" placeholder="In-Game Name" size="15" data-setting="mainUsername" required>
+				</td>
+			</tr>
+			<tr id="login-password-tr">
+				<td>
+					<label for="login-password">Login Password</label>
+					<span class="warning" role="img" aria-label="warning" data-tooltip="6+ characters. Case sensitive.&#10;&#10;Warning:&#10;The password is saved in plain text!&#10;&#10;Make sure it's different from passwords you use on other services, including live!"></span>
+				</td>
+				<td>
+					<input id="login-password" pattern=".{6,}" type="password" placeholder="Password" size=15 data-setting="loginPassword" required>
+				</td>
+			</tr>
+			<tr id="pattern-tr" class="requires-containers">
+				<td>
+					<label for="pattern" data-info="The name pattern for your alts.&#10;&#10;Examples:&#10;Roman Numerals: &quot;altI&quot; and &quot;altii&quot;.&#10;Unique Names: &quot;altCraft&quot; and &quot;testAccount&quot;.">Name Pattern</label>
+				</td>
+				<td>
+					<select id="pattern" data-setting="pattern">
+						<option value="" selected hidden>Select Name Pattern</option>
+						<option value="roman">Roman Numerals</option>
+						<option value="unique">Unique Names</option>
+					</select>
+				</td>
+			</tr>
+			<tr id="alts-number-tr" class="requires-containers">
+				<td>
+					<label for="alts-number" data-info="Number of alts, not including main account.">Number of Alts</label>
+				</td>
+				<td>
+					<input id="alts-number" pattern="^\d{1,3}$" placeholder="Number of Alts" size="24" data-setting="altsNumber">
+				</td>
+			</tr>
+			<tr id="alt-base-name-tr" class="requires-containers">
+				<td>
+					<label for="alt-base-name" data-info="The base name for your alts.&#10;&#10;For example, if your alts are &quot;alti&quot; and &quot;altii&quot;, then the base name is &quot;alt&quot;.">Alts Base Name</label>
+				</td>
+				<td>
+					<input id="alt-base-name" pattern="^[A-Za-z\d]{3,20}$" placeholder="Alt Base Name" size="24" data-setting="altBaseName">
+				</td>
+			</tr>
+			<tr id="names-list-tr" class="requires-containers">
+				<td>
+					<label for="names-list" data-info="List of the names of your alts, sperated by commas and spaces.&#10;&#10;Example: &quot;altFish, altTwo, WeirdName, myAlt&quot;.">Unique Names List</label>
+				</td>
+				<td>
+					<input id="names-list" pattern="^[A-Za-z\d, ]{3,}$" placeholder="Unique Names List" size="24" data-setting="namesList">
+				</td>
+			</tr>
+		</table>
 
-			<table id="wire" class="tab requires-containers">
-				<colgroup>
-					<col id="wire-col-1">
-					<col id="wire-col-2">
-					<col id="wire-col-3">
-				</colgroup>
-				<thead>
-					<tr>
-						<th colspan="3">
-							Currency Send Settings
-							<span class="title-info" aria-label="info" data-tooltip="Left column: Enable or disable sending of the currency.&#10;Middle column: Name of the currency.&#10;Right column: Amount of said currency to be kept when sending this currency.&#10;&#10;For example, if you check the checkbox on the &quot;Crystals&quot; row, and type &quot;100&quot; in the input box to the right, the alts will send their crystals, but will always keep at least 100 crystals on them."></span>
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td class="checkbox-td">
-							<input id="auto-wire" type="checkbox" data-setting="autoWire">
-						</td>
-						<td colspan="2">
-							<label for="auto-wire">Auto Wire to Main Account Every</label>
-							<select id="wire-frequency" data-setting="wireFrequency">
-								<option value="1440">24 Hours</option>
-								<option value="300">5 Hours</option>
-								<option value="60" selected="selected">Hour</option>
-								<option value="5">5 Minutes</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="crystals-send" type="checkbox" data-setting="currencySend.crystals.send">
-						</td>
-						<td>
-							<label for="crystals-send">Crystals</label>
-						</td>
-						<td>
-							<input id="crystals-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.crystals.keepAmount">
-						</td>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="platinum-send" type="checkbox" data-setting="currencySend.platinum.send">
-						</td>
-						<td>
-							<label for="platinum-send">Platinum</label>
-						</td>
-						<td>
-							<input id="platinum-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.platinum.keepAmount">
-						</td>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="gold-send" type="checkbox" data-setting="currencySend.gold.send">
-						</td>
-						<td>
-							<label for="gold-send">Gold</label>
-						</td>
-						<td>
-							<input id="gold-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.gold.keepAmount">
-						</td>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="crafting-materials-send" type="checkbox" data-setting="currencySend.crafting_materials.send">
-						</td>
-						<td>
-							<label for="crafting-materials-send">Crafting Materials</label>
-						</td>
-						<td>
-							<input id="crafting-materials-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.crafting_materials.keepAmount">
-						</td>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="gem-fragments-send" type="checkbox" data-setting="currencySend.gem_fragments.send">
-						</td>
-						<td>
-							<label for="gem-fragments-send">Gem Fragments</label>
-						</td>
-						<td>
-							<input id="gem-fragments-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.gem_fragments.keepAmount">
-						</td>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="food-send" type="checkbox" data-setting="currencySend.food.send">
-						</td>
-						<td>
-							<label for="food-send">Food</label>
-						</td>
-						<td>
-							<input id="food-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.food.keepAmount">
-						</td>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="wood-send" type="checkbox" data-setting="currencySend.wood.send">
-						</td>
-						<td>
-							<label for="wood-send">Wood</label>
-						</td>
-						<td>
-							<input id="wood-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.wood.keepAmount">
-						</td>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="iron-send" type="checkbox" data-setting="currencySend.iron.send">
-						</td>
-						<td>
-							<label for="iron-send">Iron</label>
-						</td>
-						<td>
-							<input id="iron-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.iron.keepAmount">
-						</td>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="stone-send" type="checkbox" data-setting="currencySend.stone.send">
-						</td>
-						<td>
-							<label for="stone-send">Stone</label>
-						</td>
-						<td>
-							<input id="stone-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.stone.keepAmount">
-						</td>
-					</tr>
-				</tbody>
-			</table>
+		<table id="wire" class="requires-containers" data-name="Wiring" data-cols="3"
+			data-header-tooltip="Left column: Enable or disable sending of the currency.&#10;Middle column: Name of the currency.&#10;Right column: Amount of said currency to be kept when sending this currency.&#10;&#10;For example, if you check the checkbox on the &quot;Crystals&quot; row, and type &quot;100&quot; in the input box to the right, the alts will send their crystals, but will always keep at least 100 crystals on them.">
+			<tr>
+				<td class="checkbox-td">
+					<input id="auto-wire" type="checkbox" data-setting="autoWire">
+				</td>
+				<td colspan="2">
+					<label for="auto-wire">Auto Wire to Main Account Every</label>
+					<select id="wire-frequency" data-setting="wireFrequency">
+						<option value="1440">24 Hours</option>
+						<option value="300">5 Hours</option>
+						<option value="60" selected="selected">Hour</option>
+						<option value="5">5 Minutes</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="crystals-send" type="checkbox" data-setting="currencySend.crystals.send">
+				</td>
+				<td>
+					<label for="crystals-send">Crystals</label>
+				</td>
+				<td>
+					<input id="crystals-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.crystals.keepAmount">
+				</td>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="platinum-send" type="checkbox" data-setting="currencySend.platinum.send">
+				</td>
+				<td>
+					<label for="platinum-send">Platinum</label>
+				</td>
+				<td>
+					<input id="platinum-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.platinum.keepAmount">
+				</td>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="gold-send" type="checkbox" data-setting="currencySend.gold.send">
+				</td>
+				<td>
+					<label for="gold-send">Gold</label>
+				</td>
+				<td>
+					<input id="gold-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.gold.keepAmount">
+				</td>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="crafting-materials-send" type="checkbox" data-setting="currencySend.crafting_materials.send">
+				</td>
+				<td>
+					<label for="crafting-materials-send">Crafting Materials</label>
+				</td>
+				<td>
+					<input id="crafting-materials-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.crafting_materials.keepAmount">
+				</td>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="gem-fragments-send" type="checkbox" data-setting="currencySend.gem_fragments.send">
+				</td>
+				<td>
+					<label for="gem-fragments-send">Gem Fragments</label>
+				</td>
+				<td>
+					<input id="gem-fragments-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.gem_fragments.keepAmount">
+				</td>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="food-send" type="checkbox" data-setting="currencySend.food.send">
+				</td>
+				<td>
+					<label for="food-send">Food</label>
+				</td>
+				<td>
+					<input id="food-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.food.keepAmount">
+				</td>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="wood-send" type="checkbox" data-setting="currencySend.wood.send">
+				</td>
+				<td>
+					<label for="wood-send">Wood</label>
+				</td>
+				<td>
+					<input id="wood-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.wood.keepAmount">
+				</td>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="iron-send" type="checkbox" data-setting="currencySend.iron.send">
+				</td>
+				<td>
+					<label for="iron-send">Iron</label>
+				</td>
+				<td>
+					<input id="iron-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.iron.keepAmount">
+				</td>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="stone-send" type="checkbox" data-setting="currencySend.stone.send">
+				</td>
+				<td>
+					<label for="stone-send">Stone</label>
+				</td>
+				<td>
+					<input id="stone-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.stone.keepAmount">
+				</td>
+			</tr>
+		</table>
 
-			<table id="event" class="tab">
-				<colgroup>
-					<col id="event-col-1">
-					<col id="event-col-2">
-				</colgroup>
-				<thead>
-					<tr>
-						<th colspan="2">
-							Auto Event Settings
-							<span class="title-info" aria-label="info" data-tooltip="Enter the names, sperated by commas and spaces, to the right of the corresponding tradeskill.&#10;&#10;For example, if you want your alts named &quot;altI&quot; and &quot;altII&quot; to fish in the event, enter &quot;altI, altII&quot; next to the word &quot;Fishing&quot;."></span>
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>
-							<label for="join-gauntlets">Join Events</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="To automatically join Events, you first have to add all the users that you want to join events to the special event channel. Ask in main chat if you do not know how to do this.&#10;&#10;After you are in the channel, any player can initiate an event by typing in the channel chat &quot;InitEvent&quot;."></span>
-						</td>
-						<td>
-							<input id="join-gauntlets" type="checkbox" data-setting="joinGauntlets">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="attack-at">Attack At</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="When automatically joining event, switch to battle when this number of minutes are left.&#10;&#10;For example, if you type 5, you will automatically attack the event boss when there are only 5 minutes left.&#10;&#10;0 to disable."></span>
-						</td>
-						<td>
-							<!-- Only accept numbers between 0 and 15 -->
-							<input id="attack-at" pattern="(^0?\d$)|(^1[0-5]$)" placeholder="Minutes" size="6" data-setting="attackAt"> Minutes Left
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="fishing">Fishing</label>
-						</td>
-						<td>
-							<input id="fishing" pattern="^[A-Za-z, ]{3,}$" placeholder="Fishing" size="24" data-setting="tradesList.fishing">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="woodcutting">Woodcutting</label>
-						</td>
-						<td>
-							<input id="woodcutting" pattern="^[A-Za-z, ]{3,}$" placeholder="Woodcutting" size="24" data-setting="tradesList.woodcutting">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="mining">Mining</label>
-						</td>
-						<td>
-							<input id="mining" pattern="^[A-Za-z, ]{3,}$" placeholder="Mining" size="24" data-setting="tradesList.mining">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="stonecutting">Stonecutting</label>
-						</td>
-						<td>
-							<input id="stonecutting" pattern="^[A-Za-z, ]{3,}$" placeholder="Stonecutting" size="24" data-setting="tradesList.stonecutting">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="crafting">Crafting</label>
-						</td>
-						<td>
-							<input id="crafting" pattern="^[A-Za-z, ]{3,}$" placeholder="Crafting" size="24" data-setting="tradesList.crafting">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="carving">Carving</label>
-						</td>
-						<td>
-							<input id="carving" pattern="^[A-Za-z, ]{3,20}$" placeholder="Carving" size="24" data-setting="tradesList.carving">
-						</td>
-					</tr>
-				</tbody>
-			</table>
+		<table id="event" data-name="Auto Event" data-cols="2"
+		data-header-tooltip="Enter the names, sperated by commas and spaces, to the right of the corresponding tradeskill.&#10;&#10;For example, if you want your alts named &quot;altI&quot; and &quot;altII&quot; to fish in the event, enter &quot;altI, altII&quot; next to the word &quot;Fishing&quot;.">
+			<tr>
+				<td>
+					<label for="join-gauntlets" data-info="To automatically join Events, you first have to add all the users that you want to join events to the special event channel. Ask in main chat if you do not know how to do this.&#10;&#10;After you are in the channel, any player can initiate an event by typing in the channel chat &quot;InitEvent&quot;.">Join Events</label>
+				</td>
+				<td>
+					<input id="join-gauntlets" type="checkbox" data-setting="joinGauntlets">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="attack-at" data-info="When automatically joining event, switch to battle when this number of minutes are left.&#10;&#10;For example, if you type 5, you will automatically attack the event boss when there are only 5 minutes left.&#10;&#10;0 to disable.">Attack At</label>
+				</td>
+				<td>
+					<!-- Only accept numbers between 0 and 15 -->
+					<input id="attack-at" pattern="(^0?\d$)|(^1[0-5]$)" placeholder="Minutes" size="6" data-setting="attackAt"> Minutes Left
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="fishing">Fishing</label>
+				</td>
+				<td>
+					<input id="fishing" pattern="^[A-Za-z, ]{3,}$" placeholder="Fishing" size="24" data-setting="tradesList.fishing">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="woodcutting">Woodcutting</label>
+				</td>
+				<td>
+					<input id="woodcutting" pattern="^[A-Za-z, ]{3,}$" placeholder="Woodcutting" size="24" data-setting="tradesList.woodcutting">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="mining">Mining</label>
+				</td>
+				<td>
+					<input id="mining" pattern="^[A-Za-z, ]{3,}$" placeholder="Mining" size="24" data-setting="tradesList.mining">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="stonecutting">Stonecutting</label>
+				</td>
+				<td>
+					<input id="stonecutting" pattern="^[A-Za-z, ]{3,}$" placeholder="Stonecutting" size="24" data-setting="tradesList.stonecutting">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="crafting">Crafting</label>
+				</td>
+				<td>
+					<input id="crafting" pattern="^[A-Za-z, ]{3,}$" placeholder="Crafting" size="24" data-setting="tradesList.crafting">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="carving">Carving</label>
+				</td>
+				<td>
+					<input id="carving" pattern="^[A-Za-z, ]{3,20}$" placeholder="Carving" size="24" data-setting="tradesList.carving">
+				</td>
+			</tr>
+		</table>
 
-			<table id="climb" class="tab">
-				<colgroup>
-					<col id="climb-col-1">
-					<col id="climb-col-3">
-				</colgroup>
-				<thead>
-					<tr>
-						<th colspan="2">
-							Auto Climb Settings
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>
-							<label for="auto-climb">Auto Climb</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Automatically try to climb mobs after each battle quest.&#10;&#10;Technical Details:&#10;* After completing a battle quest, if the win rate is higher than &quot;Maximum Win Rate&quot;, tries to jump &quot;Jump Offset&quot; mobs forward.&#10;* After &quot;Minimum Actions&quot; actions, if the win rate is still above &quot;Maximum Win Rate&quot;, tries to jump again. Else, if the win rate is lower than &quot;Minimum Win Rate&quot;, descends back to the previous mob. If the winrate is between these two values, stays on that mob and start a new battle quest.&#10;* Travels between areas if needed (but only if you have enough gold).&#10;* You can configure different &quot;Jump Offset&quot; values for your main and alt accounts."></span>
-						</td>
-						<td>
-							<input id="auto-climb" type="checkbox" data-setting="autoClimb.climb">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="main-jump-amount">Main Jump Offset</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Any number between 1 and 22. Applies to main account only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Offset is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22."></span>
-						</td>
-						<td>
-							<!-- Only accept numbers between 1 and 22 -->
-							<input id="main-jump-amount" pattern="^([1-9]|1\d|2[0-2])$" placeholder="Jump Offset" size="15" data-setting="autoClimb.jumpAmountMain">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="alt-jump-amount">Alts Jump Offset</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Any number between 1 and 22. Applies to alt accounts only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Offset is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22."></span>
-						</td>
-						<td>
-							<!-- Only accept numbers between 1 and 22 -->
-							<input id="alt-jump-amount" pattern="^([1-9]|1\d|2[0-2])$" placeholder="Jump Offset" size="15" data-setting="autoClimb.jumpAmountAlts">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="max-win-rate">Maximum Win Rate</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Any number between 95 and 100&#10;&#10;Betaburlogin will start climbing mobs if the win rate is higher than this number.&#10;For example, if Maximum Win Rate is 99.5, Betaburlogin will start climbing if the win rate is higher than 99.5%."></span>
-						</td>
-						<td>
-							<!-- Only accept numbers between 95 and 100 -->
-							<input id="max-win-rate" pattern="^(9[5-9]|9[5-9]\.\d+|100)$" placeholder="Maximum Win Rate" size="15" data-setting="autoClimb.maximumWinrate">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="min-win-rate">Minimum Win Rate</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Any number between 90 and 100&#10;&#10;Betaburlogin will stop climbing mobs once it can't climb anymore without the win rate dropping below this number.&#10;For example, if Minimum Win Rate is 98, Betaburlogin will stop climbing mobs if the next jump will bring the winrate bellow 98%."></span>
-						</td>
-						<td>
-							<!-- Only accept numbers between 90 and 100 -->
-							<input id="min-win-rate" pattern="^(9\d|9\d\.\d+|100)$" placeholder="Minimum Win Rate" size="15" data-setting="autoClimb.minimumWinrate">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="min-actions">Minimum Actions</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Any number between 5 and 1000.&#10;&#10;Number of actions to track the winrate for before settling on a mob.&#10;For example, if Minimum Actions is 50, Betaburlogin will make sure that the winrate is high enough for at least 50 actions before settling on a mob."></span>
-						</td>
-						<td>
-							<!-- Only accept numbers between 5 and 1000 -->
-							<input id="min-actions" pattern="^([5-9]|[1-9]\d\d?|1000)$" placeholder="Minimum Actions" size="15" data-setting="autoClimb.minimumActions">
-						</td>
-					</tr>
-				</tbody>
-			</table>
+		<table id="climb" data-name="Auto Climb" data-cols="2">
+			<tr>
+				<td>
+					<label for="auto-climb" data-info="Automatically try to climb mobs after each battle quest.&#10;&#10;Technical Details:&#10;* After completing a battle quest, if the win rate is higher than &quot;Maximum Win Rate&quot;, tries to jump &quot;Jump Offset&quot; mobs forward.&#10;* After &quot;Minimum Actions&quot; actions, if the win rate is still above &quot;Maximum Win Rate&quot;, tries to jump again. Else, if the win rate is lower than &quot;Minimum Win Rate&quot;, descends back to the previous mob. If the winrate is between these two values, stays on that mob and start a new battle quest.&#10;* Travels between areas if needed (but only if you have enough gold).&#10;* You can configure different &quot;Jump Offset&quot; values for your main and alt accounts.">Auto Climb</label>
+				</td>
+				<td>
+					<input id="auto-climb" type="checkbox" data-setting="autoClimb.climb">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="main-jump-amount" data-info="Any number between 1 and 22. Applies to main account only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Offset is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22.">Main Jump Offset</label>
+				</td>
+				<td>
+					<!-- Only accept numbers between 1 and 22 -->
+					<input id="main-jump-amount" pattern="^([1-9]|1\d|2[0-2])$" placeholder="Jump Offset" size="15" data-setting="autoClimb.jumpAmountMain">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="alt-jump-amount" data-info="Any number between 1 and 22. Applies to alt accounts only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Offset is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22.">Alts Jump Offset</label>
+				</td>
+				<td>
+					<!-- Only accept numbers between 1 and 22 -->
+					<input id="alt-jump-amount" pattern="^([1-9]|1\d|2[0-2])$" placeholder="Jump Offset" size="15" data-setting="autoClimb.jumpAmountAlts">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="max-win-rate" data-info="Any number between 95 and 100&#10;&#10;Betaburlogin will start climbing mobs if the win rate is higher than this number.&#10;For example, if Maximum Win Rate is 99.5, Betaburlogin will start climbing if the win rate is higher than 99.5%.">Maximum Win Rate</label>
+				</td>
+				<td>
+					<!-- Only accept numbers between 95 and 100 -->
+					<input id="max-win-rate" pattern="^(9[5-9]|9[5-9]\.\d+|100)$" placeholder="Maximum Win Rate" size="15" data-setting="autoClimb.maximumWinrate">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="min-win-rate" data-info="Any number between 90 and 100&#10;&#10;Betaburlogin will stop climbing mobs once it can&amp;#39;t climb anymore without the win rate dropping below this number.&#10;For example, if Minimum Win Rate is 98, Betaburlogin will stop climbing mobs if the next jump will bring the winrate bellow 98%.">Minimum Win Rate</label>
+				</td>
+				<td>
+					<!-- Only accept numbers between 90 and 100 -->
+					<input id="min-win-rate" pattern="^(9\d|9\d\.\d+|100)$" placeholder="Minimum Win Rate" size="15" data-setting="autoClimb.minimumWinrate">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="min-actions" data-info="Any number between 5 and 1000.&#10;&#10;Number of actions to track the winrate for before settling on a mob.&#10;For example, if Minimum Actions is 50, Betaburlogin will make sure that the winrate is high enough for at least 50 actions before settling on a mob.">Minimum Actions</label>
+				</td>
+				<td>
+					<!-- Only accept numbers between 5 and 1000 -->
+					<input id="min-actions" pattern="^([5-9]|[1-9]\d\d?|1000)$" placeholder="Minimum Actions" size="15" data-setting="autoClimb.minimumActions">
+				</td>
+			</tr>
+		</table>
 
-			<table id="interface" class="tab">
-				<colgroup>
-					<col id="interface-col-1">
-					<col id="interface-col-2">
-				</colgroup>
-				<thead>
-					<tr>
-						<th colspan="2">
-							Interface Settings
-							<span class="title-info" role="img" aria-label="info" data-tooltip="BetaburLogin makes some changes to the interface, like adding buttons. You can choose which ones you want to enable here."></span>
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<th class="th-small" colspan="2">Live Login Page</th>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="add-open-tabs" type="checkbox" data-setting="addOpenTabs">
-						</td>
-						<td>
-							<label for="add-open-tabs">Add Open Beta Tabs Button</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Adds an &quot;Open Beta Tabs&quot; button to the Live login page.&#10;&#10;Clicking the button will open Beta login pages in new tabs, according to the number of alts you have.&#10;&#10;Reload login page to apply changes."></span>
-						</td>
-					</tr>
-					<tr>
-						<th class="th-small" colspan="2">Beta Login Page</th>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="add-login-alts" type="checkbox" data-setting="addLoginAlts">
-						</td>
-						<td>
-							<label for="add-login-alts">Add Login All Alts Button</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Adds a &quot;Login All Alts&quot; button to the Beta login page.&#10;&#10;Clicking the button will login all of your alts.&#10;&#10;Reload login page to apply changes.&#10;&#10;If checked, make sure you also enter your login details in Login Settings."></span>
-						</td>
-					</tr>
-					<tr>
-						<th class="th-small" colspan="2">Beta Game Page</th>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="add-username" type="checkbox" data-setting="addUsername">
-						</td>
-						<td>
-							<label for="add-username">Add Username Next to Room Name</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Adds the username next to the room name to help see it easily."></span>
-						</td>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="add-custom-build" type="checkbox" data-setting="addCustomBuild">
-						</td>
-						<td>
-							<label for="add-custom-build">Enable Custom Build</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Adds a field in the house screen which allows you to set a custom item to build instead of always building the quickest."></span>
-						</td>
-					</tr>
-					<tr class="requires-containers">
-						<td class="checkbox-td">
-							<input id="add-spawn-gems" type="checkbox" data-setting="addSpawnGems">
-						</td>
-						<td>
-							<label for="add-spawn-gems">Add Spawn Gems Button for Alts</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Adds a &quot;Spawn For All Alts&quot; button to the spawn gems screen on alts.&#10;&#10;Clicking the button will spawn the currently selected gems for all alts.&#10;&#10;Close and reopen the gem spawn interface to apply changes."></span>
-						</td>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="add-socket-x5" type="checkbox" data-setting="addSocketX5">
-						</td>
-						<td>
-							<label for="add-socket-x5">Add Socket Gem x5 Button</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Adds a &quot;Socket Gem x5&quot; button next to the &quot;Socket Gem&quot; Button on the Item Options screen.&#10;&#10;Clicking the button will socket 5 of the selected gems.&#10;&#10;Close and reopen the Item Options interface to apply changes."></span>
-						</td>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="remove-effects" type="checkbox" data-setting="removeEffects">
-						</td>
-						<td>
-							<label for="remove-effects">Remove Effects Box</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Removes the &quot;Effects&quot; box under the battle stats section."></span>
-						</td>
-					</tr>
-					<tr class="requires-containers">
-						<td class="checkbox-td">
-							<input id="remove-banner" type="checkbox" data-setting="removeBanner">
-						</td>
-						<td>
-							<label for="remove-banner">Remove Banner on Click</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="When closing the banner, also close the banner on all other alts."></span>
-						</td>
-					</tr>
-					<tr>
-						<td class="checkbox-td">
-							<input id="add-advent-calendar" type="checkbox" data-setting="addAdventCalendar">
-						</td>
-						<td>
-							<label for="add-advent-calendar">Add Advent Calendar Button</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="On December, add a button on the calendar to easily get the daily prize on all alts with one click."></span>
-						</td>
-					</tr>
-					<tr id="button-next-to-name-tr" class="requires-containers">
-						<td colspan="2">
-							<label for="button-next-to-name">Button Next To Name:</label>
-							<select id="button-next-to-name" data-setting="buttonNextToName">
-								<option value="" selected>None</option>
-								<option value="request">Request Currency</option>
-								<option value="spread">Spread Currency</option>
-							</select>
-							<span class="info" role="img" aria-label="info" data-tooltip="You can choose what button, if any, will be shown next to the in-game username on all of your users.&#10;&#10;Request Currency: When clicking this button, all other users will send their excess currencies (according to your currency send settings) to the requesting user.&#10;Spread Currency: When clicking this button, the spreading user will spread its excess currencies (according to your currency send settings) evenly among all of your users."></span>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+		<table id="interface" data-name="Interface" data-cols="2"
+		data-header-tooltip="BetaburLogin makes some changes to the interface, like adding buttons. You can choose which ones you want to enable here.">
+			<tr>
+				<th class="th-small" colspan="2">Live Login Page</th>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="add-open-tabs" type="checkbox" data-setting="addOpenTabs">
+				</td>
+				<td>
+					<label for="add-open-tabs" data-info="Adds an &quot;Open Beta Tabs&quot; button to the Live login page.&#10;&#10;Clicking the button will open Beta login pages in new tabs, according to the number of alts you have.&#10;&#10;Reload login page to apply changes.">Add Open Beta Tabs Button</label>
+				</td>
+			</tr>
+			<tr>
+				<th class="th-small" colspan="2">Beta Login Page</th>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="add-login-alts" type="checkbox" data-setting="addLoginAlts">
+				</td>
+				<td>
+					<label for="add-login-alts" data-info="Adds a &quot;Login All Alts&quot; button to the Beta login page.&#10;&#10;Clicking the button will login all of your alts.&#10;&#10;Reload login page to apply changes.&#10;&#10;If checked, make sure you also enter your login details in Login Settings.">Add Login All Alts Button</label>
+				</td>
+			</tr>
+			<tr>
+				<th class="th-small" colspan="2">Beta Game Page</th>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="add-username" type="checkbox" data-setting="addUsername">
+				</td>
+				<td>
+					<label for="add-username" data-info="Adds the username next to the room name to help see it easily.">Add Username Next to Room Name</label>
+				</td>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="add-custom-build" type="checkbox" data-setting="addCustomBuild">
+				</td>
+				<td>
+					<label for="add-custom-build" data-info="Adds a field in the house screen which allows you to set a custom item to build instead of always building the quickest.">Enable Custom Build</label>
+				</td>
+			</tr>
+			<tr class="requires-containers">
+				<td class="checkbox-td">
+					<input id="add-spawn-gems" type="checkbox" data-setting="addSpawnGems">
+				</td>
+				<td>
+					<label for="add-spawn-gems" data-info="Adds a &quot;Spawn For All Alts&quot; button to the spawn gems screen on alts.&#10;&#10;Clicking the button will spawn the currently selected gems for all alts.&#10;&#10;Close and reopen the gem spawn interface to apply changes.">Add Spawn Gems Button for Alts</label>
+				</td>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="add-socket-x5" type="checkbox" data-setting="addSocketX5">
+				</td>
+				<td>
+					<label for="add-socket-x5" data-info="Adds a &quot;Socket Gem x5&quot; button next to the &quot;Socket Gem&quot; Button on the Item Options screen.&#10;&#10;Clicking the button will socket 5 of the selected gems.&#10;&#10;Close and reopen the Item Options interface to apply changes.">Add Socket Gem x5 Button</label>
+				</td>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="remove-effects" type="checkbox" data-setting="removeEffects">
+				</td>
+				<td>
+					<label for="remove-effects" data-info="Removes the &quot;Effects&quot; box under the battle stats section.">Remove Effects Box</label>
+				</td>
+			</tr>
+			<tr class="requires-containers">
+				<td class="checkbox-td">
+					<input id="remove-banner" type="checkbox" data-setting="removeBanner">
+				</td>
+				<td>
+					<label for="remove-banner" data-info="When closing the banner, also close the banner on all other alts.">Remove Banner on Click</label>
+				</td>
+			</tr>
+			<tr>
+				<td class="checkbox-td">
+					<input id="add-advent-calendar" type="checkbox" data-setting="addAdventCalendar">
+				</td>
+				<td>
+					<label for="add-advent-calendar" data-info="On December, add a button on the calendar to easily get the daily prize on all alts with one click.">Add Advent Calendar Button</label>
+				</td>
+			</tr>
+			<tr id="button-next-to-name-tr" class="requires-containers">
+				<td colspan="2">
+					<label for="button-next-to-name">Button Next To Name:</label>
+					<select id="button-next-to-name" data-setting="buttonNextToName" data-info="You can choose what button, if any, will be shown next to the in-game username on all of your users.&#10;&#10;Request Currency: When clicking this button, all other users will send their excess currencies (according to your wiring settings) to the requesting user.&#10;Spread Currency: When clicking this button, the spreading user will spread its excess currencies (according to your wiring settings) evenly among all of your users.">
+						<option value="" selected>None</option>
+						<option value="request">Request Currency</option>
+						<option value="spread">Spread Currency</option>
+					</select>
+				</td>
+			</tr>
+		</table>
 
-			<table id="advanced" class="tab">
-				<colgroup>
-					<col id="advanced-col-1">
-					<col id="advanced-col-2">
-				</colgroup>
-				<thead>
-					<tr>
-						<th colspan="2">Advanced Settings</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>
-							<label for="verbose">Verbose Logging</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="If checked, the addon will log more things to the console.&#10;This is useful for debugging."></span>
-						</td>
-						<td>
-							<input id="verbose" type="checkbox" size="15" data-setting="verbose">
-						</td>
-					</tr>
-					<tr id="containers-tr" class="requires-containers">
-						<td>
-							Containers
-							<span class="info" role="img" aria-label="info" data-tooltip="You can choose which containers the addon will use here.&#10;&#10;Auto means that the first n containers will be used, where n is the number of alts you have."></span>
-						</td>
-						<td>
-							<input id="containers-auto" type="checkbox" data-for="containers">
-							<label for="containers-auto">Auto</label>
-							<div id="containers"></div>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label>Event channel ID</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Listen to the channel with this ID.&#10;&#10;Typing &quot;InitEvent&quot; in this channel will init a regular event, and typing &quot;MainEvent&quot; will init an event in which only main accounts will attack."></span>
-						</td>
-						<td>
-							<input id="event-channel-id" pattern="^\d+$" placeholder="Channel ID" size="15" data-setting="eventChannelID">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="custom-css">CSS Styles</label>
-							<span class="info" role="img" aria-label="info" data-tooltip="Betaburlogin will add some CSS code to make the game look better. If you want, you can change that code here."></span>
-						</td>
-						<td>
-							<div id="css-div">
-								<textarea id="custom-css" spellcheck="false" autocomplete="off" rows="10" cols="22" data-setting="css.custom.code"></textarea>
-								<button id="reset-css" type="button">
-									<span class="circle"></span>
-									<span>Reset CSS Styles</span>
-								</button>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							Reset Settings
-							<span class="info" role="img" aria-label="info" data-tooltip="Reset all settings to default values"></span>
-						</td>
-						<td>
-							<div id="reset-div">
-								<button id="reset-settings" type="button">
-									<span class="circle"></span>
-									<span>Reset Settings</span>
-								</button>
-							</div>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</article>
+		<table id="advanced" data-name="Advanced" data-cols="2">
+			<tr>
+				<td>
+					<label for="verbose" data-info="If checked, the addon will log more things to the console.&#10;This is useful for debugging.">Verbose Logging</label>
+				</td>
+				<td>
+					<input id="verbose" type="checkbox" size="15" data-setting="verbose">
+				</td>
+			</tr>
+			<tr id="containers-tr" class="requires-containers">
+				<td>
+					<label for="containers-auto" data-info="You can choose which containers the addon will use here.&#10;&#10;Auto means that the first n containers will be used, where n is the number of alts you have.">Containers</label>
+				</td>
+				<td>
+					<input id="containers-auto" type="checkbox" data-for="containers">
+					<label for="containers-auto">Auto</label>
+					<div id="containers"></div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="event-channel-id" data-info="Listen to the channel with this ID.&#10;&#10;Typing &quot;InitEvent&quot; in this channel will init a regular event, and typing &quot;MainEvent&quot; will init an event in which only main accounts will attack.">Event channel ID</label>
+				</td>
+				<td>
+					<input id="event-channel-id" pattern="^\d+$" placeholder="Channel ID" size="15" data-setting="eventChannelID">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="custom-css" data-info="Betaburlogin will add some CSS code to make the game look better. If you want, you can change that code here.">CSS Styles</label>
+				</td>
+				<td>
+					<div class="center">
+						<textarea id="custom-css" spellcheck="false" autocomplete="off" rows="10" cols="22" data-setting="css.custom.code"></textarea>
+						<button id="reset-css" type="button">Reset CSS Styles</button>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label data-info="Reset all settings to default values">Reset Settings</label>
+				</td>
+				<td>
+					<div class="center">
+						<button id="reset-settings" type="button">Reset Settings</button>
+					</div>
+				</td>
+			</tr>
+		</table>
 
 		<p id="output"></p>
 		<script src="../js/background/options-page.js"></script>

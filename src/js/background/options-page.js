@@ -10,6 +10,70 @@
 let settings = null
 
 /**
+ * @function buildHTML
+ * @memberof options
+ */
+function buildHTML() {
+	/**
+	 * Removes a data attribute and returns its value
+	 * @function getData
+	 * @param {HTMLElement} el
+	 * @param {String} attr
+	 * @returns {string}
+ 	 * @memberof options
+	 * @private
+	 */
+	function getData(el, attr) {
+		const tmp = el.getAttribute("data-" + attr)
+		el.removeAttribute(attr)
+		return tmp
+	}
+
+	for (const table of $("table")) {
+		const tableName = getData(table, "name")
+		const cols = getData(table, "cols")
+
+		// Add tab button:
+		$("#tabs-buttons").append(`<div id="${table.id}-tab-button" class="tab-button">${tableName}</div>`)
+
+		// Add table header:
+		let head = `<thead><tr><th colspan="${cols}">${tableName} Settings`
+		if (table.dataset.headerTooltip) {
+			head += ` <span class="title-info" role="img" aria-label="info" data-tooltip='${getData(table, "header-tooltip")}'></span>`
+		}
+		head += "</thead></th></tr>"
+		$(table).prepend(head)
+
+		// Add colgroup:
+		let colGroup = "<colgroup>"
+		for (let i = 1; i <= cols; i++) {
+			colGroup += `<col id="${table.id}-col-${i}">`
+		}
+		$(table).prepend(colGroup)
+	}
+
+	// Wrap all tables:
+	$("table").wrapAll(`<article id="settings"></article>`)
+
+	// Add `.tab` class:
+	$("table").addClass("tab")
+
+	// Select first tab:
+	$("table").eq(0).addClass("selected")
+	$(".tab-button").eq(1).addClass("selected")
+
+	// Add info tooltips:
+	for (const el of $("[data-info]")) {
+		$(el).after(`<span class="info" role="img" aria-label="info" data-tooltip='${getData(el, "info")}'></span>`)
+	}
+
+	// Add buttons animation:
+	$("button").wrapInner("<span></span>")
+	$("button").prepend(`<span class="circle"></span>`)
+}
+buildHTML()
+
+/**
  * A class for setting fields
  */
 class Setting {
@@ -44,6 +108,36 @@ class Setting {
 					// Update the displayed value (e.g 1000b => 1T)
 					setting.value = abbreviateNumber(deabbreviateNumber(setting.value))
 				})
+		}
+
+		// Set load/save functions based on type:
+		switch (this.type) {
+			case "encrypted":
+				/**
+				 * **Note: DO NOT trust this encryption**. it's very weak and uses a public key for encryption.
+				 * There is a reason why there is still a warning about the password being saved in plain text.
+				 * @name notEncrypted
+				 * @memberof options
+				 */
+				this.loadValue = async function() {this.input.value = await insecureCrypt.decrypt(settings[this.name], "betabot Totally-not-secure Super NOT secret key!")}
+				this.updateValue = async function() {this.value = await insecureCrypt.encrypt(this.input.value, "betabot Totally-not-secure Super NOT secret key!")}
+				break
+			case "boolean":
+				this.loadValue = function() {this.input.checked = this.value}
+				this.updateValue = function() {this.value = this.input.checked}
+				break
+			case "array":
+				this.loadValue = function() {this.input.value = this.value.join(", ")}
+				this.updateValue = function() {this.value = this.input.value !== "" ? this.input.value.split(", ") : []}
+				break
+			case "number":
+				// Don't abbreviate the Event Channel ID field
+				this.loadValue = function() {this.input.value = this.input.id === "event-channel-id" ? this.value : abbreviateNumber(this.value)}
+				this.updateValue = function() {this.value = deabbreviateNumber(this.input.value) || this.value}
+				break
+			default:
+				this.loadValue = function() {this.input.value = this.value}
+				this.updateValue = function() {this.value = this.input.value}
 		}
 
 		// Save changes. Using an arrow function because `oninput` functions receive the input element as `this`:
@@ -87,32 +181,8 @@ class Setting {
 		// If less than 2 seconds have passed since last change, return:
 		if (timestamp - this.lastChanged < 2000) return
 
-		// Adapt value to type:
-		switch (this.type) {
-			case "encrypted":
-				/**
-				 * **Note: DO NOT trust this encryption**. it's very weak and uses a public key for encryption.
-				 * There is a reason why there is still a warning about the password being saved in plain text.
-				 * @name notEncrypted
-				 * @memberof options
-				 */
-				this.value = await insecureCrypt.encrypt(this.input.value, "betabot Totally-not-secure Super NOT secret key!")
-				break
-			case "boolean":
-				this.value = this.input.checked
-				break
-			case "array":
-				this.value = this.input.value.split(", ")
-				if (this.value.length === 1 && this.value[0] === "") { // If `this.value` equals `[ "" ]`
-					this.value = []
-				}
-				break
-			case "number":
-				this.value = deabbreviateNumber(this.input.value) || this.value
-				break
-			case "string":
-				this.value = this.input.value
-		}
+		// update value:
+		await this.updateValue()
 
 		for (const fun of this.runAfterSave) fun(this.input)
 
@@ -157,24 +227,8 @@ class Setting {
 	async load() {
 		this.value = Setting.getSettingByName(this.name).settingValue
 
-		// Update field according to setting type:
-		switch (this.type) {
-			case "encrypted":
-				this.input.value = await insecureCrypt.decrypt(settings[this.name], "betabot Totally-not-secure Super NOT secret key!")
-				break
-			case "boolean":
-				this.input.checked = this.value
-				break
-			case "array":
-				this.input.value = this.value.join(", ")
-				break
-			case "number":
-				// Don't abbreviate if it's the Event Channel ID field:
-				this.input.value = this.input.id === "event-channel-id" ? this.value : abbreviateNumber(this.value)
-				break
-			case "string":
-				this.input.value = this.value
-		}
+		// Update field:
+		await this.loadValue()
 
 		for (const fun of this.runAfterChange) fun(this.input)
 	}

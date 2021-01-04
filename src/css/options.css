@@ -163,17 +163,12 @@ input[name=containers],
 	display: none;
 }
 
-#css-div {
+.center {
 	align-items: center;
 	display: flex;
 	flex-flow: column;
 	justify-content: center;
 	margin: .5em;
-}
-
-#reset-div {
-	display: flex;
-	justify-content: center;
 }
 
 #daily-crystals-text {
