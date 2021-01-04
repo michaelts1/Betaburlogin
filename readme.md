@@ -4,22 +4,13 @@ Firefox addon to allow automation in [Avabur's beta server](https://beta.avabur.
 #### Features:
 * Automatic login
 * Automatic events
-* Automatic quests
-* Automatic stamina
-* Automatic carving
-* Automatic crafting
-* Automatic Harvestron
+* Automatic mob climbing
 * Automatic construction
-* Socket all 5 gems at once
+* Extensive options page
 * Send currency between alts
-* Automatic Daily Crystals buying
-* Many optional interface changes
-* Move alts together between mobs
-* Spawn gems for all your alts at once
-* Automatically send currency to your main
-* Move username to the middle of the screen
+* Socket multiple gems at once
+And more
 
 ###### Notes:
-1. [Container Tabs](https://support.mozilla.org/en-US/kb/containers) are required for managing more than one account
-2. All features can be turned on/off. If you find a feature that can't be turned off, please create a [new issue](https://github.com/michaelts1/Betaburlogin/issues/new)
-3. Editing the code to run this addon on the live server will get you banned
+* [Container Tabs](https://support.mozilla.org/en-US/kb/containers) are required for managing more than one account
+* All features can be turned on/off. If you find a feature that can't be turned off, please create a [new issue](https://github.com/michaelts1/Betaburlogin/issues/new)
