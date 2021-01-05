@@ -44,9 +44,7 @@
 			"js": ["src/js/login/beta-login.js"]
 		},
 		{
-			"matches": [
-				"https://beta.avabur.com/game"
-			],
+			"matches": ["https://beta.avabur.com/game"],
 			"js": [
 				"src/js/game/beta-game-functions.js",
 				"src/js/game/beta-game.js"
@@ -63,7 +61,7 @@
 	},
 
 	"options_ui": {
-		"page": "src/html/options.html",
+		"page": "src/html/options-page.html",
 		"open_in_tab": true
 	},
 
@@ -72,7 +70,7 @@
 			"60": "src/images/betaburlogin.png"
 		},
 		"default_title": "Betabur Login",
-		"default_popup": "src/html/browser_action.html"
+		"default_popup": "src/html/browser-action.html"
 	},
 
 	"permissions": [
