@@ -129,7 +129,6 @@ const house = {
 	async addCustomBuild() {
 		vars.actionsPending = true
 		// Hide the interface for the duration of this function:
-		$("#modalBackground, #modalWrapper, #modal2Wrapper").addClass("betabot-hidden")
 
 		$("#housing").click()
 		await eventListeners.waitFor("roa-ws:page:house")
@@ -156,10 +155,6 @@ const house = {
 		// Close house pages:
 		$("#modal2Wrapper .closeModal").click()
 		completeTask()
-
-		// Reshow the interface (For some reason I can't go above 999 ms delay):
-		await delay(999)
-		$("#modalBackground, #modalWrapper, #modal2Wrapper").removeClass("betabot-hidden")
 	},
 
 	/**
@@ -875,13 +870,17 @@ const betabot = {
 	 * @memberof beta-game-functions
 	 */
 	async buyCrys() {
+		setTimeout(betabot.buyCrys, 1000*60*60*24)
+
 		if (settings.dailyCrystals === 0) return
 
 		vars.actionsPending = true
 		await delay(vars.startActionsDelay)
+
 		$("#premiumShop").click()
 
 		await eventListeners.waitFor("roa-ws:page:boosts")
+
 		const leftToBuy = settings.dailyCrystals - parseInt($("#premium_purchased_today").text()) // Amount of crystals left to buy
 		if (leftToBuy > 0) { // Don't purchase if there is nothing to purchase
 			await delay(vars.buttonDelay)
@@ -892,9 +891,7 @@ const betabot = {
 			$("#premium_purchase_gold_button").click()
 			if (settings.verbose) log(`Bought ${leftToBuy} daily crystals`)
 		}
-		completeTask()
-
-		setTimeout(betabot.buyCrys, 1000*60*60*24)
+		await completeTask()
 	},
 
 	/**

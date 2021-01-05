@@ -72,16 +72,8 @@ async function toggleInterfaceChanges(refresh) {
 	}
 
 	// Option to build a specific item:
-	// Don't run if setting is off, if there is no need to, or if there is no house:
-	if (settings.addCustomBuild && !$("#betabot-custom-build")[0] && $("#housing").is(":visible")) {
-		// Don't activate immediately on page load:
-		if (refresh) {
-			house.addCustomBuild()
-		} else {
-			eventListeners.waitFor("roa-ws:motd").then(() => { // Wait for the page to load
-				house.addCustomBuild()
-			})
-		}
+	if (settings.addCustomBuild && !$("#betabot-custom-build")[0] && $("#housing").is(":visible") && refresh) {
+		house.addCustomBuild()
 	} else if (!settings.addCustomBuild && $("#betabot-custom-build")[0]) {
 		$("#betabot-custom-build").remove()
 	}
@@ -198,9 +190,26 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 	// Start up auto wire:
 	setTimeout(wiring.wire, settings.wireFrequency*60*1000)
 
-	// Set up auto gauntlet:
-	eventListeners.waitFor("roa-ws:motd").then(() => { // Start after a delay to avoid being triggered by old messages
+	// Wait for the page to load:
+	eventListeners.waitFor("roa-ws:motd").then(async () => {
+		// Set up auto gauntlet:
 		eventListeners.toggle("roa-ws:message", gauntlet.checkGauntletMessage, settings.joinGauntlets)
+
+		// Hide the interface:
+		$("#modalBackground, #modalWrapper, #modal2Wrapper").addClass("betabot-hidden")
+
+		// Option to build a specific item:
+		await house.addCustomBuild()
+
+		// Reshow some of the interface:
+		await delay(999)
+		$("#modal2Wrapper").removeClass("betabot-hidden")
+
+		// Daily Crystals:
+		await betabot.buyCrys()
+
+		// Reshow the rest of the interface:
+		$("#modalBackground, #modalWrapper").removeClass("betabot-hidden")
 	})
 
 	// On click, close banners on all alts:
@@ -208,9 +217,6 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 		// Don't run due to closeBanner():
 		if (event.originalEvent.isTrusted && settings.removeBanner) port.postMessage({text: "banner closed"})
 	})
-
-	// Buy crystals every 24 hours:
-	setTimeout(betabot.buyCrys, 1000*60*60*24)
 
 	/* Event listeners that are currently always on (might change in the future) are
 	   here. Event listeners that will be turned on/off as needed are inside `toggleInterfaceChanges` */
