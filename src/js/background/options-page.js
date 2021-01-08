@@ -71,7 +71,6 @@ function buildHTML() {
 	$("button").wrapInner("<span></span>")
 	$("button").prepend(`<span class="circle"></span>`)
 }
-buildHTML()
 
 /**
  * A class for setting fields
@@ -549,6 +548,7 @@ async function resetSettings() {
 	location.reload()
 }
 
+$(buildHTML)
 $(Setting.init)
 
 $("#reset-css").click(resetCSS)

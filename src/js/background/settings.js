@@ -118,7 +118,7 @@ async function getSettings() {
 function updateSettings() {
 	let deletedSettings = []
 	/**
-	 * Changes a setting name, and use a default value if the old setting does not exist
+	 * Changes a setting name, and uses a default value if the old setting does not exist
 	 * @param {String} oldName Old setting name
 	 * @param {String} newName New setting name
 	 * @param {*} defaultValue Default value that will be used if the old setting is not defined
