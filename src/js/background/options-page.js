@@ -10,6 +10,70 @@
 let settings = null
 
 /**
+ * @function buildHTML
+ * @memberof options
+ */
+function buildHTML() {
+	/**
+	 * Removes a data attribute and returns its value
+	 * @function getData
+	 * @param {HTMLElement} el
+	 * @param {String} attr
+	 * @returns {string}
+ 	 * @memberof options
+	 * @private
+	 */
+	function getData(el, attr) {
+		const tmp = el.getAttribute("data-" + attr)
+		el.removeAttribute(attr)
+		return tmp
+	}
+
+	for (const table of $("table")) {
+		const tableName = getData(table, "name")
+		const cols = getData(table, "cols")
+
+		// Add tab button:
+		$("#tabs-buttons").append(`<div id="${table.id}-tab-button" class="tab-button">${tableName}</div>`)
+
+		// Add table header:
+		let head = `<thead><tr><th colspan="${cols}">${tableName} Settings`
+		if (table.dataset.headerTooltip) {
+			head += ` <span class="title-info" role="img" aria-label="info" data-tooltip='${getData(table, "header-tooltip")}'></span>`
+		}
+		head += "</thead></th></tr>"
+		$(table).prepend(head)
+
+		// Add colgroup:
+		let colGroup = "<colgroup>"
+		for (let i = 1; i <= cols; i++) {
+			colGroup += `<col id="${table.id}-col-${i}">`
+		}
+		$(table).prepend(colGroup)
+	}
+
+	// Wrap all tables:
+	$("table").wrapAll(`<article id="settings"></article>`)
+
+	// Add `.tab` class:
+	$("table").addClass("tab")
+
+	// Select first tab:
+	$("table").eq(0).addClass("selected")
+	$(".tab-button").eq(1).addClass("selected")
+
+	// Add info tooltips:
+	for (const el of $("[data-info]")) {
+		$(el).after(`<span class="info" role="img" aria-label="info" data-tooltip='${getData(el, "info")}'></span>`)
+	}
+
+	// Add buttons animation:
+	$("button").wrapInner("<span></span>")
+	$("button").prepend(`<span class="circle"></span>`)
+}
+buildHTML()
+
+/**
  * A class for setting fields
  */
 class Setting {
@@ -20,8 +84,8 @@ class Setting {
 		// Set object properties:
 		this.input = input
 		this.name = input.dataset.setting
-		this.path = input.dataset.setting.split(".") // Is this really needed? its almost equivalent to `this.name`
-		const {settingType, settingValue} = Setting.getSettingByPath(this.name, this.path)
+		this.path = input.dataset.setting.split(".") /** @todo Is this really needed? its almost equivalent to `this.name` */
+		const {settingType, settingValue} = Setting.getSettingByName(this.name)
 		this.type = settingType
 		this.value = settingValue
 		this.lastChanged = new Date().getTime()
@@ -44,6 +108,36 @@ class Setting {
 					// Update the displayed value (e.g 1000b => 1T)
 					setting.value = abbreviateNumber(deabbreviateNumber(setting.value))
 				})
+		}
+
+		// Set load/save functions based on type:
+		switch (this.type) {
+			case "encrypted":
+				/**
+				 * **Note: DO NOT trust this encryption**. it's very weak and uses a public key for encryption.
+				 * There is a reason why there is still a warning about the password being saved in plain text.
+				 * @name notEncrypted
+				 * @memberof options
+				 */
+				this.loadValue = async function() {this.input.value = await insecureCrypt.decrypt(settings[this.name], "betabot Totally-not-secure Super NOT secret key!")}
+				this.updateValue = async function() {this.value = await insecureCrypt.encrypt(this.input.value, "betabot Totally-not-secure Super NOT secret key!")}
+				break
+			case "boolean":
+				this.loadValue = function() {this.input.checked = this.value}
+				this.updateValue = function() {this.value = this.input.checked}
+				break
+			case "array":
+				this.loadValue = function() {this.input.value = this.value.join(", ")}
+				this.updateValue = function() {this.value = this.input.value !== "" ? this.input.value.split(", ") : []}
+				break
+			case "number":
+				// Don't abbreviate the Event Channel ID field
+				this.loadValue = function() {this.input.value = this.input.id === "event-channel-id" ? this.value : abbreviateNumber(this.value)}
+				this.updateValue = function() {this.value = deabbreviateNumber(this.input.value) || this.value}
+				break
+			default:
+				this.loadValue = function() {this.input.value = this.value}
+				this.updateValue = function() {this.value = this.input.value}
 		}
 
 		// Save changes. Using an arrow function because `oninput` functions receive the input element as `this`:
@@ -87,60 +181,37 @@ class Setting {
 		// If less than 2 seconds have passed since last change, return:
 		if (timestamp - this.lastChanged < 2000) return
 
-		// Adapt value to type:
-		switch (this.type) {
-			case "encrypted":
-				/**
-				 * **Note: DO NOT trust this encryption**. it's very weak and uses a public key for encryption.
-				 * There is a reason why there is still a warning about the password being saved in plain text.
-				 * @name notEncrypted
-				 * @memberof options
-				 */
-				this.value = await insecureCrypt.encrypt(this.input.value, "betabot Totally-not-secure Super NOT secret key!")
-				break
-			case "boolean":
-				this.value = this.input.checked
-				break
-			case "array":
-				this.value = this.input.value.split(", ")
-				if (this.value.length === 1 && this.value[0] === "") { // If `this.value` equals `[ "" ]`
-					this.value = []
-				}
-				break
-			case "number":
-				this.value = deabbreviateNumber(this.input.value) || this.value
-				break
-			case "string":
-				this.value = this.input.value
-		}
+		// update value:
+		await this.updateValue()
 
 		for (const fun of this.runAfterSave) fun(this.input)
 
 		// Don't save if the setting didn't change:
-		if (objectEquals(this.value, Setting.getSettingByPath(this.name, this.path).settingValue)) return
+		if (objectEquals(this.value, Setting.getSettingByName(this.name).settingValue)) return
 
 		/**
 		 * Recursively creates a clone of the child of `settings` containing a specific setting, while using a new value for that setting
 		 * @function changeSetting
-		 * @param {object} settingsObject The `settings` object
-		 * @param {number} index Current index in `path`. When called manually, this should be 0
+		 * @param {Setting} setting A setting that needs to be changed
+		 * @param {object} _settingsObject A copy of `settings`. Should be omitted when called manually
+		 * @param {number} _index Current index in `path`. Should be omitted when called manually
 		 * @returns {object} New clone of the child of `settings` containing said setting, using the new value for that setting
 		 * @const
 		 * @private
 		 * @memberof options
 		 */
-		const changeSetting = (settingsObject, index) => {
-			if (index + 1 === this.path.length) { // If index is the last index, change the setting
-				settingsObject[this.path[index]] = this.value
+		const changeSetting = (setting, _settingsObject = settings, _index = 0) => {
+			if (_index + 1 === setting.path.length) { // If index is the last index, change the setting
+				_settingsObject[setting.path[_index]] = setting.value
 			} else { // Else, call `changeSetting()` again to modify the next child
-				settingsObject[this.path[index]] = changeSetting(settingsObject[this.path[index]], index + 1)
+				_settingsObject[setting.path[_index]] = changeSetting(setting, _settingsObject[setting.path[_index]], _index + 1)
 			}
-			return settingsObject // Return the modified object
+			return _settingsObject // Return the modified object
 		}
 		/* Change a setting without modifying the rest of `settings`. I am using `[this.path[0]]`
 		   to only set the specific setting (e.g. `css`), and not the whole `settings` object: */
 		browser.storage.sync.set({
-			[this.path[0]]: changeSetting(settings, 0)[this.path[0]],
+			[this.path[0]]: changeSetting(this)[this.path[0]],
 		})
 
 		displayMessage("Changes saved")
@@ -154,26 +225,10 @@ class Setting {
 	 * @memberof options
 	 */
 	async load() {
-		this.value = Setting.getSettingByPath(this.name, this.path).settingValue
+		this.value = Setting.getSettingByName(this.name).settingValue
 
-		// Update field according to setting type:
-		switch (this.type) {
-			case "encrypted":
-				this.input.value = await insecureCrypt.decrypt(settings[this.name], "betabot Totally-not-secure Super NOT secret key!")
-				break
-			case "boolean":
-				this.input.checked = this.value
-				break
-			case "array":
-				this.input.value = this.value.join(", ")
-				break
-			case "number":
-				// Don't abbreviate if it's the Event Channel ID field:
-				this.input.value = this.input.id === "event-channel-id" ? this.value : abbreviateNumber(this.value)
-				break
-			case "string":
-				this.input.value = this.value
-		}
+		// Update field:
+		await this.loadValue()
 
 		for (const fun of this.runAfterChange) fun(this.input)
 	}
@@ -189,7 +244,7 @@ class Setting {
 		settings = await browser.storage.sync.get()
 
 		for (const setting of Setting.instances) {
-			if (!objectEquals(setting.value, Setting.getSettingByPath(setting.name, setting.path).settingValue)) {
+			if (!objectEquals(setting.value, Setting.getSettingByName(setting.name).settingValue)) {
 				setting.load()
 			}
 		}
@@ -200,21 +255,20 @@ class Setting {
 
 	/**
 	 * Finds a setting in `settings` based on its name and path, and returns its value and type
-	 * @function getSettingByPath
+	 * @function getSettingByName
 	 * @param {string} settingName Name of the setting
-	 * @param {string[]} path Path to travel in `settings` in order to get to the setting, splitted to steps (e.g. to find `settings.a.b`, path should be `["a", "b"]`)
 	 * @returns {object}
 	 * @returns {*} settingValue
 	 * @returns {string} settingType
 	 * @static
 	 * @memberof options
 	 */
-	static getSettingByPath(settingName, path) {
+	static getSettingByName(settingName) {
 		let settingValue = settings
 		let settingType = null
 
 		// Get the setting value by using a pointer to navigate down the tree:
-		for (const key of path) {
+		for (const key of settingName.split(".")) {
 			settingValue = settingValue[key]
 		}
 
@@ -336,7 +390,7 @@ function displayMessage(message, time=2500) {
 	output.text(message)
 	output.fadeIn(250)
 
-	setTimeout( () => {
+	setTimeout(() => {
 		output.fadeOut(750, () => {output.text("")} )
 	}, time)
 }

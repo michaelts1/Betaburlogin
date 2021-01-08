@@ -1,14 +1,15 @@
 {
 	"manifest_version": 2,
 	"name": "Betabur Login",
-	"version": "1.0.0.0beta10",
+	"version": "1.0.0.0pre1",
 	"description": "Helps logging in with all the alts on beta.avabur.com",
 	"author": "Michael T",
 	"homepage_url": "https://www.github.com/michaelts1/Betaburlogin",
 
 	"applications": {
 		"gecko": {
-			"id": "betaburloginID@example.com"
+			"id": "betaburloginID@example.com",
+			"strict_min_version": "74.0a1"
 		}
 	},
 
@@ -43,10 +44,11 @@
 			"js": ["src/js/login/beta-login.js"]
 		},
 		{
-			"matches": [
-				"https://beta.avabur.com/game"
-			],
-			"js": ["src/js/game/beta-game.js"]
+			"matches": ["https://beta.avabur.com/game"],
+			"js": [
+				"src/js/game/beta-game-functions.js",
+				"src/js/game/beta-game.js"
+			]
 		}
 	],
 
@@ -59,7 +61,7 @@
 	},
 
 	"options_ui": {
-		"page": "src/html/options.html",
+		"page": "src/html/options-page.html",
 		"open_in_tab": true
 	},
 
@@ -68,7 +70,7 @@
 			"60": "src/images/betaburlogin.png"
 		},
 		"default_title": "Betabur Login",
-		"default_popup": "src/html/browser_action.html"
+		"default_popup": "src/html/browser-action.html"
 	},
 
 	"permissions": [

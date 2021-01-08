@@ -12,11 +12,20 @@
 		<table>
 			<tbody>
 				<tr>
+					<th colspan="4">Automation</th>
+				</tr>
+				<tr>
 					<td class="checkbox-td">
 						<input id="auto-quests" type="checkbox" data-setting="autoQuests">
 					</td>
 					<td>
-						<label for="auto-quests">Auto Quests</label>
+						<label for="auto-quests">Quests</label>
+					</td>
+					<td class="checkbox-td">
+						<input id="auto-climb" type="checkbox" data-setting="autoClimb.climb">
+					</td>
+					<td>
+						<label for="auto-climb">Climb</label>
 					</td>
 				</tr>
 				<tr>
@@ -24,15 +33,13 @@
 						<input id="auto-house" type="checkbox" data-setting="autoHouse">
 					</td>
 					<td>
-						<label for="auto-house">Auto House</label>
+						<label for="auto-house">House</label>
 					</td>
-				</tr>
-				<tr>
 					<td class="checkbox-td">
 						<input id="auto-harvestron" type="checkbox" data-setting="autoHarvestron">
 					</td>
 					<td>
-						<label for="auto-harvestron">Auto Harvestron</label>
+						<label for="auto-harvestron">Harvestron</label>
 					</td>
 				</tr>
 				<tr>
@@ -40,20 +47,18 @@
 						<input id="auto-craft" type="checkbox" data-setting="autoCraft">
 					</td>
 					<td>
-						<label for="auto-craft">Auto Craft</label>
+						<label for="auto-craft">Craft</label>
 					</td>
-				</tr>
-				<tr>
 					<td class="checkbox-td">
 						<input id="auto-carve" type="checkbox" data-setting="autoCarve">
 					</td>
 					<td>
-						<label for="auto-carve">Auto Carve</label>
+						<label for="auto-carve">Carve</label>
 					</td>
 				</tr>
 			</tbody>
 		</table>
-	</body>
 
-	<script src="../js/background/browser-action.js"></script>
+		<script src="../js/background/browser-action.js"></script>
+	</body>
 </html>

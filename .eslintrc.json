@@ -10,6 +10,7 @@
 		"ecmaVersion": 11
 	},
 	"globals": {
+		"capitalize": "readonly",
 		"delay": "readonly",
 		"eventListeners": "readonly",
 		"insecureCrypt": "readonly",
@@ -17,10 +18,15 @@
 		"objectEquals": "readonly"
 	},
 	"rules": {
-		"semi": [
+		"comma-dangle" : [
 			"error",
-			"never"
+			"always-multiline"
 		],
+		"eol-last": [
+			"error",
+			"always"
+		],
+		"eqeqeq": "error",
 		"indent": [
 			"error",
 			"tab",
@@ -28,6 +34,34 @@
 				"SwitchCase" : 1
 			}
 		],
+		"init-declarations": [
+			"error",
+			"always"
+		],
+		"linebreak-style": [
+			"error",
+			"unix"
+		],
+		"no-eval": "error",
+		"no-implied-eval": "error",
+		"no-inner-declarations": "off",
+		"no-multiple-empty-lines": [
+			"error",
+			{
+				"max": 1
+			}
+		],
+		"no-prototype-builtins": "off",
+		"no-trailing-spaces": "error",
+		"no-use-before-define": [
+			"error",
+			{
+				"functions": false,
+				"classes": false,
+				"variables": true
+			}
+		],
+		"no-var": "error",
 		"quotes": [
 			"error",
 			"double",
@@ -36,43 +70,13 @@
 				"allowTemplateLiterals": true
 			}
 		],
+		"semi": [
+			"error",
+			"never"
+		],
 		"strict": [
 			"error",
 			"global"
-		],
-		"eol-last": [
-			"error",
-			"always"
-		],
-		"comma-dangle" : [
-			"error",
-			"always-multiline"
-		],
-		"linebreak-style": [
-			"error",
-			"unix"
-		],
-		"no-multiple-empty-lines": [
-			"error",
-			{
-				"max": 1
-			}
-		],
-		"init-declarations": [
-			"error",
-			"always"
-		],
-		"no-use-before-define": [
-			"error", {
-				"functions": false,
-				"classes": false,
-				"variables": true
-			}
-		],
-		"no-var": "error",
-		"no-eval": "error",
-		"no-implied-eval": "error",
-		"no-trailing-spaces": "error",
-		"no-inner-declarations": "off"
+		]
 	}
 }

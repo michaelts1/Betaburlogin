@@ -24,6 +24,21 @@ body {
 }
 
 /* Appears in browser-action.html */
+
+#browser-action h2 {
+	margin: .5em 0 .5em;
+}
+
+#browser-action {
+	width: 230px
+}
+
+#browser-action th {
+	padding: .1em;
+	font-size: 14pt;
+	font-family: sans-serif	;
+}
+
 #settings-icon {
 	cursor: pointer;
 	float: right;
@@ -69,7 +84,7 @@ header {
 /* Form Contents */
 
 #settings {
-	height: 75.15vh;
+	max-height: 75.15vh;
 	margin: var(--settings-margin-top) auto auto;
 	overflow-y: auto;
 	width: var(--settings-width);
@@ -148,17 +163,12 @@ input[name=containers],
 	display: none;
 }
 
-#css-div {
+.center {
 	align-items: center;
 	display: flex;
 	flex-flow: column;
 	justify-content: center;
 	margin: .5em;
-}
-
-#reset-div {
-	display: flex;
-	justify-content: center;
 }
 
 #daily-crystals-text {
@@ -211,10 +221,6 @@ td {
 	width: 27em;
 }
 
-#browser-action {
-	width: 190px
-}
-
 #general-col-1 {width: 60%;}
 #general-col-2 {width: 40%;}
 
@@ -227,6 +233,9 @@ td {
 
 #event-col-1 {width: 40%;}
 #event-col-2 {width: 60%;}
+
+#climb-col-1 {width: 55%;}
+#climb-col-2 {width: 45%;}
 
 #interface-col-1 {width: 10%;}
 #interface-col-2 {width: 90%;}

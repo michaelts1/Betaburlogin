@@ -63,9 +63,6 @@ browser.runtime.onConnect.addListener(async port => {
 			ports.alts.push(port)
 			port.onMessage.addListener(message => {
 				switch (message.text) {
-					case "move to mob":
-						jumpMobs(message.number)
-						break
 					case "spawnGem":
 						spawnGem(message.type, message.splice, message.tier, message.amount)
 				}
@@ -94,12 +91,15 @@ browser.runtime.onConnect.addListener(async port => {
 	}
 
 	// When a port disconnects, forget it:
-	port.onDisconnect.addListener( () => {
+	port.onDisconnect.addListener(() => {
 		if (["live", "main"].includes(port.role)) {
+			delete ports[port.role]
 			ports[port.role] = null
 		} else if (["alt", "login"].includes(port.role)) {
-			const index = ports[port.role + "s"].indexOf(port)
-			if (index !== -1) ports[port.role + "s"].splice(index, 1)
+			const role = port.role + "s"
+			const index = ports[role].indexOf(port)
+			delete ports[role][index]
+			if (index !== -1) ports[role].splice(index, 1)
 		}
 		log(`${port.role}${port.name ? ` (${port.name})` : ""} disconnected`)
 	})
@@ -121,7 +121,7 @@ async function openTabs() {
 
 	browser.tabs.create({url: "https://beta.avabur.com"})
 	for (let i = 0; i < Math.min(containers.length, altsNumber); i++) {
-		setTimeout( () => {
+		setTimeout(() => {
 			browser.tabs.create({
 				cookieStoreId: containers[i].cookieStoreId,
 				url: "https://beta.avabur.com",
@@ -232,16 +232,6 @@ function spawnGem(type, splice, tier, amount) {
 		tier  : tier,
 		amount: amount,
 	}, ports.alts)
-}
-
-/**
- * Jumps all alts to mob with a given ID
- * @function jumpMobs
- * @param {number} number Mob ID
- * @memberof background
- */
-function jumpMobs(number) {
-	sendMessage({text: "jump mobs", number: number}, ports.alts)
 }
 
 /**
