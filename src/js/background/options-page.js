@@ -548,12 +548,20 @@ async function resetSettings() {
 	location.reload()
 }
 
-$(buildHTML)
-$(Setting.init)
+/**
+ * @function init
+ * @memberof options
+ */
+function init() {
+	buildHTML()
+	Setting.init()
 
-$("#reset-css").click(resetCSS)
-$(".tab-button").click(changeTab)
-$("#reset-settings").click(resetSettings)
+	$("#reset-css").click(resetCSS)
+	$(".tab-button").click(changeTab)
+	$("#reset-settings").click(resetSettings)
+}
+
+$(init)
 
 window.onbeforeunload = () => {
 	const time = new Date().getTime()
