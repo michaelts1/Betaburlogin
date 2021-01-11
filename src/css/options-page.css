@@ -367,7 +367,3 @@ button:hover .circle {
 #reset-settings {
 	margin: .5em 0;
 }
-
-.hidden {
-	display: none !important;
-}
