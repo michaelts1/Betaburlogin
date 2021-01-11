@@ -58,17 +58,12 @@ async function toggleInterfaceChanges(refresh) {
 		$("head").append(`<link id="betabot-css" class="betabot" rel="stylesheet" href="data:text/css;base64,${btoa(settings.css.addon + settings.css.custom.code)}">`)
 	}
 
-	// Remove Effects Box:
-	if (settings.removeEffects && $("#effectInfo")[0]) {
-		$("#effectInfo").remove()
-	} else if (!settings.removeEffects && !$("#effectInfo")[0]) {
-		$("#gauntletInfo").after(`
-		<div id="effectInfo" style="display: block;">
-			<div class="ui-element border2">
-				<h5 class="toprounder center"><a id="effectUpgradeTable">Effects</a></h5>
-				<div class="row" id="effectTable"></div>
-			</div>
-		</div>`)
+	// Hide Effects Box:
+	const effectsInfo = $("#effectInfo")[0]
+	if (settings.removeEffects && !Array.from(effectsInfo.classList).includes("betabot-hidden")) {
+		$("#effectInfo").addClass("betabot-hidden")
+	} else if (!settings.removeEffects && Array.from(effectsInfo.classList).includes("betabot-hidden")) {
+		$("#effectInfo").removeClass("betabot-hidden")
 	}
 
 	// Option to build a specific item:
