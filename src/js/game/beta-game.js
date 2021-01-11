@@ -24,21 +24,16 @@ async function toggleInterfaceChanges(refresh) {
 	// Button next to name:
 	switch (settings.buttonNextToName) {
 		case "request":
-			if (!$("#betabot-request-currency")[0]) {
-				$("#betabot-next-to-name").empty()
-				$("#betabot-next-to-name").append(`<button id="betabot-request-currency" class="betabot"><a>Request Currency</a></button>`)
-				$("#betabot-request-currency").click(() => port.postMessage({text: "requesting currency"}) )
-			}
+			$("#betabot-request-button").removeClass("betabot-hidden")
+			$("#betabot-spread-button").addClass("betabot-hidden")
 			break
 		case "spread":
-			if (!$("#betabot-spread-button")[0]) {
-				$("#betabot-next-to-name").empty()
-				$("#betabot-next-to-name").append(`<button id="betabot-spread-button" class="betabot"><a>Spread Currency</a></button>`)
-				$("#betabot-spread-button").click(() => port.postMessage({text: "requesting a list of active alts"}) )
-			}
+			$("#betabot-request-button").addClass("betabot-hidden")
+			$("#betabot-spread-button").removeClass("betabot-hidden")
 			break
 		default:
-			$("#betabot-next-to-name").empty()
+			$("#betabot-request-button").addClass("betabot-hidden")
+			$("#betabot-spread-button").addClass("betabot-hidden")
 	}
 
 	// Make it easier to see what alt it is:
@@ -177,9 +172,13 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 		}
 	})
 
-	// Create an empty `span` next to the username:
+	// Create a `span` for buttons next to the username:
 	if (!$("#betabot-next-to-name")[0]) {
-		$("#username").after(`<span id="betabot-next-to-name" class="betabot"></span>`)
+		$("#username").after(`<span id="betabot-next-to-name" class="betabot"> </span>`)
+		$("#betabot-next-to-name").append(`<button id="betabot-request-button" class="betabot"><a>Request Currency</a></button>`)
+		$("#betabot-next-to-name").append(`<button id="betabot-spread-button" class="betabot"><a>Spread Currency</a></button>`)
+		$("#betabot-request-button").click(() => port.postMessage({text: "requesting currency"}) )
+		$("#betabot-spread-button").click(() => port.postMessage({text: "requesting a list of active alts"}) )
 	}
 
 	// Start up auto wire:

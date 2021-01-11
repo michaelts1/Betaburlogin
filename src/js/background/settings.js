@@ -43,9 +43,6 @@ const ADDON_CSS =
 	content: ": ";
 	font-size: 14px;
 }
-#betabot-next-to-name {
-	margin-left: 10px;
-}
 #betabot-next-to-name a {
 	line-height: 10px;
 }
