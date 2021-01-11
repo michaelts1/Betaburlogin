@@ -7,7 +7,7 @@
 	},
 	"extends": "eslint:recommended",
 	"parserOptions": {
-		"ecmaVersion": 11
+		"ecmaVersion": 2021
 	},
 	"globals": {
 		"capitalize": "readonly",
@@ -53,6 +53,7 @@
 		],
 		"no-prototype-builtins": "off",
 		"no-trailing-spaces": "error",
+		"no-unsafe-optional-chaining" : "error",
 		"no-use-before-define": [
 			"error",
 			{
@@ -74,6 +75,7 @@
 			"error",
 			"never"
 		],
+		"space-before-blocks" : "error",
 		"strict": [
 			"error",
 			"global"

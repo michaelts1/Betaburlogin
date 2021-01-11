@@ -376,7 +376,7 @@ const gauntlet = {
 		eventListeners.toggle("roa-ws:event_action", gauntlet.changeTrade, true)
 
 		// If we are still tracking the same gauntlet after 16 minutes, stop tracking it:
-		await delay(16*60*1000)
+		await delay(16*60_000)
 		if (gauntlet.gauntVars.gauntletID === msgID) gauntlet.finishGauntlet()
 	},
 
@@ -482,7 +482,7 @@ const gems = {
 
 		await eventListeners.waitFor("roa-ws:page:gem_spawn")
 		$("#betabot-spawn-gem").prop("disabled", true)
-		await delay(60*1000)
+		await delay(60_000)
 		$("#betabot-spawn-gem").prop("disabled", false)
 		$("#confirmButtons>a.green")[0].click()
 	},
@@ -557,7 +557,7 @@ const wiring = {
 		// If this is an automatic wire:
 		if (settings.autoWire && !target) {
 			// Make sure enough time has passed since last run:
-			const wiringInterval = settings.wireFrequency*60*1000
+			const wiringInterval = settings.wireFrequency*60_000
 			// Subtract one second from wiringInterval, to allow slight mistimings:
 			if (Date.now() - wiring.autoWireLastTimestamp < wiringInterval - 1000) {
 				//log(`Automatic wiring occurred before time. Stopping now`)
@@ -797,7 +797,7 @@ const betabot = {
 		}
 
 		betabot[key] = true
-		await delay(60*1000)
+		await delay(60_000)
 		betabot[key] = false
 	},
 
@@ -939,7 +939,7 @@ const betabot = {
 				case data?.house_timers[0]?.next < 1800 && !house.houseItemQueued:
 					if (settings.verbose) log("House timer less than 30 minutes, queuing another item")
 					house.houseItemQueued = true
-					setTimeout(() => house.houseItemQueued = false, 30*60*1000)
+					setTimeout(() => house.houseItemQueued = false, 30*60_000)
 					// Fall through
 				case data?.can_build_house:
 					vars.actionsPending = true
@@ -1065,7 +1065,7 @@ const mobClimbing = {
 	async travel(amount) {
 		const gold = parseInt($(".right.mygold.gold").data("personal").replace(/,/g, ""))
 		// If we don't have enough gold for travel, don't climb:
-		if (gold < 100*1000*1000) {
+		if (gold < 100_000_000) {
 			$("#loadBattle").click()
 			mobClimbing.finishClimbing()
 			return
@@ -1147,7 +1147,7 @@ const mobClimbing = {
 		}
 
 		// Only try climbing again in one hour:
-		if (!settings.autoQuests) await delay(60*60*1000)
+		if (!settings.autoQuests) await delay(60*60_000)
 		mobClimbing.climbing = false
 	},
 }

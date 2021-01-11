@@ -4,14 +4,11 @@
 		"url": "https://github.com/michaelts1/Betaburlogin/issues"
 	},
 	"description": "Firefox addon to help managing alts on beta.avabur.com",
-	"devDependencies": {
-		"eslint": "mysticatea/eslint-plugin"
-	},
 	"homepage": "https://github.com/michaelts1/Betaburlogin",
 	"license": "MIT",
 	"repository": "github:michaelts1/Betaburlogin",
 	"scripts": {
-		"test-addon": "eslint --ignore-pattern *.min.js --ignore-pattern /out/ ./ && (C:/\"Program Files\"/7-Zip/7z.exe a ../betaburlogin.xpi license manifest.json readme.md src && addons-linter betaburlogin.xpi & del betaburlogin.xpi) && echo tests finished",
+		"test-addon": "eslint --ignore-pattern *.min.js --ignore-pattern /out/ ./ && (C:/\"Program Files\"/7-Zip/7z.exe a betaburlogin.xpi license manifest.json readme.md src && addons-linter --self-hosted betaburlogin.xpi & del betaburlogin.xpi) && echo tests finished",
 		"export-addon": "C:/\"Program Files\"/7-Zip/7z.exe a ../betaburlogin.xpi license manifest.json readme.md src",
 		"generate-jsdoc": "jsdoc src/js/ -p -r"
 	}
