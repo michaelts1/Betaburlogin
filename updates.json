@@ -1,0 +1,103 @@
+{
+	"addons": {
+		"betaburloginID@example.com": {
+			"updates": [
+				{
+					"version": "0.9.7.5",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v0.9.7.5/betaburlogin-0.9.7.5-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v0.9.7.5"
+				},
+				{
+					"version": "0.9.7.7",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v0.9.7.7/betaburlogin-0.9.7.7-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v0.9.7.7"
+				},
+				{
+					"version": "0.9.7.8",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v0.9.7.8/betaburlogin-0.9.7.8-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v0.9.7.8"
+				},
+				{
+					"version": "0.9.8.0",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v0.9.8.0/betaburlogin-0.9.8.0-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v0.9.8.0"
+				},
+				{
+					"version": "0.9.8.1",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v0.9.8.1/betaburlogin-0.9.8.1-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v0.9.8.1"
+				},
+				{
+					"version": "0.9.9.0",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v0.9.9.0/betaburlogin-0.9.9.0-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v0.9.9.0"
+				},
+				{
+					"version": "1.0.0.0beta1",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v1.0.0.0beta1/betaburlogin-1.0.0.0beta1-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v1.0.0.0beta1"
+				},
+				{
+					"version": "1.0.0.0beta2",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v1.0.0.0beta2/betaburlogin-1.0.0.0beta2-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v1.0.0.0beta2"
+				},
+				{
+					"version": "1.0.0.0beta3",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v1.0.0.0beta3/betaburlogin-1.0.0.0beta3-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v1.0.0.0beta3"
+				},
+				{
+					"version": "1.0.0.0beta4",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v1.0.0.0beta4/betaburlogin-1.0.0.0beta4-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v1.0.0.0beta4"
+				},
+				{
+					"version": "1.0.0.0beta5",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v1.0.0.0beta5/betaburlogin-1.0.0.0beta5-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v1.0.0.0beta5"
+				},
+				{
+					"version": "1.0.0.0beta6",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v1.0.0.0beta6/betaburlogin-1.0.0.0beta6-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v1.0.0.0beta6"
+				},
+				{
+					"version": "1.0.0.0beta7",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v1.0.0.0beta7/betaburlogin-1.0.0.0beta7-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v1.0.0.0beta7"
+				},
+				{
+					"version": "1.0.0.0beta8",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v1.0.0.0beta8/betaburlogin-1.0.0.0beta8-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v1.0.0.0beta8"
+				},
+				{
+					"version": "1.0.0.0beta9",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v1.0.0.0beta9/betaburlogin-1.0.0.0beta9-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v1.0.0.0beta9"
+				},
+				{
+					"version": "1.0.0.0beta10",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v1.0.0.0beta10/betaburlogin-1.0.0.0beta10-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v1.0.0.0beta10"
+				},
+				{
+					"version": "1.0.0.0pre1",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v1.0.0.0pre/betaburlogin-1.0.0.0pre1-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v1.0.0.0pre"
+				},
+				{
+					"version": "1.0.0.0pre2",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v1.0.0.0pre/betaburlogin-1.0.0.0pre2-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v1.0.0.0pre"
+				},
+				{
+					"version": "1.0.0.0pre3",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v1.0.0.0pre/betaburlogin-1.0.0.0pre3-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v1.0.0.0pre"
+				}
+			]
+		}
+	}
+}
