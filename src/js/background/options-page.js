@@ -23,11 +23,7 @@ function buildHTML() {
  	 * @memberof options
 	 * @private
 	 */
-	function getData(el, attr) {
-		const tmp = el.getAttribute("data-" + attr)
-		el.removeAttribute(attr)
-		return tmp
-	}
+	const getData = (el, attr) => el.attributes.removeNamedItem("data-" + attr).value
 
 	for (const table of $("table")) {
 		const tableName = getData(table, "name")
