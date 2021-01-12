@@ -569,8 +569,8 @@ const wiring = {
 			// Set `target` to main username:
 			target = settings.mainUsername
 
-			// Call `wire()` again:
-			setTimeout(wiring.wire, wiringInterval)
+			// Call `wire` again, but only if `settings.wireFrequency` is not 0:
+			if (wiringInterval) setTimeout(wiring.wire, wiringInterval)
 		}
 
 		// Don't allow wiring to oneself:
@@ -581,7 +581,7 @@ const wiring = {
 		let sendMessage = `/wire ${target}`
 
 		for (const [name, sendSettings] of Object.entries(settings.currencySend)) {
-			if (!sendSettings.send) continue
+			if (!sendSettings.sendRequest) continue
 
 			const amount   = $(`.${name}`).attr("title").replace(/,/g, "")
 			const sellable = $(`.${name}`).attr("data-personal").replace(/,/g, "")
@@ -617,7 +617,7 @@ const wiring = {
 
 		// Calculate the amounts:
 		for (const [currencyName, sendSettings] of Object.entries(settings.currencySend)) {
-			if (!sendSettings.send) continue
+			if (!sendSettings.sendSpread) continue
 
 			const totalAmount = $(`.${currencyName}`).attr("title").replace(/,/g, "")
 			const marketable = $(`.${currencyName}`).attr("data-personal").replace(/,/g, "")

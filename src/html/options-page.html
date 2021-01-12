@@ -166,119 +166,150 @@
 			</tr>
 		</table>
 
-		<table id="wire" class="requires-containers" data-name="Wiring" data-cols="3"
-			data-header-tooltip="Left column: Enable or disable sending of the currency.&#10;Middle column: Name of the currency.&#10;Right column: Amount of said currency to be kept when sending this currency.&#10;&#10;For example, if you check the checkbox on the &quot;Crystals&quot; row, and type &quot;100&quot; in the input box to the right, the alts will send their crystals, but will always keep at least 100 crystals on them.">
+		<table id="wire" class="requires-containers" data-name="Wiring" data-cols="4"
+			data-header-tooltip="* Currency Name: Name of this currency.&#10;* Keep Amount: Amount of said currency to be kept when sending said currency.&#10;* Request: Check to send said currency when using the &quot;Request Currency&quot; button or when auto wire occurs&#10;* Spread: Check to send said currency when using the &quot;Spread Currency&quot; button&#10;&#10;Example: If you type &quot;100&quot; in the &quot;Keep Amount&quot; column under the &quot;Crystals&quot; row, and check &quot;Request&quot; but not &quot;Spread&quot;, crystals will be sent when auto wire occurs or when you request currency, but not when you spread currency. Also, your alts will always keep at least 100 crystals on them.">
 			<tr>
-				<td class="checkbox-td">
-					<input id="auto-wire" type="checkbox" data-setting="autoWire">
-				</td>
-				<td colspan="2">
-					<label for="auto-wire">Auto Wire to Main Account Every</label>
+				<td colspan="4" style="text-align: center;">
+					<label for="wire-frequency">Auto Wire to Main Account:</label>
 					<select id="wire-frequency" data-setting="wireFrequency">
-						<option value="1440">24 Hours</option>
-						<option value="300">5 Hours</option>
-						<option value="60" selected="selected">Hour</option>
-						<option value="5">5 Minutes</option>
+						<option value="0">Off</option>
+						<option value="5">Every 5 Minutes</option>
+						<option value="60">Every Hour</option>
+						<option value="300">Every 5 Hours</option>
+						<option value="1440">Every 24 Hours</option>
 					</select>
 				</td>
 			</tr>
 			<tr>
+				<th class="th-small">Currency Name</th>
+				<th class="th-small">Keep Amount</th>
+				<th class="th-small">Request</th>
+				<th class="th-small">Spread</th>
+			</tr>
+			<tr>
+				<td>
+					<label for="crystals-keep">Crystals</label>
+				</td>
+				<td>
+					<input id="crystals-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=13 data-setting="currencySend.crystals.keepAmount">
+				</td>
 				<td class="checkbox-td">
-					<input id="crystals-send" type="checkbox" data-setting="currencySend.crystals.send">
+					<input id="crystals-send-request" type="checkbox" data-setting="currencySend.crystals.sendRequest">
 				</td>
-				<td>
-					<label for="crystals-send">Crystals</label>
-				</td>
-				<td>
-					<input id="crystals-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.crystals.keepAmount">
+				<td class="checkbox-td">
+					<input id="crystals-send-spread" type="checkbox" data-setting="currencySend.crystals.sendSpread">
 				</td>
 			</tr>
 			<tr>
+				<td>
+					<label for="platinum-keep">Platinum</label>
+				</td>
+				<td>
+					<input id="platinum-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=13 data-setting="currencySend.platinum.keepAmount">
+				</td>
 				<td class="checkbox-td">
-					<input id="platinum-send" type="checkbox" data-setting="currencySend.platinum.send">
+					<input id="platinum-send-request" type="checkbox" data-setting="currencySend.platinum.sendRequest">
 				</td>
-				<td>
-					<label for="platinum-send">Platinum</label>
-				</td>
-				<td>
-					<input id="platinum-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.platinum.keepAmount">
+				<td class="checkbox-td">
+					<input id="platinum-send-spread" type="checkbox" data-setting="currencySend.platinum.sendSpread">
 				</td>
 			</tr>
 			<tr>
+				<td>
+					<label for="gold-keep">Gold</label>
+				</td>
+				<td>
+					<input id="gold-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=13 data-setting="currencySend.gold.keepAmount">
+				</td>
 				<td class="checkbox-td">
-					<input id="gold-send" type="checkbox" data-setting="currencySend.gold.send">
+					<input id="gold-send-request" type="checkbox" data-setting="currencySend.gold.sendRequest">
 				</td>
-				<td>
-					<label for="gold-send">Gold</label>
-				</td>
-				<td>
-					<input id="gold-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.gold.keepAmount">
+				<td class="checkbox-td">
+					<input id="gold-send-spread" type="checkbox" data-setting="currencySend.gold.sendSpread">
 				</td>
 			</tr>
 			<tr>
+				<td>
+					<label for="crafting-materials-keep">Crafting Materials</label>
+				</td>
+				<td>
+					<input id="crafting-materials-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=13 data-setting="currencySend.crafting_materials.keepAmount">
+				</td>
 				<td class="checkbox-td">
-					<input id="crafting-materials-send" type="checkbox" data-setting="currencySend.crafting_materials.send">
+					<input id="crafting-materials-send-request" type="checkbox" data-setting="currencySend.crafting_materials.sendRequest">
 				</td>
-				<td>
-					<label for="crafting-materials-send">Crafting Materials</label>
-				</td>
-				<td>
-					<input id="crafting-materials-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.crafting_materials.keepAmount">
+				<td class="checkbox-td">
+					<input id="crafting-materials-send-spread" type="checkbox" data-setting="currencySend.crafting_materials.sendSpread">
 				</td>
 			</tr>
 			<tr>
+				<td>
+					<label for="gem-fragments-keep">Gem Fragments</label>
+				</td>
+				<td>
+					<input id="gem-fragments-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=13 data-setting="currencySend.gem_fragments.keepAmount">
+				</td>
 				<td class="checkbox-td">
-					<input id="gem-fragments-send" type="checkbox" data-setting="currencySend.gem_fragments.send">
+					<input id="gem-fragments-send-request" type="checkbox" data-setting="currencySend.gem_fragments.sendRequest">
 				</td>
-				<td>
-					<label for="gem-fragments-send">Gem Fragments</label>
-				</td>
-				<td>
-					<input id="gem-fragments-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.gem_fragments.keepAmount">
+				<td class="checkbox-td">
+					<input id="gem-fragments-send-spread" type="checkbox" data-setting="currencySend.gem_fragments.sendSpread">
 				</td>
 			</tr>
 			<tr>
+				<td>
+					<label for="food-keep">Food</label>
+				</td>
+				<td>
+					<input id="food-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=13 data-setting="currencySend.food.keepAmount">
+				</td>
 				<td class="checkbox-td">
-					<input id="food-send" type="checkbox" data-setting="currencySend.food.send">
+					<input id="food-send-request" type="checkbox" data-setting="currencySend.food.sendRequest">
 				</td>
-				<td>
-					<label for="food-send">Food</label>
-				</td>
-				<td>
-					<input id="food-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.food.keepAmount">
+				<td class="checkbox-td">
+					<input id="food-send-spread" type="checkbox" data-setting="currencySend.food.sendSpread">
 				</td>
 			</tr>
 			<tr>
+				<td>
+					<label for="wood-keep">Wood</label>
+				</td>
+				<td>
+					<input id="wood-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=13 data-setting="currencySend.wood.keepAmount">
+				</td>
 				<td class="checkbox-td">
-					<input id="wood-send" type="checkbox" data-setting="currencySend.wood.send">
+					<input id="wood-send-request" type="checkbox" data-setting="currencySend.wood.sendRequest">
 				</td>
-				<td>
-					<label for="wood-send">Wood</label>
-				</td>
-				<td>
-					<input id="wood-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.wood.keepAmount">
+				<td class="checkbox-td">
+					<input id="wood-send-spread" type="checkbox" data-setting="currencySend.wood.sendSpread">
 				</td>
 			</tr>
 			<tr>
+				<td>
+					<label for="iron-keep">Iron</label>
+				</td>
+				<td>
+					<input id="iron-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=13 data-setting="currencySend.iron.keepAmount">
+				</td>
 				<td class="checkbox-td">
-					<input id="iron-send" type="checkbox" data-setting="currencySend.iron.send">
+					<input id="iron-send-request" type="checkbox" data-setting="currencySend.iron.sendRequest">
 				</td>
-				<td>
-					<label for="iron-send">Iron</label>
-				</td>
-				<td>
-					<input id="iron-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.iron.keepAmount">
+				<td class="checkbox-td">
+					<input id="iron-send-spread" type="checkbox" data-setting="currencySend.iron.sendSpread">
 				</td>
 			</tr>
 			<tr>
+				<td>
+					<label for="stone-keep">Stone</label>
+				</td>
+				<td>
+					<input id="stone-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=13 data-setting="currencySend.stone.keepAmount">
+				</td>
 				<td class="checkbox-td">
-					<input id="stone-send" type="checkbox" data-setting="currencySend.stone.send">
+					<input id="stone-send-request" type="checkbox" data-setting="currencySend.stone.sendRequest">
 				</td>
-				<td>
-					<label for="stone-send">Stone</label>
-				</td>
-				<td>
-					<input id="stone-keep" pattern="^\d+\.?\d*[kKmMbBtTqQ]?$" placeholder="Amount to Keep" size=15 data-setting="currencySend.stone.keepAmount">
+				<td class="checkbox-td">
+					<input id="stone-send-spread" type="checkbox" data-setting="currencySend.stone.sendSpread">
 				</td>
 			</tr>
 		</table>

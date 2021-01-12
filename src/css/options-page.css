@@ -227,9 +227,10 @@ td {
 #login-col-1 {width: 46%;}
 #login-col-2 {width: 54%;}
 
-#wire-col-1 {width: 10%;}
-#wire-col-2 {width: 45%;}
-#wire-col-3 {width: 45%;}
+#wire-col-1 {width: 34%;}
+#wire-col-2 {width: 35%;}
+#wire-col-3 {width: 16%;}
+#wire-col-4 {width: 15%;}
 
 #event-col-1 {width: 40%;}
 #event-col-2 {width: 60%;}

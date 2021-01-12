@@ -144,7 +144,8 @@ function updateSettings() {
 			for (const currency of ["crystals", "platinum", "gold",
 				"crafting_materials", "gem_fragments"]) {
 				settings.currencySend[currency] = {
-					send: true,
+					sendRequest: true,
+					sendSpread: true,
 					minimumAmount: 100,
 					keepAmount: 0,
 				}
@@ -175,10 +176,9 @@ function updateSettings() {
 				}
 			}
 		case 5:
-			settings.autoWire = false
+			// No changes here anymore
 		case 6:
 			settings.verbose = false
-			settings.wireFrequency = 60
 		case 7:
 			settings.containers = {
 				list: [],
@@ -241,7 +241,7 @@ function updateSettings() {
 				}
 			}
 		case 17:
-			// Format change (Array => Object):
+			// Refactoring (Array => Object):
 			if (Array.isArray(settings.currencySend)) {
 				let tmp = {}
 				for (const currency of settings.currencySend) {
@@ -287,6 +287,21 @@ function updateSettings() {
 			}
 			if (settings.addJumpMobs !== undefined) {
 				deletedSettings.push("addJumpMobs")
+			}
+		case 21:
+			// `autoWire` is now part of `wireFrequency`:
+			settings.wireFrequency = +(settings.autoWire ?? 0)*60 // 60 if `autoWire` is true, 0 otherwise
+			if (settings.autoWire !== undefined) {
+				deletedSettings.push("autoWire")
+			}
+
+			// `send` is now two separate properties:
+			if ("send" in settings.currencySend.crystals) {
+				for (const currency in Object.keys(settings.currencySend)) {
+					const send = settings.currencySend[currency].send
+					settings.currencySend[currency].sendRequest = send
+					settings.currencySend[currency].sendSpread = send
+				}
 			}
 		default:
 			// Update internal CSS:
