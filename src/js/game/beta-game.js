@@ -143,7 +143,7 @@ browser.storage.sync.get().then(result => {
 	// Hookup to the websocket:
 	if ($("#betabot-ws")[0]) $("#betabot-ws").remove() // Re-inject the script if it already exists
 
-	$("head").after(`<script id="betabot-ws" class="betabot">
+	$("head").append(`<script id="betabot-ws" class="betabot">
 betabotChannel = new MessageChannel()
 window.postMessage("betabot-ws message", "*", [betabotChannel.port2])
 $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.parse(data)))
