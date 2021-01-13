@@ -17,7 +17,7 @@
  * @type {number}
  * @memberof settings
  */
-const SETTINGS_VERSION = 21
+const SETTINGS_VERSION = 22
 
 /**
  * - CSS code for Betaburlogin interface changes
@@ -297,7 +297,7 @@ function updateSettings() {
 
 			// `send` is now two separate properties:
 			if ("send" in settings.currencySend.crystals) {
-				for (const currency in Object.keys(settings.currencySend)) {
+				for (const currency of Object.keys(settings.currencySend)) {
 					const send = settings.currencySend[currency].send
 					settings.currencySend[currency].sendRequest = send
 					settings.currencySend[currency].sendSpread = send
