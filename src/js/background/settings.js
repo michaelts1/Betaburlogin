@@ -301,6 +301,7 @@ function updateSettings() {
 					const send = settings.currencySend[currency].send
 					settings.currencySend[currency].sendRequest = send
 					settings.currencySend[currency].sendSpread = send
+					delete settings.currencySend[currency].send
 				}
 			}
 		default:
