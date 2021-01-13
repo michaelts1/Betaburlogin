@@ -109,7 +109,7 @@ async function refreshSettings(changes) {
 	for (const [name, {newValue}] of Object.entries(changes)) settings[name] = newValue
 
 	// Restart auto wire:
-	if ("wireFrequency" in changes && settings.autoWire) {
+	if ("wireFrequency" in changes && settings.wireFrequency > 0) {
 		setTimeout(wiring.wire, settings.wireFrequency*60_000)
 	}
 

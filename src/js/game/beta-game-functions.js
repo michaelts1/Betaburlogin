@@ -555,7 +555,7 @@ const wiring = {
 	 */
 	wire(target) {
 		// If this is an automatic wire:
-		if (settings.autoWire && !target) {
+		if (settings.wireFrequency > 0 && !target) {
 			// Make sure enough time has passed since last run:
 			const wiringInterval = settings.wireFrequency*60_000
 			// Subtract one second from wiringInterval, to allow slight mistimings:
