@@ -8,8 +8,8 @@
 	"license": "MIT",
 	"repository": "github:michaelts1/Betaburlogin",
 	"scripts": {
-		"test-addon": "eslint --ignore-pattern *.min.js --ignore-pattern /out/ ./ && (C:/\"Program Files\"/7-Zip/7z.exe a betaburlogin.xpi license manifest.json readme.md src && addons-linter --self-hosted betaburlogin.xpi & del betaburlogin.xpi) && echo tests finished",
-		"export-addon": "C:/\"Program Files\"/7-Zip/7z.exe a ../betaburlogin.xpi license manifest.json readme.md src",
+		"test-addon": "eslint --ignore-pattern *.min.js --ignore-pattern /out/ ./ && (C:/\"Program Files\"/7-Zip/7z.exe a betaburlogin.xpi license manifest.json src && addons-linter --self-hosted betaburlogin.xpi & del betaburlogin.xpi) && echo tests finished",
+		"export-addon": "C:/\"Program Files\"/7-Zip/7z.exe a ../betaburlogin.xpi license manifest.json src",
 		"generate-jsdoc": "jsdoc src/js/ -p -r"
 	}
 }
