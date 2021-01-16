@@ -881,8 +881,21 @@ const betabot = {
 
 		await eventListeners.waitFor("roa-ws:page:boosts")
 
-		const leftToBuy = settings.dailyCrystals - parseInt($("#premium_purchased_today").text()) // Amount of crystals left to buy
-		if (leftToBuy > 0) { // Don't purchase if there is nothing to purchase
+		// Don't buy the whole amount if some crystals have already been bought:
+		let leftToBuy = settings.dailyCrystals - parseInt($("#premium_purchased_today").text())
+
+		/*
+		   Before purchasing crystals, make sure that there is enough gold for
+		   the purchase. If there isn't, buy as many crystals as possible.
+		   Original sum equation can be found on `options-page.js` under `updateCrystalsPrice()`.
+		*/
+		const max = s => (-1_500_000 + Math.sqrt(1_500_000**2 -4 * 500_000 *-s)) / 1_000_000
+		const gold = parseInt($(`.mygold`).attr("title").replace(/,/g, ""))
+		const maxCrystals = Math.floor(max(gold))
+		leftToBuy = Math.min(leftToBuy, maxCrystals)
+
+		// Don't purchase if there is nothing to purchase
+		if (leftToBuy > 0) {
 			await delay(vars.buttonDelay)
 			$("#goldCrystalButton").click()
 
