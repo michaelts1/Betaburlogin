@@ -951,10 +951,12 @@ const betabot = {
 			switch (true) {
 				case data?.house_timers[0]?.next < 1800 && !house.houseItemQueued:
 					if (settings.verbose) log("House timer less than 30 minutes, queuing another item")
-					house.houseItemQueued = true
-					setTimeout(() => house.houseItemQueued = false, 30*60_000)
 					// Fall through
 				case data?.can_build_house:
+					house.houseItemQueued = true
+					// Falsify after 30 minutes, or after 1 minute if house is available:
+					setTimeout(() => house.houseItemQueued = false, data?.can_build_house ? 1 : 30 * 60_000)
+
 					vars.actionsPending = true
 					$("li#housing").click()
 					await eventListeners.waitFor("roa-ws:page:house")
