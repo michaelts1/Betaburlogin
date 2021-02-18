@@ -462,6 +462,9 @@ function displayLoginFields() {
 function changeTab(event) {
 	const tabID = event.target.id.replace("-tab-button", "")
 
+	// Disable invisible button:
+	if (tabID === "first") return
+
 	for (const tab of document.querySelectorAll(".tab")) {
 		tab.classList.remove("selected")
 	}

@@ -77,6 +77,10 @@ header {
 	text-align: center;
 }
 
+#first-tab-button {
+	cursor: initial;
+}
+
 .tab-button.selected {
 	color: var(--button-color);
 }
