@@ -304,7 +304,7 @@ Setting.instances = []
  * @function abbreviateNumber
  * @example
  * // Returns "10K"
- * abbreviateNumber(10_000)
+ * abbreviateNumber(10000)
  * @param {number} num
  * @returns {string} Short form number
  * @memberof options
@@ -320,17 +320,17 @@ function abbreviateNumber(num) {
 	 */
 	const round = num => Math.round(num*1000)/1000
 
-	if(num >= 1_000_000_000_000_000) {
-		return round(num/1_000_000_000_000_000)+"Q"
+	if(num >= 1000000000000000) {
+		return round(num/1000000000000000)+"Q"
 	}
-	if(num >= 1_000_000_000_000) {
-		return round(num/1_000_000_000_000)+"T"
+	if(num >= 1000000000000) {
+		return round(num/1000000000000)+"T"
 	}
-	if(num >= 1_000_000_000) {
-		return round(num/1_000_000_000)+"B"
+	if(num >= 1000000000) {
+		return round(num/1000000000)+"B"
 	}
-	if(num >= 1_000_000) {
-		return round(num/1_000_000)+"M"
+	if(num >= 1000000) {
+		return round(num/1000000)+"M"
 	}
 	if(num >= 1000) {
 		return round(num/1000)+"K"
@@ -342,7 +342,7 @@ function abbreviateNumber(num) {
  * Deabbreviates a number from short form
  * @function deabbreviateNumber
  * @example
- * // Returns 10_000
+ * // Returns 10000
  * romanize("10K")
  * @param {string} input A string containing a short form number
  * @returns {number} Long form number
@@ -360,11 +360,11 @@ function deabbreviateNumber (input) {
 
 	const num = parseFloat(numPart.replace(/[^0-9.]/g, ""))
 	const scales = {
-		K: 1_000,
-		M: 1_000_000,
-		B: 1_000_000_000,
-		T: 1_000_000_000_000,
-		Q: 1_000_000_000_000_000,
+		K: 1000,
+		M: 1000000,
+		B: 1000000000,
+		T: 1000000000000,
+		Q: 1000000000000000,
 	}
 
 	if (!scales[scale]) return input
@@ -414,7 +414,7 @@ function updateCrystalsPrice() {
 	 * @private
 	 * @memberof options
 	 */
-	const price = n => (n * (2 * 2_000_000 + (n - 1) * 1_000_000)) / 2
+	const price = n => (n * (2 * 2000000 + (n - 1) * 1000000)) / 2
 	const number = deabbreviateNumber($("#daily-crystals").val())
 	$("#daily-crystals-price").text(abbreviateNumber(price(number) || 0))
 	$("#daily-crystals + div").prop("title", Intl.NumberFormat().format(price(number)) )

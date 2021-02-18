@@ -110,7 +110,7 @@ async function refreshSettings(changes) {
 
 	// Restart auto wire:
 	if ("wireFrequency" in changes && settings.wireFrequency > 0) {
-		setTimeout(wiring.wire, settings.wireFrequency*60_000)
+		setTimeout(wiring.wire, settings.wireFrequency*60000)
 	}
 
 	// Reset `actionsPending` and call `toggleInterfaceChanges`:
@@ -182,7 +182,7 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 	}
 
 	// Start up auto wire:
-	setTimeout(wiring.wire, settings.wireFrequency*60_000)
+	setTimeout(wiring.wire, settings.wireFrequency*60000)
 
 	// Wait for the page to load:
 	eventListeners.waitFor("roa-ws:motd").then(async () => {

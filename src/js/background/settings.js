@@ -152,7 +152,7 @@ function updateSettings() {
 			}
 			// Override some of the previously set values:
 			settings.currencySend.crystals.minimumAmount = 0
-			settings.currencySend.gold.minimumAmount = 10_000
+			settings.currencySend.gold.minimumAmount = 10000
 
 			/* eslint-disable no-fallthrough */ // Falling through to update properly
 		case 2:
@@ -172,7 +172,7 @@ function updateSettings() {
 				settings.currencySend[trade] = {
 					send: true,
 					minimumAmount: 100,
-					keepAmount: 100_000_000,
+					keepAmount: 100000000,
 				}
 			}
 		case 5:

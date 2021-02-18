@@ -376,7 +376,7 @@ const gauntlet = {
 		eventListeners.toggle("roa-ws:event_action", gauntlet.changeTrade, true)
 
 		// If we are still tracking the same gauntlet after 16 minutes, stop tracking it:
-		await delay(16*60_000)
+		await delay(16*60000)
 		if (gauntlet.gauntVars.gauntletID === msgID) gauntlet.finishGauntlet()
 	},
 
@@ -482,7 +482,7 @@ const gems = {
 
 		await eventListeners.waitFor("roa-ws:page:gem_spawn")
 		$("#betabot-spawn-gem").prop("disabled", true)
-		await delay(60_000)
+		await delay(60000)
 		$("#betabot-spawn-gem").prop("disabled", false)
 		$("#confirmButtons>a.green")[0].click()
 	},
@@ -557,7 +557,7 @@ const wiring = {
 		// If this is an automatic wire:
 		if (settings.wireFrequency > 0 && !target) {
 			// Make sure enough time has passed since last run:
-			const wiringInterval = settings.wireFrequency*60_000
+			const wiringInterval = settings.wireFrequency*60000
 			// Subtract one second from wiringInterval, to allow slight mistimings:
 			if (Date.now() - wiring.autoWireLastTimestamp < wiringInterval - 1000) {
 				//log(`Automatic wiring occurred before time. Stopping now`)
@@ -797,7 +797,7 @@ const betabot = {
 		}
 
 		betabot[key] = true
-		await delay(60_000)
+		await delay(60000)
 		betabot[key] = false
 	},
 
@@ -889,7 +889,7 @@ const betabot = {
 		   the purchase. If there isn't, buy as many crystals as possible.
 		   Original sum equation can be found on `options-page.js` under `updateCrystalsPrice()`.
 		*/
-		const max = s => (-1_500_000 + Math.sqrt(1_500_000**2 -4 * 500_000 *-s)) / 1_000_000
+		const max = s => (-1500000 + Math.sqrt(1500000**2 -4 * 500000 *-s)) / 1000000
 		const gold = parseInt($(`.mygold`).attr("title").replace(/,/g, ""))
 		const maxCrystals = Math.floor(max(gold))
 		leftToBuy = Math.min(leftToBuy, maxCrystals)
@@ -955,7 +955,7 @@ const betabot = {
 				case data?.can_build_house:
 					house.houseItemQueued = true
 					// Falsify after 30 minutes, or after 1 minute if house is available:
-					setTimeout(() => house.houseItemQueued = false, data?.can_build_house ? 1 : 30 * 60_000)
+					setTimeout(() => house.houseItemQueued = false, data?.can_build_house ? 1 : 30 * 60000)
 
 					vars.actionsPending = true
 					$("li#housing").click()
@@ -1080,7 +1080,7 @@ const mobClimbing = {
 	async travel(amount) {
 		const gold = parseInt($(".right.mygold.gold").data("personal").replace(/,/g, ""))
 		// If we don't have enough gold for travel, don't climb:
-		if (gold < 100_000_000) {
+		if (gold < 100000000) {
 			$("#loadBattle").click()
 			mobClimbing.finishClimbing()
 			return
@@ -1162,7 +1162,7 @@ const mobClimbing = {
 		}
 
 		// Only try climbing again in one hour:
-		if (!settings.autoQuests) await delay(60*60_000)
+		if (!settings.autoQuests) await delay(60*60000)
 		mobClimbing.climbing = false
 	},
 }
