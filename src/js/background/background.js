@@ -250,7 +250,7 @@ function sendCurrency(name) {
  * @function closeBanners
  * @memberof background
  */
-function closeBanners(){
+function closeBanners() {
 	sendMessage({text: "close banners"})
 }
 

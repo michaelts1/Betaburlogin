@@ -24,21 +24,16 @@ async function toggleInterfaceChanges(refresh) {
 	// Button next to name:
 	switch (settings.buttonNextToName) {
 		case "request":
-			if (!$("#betabot-request-currency")[0]) {
-				$("#betabot-next-to-name").empty()
-				$("#betabot-next-to-name").append(`<button id="betabot-request-currency" class="betabot"><a>Request Currency</a></button>`)
-				$("#betabot-request-currency").click(() => port.postMessage({text: "requesting currency"}) )
-			}
+			$("#betabot-request-button").removeClass("betabot-hidden")
+			$("#betabot-spread-button").addClass("betabot-hidden")
 			break
 		case "spread":
-			if (!$("#betabot-spread-button")[0]) {
-				$("#betabot-next-to-name").empty()
-				$("#betabot-next-to-name").append(`<button id="betabot-spread-button" class="betabot"><a>Spread Currency</a></button>`)
-				$("#betabot-spread-button").click(() => port.postMessage({text: "requesting a list of active alts"}) )
-			}
+			$("#betabot-request-button").addClass("betabot-hidden")
+			$("#betabot-spread-button").removeClass("betabot-hidden")
 			break
 		default:
-			$("#betabot-next-to-name").empty()
+			$("#betabot-request-button").addClass("betabot-hidden")
+			$("#betabot-spread-button").addClass("betabot-hidden")
 	}
 
 	// Make it easier to see what alt it is:
@@ -58,17 +53,12 @@ async function toggleInterfaceChanges(refresh) {
 		$("head").append(`<link id="betabot-css" class="betabot" rel="stylesheet" href="data:text/css;base64,${btoa(settings.css.addon + settings.css.custom.code)}">`)
 	}
 
-	// Remove Effects Box:
-	if (settings.removeEffects && $("#effectInfo")[0]) {
-		$("#effectInfo").remove()
-	} else if (!settings.removeEffects && !$("#effectInfo")[0]) {
-		$("#gauntletInfo").after(`
-		<div id="effectInfo" style="display: block;">
-			<div class="ui-element border2">
-				<h5 class="toprounder center"><a id="effectUpgradeTable">Effects</a></h5>
-				<div class="row" id="effectTable"></div>
-			</div>
-		</div>`)
+	// Hide Effects Box:
+	const effectsInfo = $("#effectInfo")[0]
+	if (settings.removeEffects && !Array.from(effectsInfo.classList).includes("betabot-hidden")) {
+		$("#effectInfo").addClass("betabot-hidden")
+	} else if (!settings.removeEffects && Array.from(effectsInfo.classList).includes("betabot-hidden")) {
+		$("#effectInfo").removeClass("betabot-hidden")
 	}
 
 	// Option to build a specific item:
@@ -119,8 +109,8 @@ async function refreshSettings(changes) {
 	for (const [name, {newValue}] of Object.entries(changes)) settings[name] = newValue
 
 	// Restart auto wire:
-	if ("wireFrequency" in changes && settings.autoWire) {
-		setTimeout(wiring.wire, settings.wireFrequency*60*1000)
+	if ("wireFrequency" in changes && settings.wireFrequency > 0) {
+		setTimeout(wiring.wire, settings.wireFrequency*60000)
 	}
 
 	// Reset `actionsPending` and call `toggleInterfaceChanges`:
@@ -153,7 +143,7 @@ browser.storage.sync.get().then(result => {
 	// Hookup to the websocket:
 	if ($("#betabot-ws")[0]) $("#betabot-ws").remove() // Re-inject the script if it already exists
 
-	$("head").after(`<script id="betabot-ws" class="betabot">
+	$("head").append(`<script id="betabot-ws" class="betabot">
 betabotChannel = new MessageChannel()
 window.postMessage("betabot-ws message", "*", [betabotChannel.port2])
 $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.parse(data)))
@@ -182,13 +172,17 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 		}
 	})
 
-	// Create an empty `span` next to the username:
+	// Create a `span` for buttons next to the username:
 	if (!$("#betabot-next-to-name")[0]) {
-		$("#username").after(`<span id="betabot-next-to-name" class="betabot"></span>`)
+		$("#username").after(`<span id="betabot-next-to-name" class="betabot"> </span>`)
+		$("#betabot-next-to-name").append(`<button id="betabot-request-button" class="betabot"><a>Request Currency</a></button>`)
+		$("#betabot-next-to-name").append(`<button id="betabot-spread-button" class="betabot"><a>Spread Currency</a></button>`)
+		$("#betabot-request-button").click(() => port.postMessage({text: "requesting currency"}) )
+		$("#betabot-spread-button").click(() => port.postMessage({text: "requesting a list of active alts"}) )
 	}
 
 	// Start up auto wire:
-	setTimeout(wiring.wire, settings.wireFrequency*60*1000)
+	setTimeout(wiring.wire, settings.wireFrequency*60000)
 
 	// Wait for the page to load:
 	eventListeners.waitFor("roa-ws:motd").then(async () => {
