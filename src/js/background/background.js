@@ -61,12 +61,6 @@ browser.runtime.onConnect.addListener(async port => {
 			break
 		case "alt":
 			ports.alts.push(port)
-			port.onMessage.addListener(message => {
-				switch (message.text) {
-					case "spawnGem":
-						spawnGem(message.type, message.splice, message.tier, message.amount)
-				}
-			})
 	}
 
 	if (["main", "alt"].includes(port.role)) { // If beta account
@@ -213,25 +207,6 @@ function sendMessage(message, users=[...ports.alts, ports.main]) {
 	for (const user of users) {
 		user.postMessage(message)
 	}
-}
-
-/**
- * Spawns the gems specified by the parameters for all alts
- * @function spawnGem
- * @param {number} type ID of a gem type for the main gem
- * @param {number} splice ID of a gem type for the spliced gem
- * @param {number} tier
- * @param {number} amount
- * @memberof background
- */
-function spawnGem(type, splice, tier, amount) {
-	sendMessage({
-		text  : "spawn gems",
-		type  : type,
-		splice: splice,
-		tier  : tier,
-		amount: amount,
-	}, ports.alts)
 }
 
 /**

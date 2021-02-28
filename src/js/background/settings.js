@@ -17,7 +17,7 @@
  * @type {number}
  * @memberof settings
  */
-const SETTINGS_VERSION = 22
+const SETTINGS_VERSION = 23
 
 /**
  * - CSS code for Betaburlogin interface changes
@@ -116,16 +116,34 @@ function updateSettings() {
 	let deletedSettings = []
 	/**
 	 * Changes a setting name, and uses a default value if the old setting does not exist
+	 * @function changeSettingName
 	 * @param {String} oldName Old setting name
 	 * @param {String} newName New setting name
 	 * @param {*} defaultValue Default value that will be used if the old setting is not defined
+	 * @memberof settings
+	 * @private
 	 */
 	function changeSettingName(oldName, newName, defaultValue) {
 		if (settings.hasOwnProperty(oldName)) {
 			settings[newName] = settings[oldName]
-			deletedSettings.push("doCraftQueue")
+			deleteSettings(oldName)
 		} else {
 			settings[newName] = defaultValue
+		}
+	}
+
+	/**
+	 * Deletes settings from storage if they exist
+	 * @function deleteSettings
+	 * @param {...String} names
+	 * @memberof settings
+	 * @private
+	 */
+	function deleteSettings(...names) {
+		for (const name of names) {
+			if (settings.hasOwnProperty(name)) {
+				deletedSettings.push(name)
+			}
 		}
 	}
 
@@ -197,7 +215,6 @@ function updateSettings() {
 			settings.autoStamina = true
 			settings.addCustomBuild = true
 			settings.addUsername = true
-			settings.addSpawnGems = true
 		case 9:
 			settings.attackAt = 3
 			settings.eventChannelID = 3202
@@ -215,10 +232,7 @@ function updateSettings() {
 		case 14:
 			changeSettingName("joinEvents", "joinGauntlets", true)
 			// Deletions:
-			if (settings.buttonDelay) deletedSettings.push("buttonDelay")
-			if (settings.actionsPending) deletedSettings.push("actionsPending")
-			if (settings.questCompleting) deletedSettings.push("questCompleting")
-			if (settings.startActionsDelay) deletedSettings.push("startActionsDelay")
+			deleteSettings("buttonDelay", "actionsPending", "questCompleting", "startActionsDelay")
 			// Reset:
 			settings.loginPassword = ""
 		case 15:
@@ -259,7 +273,7 @@ function updateSettings() {
 				settings.buttonNextToName = ""
 			} else {
 				settings.buttonNextToName = settings.addRequestMoney ? "request" : ""
-				deletedSettings.push("addRequestMoney")
+				deleteSettings("addRequestMoney")
 			}
 		case 19:
 			// No changes here anymore
@@ -267,12 +281,8 @@ function updateSettings() {
 			changeSettingName("addAdvertCalendar", "addAdventCalendar", true)
 
 			// Merging:
-			if (settings.minCraftingQueue === undefined && settings.minCarvingQueue === undefined) {
-				settings.minQueue = 5
-			} else {
-				settings.minQueue = Math.max(settings.minCraftingQueue ?? 0, settings.minCarvingQueue ?? 0)
-				deletedSettings.push("minCraftingQueue", "minCarvingQueue")
-			}
+			settings.minQueue = Math.max(settings.minCraftingQueue ?? 0, settings.minCarvingQueue ?? 0) || 5
+			deleteSettings("minCraftingQueue", "minCarvingQueue")
 
 			// Auto climb:
 			if (settings.autoClimb === undefined) {
@@ -285,15 +295,11 @@ function updateSettings() {
 					minimumWinrate: 99,
 				}
 			}
-			if (settings.addJumpMobs !== undefined) {
-				deletedSettings.push("addJumpMobs")
-			}
+			deleteSettings("addJumpMobs")
 		case 21:
 			// `autoWire` is now part of `wireFrequency`:
 			settings.wireFrequency = +(settings.autoWire ?? 0)*60 // 60 if `autoWire` is true, 0 otherwise
-			if (settings.autoWire !== undefined) {
-				deletedSettings.push("autoWire")
-			}
+			deleteSettings("autoWire")
 
 			// `send` is now two separate properties:
 			if ("send" in settings.currencySend.crystals) {
@@ -304,6 +310,8 @@ function updateSettings() {
 					delete settings.currencySend[currency].send
 				}
 			}
+		case 22:
+			deleteSettings("addSpawnGems")
 		default:
 			// Update internal CSS:
 			if (settings.css.addon !== ADDON_CSS) {

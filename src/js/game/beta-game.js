@@ -87,9 +87,6 @@ async function toggleInterfaceChanges(refresh) {
 			.join(" roa-ws:page:"),
 		gems.addSocket5Button, settings.addSocketX5)
 
-	// Spawn Gems For All Alts:
-	eventListeners.toggle("roa-ws:modalContent", gems.addAltsSpawn, username.isAlt() && settings.addSpawnGems)
-
 	// Advent Calendar:
 	eventListeners.toggle("roa-ws:page:event_calendar", calendar.addAdventCalendar, settings.addAdventCalendar)
 
@@ -130,7 +127,6 @@ browser.storage.sync.get().then(result => {
 		if (message.text === "list of active alts") wiring.spreadCurrency(message.alts)
 		if (message.text === "open advent calendar") calendar.receiveAdventCalendar()
 		if (message.text === "send currency") wiring.wire(message.recipient)
-		if (message.text === "spawn gems") gems.spawnGems(message.tier, message.type, message.splice, message.amount)
 	})
 
 	if (settings.verbose) {

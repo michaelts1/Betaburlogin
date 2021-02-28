@@ -419,7 +419,6 @@ const gauntlet = {
  * Gems related functions
  * @const gems
  * @property {function} addAltsSpawn Adds a "Spawn For All Alts" button
- * @property {function} spawnGems Spawns gems
  * @property {function} addSocket5Button Adds a "Socket Gem x5" button
  * @property {function} socketGems Sockets gems
  * @memberof beta-game-functions
@@ -448,43 +447,6 @@ const gems = {
 				if (settings.verbose) log(`Requested to spawn ${msg.amount} tier ${msg.tier} gems with type value of ${msg.type} and splice value of ${msg.splice}`)
 			})
 		}
-	},
-
-	/**
-	 * Spawns gems
-	 * @async
-	 * @function gems.spawnGems
-	 * @param {number} type ID of a gem type for the main gem
-	 * @param {number} splice ID of a gem type for the spliced gem
-	 * @param {number} tier
-	 * @param {number} amount
-	 * @memberof beta-game-functions
-	 */
-	async spawnGems(tier, type, splice, amount) {
-		if (settings.verbose) log(`Spawning ${amount} level ${tier*10} gems with type value of ${type} and splice value of ${splice}`)
-
-		if (tier > parseInt($("#level").text()) * 10 || amount > 60 || type === 65535 || splice === 65535 || type === splice) {
-			if (settings.verbose) log("Invalid request. Aborting spawn")
-			return
-		}
-
-		$("#chatMessage").text("/spawngem")
-		$("#chatSendMessage").click()
-
-		await eventListeners.waitFor("roa-ws:modalContent")
-		$("#spawnGemLevel").val(tier)
-		$("#gemSpawnType").val(type)
-		$("#gemSpawnSpliceType").val(splice)
-		$("#gemSpawnCount").val(amount)
-
-		await delay(vars.startActionsDelay)
-		$("#gemSpawnConfirm").click()
-
-		await eventListeners.waitFor("roa-ws:page:gem_spawn")
-		$("#betabot-spawn-gem").prop("disabled", true)
-		await delay(60000)
-		$("#betabot-spawn-gem").prop("disabled", false)
-		$("#confirmButtons>a.green")[0].click()
 	},
 
 	/**
