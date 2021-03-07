@@ -31,9 +31,11 @@ async function toggleInterfaceChanges(refresh) {
 			$("#betabot-request-button").addClass("betabot-hidden")
 			$("#betabot-spread-button").removeClass("betabot-hidden")
 			break
+		case "both":
+			$("#betabot-request-button, #betabot-spread-button").removeClass("betabot-hidden")
+			break
 		default:
-			$("#betabot-request-button").addClass("betabot-hidden")
-			$("#betabot-spread-button").addClass("betabot-hidden")
+			$("#betabot-request-button, #betabot-spread-button").addClass("betabot-hidden")
 	}
 
 	// Make it easier to see what alt it is:
