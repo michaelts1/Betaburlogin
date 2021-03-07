@@ -172,7 +172,7 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 
 	// Create a `span` for buttons next to the username:
 	if (!$("#betabot-next-to-name")[0]) {
-		$("#username").after(`<span id="betabot-next-to-name" class="betabot"> </span>`)
+		$("#username").after(`<span id="betabot-next-to-name" class="betabot"></span>`)
 		$("#betabot-next-to-name").append(`<button id="betabot-request-button" class="betabot"><a>Request Currency</a></button>`)
 		$("#betabot-next-to-name").append(`<button id="betabot-spread-button" class="betabot"><a>Spread Currency</a></button>`)
 		$("#betabot-request-button").click(() => port.postMessage({text: "requesting currency"}) )

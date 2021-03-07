@@ -17,7 +17,7 @@
  * @type {number}
  * @memberof settings
  */
-const SETTINGS_VERSION = 23
+const SETTINGS_VERSION = 24
 
 /**
  * - CSS code for Betaburlogin interface changes
@@ -45,6 +45,9 @@ const ADDON_CSS =
 }
 #betabot-next-to-name a {
 	line-height: 10px;
+}
+#betabot-next-to-name button {
+	margin-left: 3px;
 }
 #betabot-spawn-gem[disabled] {
 	opacity: 0.5;
