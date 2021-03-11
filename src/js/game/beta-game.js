@@ -31,9 +31,11 @@ async function toggleInterfaceChanges(refresh) {
 			$("#betabot-request-button").addClass("betabot-hidden")
 			$("#betabot-spread-button").removeClass("betabot-hidden")
 			break
+		case "both":
+			$("#betabot-request-button, #betabot-spread-button").removeClass("betabot-hidden")
+			break
 		default:
-			$("#betabot-request-button").addClass("betabot-hidden")
-			$("#betabot-spread-button").addClass("betabot-hidden")
+			$("#betabot-request-button, #betabot-spread-button").addClass("betabot-hidden")
 	}
 
 	// Make it easier to see what alt it is:
@@ -107,7 +109,7 @@ async function refreshSettings(changes) {
 
 	// Restart auto wire:
 	if ("wireFrequency" in changes && settings.wireFrequency > 0) {
-		setTimeout(wiring.wire, settings.wireFrequency*60000)
+		setTimeout(wiring.wire, settings.wireFrequency*60_000)
 	}
 
 	// Reset `actionsPending` and call `toggleInterfaceChanges`:
@@ -170,7 +172,7 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 
 	// Create a `span` for buttons next to the username:
 	if (!$("#betabot-next-to-name")[0]) {
-		$("#username").after(`<span id="betabot-next-to-name" class="betabot"> </span>`)
+		$("#username").after(`<span id="betabot-next-to-name" class="betabot"></span>`)
 		$("#betabot-next-to-name").append(`<button id="betabot-request-button" class="betabot"><a>Request Currency</a></button>`)
 		$("#betabot-next-to-name").append(`<button id="betabot-spread-button" class="betabot"><a>Spread Currency</a></button>`)
 		$("#betabot-request-button").click(() => port.postMessage({text: "requesting currency"}) )
@@ -178,7 +180,7 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 	}
 
 	// Start up auto wire:
-	setTimeout(wiring.wire, settings.wireFrequency*60000)
+	setTimeout(wiring.wire, settings.wireFrequency*60_000)
 
 	// Wait for the page to load:
 	eventListeners.waitFor("roa-ws:motd").then(async () => {

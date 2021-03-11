@@ -17,7 +17,7 @@
  * @type {number}
  * @memberof settings
  */
-const SETTINGS_VERSION = 23
+const SETTINGS_VERSION = 24
 
 /**
  * - CSS code for Betaburlogin interface changes
@@ -43,8 +43,14 @@ const ADDON_CSS =
 	content: ": ";
 	font-size: 14px;
 }
+#betabot-next-to-name {
+	margin-left: 3px;
+}
 #betabot-next-to-name a {
 	line-height: 10px;
+}
+#betabot-next-to-name button {
+	margin-left: 3px;
 }
 #betabot-spawn-gem[disabled] {
 	opacity: 0.5;
@@ -170,7 +176,7 @@ function updateSettings() {
 			}
 			// Override some of the previously set values:
 			settings.currencySend.crystals.minimumAmount = 0
-			settings.currencySend.gold.minimumAmount = 10000
+			settings.currencySend.gold.minimumAmount = 10_000
 
 			/* eslint-disable no-fallthrough */ // Falling through to update properly
 		case 2:
@@ -190,7 +196,7 @@ function updateSettings() {
 				settings.currencySend[trade] = {
 					send: true,
 					minimumAmount: 100,
-					keepAmount: 100000000,
+					keepAmount: 100_000_000,
 				}
 			}
 		case 5:
