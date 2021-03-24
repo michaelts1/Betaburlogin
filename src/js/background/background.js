@@ -106,10 +106,7 @@ browser.runtime.onConnect.addListener(async port => {
  * @memberof background
  */
 async function openTabs() {
-	let containers = await browser.contextualIdentities.query({}) // Get all containers
-	if (!settings.containers.useAll) {
-		containers = containers.filter(e => settings.containers.list.includes(e.name)) // Filter according to settings
-	}
+	let containers = await getContainers()
 
 	const altsNumber = settings.pattern === "unique" ? settings.namesList.length : settings.altsNumber
 
@@ -122,6 +119,22 @@ async function openTabs() {
 			})
 		}, 10 * (i + 1))
 	}
+}
+
+/**
+ * Returns a list of containers for use by Betaburlogin
+ * @async
+ * @function getContainers
+ * @memberof background
+ * @returns {Promise<Array>} A promise that resolves to an array of {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/contextualIdentities/ContextualIdentity|Contextual Identities}
+ */
+async function getContainers() {
+	browser.contextualIdentities.query({})
+		.then(containers => {
+			return settings.containers.useAll
+				? containers
+				: containers.filter(e => settings.containers.list.includes(e.name)) // Filter according to settings
+		})
 }
 
 /**
