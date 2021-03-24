@@ -36,7 +36,7 @@ async function betaLogin() {
 	 */
 	async function login(username) {
 		$("#acctname").val(username)
-		$("#password").val(await insecureCrypt.decrypt(settings.loginPassword, "betabot Totally-not-secure Super NOT secret key!"))
+		$("#password").val(await helpers.insecureCrypt.decrypt(settings.loginPassword, "betabot Totally-not-secure Super NOT secret key!"))
 		$("#login").click()
 		if (settings.verbose) log(`Logging in with username ${username}`)
 		await delay(7500)

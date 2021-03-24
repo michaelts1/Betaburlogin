@@ -23,6 +23,9 @@
 /* eslint-disable no-unused-vars */ // Defined in this file, used in beta-game.js
 /* eslint-disable no-use-before-define */ // Functions here will only run after all other functions and objects were initialized
 
+// Shorthand:
+const {eventListeners} = helpers
+
 /**
  * Stores variables and constants to avoid polluting the global space
  * @constant vars
@@ -676,7 +679,7 @@ const professionQueues = {
 		if (vars.actionsPending) return
 
 		// If auto Craft/Carve is off, return:
-		if (settings[`auto${capitalize(data.type)}`] === false) return
+		if (settings[`auto${helpers.capitalize(data.type)}`] === false) return
 
 		const expr = /You completed your (crafting|carving) queue and began (Battling|Fishing|Woodcutting|Mining|Stonecutting) automatically./
 		if ((["carve", "craft"].includes(data.type) && data.results.a.cq < settings.minQueue) ||

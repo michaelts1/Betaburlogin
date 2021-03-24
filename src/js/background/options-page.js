@@ -114,8 +114,8 @@ class Setting {
 				 * @name notEncrypted
 				 * @memberof options
 				 */
-				this.loadValue = async function() {this.input.value = await insecureCrypt.decrypt(settings[this.name], "betabot Totally-not-secure Super NOT secret key!")}
-				this.updateValue = async function() {this.value = await insecureCrypt.encrypt(this.input.value, "betabot Totally-not-secure Super NOT secret key!")}
+				this.loadValue = async function() {this.input.value = await helpers.insecureCrypt.decrypt(settings[this.name], "betabot Totally-not-secure Super NOT secret key!")}
+				this.updateValue = async function() {this.value = await helpers.insecureCrypt.encrypt(this.input.value, "betabot Totally-not-secure Super NOT secret key!")}
 				break
 			case "boolean":
 				this.loadValue = function() {this.input.checked = this.value}
@@ -182,7 +182,7 @@ class Setting {
 		for (const fun of this.runAfterSave) fun(this.input)
 
 		// Don't save if the setting didn't change:
-		if (objectEquals(this.value, Setting.getSettingByName(this.name).settingValue)) return
+		if (helpers.objectEquals(this.value, Setting.getSettingByName(this.name).settingValue)) return
 
 		/**
 		 * Recursively creates a clone of the child of `settings` containing a specific setting, while using a new value for that setting
@@ -239,7 +239,7 @@ class Setting {
 		settings = await browser.storage.sync.get()
 
 		for (const setting of Setting.instances) {
-			if (!objectEquals(setting.value, Setting.getSettingByName(setting.name).settingValue)) {
+			if (!helpers.objectEquals(setting.value, Setting.getSettingByName(setting.name).settingValue)) {
 				setting.load()
 			}
 		}

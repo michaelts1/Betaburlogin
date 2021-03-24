@@ -10,8 +10,8 @@
 
 // Defined in beta-game-functions.js:
 /*
-	global betabot, calendar, closeBanner, gauntlet, gems, house, mobClimbing,
-	port:writable, professionQueues, settings:writable, username, vars, wiring
+	global betabot, calendar, closeBanner, gauntlet, gems, house, mobClimbing, eventListeners,
+		port:writable, professionQueues, settings:writable, username, vars, wiring
 */
 
 /**
@@ -84,9 +84,8 @@ async function toggleInterfaceChanges(refresh) {
 
 	// Socket Gem x5:
 	eventListeners.toggle(
-		"roa-ws:page:" +
-		["item_options", "gem_unsocket_from_item", "gem_unsocket_all_from_item", "gem_socket_to_item", "item_rename", "item_own"]
-			.join(" roa-ws:page:"),
+		["", "item_options", "gem_unsocket_from_item", "gem_unsocket_all_from_item", "gem_socket_to_item", "item_rename", "item_own"]
+			.join(" roa-ws:page:").trim(),
 		gems.addSocket5Button, settings.addSocketX5)
 
 	// Advent Calendar:

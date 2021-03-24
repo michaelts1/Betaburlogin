@@ -357,7 +357,7 @@ function logSettingsChanges(changes) {
 	if (!settings.verbose) return
 
 	for (let key in changes) {
-		if (!objectEquals(changes[key].oldValue, changes[key].newValue)) {
+		if (!helpers.objectEquals(changes[key].oldValue, changes[key].newValue)) {
 			log(key, "changed from", changes[key].oldValue, "to", changes[key].newValue)
 		}
 	}

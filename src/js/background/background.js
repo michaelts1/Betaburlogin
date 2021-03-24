@@ -143,7 +143,7 @@ async function openTabs() {
 				cookieStoreId: containers[i].cookieStoreId,
 				url: "https://beta.avabur.com",
 			})
-		}, 10 * (++i))
+		}, 10 * ++i)
 	}
 }
 
@@ -170,37 +170,6 @@ async function getContainers() {
  * @memberof background
  */
 function login() {
-	/**
-	 * Converts a Latin numeral to Roman numeral
-	 * @function romanize
-	 * @example
-	 * // Returns "IX"
-	 * romanize(9)
-	 * @param {number} num Latin numeral
-	 * @returns {string} String containing a roman numeral
-	 * @private
-	 * @memberof background
-	 */
-	function romanize(num) {
-		if (num === 0) return ""
-		const roman = {
-			L : 50,
-			XL: 40,
-			X : 10,
-			IX: 9,
-			V : 5,
-			IV: 4,
-			I : 1,
-		}
-		let str = ""
-		for (const key of Object.keys(roman)) {
-			const q = Math.floor(num / roman[key])
-			num -= q * roman[key]
-			str += key.repeat(q)
-		}
-		return str
-	}
-
 	// Sort `ports.login` to get a consistent login order (For example, `firefox-default` will always login with the main account):
 	ports.login = ports.login.sort((el1, el2) => {
 		const n1 = parseInt(el1.sender.tab.cookieStoreId.match(/\d+/)) || 0
@@ -211,7 +180,7 @@ function login() {
 	ports.login[0].login(settings.mainAccount)
 	if (settings.pattern === "roman") {
 		for (let i = 1; i <= settings.altsNumber; i++) {
-			ports.login[i].login(settings.altBaseName+romanize(i))
+			ports.login[i].login(settings.altBaseName+helpers.romanize(i))
 		}
 	} else {
 		for (let i = 0; i < settings.namesList.length; i++) {
