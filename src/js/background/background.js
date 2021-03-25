@@ -126,6 +126,27 @@ browser.runtime.onConnect.addListener(runtimePort => {
 })
 
 /**
+ * Returns a list of containers for use by Betaburlogin
+ * @async
+ * @function getContainers
+ * @memberof background
+ * @returns {Promise<Array>} A promise that resolves to an array of {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/contextualIdentities/ContextualIdentity|Contextual Identities}
+ */
+async function getContainers() {
+	return new Promise(resolve => {
+		if (settings.containers.useAll) {
+			// Return the default container and all other containers:
+			browser.contextualIdentities.query({}).then(containers => {
+				resolve(["firefox-default", ...containers.map(e=>e.cookieStoreId)])
+			})
+		} else {
+			// Return the selected containers only:
+			resolve(settings.containers.list)
+		}
+	})
+}
+
+/**
  * Opens Beta Login tabs according to the amount of alts
  * @async
  * @function openTabs
@@ -134,33 +155,17 @@ browser.runtime.onConnect.addListener(runtimePort => {
 async function openTabs() {
 	let containers = await getContainers()
 
-	const altsNumber = settings.pattern === "unique" ? settings.namesList.length : settings.altsNumber
+	// Number of alts, including main:
+	const altsNumber = 1 + (settings.pattern === "unique" ? settings.namesList.length : settings.altsNumber)
 
-	browser.tabs.create({url: "https://beta.avabur.com"})
-	for (let i = 0; i < Math.min(containers.length, altsNumber);) {
+	for (let i = 0; i < Math.min(containers.length, altsNumber); i++) {
 		setTimeout(() => {
 			browser.tabs.create({
-				cookieStoreId: containers[i].cookieStoreId,
+				cookieStoreId: containers[i],
 				url: "https://beta.avabur.com",
 			})
-		}, 10 * ++i)
+		}, 10 * i+1)
 	}
-}
-
-/**
- * Returns a list of containers for use by Betaburlogin
- * @async
- * @function getContainers
- * @memberof background
- * @returns {Promise<Array>} A promise that resolves to an array of {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/contextualIdentities/ContextualIdentity|Contextual Identities}
- */
-async function getContainers() {
-	browser.contextualIdentities.query({})
-		.then(containers => {
-			return settings.containers.useAll
-				? containers
-				: containers.filter(e => settings.containers.list.includes(e.name)) // Filter according to settings
-		})
 }
 
 /**

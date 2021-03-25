@@ -493,27 +493,36 @@ function resetCSS() {
  * @memberof options
  */
 async function fillContainers() {
-	const containers = await browser.contextualIdentities.query({}) // Get all containers
+	// All containers plus the default container:
+	const containers = [
+		{name: "Default Container", cookieStoreId: "firefox-default"},
+		...(await browser.contextualIdentities.query({})),
+	]
 
+	// Check the box according to settings:
 	$("#containers-auto").prop("checked", settings.containers.useAll)
 
-	if (containers.length === 0) { // If there are no containers
+	// If there are no containers (except from the default one):
+	if (containers.length === 1) {
 		$("#containers").text("No containers found")
 		return
 	}
 
-	if ($("[name=containers]").length === 0) { // Only add checkboxes if they don't exist already
+	// Add checkboxes, but only if they don't already exist:
+	if ($("[name=containers]").length === 0) {
 		for (const container of containers) {
-			const name = container.name
-			$("#containers").append(`<input id="${name}" name="containers" type="checkbox" data-for="containers"><span id="${name}-icon" class="container-icon"></span><label for="${name}">${name}</label><br>`)
-			$(`#${name}-icon`).css({"background-color": container.color, "mask": `url(${container.iconUrl})`, "mask-size": "100%"})
+			const id = container.cookieStoreId
+			$("#containers").append(`<input id="${id}" name="containers" type="checkbox" data-for="containers"><span id="${id}-icon" class="container-icon"></span><label for="${id}">${container.name}</label><br>`)
+			$(`#${id}-icon`).css({"background-color": container.color, "mask": `url(${container.iconUrl})`, "mask-size": "100%"})
 		}
 	}
 
-	for (const container of settings.containers.list) { // Check all containers previously saved
+	// Check all containers previously saved:
+	for (const container of settings.containers.list) {
 		$(`#${container}`).prop("checked", true)
 	}
 
+	// Save on change:
 	$("#containers-auto, [name=containers]").on("input", saveContainers)
 }
 
@@ -526,7 +535,7 @@ function saveContainers() {
 	browser.storage.sync.set({
 		containers: {
 			useAll: $("#containers-auto").prop("checked"),
-			list: $("[name=containers]:checked").get().map(e => e.id), // Get id's of checked containers,
+			list: $("[name=containers]:checked").get().map(e => e.id),
 		},
 	})
 }
