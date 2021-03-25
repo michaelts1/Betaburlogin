@@ -44,6 +44,7 @@ class Port {
 		// Define properties and methods:
 		this.originalPortObject = runtimePort
 		this.postMessage = runtimePort.postMessage
+		this.cookieStoreId = runtimePort.sender.tab.cookieStoreId
 
 		/**
 		 * Logs in with a given Username
@@ -174,23 +175,24 @@ async function openTabs() {
  * @function login
  * @memberof background
  */
-function login() {
-	// Sort `ports.login` to get a consistent login order (For example, `firefox-default` will always login with the main account):
-	ports.login = ports.login.sort((el1, el2) => {
-		const n1 = parseInt(el1.sender.tab.cookieStoreId.match(/\d+/)) || 0
-		const n2 = parseInt(el2.sender.tab.cookieStoreId.match(/\d+/)) || 0
-		return n1 - n2
-	})
+async function login() {
+	const containers = await getContainers()
 
-	// Login users:
-	ports.login[0].login(settings.mainAccount)
-	if (settings.pattern === "roman") {
-		for (let i = 1; i <= settings.altsNumber; i++) {
-			ports.login[i].login(settings.altBaseName+helpers.romanize(i))
+	for (const port of ports.login) {
+		// Login alts based on container id:
+		const index = containers.indexOf(port.cookieStoreId)
+		// Login main account
+		if (index === 0) {
+			port.login(settings.mainAccount)
+			continue
 		}
-	} else {
-		for (let i = 0; i < settings.namesList.length; i++) {
-			ports.login[i+1].login(settings.namesList[i])
+
+		// Login alts:
+		if (settings.pattern === "roman") {
+			port.login(settings.altBaseName + helpers.romanize(index))
+		} else {
+			// Use `index-1` since namesList[0] is #1st alt's name:
+			port.login(settings.namesList[index-1])
 		}
 	}
 }
