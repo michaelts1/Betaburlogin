@@ -47,6 +47,14 @@ function delay(ms) {
 	})
 }
 
+/**
+ * @const helpers
+ * @property {Object} eventListeners
+ * @property {Object} insecureCrypt
+ * @property {Function} objectEquals
+ * @property {Function} capitalize
+ * @property {Function} romanize
+ */
 const helpers = {
 	/**
 	 * Object used to manage jQuery document event listeners
