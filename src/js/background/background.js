@@ -27,7 +27,7 @@
 const ports = {
 	live : null,
 	main : null,
-	alt : [],
+	alt  : [],
 	login: [],
 }
 
