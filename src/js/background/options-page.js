@@ -100,7 +100,7 @@ class Setting {
 			case this.input.id.match(/.*-keep$/)?.input: // https://stackoverflow.com/a/18881169/
 				this.runAfterChange.push(currencySendTitle)
 				this.runAfterSave.push(async setting => {
-					// Update the displayed value (e.g 1000b => 1T)
+					// Update the displayed value (e.g 1000b => 1T):
 					setting.value = abbreviateNumber(deabbreviateNumber(setting.value))
 				})
 		}
@@ -126,7 +126,7 @@ class Setting {
 				this.updateValue = function() {this.value = this.input.value !== "" ? this.input.value.split(", ") : []}
 				break
 			case "number":
-				// Don't abbreviate the Event Channel ID field
+				// Don't abbreviate the Event Channel ID field:
 				this.loadValue = function() {this.input.value = this.input.id === "event-channel-id" ? this.value : abbreviateNumber(this.value)}
 				this.updateValue = function() {const value = deabbreviateNumber(this.input.value); this.value = isNaN(value) ? this.value : value}
 				break
@@ -196,12 +196,14 @@ class Setting {
 		 * @memberof options
 		 */
 		const changeSetting = (setting, _settingsObject = settings, _index = 0) => {
-			if (_index + 1 === setting.path.length) { // If index is the last index, change the setting
+			if (_index + 1 === setting.path.length) {// If index is the last index, change the setting
 				_settingsObject[setting.path[_index]] = setting.value
 			} else { // Else, call `changeSetting()` again to modify the next child
 				_settingsObject[setting.path[_index]] = changeSetting(setting, _settingsObject[setting.path[_index]], _index + 1)
 			}
-			return _settingsObject // Return the modified object
+
+			// Return the modified object:
+			return _settingsObject
 		}
 		/* Change a setting without modifying the rest of `settings`. I am using `[this.path[0]]`
 		   to only set the specific setting (e.g. `css`), and not the whole `settings` object: */
@@ -435,7 +437,7 @@ function displayLoginFields() {
 		loginPassword: $("#login-password-tr"),
 	}
 
-	// Hide everything, then only show what is needed
+	// Hide everything, then only show what is needed:
 	for (const field in fieldRows) fieldRows[field].hide()
 
 	if ($("#add-login-alts").prop("checked")) {
@@ -574,7 +576,8 @@ $(init)
 window.onbeforeunload = () => {
 	const time = new Date().getTime()
 	for (const setting of Setting.instances) {
-		if (time - setting.lastChanged < 2000) { // If `setting` was last changed less than 2 seconds ago, it still didn't save
+		// If `setting` was last changed less than 2 seconds ago, it probably still didn't save:
+		if (time - setting.lastChanged < 2000) {
 			setting.save()
 		}
 	}

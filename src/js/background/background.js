@@ -182,6 +182,7 @@ function login() {
 		return n1 - n2
 	})
 
+	// Login users:
 	ports.login[0].login(settings.mainAccount)
 	if (settings.pattern === "roman") {
 		for (let i = 1; i <= settings.altsNumber; i++) {

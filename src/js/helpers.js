@@ -85,14 +85,20 @@ const helpers = {
 			if (this[eventName] === undefined) {
 				this[eventName] = []
 			}
-			const prop = this[eventName] // Shorter identifier
 
-			if (prop.includes(handler) && turnOn) { // Turn off the previous event handler to avoid duplicates
+			// Shorter identifier:
+			const prop = this[eventName]
+
+			// Turn off the previous event handler to avoid duplicates:
+			if (prop.includes(handler) && turnOn) {
 				$(document).off(eventName, handler)
 			}
 
-			$(document)[turnOn ? "on" : "off"](eventName, handler) // If turnOn is true, $(document).on(...), if false, $(document).off(...)
-			if (prop.includes(handler) && !turnOn) { // Push/pop the handler from the handlers array
+			// If turnOn is true, $(document).on(...), if false, $(document).off(...):
+			$(document)[turnOn ? "on" : "off"](eventName, handler)
+
+			// Push/pop the handler from the handlers array:
+			if (prop.includes(handler) && !turnOn) {
 				prop.splice(prop.indexOf(handler), 1)
 			} else if (turnOn) {
 				prop.push(handler)
@@ -118,10 +124,13 @@ const helpers = {
 
 			return new Promise(resolve => {
 				function resolved(event, data) {
-					helpers.eventListeners.toggle(eventName, resolved, false) // Remove the listener
-					resolve({event, data}) // Resolve the promise
+					// Remove the listener and resolve the promise:
+					helpers.eventListeners.toggle(eventName, resolved, false)
+					resolve({event, data})
 				}
-				helpers.eventListeners.toggle(eventName, resolved, true) // Add a listener that will call resolved() when the event is triggered
+
+				// Add a listener that will call resolved() when the event is triggered:
+				helpers.eventListeners.toggle(eventName, resolved, true)
 			})
 		},
 	},

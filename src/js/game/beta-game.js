@@ -47,10 +47,13 @@ async function toggleInterfaceChanges(refresh) {
 		$("#betabot-clear-username")?.remove()
 	}
 
-	// Custom style:
+	// Check CSS for changes:
 	const cssChanged = `data:text/css;base64,${btoa(settings.css.addon + settings.css.custom.code)}` !== $("#betabot-css")?.prop("href")
-	if (cssChanged) { // If the code has changed, or if it was never injected
-		$("#betabot-css")?.remove() //only remove the element if it exists
+
+	// If the code has changed, or if it was never injected:
+	if (cssChanged) {
+		//only remove the element if it exists:
+		$("#betabot-css")?.remove()
 		// Decode CSS into base64 and use it as a link to avoid script injections:
 		$("head").append(`<link id="betabot-css" class="betabot" rel="stylesheet" href="data:text/css;base64,${btoa(settings.css.addon + settings.css.custom.code)}">`)
 	}
