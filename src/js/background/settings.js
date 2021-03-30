@@ -93,19 +93,19 @@ async function getSettings() {
 	updateSettings()
 
 	// Update `ports`:
-	if (ports.main || ports.alts.length > 0) { // If there are either alts or main connected
+	if (ports.main || ports.alt.length > 0) { // If there are either alts or main connected
 		if (ports.main?.name !== settings.mainUsername) {
 			// Move old `main` into `alts`:
 			if (ports.main !== null) {
-				ports.alts.push(ports.main)
+				ports.alt.push(ports.main)
 				ports.main = null
 			}
 
 			// Find new `main` in `alts`:
-			for (const port of ports.alts) {
+			for (const port of ports.alt) {
 				if (port.name === settings.mainUsername) {
 					ports.main = port
-					ports.alts.splice(ports.alts.indexOf(port), 1)
+					ports.alt.splice(ports.alt.indexOf(port), 1)
 				}
 			}
 		}
@@ -357,7 +357,7 @@ function logSettingsChanges(changes) {
 	if (!settings.verbose) return
 
 	for (let key in changes) {
-		if (!objectEquals(changes[key].oldValue, changes[key].newValue)) {
+		if (!helpers.objectEquals(changes[key].oldValue, changes[key].newValue)) {
 			log(key, "changed from", changes[key].oldValue, "to", changes[key].newValue)
 		}
 	}

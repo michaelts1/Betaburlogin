@@ -23,6 +23,9 @@
 /* eslint-disable no-unused-vars */ // Defined in this file, used in beta-game.js
 /* eslint-disable no-use-before-define */ // Functions here will only run after all other functions and objects were initialized
 
+// Shorthand:
+const {eventListeners} = helpers
+
 /**
  * Stores variables and constants to avoid polluting the global space
  * @constant vars
@@ -84,7 +87,8 @@ const username = {
 	 * @memberof beta-game-functions
 	 */
 	usernameChange(_, data) {
-		if (data.s === 0) return // Unsuccessful name change
+		// Unsuccessful name change:
+		if (data.s === 0) return
 
 		if (settings.verbose) log(`User has changed name from ${username.name} to ${data.u}`)
 		$.alert(`It looks like you have changed your username from ${username.name} to ${data.u}.
@@ -522,7 +526,6 @@ const wiring = {
 			const wiringInterval = settings.wireFrequency*60_000
 			// Subtract one second from wiringInterval, to allow slight mistimings:
 			if (Date.now() - wiring.autoWireLastTimestamp < wiringInterval - 1000) {
-				//log(`Automatic wiring occurred before time. Stopping now`)
 				return
 			}
 
@@ -547,12 +550,14 @@ const wiring = {
 
 			const amount   = $(`.${name}`).attr("title").replace(/,/g, "")
 			const sellable = $(`.${name}`).attr("data-personal").replace(/,/g, "")
-			let amountToSend = amount - sendSettings.keepAmount // Keep this amount
 
-			// Don't send more than you can
+			// Keep this amount:
+			let amountToSend = amount - sendSettings.keepAmount
+
+			// Don't send more than you can:
 			if (amountToSend > sellable) amountToSend = sellable
 
-			// Only send if you have enough
+			// Only send if you have enough:
 			if (amountToSend > sendSettings.minimumAmount) {
 				sendMessage += ` ${amountToSend} ${name},`
 			}
@@ -676,7 +681,7 @@ const professionQueues = {
 		if (vars.actionsPending) return
 
 		// If auto Craft/Carve is off, return:
-		if (settings[`auto${capitalize(data.type)}`] === false) return
+		if (settings[`auto${helpers.capitalize(data.type)}`] === false) return
 
 		const expr = /You completed your (crafting|carving) queue and began (Battling|Fishing|Woodcutting|Mining|Stonecutting) automatically./
 		if ((["carve", "craft"].includes(data.type) && data.results.a.cq < settings.minQueue) ||
@@ -698,7 +703,6 @@ const professionQueues = {
 
 		await delay(vars.startActionsDelay)
 		type === "craft" ? $(".craftingTableLink")[0].click() : $(".carvingBenchLink")[0].click()
-		// $(".craftingTableLink")[0].dispatchEvent(new Event("click")) // For some weird reason, .click() does not work here ¯\_(ツ)_/¯
 
 		await eventListeners.waitFor("roa-ws:page:house_room_item")
 		await delay(vars.buttonDelay)
@@ -856,7 +860,7 @@ const betabot = {
 		const maxCrystals = Math.floor(max(gold))
 		leftToBuy = Math.min(leftToBuy, maxCrystals)
 
-		// Don't purchase if there is nothing to purchase
+		// Don't purchase if there is nothing to purchase:
 		if (leftToBuy > 0) {
 			await delay(vars.buttonDelay)
 			$("#goldCrystalButton").click()
@@ -1135,7 +1139,9 @@ const mobClimbing = {
  * @memberof beta-game-functions
  */
 function closeBanner() {
-	if (!$("#close_general_notification")[0]) return // Don't run if the banner is already closed
+	// Don't run if the banner is already closed:
+	if (!$("#close_general_notification")[0]) return
+
 	$("#close_general_notification")[0].click()
 	if (settings.verbose) log("Banner closed")
 }

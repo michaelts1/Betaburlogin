@@ -100,7 +100,7 @@ class Setting {
 			case this.input.id.match(/.*-keep$/)?.input: // https://stackoverflow.com/a/18881169/
 				this.runAfterChange.push(currencySendTitle)
 				this.runAfterSave.push(async setting => {
-					// Update the displayed value (e.g 1000b => 1T)
+					// Update the displayed value (e.g 1000b => 1T):
 					setting.value = abbreviateNumber(deabbreviateNumber(setting.value))
 				})
 		}
@@ -114,8 +114,8 @@ class Setting {
 				 * @name notEncrypted
 				 * @memberof options
 				 */
-				this.loadValue = async function() {this.input.value = await insecureCrypt.decrypt(settings[this.name], "betabot Totally-not-secure Super NOT secret key!")}
-				this.updateValue = async function() {this.value = await insecureCrypt.encrypt(this.input.value, "betabot Totally-not-secure Super NOT secret key!")}
+				this.loadValue = async function() {this.input.value = await helpers.insecureCrypt.decrypt(settings[this.name], "betabot Totally-not-secure Super NOT secret key!")}
+				this.updateValue = async function() {this.value = await helpers.insecureCrypt.encrypt(this.input.value, "betabot Totally-not-secure Super NOT secret key!")}
 				break
 			case "boolean":
 				this.loadValue = function() {this.input.checked = this.value}
@@ -126,7 +126,7 @@ class Setting {
 				this.updateValue = function() {this.value = this.input.value !== "" ? this.input.value.split(", ") : []}
 				break
 			case "number":
-				// Don't abbreviate the Event Channel ID field
+				// Don't abbreviate the Event Channel ID field:
 				this.loadValue = function() {this.input.value = this.input.id === "event-channel-id" ? this.value : abbreviateNumber(this.value)}
 				this.updateValue = function() {const value = deabbreviateNumber(this.input.value); this.value = isNaN(value) ? this.value : value}
 				break
@@ -182,7 +182,7 @@ class Setting {
 		for (const fun of this.runAfterSave) fun(this.input)
 
 		// Don't save if the setting didn't change:
-		if (objectEquals(this.value, Setting.getSettingByName(this.name).settingValue)) return
+		if (helpers.objectEquals(this.value, Setting.getSettingByName(this.name).settingValue)) return
 
 		/**
 		 * Recursively creates a clone of the child of `settings` containing a specific setting, while using a new value for that setting
@@ -196,12 +196,14 @@ class Setting {
 		 * @memberof options
 		 */
 		const changeSetting = (setting, _settingsObject = settings, _index = 0) => {
-			if (_index + 1 === setting.path.length) { // If index is the last index, change the setting
+			if (_index + 1 === setting.path.length) {// If index is the last index, change the setting
 				_settingsObject[setting.path[_index]] = setting.value
 			} else { // Else, call `changeSetting()` again to modify the next child
 				_settingsObject[setting.path[_index]] = changeSetting(setting, _settingsObject[setting.path[_index]], _index + 1)
 			}
-			return _settingsObject // Return the modified object
+
+			// Return the modified object:
+			return _settingsObject
 		}
 		/* Change a setting without modifying the rest of `settings`. I am using `[this.path[0]]`
 		   to only set the specific setting (e.g. `css`), and not the whole `settings` object: */
@@ -239,7 +241,7 @@ class Setting {
 		settings = await browser.storage.sync.get()
 
 		for (const setting of Setting.instances) {
-			if (!objectEquals(setting.value, Setting.getSettingByName(setting.name).settingValue)) {
+			if (!helpers.objectEquals(setting.value, Setting.getSettingByName(setting.name).settingValue)) {
 				setting.load()
 			}
 		}
@@ -435,7 +437,7 @@ function displayLoginFields() {
 		loginPassword: $("#login-password-tr"),
 	}
 
-	// Hide everything, then only show what is needed
+	// Hide everything, then only show what is needed:
 	for (const field in fieldRows) fieldRows[field].hide()
 
 	if ($("#add-login-alts").prop("checked")) {
@@ -493,27 +495,36 @@ function resetCSS() {
  * @memberof options
  */
 async function fillContainers() {
-	const containers = await browser.contextualIdentities.query({}) // Get all containers
+	// All containers plus the default container:
+	const containers = [
+		{name: "Default Container", cookieStoreId: "firefox-default"},
+		...(await browser.contextualIdentities.query({})),
+	]
 
+	// Check the box according to settings:
 	$("#containers-auto").prop("checked", settings.containers.useAll)
 
-	if (containers.length === 0) { // If there are no containers
+	// If there are no containers (except from the default one):
+	if (containers.length === 1) {
 		$("#containers").text("No containers found")
 		return
 	}
 
-	if ($("[name=containers]").length === 0) { // Only add checkboxes if they don't exist already
+	// Add checkboxes, but only if they don't already exist:
+	if ($("[name=containers]").length === 0) {
 		for (const container of containers) {
-			const name = container.name
-			$("#containers").append(`<input id="${name}" name="containers" type="checkbox" data-for="containers"><span id="${name}-icon" class="container-icon"></span><label for="${name}">${name}</label><br>`)
-			$(`#${name}-icon`).css({"background-color": container.color, "mask": `url(${container.iconUrl})`, "mask-size": "100%"})
+			const id = container.cookieStoreId
+			$("#containers").append(`<input id="${id}" name="containers" type="checkbox" data-for="containers"><span id="${id}-icon" class="container-icon"></span><label for="${id}">${container.name}</label><br>`)
+			$(`#${id}-icon`).css({"background-color": container.color, "mask": `url(${container.iconUrl})`, "mask-size": "100%"})
 		}
 	}
 
-	for (const container of settings.containers.list) { // Check all containers previously saved
+	// Check all containers previously saved:
+	for (const container of settings.containers.list) {
 		$(`#${container}`).prop("checked", true)
 	}
 
+	// Save on change:
 	$("#containers-auto, [name=containers]").on("input", saveContainers)
 }
 
@@ -526,7 +537,7 @@ function saveContainers() {
 	browser.storage.sync.set({
 		containers: {
 			useAll: $("#containers-auto").prop("checked"),
-			list: $("[name=containers]:checked").get().map(e => e.id), // Get id's of checked containers,
+			list: $("[name=containers]:checked").get().map(e => e.id),
 		},
 	})
 }
@@ -565,7 +576,8 @@ $(init)
 window.onbeforeunload = () => {
 	const time = new Date().getTime()
 	for (const setting of Setting.instances) {
-		if (time - setting.lastChanged < 2000) { // If `setting` was last changed less than 2 seconds ago, it still didn't save
+		// If `setting` was last changed less than 2 seconds ago, it probably still didn't save:
+		if (time - setting.lastChanged < 2000) {
 			setting.save()
 		}
 	}

@@ -10,8 +10,8 @@
 
 // Defined in beta-game-functions.js:
 /*
-	global betabot, calendar, closeBanner, gauntlet, gems, house, mobClimbing,
-	port:writable, professionQueues, settings:writable, username, vars, wiring
+	global betabot, calendar, closeBanner, gauntlet, gems, house, mobClimbing, eventListeners,
+		port:writable, professionQueues, settings:writable, username, vars, wiring
 */
 
 /**
@@ -47,10 +47,13 @@ async function toggleInterfaceChanges(refresh) {
 		$("#betabot-clear-username")?.remove()
 	}
 
-	// Custom style:
+	// Check CSS for changes:
 	const cssChanged = `data:text/css;base64,${btoa(settings.css.addon + settings.css.custom.code)}` !== $("#betabot-css")?.prop("href")
-	if (cssChanged) { // If the code has changed, or if it was never injected
-		$("#betabot-css")?.remove() //only remove the element if it exists
+
+	// If the code has changed, or if it was never injected:
+	if (cssChanged) {
+		//only remove the element if it exists:
+		$("#betabot-css")?.remove()
 		// Decode CSS into base64 and use it as a link to avoid script injections:
 		$("head").append(`<link id="betabot-css" class="betabot" rel="stylesheet" href="data:text/css;base64,${btoa(settings.css.addon + settings.css.custom.code)}">`)
 	}
@@ -84,9 +87,8 @@ async function toggleInterfaceChanges(refresh) {
 
 	// Socket Gem x5:
 	eventListeners.toggle(
-		"roa-ws:page:" +
-		["item_options", "gem_unsocket_from_item", "gem_unsocket_all_from_item", "gem_socket_to_item", "item_rename", "item_own"]
-			.join(" roa-ws:page:"),
+		["", "item_options", "gem_unsocket_from_item", "gem_unsocket_all_from_item", "gem_socket_to_item", "item_rename", "item_own"]
+			.join(" roa-ws:page:").trim(),
 		gems.addSocket5Button, settings.addSocketX5)
 
 	// Advent Calendar:
