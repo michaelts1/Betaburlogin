@@ -223,7 +223,7 @@ function updateSettings() {
 			settings.addUsername = true
 		case 9:
 			settings.attackAt = 3
-			settings.eventChannelID = 3202
+			settings.eventChannelID = 3262
 			settings.addOpenTabs = true
 			settings.addLoginAlts = false
 			settings.removeEffects = false
