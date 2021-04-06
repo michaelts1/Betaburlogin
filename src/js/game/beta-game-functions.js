@@ -376,7 +376,7 @@ const gauntlet = {
 		gauntlet.gauntVars.gauntletInProgress = true
 
 		if (settings.verbose) log(`Joining ${gauntlet.gauntVars.mainGauntlet ? "main" : "regular"} gauntlet due to message #${msgID}`)
-		gauntlet.BUTTONS[gauntlet.getTrade].click()
+		gauntlet.BUTTONS[gauntlet.getTrade(username)].click()
 		eventListeners.toggle("roa-ws:event_action", gauntlet.changeTrade, true)
 
 		// If we are still tracking the same gauntlet after 16 minutes, stop tracking it:
