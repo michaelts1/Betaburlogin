@@ -8,8 +8,14 @@
 	"license": "MIT",
 	"repository": "github:michaelts1/Betaburlogin",
 	"scripts": {
+		"generate-jsdoc": "jsdoc src/js/ -p -r",
 		"test-addon": "eslint --ignore-pattern *.min.js --ignore-pattern /out/ ./ && (C:/\"Program Files\"/7-Zip/7z.exe a betaburlogin.xpi license manifest.json src && addons-linter --self-hosted betaburlogin.xpi & del betaburlogin.xpi) && echo tests finished",
-		"export-addon": "C:/\"Program Files\"/7-Zip/7z.exe a ../betaburlogin.xpi license manifest.json src",
-		"generate-jsdoc": "jsdoc src/js/ -p -r"
+		"bump-hotfix-and-export": "node ./bump-version 3 && npm run export-addon",
+		"bump-minor-and-export": "node ./bump-version 2 && npm run export-addon",
+		"export-addon": "C:/\"Program Files\"/7-Zip/7z.exe a ../betaburlogin.xpi license manifest.json src"
+	},
+	"devDependencies": {
+		"jsonfile": "^6.1.0",
+		"npm": "^7.8.0"
 	}
 }
