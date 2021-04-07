@@ -293,6 +293,11 @@ const house = {
  * @memberof beta-game-functions
  */
 const gauntlet = {
+	/**
+	 * Enum for the gauntlet buttons
+	 * @enum {HTMLButtonElement}
+	 * @memberof beta-game-functions
+	 */
 	BUTTONS: {
 		battle      : $(".bossFight.btn.btn-primary")[0],
 		fishing     : $(".bossHarvest.btn")[4],
@@ -303,7 +308,13 @@ const gauntlet = {
 		carving     : $(".bossCarve.btn")[0],
 	},
 
+	/**
+	 * Enum for gauntlet-related vars
+	 * @enum {boolean}
+	 * @memberof beta-game-functions
+	 */
 	gauntVars: {
+		/** @type {?string} */
 		gauntletID: null,
 		gauntletInProgress: false,
 		mainGauntlet: false,
