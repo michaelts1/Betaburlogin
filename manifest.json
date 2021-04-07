@@ -5,7 +5,6 @@
 	"description": "Helps logging in with all the alts on beta.avabur.com",
 	"author": "Michael T",
 	"homepage_url": "https://www.github.com/michaelts1/Betaburlogin",
-
 	"applications": {
 		"gecko": {
 			"id": "betaburloginID@example.com",
@@ -13,11 +12,9 @@
 			"update_url": "https://raw.githubusercontent.com/michaelts1/Betaburlogin/master/updates.json"
 		}
 	},
-
 	"icons": {
 		"60": "src/images/betaburlogin.png"
 	},
-
 	"content_scripts": [
 		{
 			"matches": [
@@ -35,24 +32,29 @@
 				"https://www.avabur.com/",
 				"https://www.avabur.com/?expired=1"
 			],
-			"js": ["src/js/login/live-login.js"]
+			"js": [
+				"src/js/login/live-login.js"
+			]
 		},
 		{
 			"matches": [
 				"https://beta.avabur.com/?expired=1",
 				"https://beta.avabur.com/"
 			],
-			"js": ["src/js/login/beta-login.js"]
+			"js": [
+				"src/js/login/beta-login.js"
+			]
 		},
 		{
-			"matches": ["https://beta.avabur.com/game"],
+			"matches": [
+				"https://beta.avabur.com/game"
+			],
 			"js": [
 				"src/js/game/beta-game-functions.js",
 				"src/js/game/beta-game.js"
 			]
 		}
 	],
-
 	"background": {
 		"scripts": [
 			"src/js/helpers.js",
@@ -60,12 +62,10 @@
 			"src/js/background/background.js"
 		]
 	},
-
 	"options_ui": {
 		"page": "src/html/options-page.html",
 		"open_in_tab": true
 	},
-
 	"browser_action": {
 		"default_icon": {
 			"60": "src/images/betaburlogin.png"
@@ -73,7 +73,6 @@
 		"default_title": "Betabur Login",
 		"default_popup": "src/html/browser-action.html"
 	},
-
 	"permissions": [
 		"storage",
 		"tabs",
