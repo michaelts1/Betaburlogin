@@ -15,7 +15,6 @@
 		"export-addon": "C:/\"Program Files\"/7-Zip/7z.exe a ../betaburlogin.xpi license manifest.json src"
 	},
 	"devDependencies": {
-		"jsonfile": "^6.1.0",
-		"npm": "^7.8.0"
+		"jsonfile": "^6.1.0"
 	}
 }
