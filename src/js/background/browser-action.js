@@ -26,7 +26,7 @@ async function getVars() {
 /**
  * Toggles a setting on/off, and saves the new value to the storage
  * @function toggle
- * @param {event} event `change` event
+ * @param {Event} event `change` event
  * @param {HTMLInputElement} event.target
  * @memberof browser-action
  */
