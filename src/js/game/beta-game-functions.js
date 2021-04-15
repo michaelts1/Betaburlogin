@@ -364,11 +364,15 @@ const gauntlet = {
 			   message of the day, which means it was only sent due to
 			   a chat reconnection, and we should not join the gauntlet */
 			await delay(vars.startActionsDelay)
-			if (!gauntlet.gauntVars.motdReceived) {
-				if (gauntlet.gauntVars.gauntletID !== data.m_id || !gauntlet.gauntVars.gauntletInProgress ||
-					["InitEvent", "MainEvent"].includes(data.m)) {
-					gauntlet.joinGauntlet(data.m, data.m_id)
-				}
+			/* Only join the gauntlet if all criteria are met:
+				1. The message wasn't sent because of a reconnect (see above)
+				2. The message content is either "InitEvent" or "MainEvent"
+				3. The message wasn't already parsed (the `gauntletID` part)
+				4. There is no gauntlet already going on
+			*/
+			if (!gauntlet.gauntVars.motdReceived && ["InitEvent", "MainEvent"].includes(data.m) &&
+				!gauntlet.gauntVars.gauntletID === data.m_id && !gauntlet.gauntVars.gauntletInProgress) {
+				gauntlet.joinGauntlet(data.m, data.m_id)
 			}
 		}
 	},
