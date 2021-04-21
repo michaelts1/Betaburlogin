@@ -371,7 +371,7 @@ const gauntlet = {
 				4. There is no gauntlet already going on
 			*/
 			if (!gauntlet.gauntVars.motdReceived && ["InitEvent", "MainEvent"].includes(data.m) &&
-				!gauntlet.gauntVars.gauntletID === data.m_id && !gauntlet.gauntVars.gauntletInProgress) {
+				!(gauntlet.gauntVars.gauntletID === data.m_id) && !gauntlet.gauntVars.gauntletInProgress) {
 				gauntlet.joinGauntlet(data.m, data.m_id)
 			}
 		}
