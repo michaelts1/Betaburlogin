@@ -348,7 +348,7 @@ function updateSettings() {
  * Logs changes in `settings` to the console
  * @function logSettingsChanges
  * @memberof settings
- * @param {object} changes
+ * @param {Object} changes
  */
 function logSettingsChanges(changes) {
 	getSettings()

@@ -200,7 +200,7 @@ async function login() {
 /**
  * Sends a message to all ports inside an array at once
  * @function sendMessage
- * @param {object} message A message to be sent
+ * @param {Object} message A message to be sent
  * @param {runtimePort[]} [users=[...ports.alt, ports.main]] An array of `runtimePort` objects. If omitted, defaults to `[...ports.alt, ports.main]`
  * @memberof background
  */

@@ -38,7 +38,7 @@ function log(...msg) {
  * - Returns a promise that is resolved after some time.
  * - Useful for pausing async functions.
  * @function delay
- * @param {number} ms Amount of milliseconds to wait before resolving the promise
+ * @param {Number} ms Amount of milliseconds to wait before resolving the promise
  * @memberof helpers
  */
 function delay(ms) {
@@ -72,9 +72,9 @@ const helpers = {
 		/**
 		 * Attaches/deattaches handlers to document events, while avoiding having duplicate listeners
 		 * @method toggle
-		 * @param {string} eventName - Listen to events with this name
-		 * @param {function} handler - Handle the event with this handler
-		 * @param {boolean} turnOn - If true, turns the event listener on. If false, turns the event listener off
+		 * @param {String} eventName - Listen to events with this name
+		 * @param {Function} handler - Handle the event with this handler
+		 * @param {Boolean} turnOn - If true, turns the event listener on. If false, turns the event listener off
 		 * @memberof helpers
 		 * */
 		toggle(eventName, handler, turnOn) {
@@ -115,8 +115,8 @@ const helpers = {
 		/**
 		 * Allows waiting for events in asynchronous functions
 		 * @method waitFor
-		 * @param {string} eventName Wait for event with this name
-		 * @returns {promise<waitForEvent>} A Promise that will be fulfilled with an object, containing an `event` object and an `data` object, after `eventName` is triggered
+		 * @param {String} eventName Wait for event with this name
+		 * @returns {Promise<waitForEvent>} A Promise that will be fulfilled with an object, containing an `event` object and an `data` object, after `eventName` is triggered
 		 * @memberof helpers
 		 */
 		waitFor(eventName) {
@@ -146,10 +146,10 @@ const helpers = {
 		 * Do the actual crypto operations
 		 * @async
 		 * @method _insecureCrypt
-		 * @param {string} str Message to work on
-		 * @param {string} key Key to work with
-		 * @param {boolean} decrypt If true, decrypts the message. If false, encrypts the message
-		 * @returns {promise<string>} A promise that is resolved with a string containing the new message
+		 * @param {String} str Message to work on
+		 * @param {String} key Key to work with
+		 * @param {Boolean} decrypt If true, decrypts the message. If false, encrypts the message
+		 * @returns {Promise<string>} A promise that is resolved with a string containing the new message
 		 * @private
 		 * @memberof helpers
 		 */
@@ -185,9 +185,9 @@ const helpers = {
 		 * **vulnerable** Encrypt a string using another string as a key
 		 * @async
 		 * @method encrypt
-		 * @param {string} str Message to encrypt
-		 * @param {string} key Key to encrypt the message with
-		 * @returns {promise<string>} A promise that is resolved with a string containing the encrypted message
+		 * @param {String} str Message to encrypt
+		 * @param {String} key Key to encrypt the message with
+		 * @returns {Promise<string>} A promise that is resolved with a string containing the encrypted message
 		 * @memberof helpers
 		 */
 		async encrypt(str, key) { return await this._insecureCrypt(str, key, false) },
@@ -196,9 +196,9 @@ const helpers = {
 		 * **vulnerable** Decrypt a string using another string as a key
 		 * @async
 		 * @method decrypt
-		 * @param {string} str Message to decrypt
-		 * @param {string} key Key to decrypt the message with
-		 * @returns {promise<string>} A promise that is resolved with a string containing the decrypted message
+		 * @param {String} str Message to decrypt
+		 * @param {String} key Key to decrypt the message with
+		 * @returns {Promise<string>} A promise that is resolved with a string containing the decrypted message
 		 * @memberof helpers
 		 */
 		async decrypt(str, key) { return await this._insecureCrypt(str, key, true) },
@@ -231,8 +231,8 @@ const helpers = {
 
 	/**
 	 * @function capitalize
-	 * @param {string} str
-	 * @returns {string}
+	 * @param {String} str
+	 * @returns {String}
 	 * @memberof helpers
 	 */
 	capitalize(str) {
@@ -245,8 +245,8 @@ const helpers = {
 	 * @example
 	 * // Returns "IX"
 	 * romanize(9)
-	 * @param {number} num Latin numeral
-	 * @returns {string} String containing a roman numeral
+	 * @param {Number} num Latin numeral
+	 * @returns {String} String containing a roman numeral
 	 * @private
 	 * @memberof background
 	 */
