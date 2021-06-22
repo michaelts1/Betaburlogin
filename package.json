@@ -10,8 +10,8 @@
 	"scripts": {
 		"generate-jsdoc": "jsdoc src/js/ -p -r",
 		"test-addon": "eslint --ignore-pattern *.min.js --ignore-pattern /out/ ./ && (C:/\"Program Files\"/7-Zip/7z.exe a betaburlogin.xpi license manifest.json src && addons-linter --self-hosted betaburlogin.xpi & del betaburlogin.xpi) && echo tests finished",
-		"bump-hotfix-and-export": "node ./bump-version 3 && npm run export-addon",
-		"bump-minor-and-export": "node ./bump-version 2 && npm run export-addon",
+		"bump-hotfix": "node ./bump-version 3",
+		"bump-minor": "node ./bump-version 2",
 		"export-addon": "C:/\"Program Files\"/7-Zip/7z.exe a ../betaburlogin.xpi license manifest.json src"
 	},
 	"devDependencies": {
