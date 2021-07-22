@@ -394,20 +394,20 @@
 			</tr>
 			<tr>
 				<td>
-					<label for="main-jump-amount" data-info="Any number between 1 and 22. Applies to main account only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Offset is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22.">Main Jump Offset</label>
+					<label for="main-jump-amount" data-info="Any number between 1 and 1000. Applies to main account only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Offset is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22.">Main Jump Offset</label>
 				</td>
 				<td>
-					<!-- Only accept numbers between 1 and 22 -->
-					<input id="main-jump-amount" pattern="^([1-9]|1\d|2[0-2])$" placeholder="Jump Offset" size="15" data-setting="autoClimb.jumpAmountMain">
+					<!-- Only accept numbers between 1 and 1000 -->
+					<input id="main-jump-amount" pattern="^(0+[1-9]\d{0,2}|[1-9]\d{0,2}|1000)$" placeholder="Jump Offset" size="15" data-setting="autoClimb.jumpAmountMain">
 				</td>
 			</tr>
 			<tr>
 				<td>
-					<label for="alt-jump-amount" data-info="Any number between 1 and 22. Applies to alt accounts only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Offset is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22.">Alts Jump Offset</label>
+					<label for="alt-jump-amount" data-info="Any number between 1 and 1000. Applies to alt accounts only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Offset is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22.">Alts Jump Offset</label>
 				</td>
 				<td>
-					<!-- Only accept numbers between 1 and 22 -->
-					<input id="alt-jump-amount" pattern="^([1-9]|1\d|2[0-2])$" placeholder="Jump Offset" size="15" data-setting="autoClimb.jumpAmountAlts">
+					<!-- Only accept numbers between 1 and 1000 -->
+					<input id="alt-jump-amount" pattern="^(0+[1-9]\d{0,2}|[1-9]\d{0,2}|1000)$" placeholder="Jump Offset" size="15" data-setting="autoClimb.jumpAmountAlts">
 				</td>
 			</tr>
 			<tr>
