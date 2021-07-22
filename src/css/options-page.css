@@ -142,6 +142,10 @@ textarea {
 	color: darkcyan;
 }
 
+input[type=number] {
+	appearance: textfield
+}
+
 select {
 	background: var(--background-color);
 	border-radius: .4em;
