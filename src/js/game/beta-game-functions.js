@@ -92,7 +92,7 @@ const username = {
 
 		if (settings.verbose) log(`User has changed name from ${username.name} to ${data.u}`)
 		$.alert(`It looks like you have changed your username from ${username.name} to ${data.u}.
-			If you used the old username in BetaburLogin settings page, you might want to
+			If you used the old username in Betaburlogin settings page, you might want to
 			update these settings`, "Name Changed")
 		username.name = data.u
 	},
