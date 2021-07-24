@@ -61,6 +61,21 @@ header {
 	z-index: 99;
 }
 
+footer {
+	background: var(--background-color);
+	bottom: 0;
+	color: var(--input-text-color);
+	height: 40px;
+	left: 0;
+	position: fixed;
+	right: 0;
+	text-align: center;
+}
+
+footer p {
+	margin: 0;
+}
+
 #tabs-buttons {
 	display: flex;
 	flex-flow: wrap;
@@ -184,9 +199,12 @@ input[name=containers],
 	text-align: center;
 }
 
-#output {
-	color: var(--input-text-color);
-	text-align: center;
+#version-text {
+	bottom: 2px;
+	font-size: smaller;
+	left: 0;
+	position: fixed;
+	right: 0;
 }
 
 #wire-frequency {

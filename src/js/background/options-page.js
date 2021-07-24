@@ -66,6 +66,9 @@ function buildHTML() {
 	// Add buttons animation:
 	$("button").wrapInner("<span></span>")
 	$("button").prepend(`<span class="circle"></span>`)
+
+	// Add version number:
+	$("#version-number").text(browser.runtime.getManifest().version)
 }
 
 /**
