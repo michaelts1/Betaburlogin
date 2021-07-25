@@ -1,6 +1,6 @@
 {
 	"manifest_version": 2,
-	"name": "Betabur Login",
+	"name": "Betaburlogin",
 	"version": "1.0.2.0",
 	"description": "Helps logging in with all the alts on beta.avabur.com",
 	"author": "Michael T",
@@ -70,7 +70,7 @@
 		"default_icon": {
 			"60": "src/images/betaburlogin.png"
 		},
-		"default_title": "Betabur Login",
+		"default_title": "Betaburlogin",
 		"default_popup": "src/html/browser-action.html"
 	},
 	"permissions": [
