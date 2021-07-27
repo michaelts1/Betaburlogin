@@ -1070,7 +1070,7 @@ const mobClimbing = {
 	},
 
 	/**
-	 * Finished handling the move, and then calls `checkStability` or `finishClimbing` as needed
+	 * Finishes handling the move, and then calls `checkStability` or `finishClimbing` as needed
 	 * @async
 	 * @function mobClimbing.finalizeMove
 	 * @param {String} direction Starts to track stability if `direction` is "up", and finishes climbing otherwise
