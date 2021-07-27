@@ -92,7 +92,7 @@ const username = {
 
 		if (settings.verbose) log(`User has changed name from ${username.name} to ${data.u}`)
 		$.alert(`It looks like you have changed your username from ${username.name} to ${data.u}.
-			If you used the old username in BetaburLogin settings page, you might want to
+			If you used the old username in Betaburlogin settings page, you might want to
 			update these settings`, "Name Changed")
 		username.name = data.u
 	},
@@ -1022,8 +1022,33 @@ const mobClimbing = {
 		const currentMob = parseInt($(`#enemyList option:selected`).val())
 		const minNumber = parseInt($(`#enemyList option:first-child`).val())
 		const maxNumber = parseInt($(`#enemyList option:last-child`).val())
-		const i = username.isAlt() ? settings.autoClimb.jumpAmountAlts : settings.autoClimb.jumpAmountMain
-		const nextMob = direction === "up" ? currentMob + i : currentMob - i
+		const offset = username.isAlt() ? settings.autoClimb.jumpAmountAlts : settings.autoClimb.jumpAmountMain
+		let nextMob = direction === "up" ? currentMob + offset : currentMob - offset
+
+		/*
+			The user can choose a jump offset (how many mobs should Betaburlogin advance
+			each time) of up to 1000. If the user chooses an offset that is greater than
+			22, the mob will not show up on the list even if it is in the same area as
+			the player.
+			Thus, if the current and next mobs are both farm mobs, we should use the "select
+			a farm mob" button. If one of the mobs is not a farm mob, we should limit the
+			offset to 22, so that the mob will show up in the list.
+		*/
+		if (offset > 22) {
+			// The first farm mob is mob #627
+			if (currentMob > 627 && nextMob > 627) {
+				// Use the "select a farm mob" button:
+				$("#autoSelectEnemy").val(nextMob - 626)
+				$("#autoSelectedEnemy").click()
+
+				// Stop here:
+				mobClimbing.finalizeMove(direction)
+				return
+			} else {
+				// treat offset as if it is 22:
+				nextMob = direction === "up" ? currentMob + 22 : currentMob - 22
+			}
+		}
 
 		// If the next mob is not on the list:
 		if (nextMob > maxNumber || nextMob < minNumber) {
@@ -1033,10 +1058,25 @@ const mobClimbing = {
 
 			await eventListeners.waitFor("roa-ws:page:town_battlegrounds")
 		}
+
+		// Select the next mob:
 		$(`#enemyList`).val(nextMob)
 
+		// Start battle:
 		await delay(vars.buttonDelay)
 		$("#autoEnemy").click()
+
+		mobClimbing.finalizeMove(direction)
+	},
+
+	/**
+	 * Finishes handling the move, and then calls `checkStability` or `finishClimbing` as needed
+	 * @async
+	 * @function mobClimbing.finalizeMove
+	 * @param {String} direction Starts to track stability if `direction` is "up", and finishes climbing otherwise
+	 * @memberof beta-game.functions
+	 */
+	async finalizeMove(direction) {
 		$("#clearBattleStats")[0].click()
 
 		if (direction === "up") {

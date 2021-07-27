@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>BetaburLogin Options Page</title>
+		<title>Betaburlogin Options Page</title>
 		<link rel="icon" href="../images/betaburlogin.png">
 		<link rel="stylesheet" href="../css/options-page.css">
 		<script src="../js/jquery-3.6.0.min.js"></script>
@@ -11,7 +11,7 @@
 	<body class="options-page">
 		<!-- Top panel -->
 		<header id="top">
-			<h1>BetaburLogin Options Page</h1>
+			<h1>Betaburlogin Options Page</h1>
 			<!-- Tabs navigation -->
 			<div id="tabs-buttons">
 				<div id="first-tab-button" class="tab-button"></div>
@@ -102,7 +102,7 @@
 			</tr>
 		</table>
 
-		<table id="login" data-name="Accounts" data-cols="2">
+		<table id="login" data-name="Account" data-cols="2">
 			<tr id="main-account-tr">
 				<td>
 					<label for="main-account" data-info="3-20 characters. Letters and numbers.&#10;&#10;The name you use to log in with your main account.&#10;&#10;Might be different than your in-game username.">Main Login Name</label>
@@ -145,7 +145,7 @@
 					<label for="alts-number" data-info="Number of alts, not including main account.">Number of Alts</label>
 				</td>
 				<td>
-					<input id="alts-number" pattern="^\d{1,3}$" placeholder="Number of Alts" size="24" data-setting="altsNumber">
+					<input id="alts-number" type="number" min="0" max="100" placeholder="Number of Alts" size="24" data-setting="altsNumber">
 				</td>
 			</tr>
 			<tr id="alt-base-name-tr" class="requires-containers">
@@ -329,8 +329,7 @@
 					<label for="attack-at" data-info="When automatically joining event, switch to battle when this number of minutes are left.&#10;&#10;For example, if you type 5, you will automatically attack the event boss when there are only 5 minutes left.&#10;&#10;0 to disable.">Attack At</label>
 				</td>
 				<td>
-					<!-- Only accept numbers between 0 and 15 -->
-					<input id="attack-at" pattern="(^0?\d$)|(^1[0-5]$)" placeholder="Minutes" size="6" data-setting="attackAt"> Minutes Left
+					<input id="attack-at" type="number" min="0" max="15" placeholder="Minutes" size="6" data-setting="attackAt"> Minutes Left
 				</td>
 			</tr>
 			<tr>
@@ -394,20 +393,18 @@
 			</tr>
 			<tr>
 				<td>
-					<label for="main-jump-amount" data-info="Any number between 1 and 22. Applies to main account only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Offset is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22.">Main Jump Offset</label>
+					<label for="main-jump-amount" data-info="Any number between 1 and 1000. Applies to main account only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Offset is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose multiples of 11 (11, 22, 33 etc.).">Main Jump Offset</label>
 				</td>
 				<td>
-					<!-- Only accept numbers between 1 and 22 -->
-					<input id="main-jump-amount" pattern="^([1-9]|1\d|2[0-2])$" placeholder="Jump Offset" size="15" data-setting="autoClimb.jumpAmountMain">
+					<input id="main-jump-amount" type="number" min="1" max="1000" placeholder="Jump Offset" size="15" data-setting="autoClimb.jumpAmountMain">
 				</td>
 			</tr>
 			<tr>
 				<td>
-					<label for="alt-jump-amount" data-info="Any number between 1 and 22. Applies to alt accounts only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Offset is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose either 11 or 22.">Alts Jump Offset</label>
+					<label for="alt-jump-amount" data-info="Any number between 1 and 1000. Applies to alt accounts only.&#10;&#10;How many mobs should Betaburlogin try to jump each time. For example, if Jump Offset is 10, and you are currently on mob #15, Betaburlogin will try to jump to mob #25.&#10;If you want the next mob to be of the same type as the current mob (i.e. both will be serpents), choose multiples of 11 (11, 22, 33 etc.).">Alts Jump Offset</label>
 				</td>
 				<td>
-					<!-- Only accept numbers between 1 and 22 -->
-					<input id="alt-jump-amount" pattern="^([1-9]|1\d|2[0-2])$" placeholder="Jump Offset" size="15" data-setting="autoClimb.jumpAmountAlts">
+					<input id="alt-jump-amount" type="number" min="1" max="1000" placeholder="Jump Offset" size="15" data-setting="autoClimb.jumpAmountAlts">
 				</td>
 			</tr>
 			<tr>
@@ -415,8 +412,7 @@
 					<label for="max-win-rate" data-info="Any number between 95 and 100&#10;&#10;Betaburlogin will start climbing mobs if the win rate is higher than this number.&#10;For example, if Maximum Win Rate is 99.5, Betaburlogin will start climbing if the win rate is higher than 99.5%.">Maximum Win Rate</label>
 				</td>
 				<td>
-					<!-- Only accept numbers between 95 and 100 -->
-					<input id="max-win-rate" pattern="^(9[5-9]|9[5-9]\.\d+|100)$" placeholder="Maximum Win Rate" size="15" data-setting="autoClimb.maximumWinrate">
+					<input id="max-win-rate" type="number" min="95" max="100" step="0.05" placeholder="Maximum Win Rate" size="15" data-setting="autoClimb.maximumWinrate">
 				</td>
 			</tr>
 			<tr>
@@ -424,8 +420,7 @@
 					<label for="min-win-rate" data-info="Any number between 90 and 100&#10;&#10;Betaburlogin will stop climbing mobs once it can&amp;#39;t climb anymore without the win rate dropping below this number.&#10;For example, if Minimum Win Rate is 98, Betaburlogin will stop climbing mobs if the next jump will bring the winrate bellow 98%.">Minimum Win Rate</label>
 				</td>
 				<td>
-					<!-- Only accept numbers between 90 and 100 -->
-					<input id="min-win-rate" pattern="^(9\d|9\d\.\d+|100)$" placeholder="Minimum Win Rate" size="15" data-setting="autoClimb.minimumWinrate">
+					<input id="min-win-rate" type="number" min="90" max="100" step="0.05" placeholder="Minimum Win Rate" size="15" data-setting="autoClimb.minimumWinrate">
 				</td>
 			</tr>
 			<tr>
@@ -433,14 +428,13 @@
 					<label for="min-actions" data-info="Any number between 5 and 1000.&#10;&#10;Number of actions to track the winrate for before settling on a mob.&#10;For example, if Minimum Actions is 50, Betaburlogin will make sure that the winrate is high enough for at least 50 actions before settling on a mob.">Minimum Actions</label>
 				</td>
 				<td>
-					<!-- Only accept numbers between 5 and 1000 -->
-					<input id="min-actions" pattern="^([5-9]|[1-9]\d\d?|1000)$" placeholder="Minimum Actions" size="15" data-setting="autoClimb.minimumActions">
+					<input id="min-actions" type="number" min="5" max="1000" placeholder="Minimum Actions" size="15" data-setting="autoClimb.minimumActions">
 				</td>
 			</tr>
 		</table>
 
 		<table id="interface" data-name="Interface" data-cols="2"
-		data-header-tooltip="BetaburLogin makes some changes to the interface, like adding buttons. You can choose which ones you want to enable here.">
+		data-header-tooltip="Betaburlogin makes some changes to the interface, like adding buttons. You can choose which ones you want to enable here.">
 			<tr>
 				<th class="th-small" colspan="2">Live Login Page</th>
 			</tr>
@@ -551,7 +545,7 @@
 					<label for="event-channel-id" data-info="Listen to the channel with this ID.&#10;&#10;Typing &quot;InitEvent&quot; in this channel will init a regular event, and typing &quot;MainEvent&quot; will init an event in which only main accounts will attack.">Event channel ID</label>
 				</td>
 				<td>
-					<input id="event-channel-id" pattern="^\d+$" placeholder="Channel ID" size="15" data-setting="eventChannelID">
+					<input id="event-channel-id" type="number" min="1" max="9999" placeholder="Channel ID" size="15" data-setting="eventChannelID">
 				</td>
 			</tr>
 			<tr>
@@ -577,7 +571,10 @@
 			</tr>
 		</table>
 
-		<p id="output"></p>
+		<footer>
+			<p id="output"></p>
+			<p id="version-text">Betaburlogin version <span id="version-number"></span></p>
+		</footer>
 
 		<script src="../js/background/options-page.js"></script>
 	</body>
