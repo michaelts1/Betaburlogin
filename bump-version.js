@@ -11,8 +11,8 @@ const versionIncrementationDepth = process.argv[2]
 /**
  * Increments a version string
  * @function incrementVersion
- * @param {String} version A version string to increment
- * @param {Number} depth What part of the version string to increment
+ * @param {string} version A version string to increment
+ * @param {number} depth What part of the version string to increment
  * @example incrementVersion("1.9.2.1", 1) // Returns "1.10.0.0"
  */
 function incrementVersion(version, depth) {

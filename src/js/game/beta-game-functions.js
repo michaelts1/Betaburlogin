@@ -74,7 +74,7 @@ const username = {
 	/**
 	 * Returns `true` if the current user is an alt, and returns `false` otherwise
 	 * @function username.isAlt
-	 * @returns {Boolean}
+	 * @returns {boolean}
 	 * @memberof beta-game-functions
 	 */
 	isAlt: () => username.name !== settings.mainUsername,
@@ -83,7 +83,7 @@ const username = {
 	 * Advises the user to update settings when changing name
 	 * @function username.usernameChange
 	 * @param {Event} _ Placeholder parameter
-	 * @param {Object} data Event data
+	 * @param {object} data Event data
 	 * @memberof beta-game-functions
 	 */
 	usernameChange(_, data) {
@@ -189,7 +189,7 @@ const house = {
 	 * Builds a custom item based on its ID
 	 * @async
 	 * @function house.customBuild
-	 * @param {Number} itemId ID of a house item
+	 * @param {number} itemId ID of a house item
 	 * @memberof beta-game-functions
 	 */
 	async customBuild(itemId) {
@@ -337,8 +337,8 @@ const gauntlet = {
 	 * - Gets the Trade Skill of a user
 	 * - If the user's Trade Skill is not found, returns `"mining"`
 	 * @function gauntlet.getTrade
-	 * @param {String} username Username to search
-	 * @returns {String} Name of the Trade Skill
+	 * @param {string} username Username to search
+	 * @returns {string} Name of the Trade Skill
 	 * @memberof beta-game-functions
 	 */
 	getTrade(username) {
@@ -355,7 +355,7 @@ const gauntlet = {
 	 * @async
 	 * @function gauntlet.checkGauntletMessage
 	 * @param {Event} _ Placeholder parameter
-	 * @param {Object} data Event data
+	 * @param {object} data Event data
 	 * @memberof beta-game-functions
 	 */
 	async checkGauntletMessage(_, data) {
@@ -381,8 +381,8 @@ const gauntlet = {
 	 * Joins the gauntlet if the criteria are met
 	 * @async
 	 * @function gauntlet.joinGauntlet
-	 * @param {String} msgContent Contents of the chat message
-	 * @param {String} msgID ID of the chat message
+	 * @param {string} msgContent Contents of the chat message
+	 * @param {string} msgID ID of the chat message
 	 * @memberof beta-game-functions
 	 */
 	async joinGauntlet(msgContent, msgID) {
@@ -403,7 +403,7 @@ const gauntlet = {
 	 * Attacks in gauntlets when the criteria are met
 	 * @function gauntlet.changeTrade
 	 * @param {Event} _ Placeholder parameter
-	 * @param {Object} data Event data
+	 * @param {object} data Event data
 	 * @memberof beta-game-functions
 	 */
 	changeTrade(_, data) {
@@ -447,7 +447,7 @@ const gems = {
 	 * Creates a "Spawn For All Alts" button on the Spawn Gems interface
 	 * @function gems.addAltsSpawn
 	 * @param {Event} _ Placeholder parameter
-	 * @param {Object} data Event data
+	 * @param {object} data Event data
 	 * @memberof beta-game-functions
 	 */
 	addAltsSpawn(_, data) {
@@ -531,7 +531,7 @@ const wiring = {
 	/**
 	 * Sends currency to another user (according to the Currency Send settings)
 	 * @function wiring.wire
-	 * @param {String} [target] Wire recipient. If omitted, defaults to `settings.mainUsername`
+	 * @param {string} [target] Wire recipient. If omitted, defaults to `settings.mainUsername`
 	 * @memberof beta-game-functions
 	 */
 	wire(target) {
@@ -638,7 +638,7 @@ const calendar = {
 	 * Adds a button to open the advent calendar on all alts at once
 	 * @function calendar.addAdventCalendar
 	 * @param {Event} _ Placeholder parameter
-	 * @param {Object} data Event data
+	 * @param {object} data Event data
 	 * @memberof beta-game-functions
 	 */
 	addAdventCalendar (_, data) {
@@ -689,7 +689,7 @@ const professionQueues = {
 	 * Checks whether or not the queue should be filled
 	 * @function professionQueues.checkQueue
 	 * @param {Event} _ Placeholder parameter
-	 * @param {Object} data Event data
+	 * @param {object} data Event data
 	 * @memberof beta-game-functions
 	 */
 	checkQueue(_, data) {
@@ -786,7 +786,7 @@ const betabot = {
 	 * Finishes a quest
 	 * @async
 	 * @function betabot.finishQuest
-	 * @param {String} type Quest type
+	 * @param {string} type Quest type
 	 * @memberof beta-game-functions
 	 */
 	async finishQuest(type) {
@@ -816,7 +816,7 @@ const betabot = {
 	 * Start a new quest
 	 * @async
 	 * @function betabot.startQuest
-	 * @param {String} type Quest type
+	 * @param {string} type Quest type
 	 * @memberof beta-game-functions
 	 */
 	async startQuest(type) {
@@ -893,7 +893,7 @@ const betabot = {
 	 * @async
 	 * @function betabot.checkResults
 	 * @param {Event} _ Placeholder parameter
-	 * @param {Object} data Event data
+	 * @param {object} data Event data
 	 * @memberof beta-game-functions
 	 */
 	async checkResults(_, data) {
@@ -974,9 +974,9 @@ const mobClimbing = {
 	/**
 	 * Returns an object containing the win rate (in percentages), and the number of actions tracked so far
 	 * @function mobClimbing.getCurrentWinRate
-	 * @returns {Object}
-	 * @returns {Number} winRate
-	 * @returns {Number} numberOfActions
+	 * @returns {object}
+	 * @returns {number} winRate
+	 * @returns {number} numberOfActions
 	 * @memberof beta-game-functions
 	 */
 	getCurrentWinRate() {
@@ -994,8 +994,8 @@ const mobClimbing = {
 	 * Checks to see if we should climb mobs
 	 * @function mobClimbing.checkClimbing
 	 * @param {Event} _ Placeholder parameter
-	 * @param {Object} data Event data
-	 * @param {Object} data.results.p
+	 * @param {object} data Event data
+	 * @param {object} data.results.p
 	 * @memberof beta-game-functions
 	 */
 	checkClimbing(_, {results: {p}}) {
@@ -1009,7 +1009,7 @@ const mobClimbing = {
 	 * Climbs/descends mobs
 	 * @async
 	 * @function mobClimbing.move
-	 * @param {String} direction If `direction` is "up", climbs up. If `direction` is "down", descends down
+	 * @param {string} direction If `direction` is "up", climbs up. If `direction` is "down", descends down
 	 * @memberof beta-game-functions
 	 */
 	async move(direction) {
@@ -1073,7 +1073,7 @@ const mobClimbing = {
 	 * Finishes handling the move, and then calls `checkStability` or `finishClimbing` as needed
 	 * @async
 	 * @function mobClimbing.finalizeMove
-	 * @param {String} direction Starts to track stability if `direction` is "up", and finishes climbing otherwise
+	 * @param {string} direction Starts to track stability if `direction` is "up", and finishes climbing otherwise
 	 * @memberof beta-game.functions
 	 */
 	async finalizeMove(direction) {
@@ -1095,7 +1095,7 @@ const mobClimbing = {
 	 * Travels to another zone
 	 * @async
 	 * @function mobClimbing.travel
-	 * @param {Number} amount Amount of zones to travel (as an offset from current zone). Can be either positive or negative
+	 * @param {number} amount Amount of zones to travel (as an offset from current zone). Can be either positive or negative
 	 * @memberof beta-game-functions
 	 */
 	async travel(amount) {

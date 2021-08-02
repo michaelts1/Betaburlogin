@@ -30,7 +30,7 @@ async function betaLogin() {
 	 * Logs in with a given username
 	 * @async
 	 * @function login
-	 * @param {String} username
+	 * @param {string} username
 	 * @private
 	 * @memberof beta-login
 	 */

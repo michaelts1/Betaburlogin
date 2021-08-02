@@ -17,7 +17,7 @@
 /**
  * @async
  * @function toggleInterfaceChanges
- * @param {Boolean} refresh Should be true when called by refreshSettings and false otherwise
+ * @param {boolean} refresh Should be true when called by refreshSettings and false otherwise
  * @memberof beta-game
  */
 async function toggleInterfaceChanges(refresh) {
@@ -102,7 +102,7 @@ async function toggleInterfaceChanges(refresh) {
  * Updates `settings` after changes
  * @async
  * @function refreshSettings
- * @param {Object} changes See {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/onChanged#Parameters|storage.onChanged}
+ * @param {object} changes See {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/onChanged#Parameters|storage.onChanged}
  * @memberof beta-game
  */
 async function refreshSettings(changes) {

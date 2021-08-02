@@ -18,8 +18,8 @@ function buildHTML() {
 	 * Removes a data attribute and returns its value
 	 * @function getData
 	 * @param {HTMLElement} el
-	 * @param {String} attr
-	 * @returns {String}
+	 * @param {string} attr
+	 * @returns {string}
  	 * @memberof options
 	 * @private
 	 */
@@ -166,7 +166,7 @@ class Setting {
 	 * Saves setting to sync storage if at least 2 seconds have passed since last input
 	 * @async
 	 * @function save
-	 * @param {Number} timestamp Time in ms since epoch to check `this.lastChanged` against
+	 * @param {number} timestamp Time in ms since epoch to check `this.lastChanged` against
 	 * @private
 	 * @memberof options
 	 */
@@ -191,9 +191,9 @@ class Setting {
 		 * Recursively creates a clone of the child of `settings` containing a specific setting, while using a new value for that setting
 		 * @function changeSetting
 		 * @param {Setting} setting A setting that needs to be changed
-		 * @param {Object} _settingsObject A copy of `settings`. Should be omitted when called manually
-		 * @param {Number} _index Current index in `path`. Should be omitted when called manually
-		 * @returns {Object} New clone of the child of `settings` containing said setting, using the new value for that setting
+		 * @param {object} _settingsObject A copy of `settings`. Should be omitted when called manually
+		 * @param {number} _index Current index in `path`. Should be omitted when called manually
+		 * @returns {object} New clone of the child of `settings` containing said setting, using the new value for that setting
 		 * @const
 		 * @private
 		 * @memberof options
@@ -256,10 +256,10 @@ class Setting {
 	/**
 	 * Finds a setting in `settings` based on its name and path, and returns its value and type
 	 * @function getSettingByName
-	 * @param {String} settingName Name of the setting
-	 * @returns {Object}
+	 * @param {string} settingName Name of the setting
+	 * @returns {object}
 	 * @returns {*} settingValue
-	 * @returns {String} settingType
+	 * @returns {string} settingType
 	 * @static
 	 * @memberof options
 	 */
@@ -310,16 +310,16 @@ Setting.instances = []
  * @example
  * // Returns "10K"
  * abbreviateNumber(10_000)
- * @param {Number} num
- * @returns {String} Short form number
+ * @param {number} num
+ * @returns {string} Short form number
  * @memberof options
  */
 function abbreviateNumber(num) {
 	/**
 	 * Rounds a number
 	 * @function round
-	 * @param {Number} num
-	 * @returns {Number}
+	 * @param {number} num
+	 * @returns {number}
 	 * @private
 	 * @memberof options
 	 */
@@ -349,8 +349,8 @@ function abbreviateNumber(num) {
  * @example
  * // Returns 10_000
  * romanize("10K")
- * @param {String} input A string containing a short form number
- * @returns {Number} Long form number
+ * @param {string} input A string containing a short form number
+ * @returns {number} Long form number
  * @memberof options
  */
 function deabbreviateNumber (input) {
@@ -380,8 +380,8 @@ function deabbreviateNumber (input) {
 /**
  * Displays a message to the user under the form control buttons
  * @function displayMessage
- * @param {String} message A message to show to the user
- * @param {Number} [time=2500] The amount of time (ms) that the message should be shown for. Defaults to 2500 ms
+ * @param {string} message A message to show to the user
+ * @param {number} [time=2500] The amount of time (ms) that the message should be shown for. Defaults to 2500 ms
  * @memberof options
  */
 function displayMessage(message, time=2500) {
@@ -414,8 +414,8 @@ function updateCrystalsPrice() {
 	/**
 	 * Returns the cost of buying daily crystals in gold
 	 * @function price
-	 * @param {Number} n Number of daily crystals
-	 * @returns {Number} Cost of daily crystals
+	 * @param {number} n Number of daily crystals
+	 * @returns {number} Cost of daily crystals
 	 * @private
 	 * @memberof options
 	 */

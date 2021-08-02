@@ -48,7 +48,7 @@ class Port {
 
 		/**
 		 * Logs in with a given Username
-		 * @param {String} username
+		 * @param {string} username
 		 */
 		this.login = username => {
 			this.postMessage({
@@ -59,8 +59,8 @@ class Port {
 
 		/**
 		 * Listens for a message from the runtime port and triggers the handler when the message is received
-		 * @param {String} trigger A String that will trigger the handler when received from the runtime port
-		 * @param {Function} handler A function that will run when triggered
+		 * @param {string} trigger A String that will trigger the handler when received from the runtime port
+		 * @param {function} handler A function that will run when triggered
 		 */
 		this.listen = (trigger, handler) => {
 			this.originalPortObject.onMessage.addListener(message => {
@@ -200,7 +200,7 @@ async function login() {
 /**
  * Sends a message to all ports inside an array at once
  * @function sendMessage
- * @param {Object} message A message to be sent
+ * @param {object} message A message to be sent
  * @param {runtimePort[]} [users=[...ports.alt, ports.main]] An array of `runtimePort` objects. If omitted, defaults to `[...ports.alt, ports.main]`
  * @memberof background
  */

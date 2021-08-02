@@ -38,7 +38,7 @@ function log(...msg) {
  * - Returns a promise that is resolved after some time.
  * - Useful for pausing async functions.
  * @function delay
- * @param {Number} ms Amount of milliseconds to wait before resolving the promise
+ * @param {number} ms Amount of milliseconds to wait before resolving the promise
  * @memberof helpers
  */
 function delay(ms) {
@@ -49,11 +49,11 @@ function delay(ms) {
 
 /**
  * @const helpers
- * @property {Object} eventListeners
- * @property {Object} insecureCrypt
- * @property {Function} objectEquals
- * @property {Function} capitalize
- * @property {Function} romanize
+ * @property {object} eventListeners
+ * @property {object} insecureCrypt
+ * @property {function} objectEquals
+ * @property {function} capitalize
+ * @property {function} romanize
  */
 const helpers = {
 	/**
@@ -72,9 +72,9 @@ const helpers = {
 		/**
 		 * Attaches/deattaches handlers to document events, while avoiding having duplicate listeners
 		 * @method toggle
-		 * @param {String} eventName - Listen to events with this name
-		 * @param {Function} handler - Handle the event with this handler
-		 * @param {Boolean} turnOn - If true, turns the event listener on. If false, turns the event listener off
+		 * @param {string} eventName - Listen to events with this name
+		 * @param {function} handler - Handle the event with this handler
+		 * @param {boolean} turnOn - If true, turns the event listener on. If false, turns the event listener off
 		 * @memberof helpers
 		 * */
 		toggle(eventName, handler, turnOn) {
@@ -115,7 +115,7 @@ const helpers = {
 		/**
 		 * Allows waiting for events in asynchronous functions
 		 * @method waitFor
-		 * @param {String} eventName Wait for event with this name
+		 * @param {string} eventName Wait for event with this name
 		 * @returns {Promise<waitForEvent>} A Promise that will be fulfilled with an object, containing an `event` object and an `data` object, after `eventName` is triggered
 		 * @memberof helpers
 		 */
@@ -146,9 +146,9 @@ const helpers = {
 		 * Do the actual crypto operations
 		 * @async
 		 * @method _insecureCrypt
-		 * @param {String} str Message to work on
-		 * @param {String} key Key to work with
-		 * @param {Boolean} decrypt If true, decrypts the message. If false, encrypts the message
+		 * @param {string} str Message to work on
+		 * @param {string} key Key to work with
+		 * @param {boolean} decrypt If true, decrypts the message. If false, encrypts the message
 		 * @returns {Promise<string>} A promise that is resolved with a string containing the new message
 		 * @private
 		 * @memberof helpers
@@ -185,8 +185,8 @@ const helpers = {
 		 * **vulnerable** Encrypt a string using another string as a key
 		 * @async
 		 * @method encrypt
-		 * @param {String} str Message to encrypt
-		 * @param {String} key Key to encrypt the message with
+		 * @param {string} str Message to encrypt
+		 * @param {string} key Key to encrypt the message with
 		 * @returns {Promise<string>} A promise that is resolved with a string containing the encrypted message
 		 * @memberof helpers
 		 */
@@ -196,8 +196,8 @@ const helpers = {
 		 * **vulnerable** Decrypt a string using another string as a key
 		 * @async
 		 * @method decrypt
-		 * @param {String} str Message to decrypt
-		 * @param {String} key Key to decrypt the message with
+		 * @param {string} str Message to decrypt
+		 * @param {string} key Key to decrypt the message with
 		 * @returns {Promise<string>} A promise that is resolved with a string containing the decrypted message
 		 * @memberof helpers
 		 */
@@ -209,7 +209,7 @@ const helpers = {
 	 * @author {@link https://stackoverflow.com/a/6713782|Jean Vincent}
 	 * @param {*} object1
 	 * @param {*} object2
-	 * @returns {Boolean}
+	 * @returns {boolean}
 	 * @memberof helpers
 	 */
 	objectEquals(object1, object2) {
@@ -231,8 +231,8 @@ const helpers = {
 
 	/**
 	 * @function capitalize
-	 * @param {String} str
-	 * @returns {String}
+	 * @param {string} str
+	 * @returns {string}
 	 * @memberof helpers
 	 */
 	capitalize(str) {
@@ -245,8 +245,8 @@ const helpers = {
 	 * @example
 	 * // Returns "IX"
 	 * romanize(9)
-	 * @param {Number} num Latin numeral
-	 * @returns {String} String containing a roman numeral
+	 * @param {number} num Latin numeral
+	 * @returns {string} String containing a roman numeral
 	 * @private
 	 * @memberof background
 	 */

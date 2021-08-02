@@ -123,8 +123,8 @@ function updateSettings() {
 	/**
 	 * Changes a setting name, and uses a default value if the old setting does not exist
 	 * @function changeSettingName
-	 * @param {String} oldName Old setting name
-	 * @param {String} newName New setting name
+	 * @param {string} oldName Old setting name
+	 * @param {string} newName New setting name
 	 * @param {*} defaultValue Default value that will be used if the old setting is not defined
 	 * @memberof settings
 	 * @private
@@ -348,7 +348,7 @@ function updateSettings() {
  * Logs changes in `settings` to the console
  * @function logSettingsChanges
  * @memberof settings
- * @param {Object} changes
+ * @param {object} changes
  */
 function logSettingsChanges(changes) {
 	getSettings()
