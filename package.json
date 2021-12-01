@@ -17,6 +17,8 @@
 	"devDependencies": {
 		"@types/firefox-webext-browser": "^94.0.0",
 		"@types/jquery": "^3.5.9",
+		"addons-linter": "^4.4.0",
+		"eslint": "^8.3.0",
 		"jsonfile": "^6.1.0"
 	}
 }
