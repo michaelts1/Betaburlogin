@@ -663,7 +663,11 @@ const calendar = {
 		$("#eventCalendarLink").click()
 
 		await eventListeners.waitFor("roa-ws:page:event_calendar")
-		$(".calendar-day.current-day a")[0].click()
+
+		if ($(".calendar-day.current-day a.event_view").length === 0) {
+			$('.calendar-day.current-day').append('<a class="event_view betabot-hidden" data-id="156">Advent Calendar</a>')
+		}
+		$(".calendar-day.current-day a.event_view")[0].click()
 
 		await eventListeners.waitFor("roa-ws:page:event_view")
 		await delay(vars.buttonDelay)
