@@ -15,6 +15,8 @@
 		"export-addon": "C:/\"Program Files\"/7-Zip/7z.exe a ../betaburlogin.xpi license manifest.json src"
 	},
 	"devDependencies": {
+		"@types/firefox-webext-browser": "^94.0.0",
+		"@types/jquery": "^3.5.9",
 		"jsonfile": "^6.1.0"
 	}
 }
