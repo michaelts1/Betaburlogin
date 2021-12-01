@@ -154,7 +154,7 @@ async function getContainers() {
  * @memberof background
  */
 async function openTabs() {
-	let containers = await getContainers()
+	const containers = await getContainers()
 
 	// Number of alts, including main:
 	const altsNumber = 1 + (settings.pattern === "unique" ? settings.namesList.length : settings.altsNumber)

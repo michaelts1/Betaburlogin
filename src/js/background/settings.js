@@ -119,7 +119,7 @@ async function getSettings() {
  * @memberof settings
  */
 function updateSettings() {
-	let deletedSettings = []
+	const deletedSettings = []
 	/**
 	 * Changes a setting name, and uses a default value if the old setting does not exist
 	 * @function changeSettingName
@@ -263,7 +263,7 @@ function updateSettings() {
 		case 17:
 			// Refactoring (Array => Object):
 			if (Array.isArray(settings.currencySend)) {
-				let tmp = {}
+				const tmp = {}
 				for (const currency of settings.currencySend) {
 					tmp[currency.name] = {
 						keepAmount: currency.keepAmount,
@@ -356,7 +356,7 @@ function logSettingsChanges(changes) {
 	// Log changes:
 	if (!settings.verbose) return
 
-	for (let key in changes) {
+	for (const key in changes) {
 		if (!helpers.objectEquals(changes[key].oldValue, changes[key].newValue)) {
 			log(key, "changed from", changes[key].oldValue, "to", changes[key].newValue)
 		}

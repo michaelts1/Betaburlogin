@@ -325,19 +325,19 @@ function abbreviateNumber(num) {
 	 */
 	const round = num => Math.round(num*1000)/1000
 
-	if(num >= 1_000_000_000_000_000) {
+	if (num >= 1_000_000_000_000_000) {
 		return round(num/1_000_000_000_000_000)+"Q"
 	}
-	if(num >= 1_000_000_000_000) {
+	if (num >= 1_000_000_000_000) {
 		return round(num/1_000_000_000_000)+"T"
 	}
-	if(num >= 1_000_000_000) {
+	if (num >= 1_000_000_000) {
 		return round(num/1_000_000_000)+"B"
 	}
-	if(num >= 1_000_000) {
+	if (num >= 1_000_000) {
 		return round(num/1_000_000)+"M"
 	}
-	if(num >= 1_000) {
+	if (num >= 1_000) {
 		return round(num/1_000)+"K"
 	}
 	return round(num)
@@ -551,7 +551,7 @@ function saveContainers() {
  * @memberof options
  */
 async function resetSettings() {
-	if(!window.confirm("Are you sure you want to reset ALL settings?")) return
+	if (!window.confirm("Are you sure you want to reset ALL settings?")) return
 
 	// Don't update settings before reloading:
 	browser.storage.onChanged.removeListener(Setting.refreshSettings)

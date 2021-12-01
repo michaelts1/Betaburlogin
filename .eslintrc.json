@@ -1,7 +1,7 @@
 {
 	"env": {
 		"browser": true,
-		"es2020": true,
+		"es2021": true,
 		"jquery": true,
 		"webextensions": true
 	},
@@ -26,7 +26,7 @@
 		"eqeqeq": "error",
 		"indent": [
 			"error",
-			4,
+			"tab",
 			{
 				"SwitchCase" : 1
 			}

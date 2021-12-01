@@ -42,6 +42,7 @@ const vars = {
  * Contains the settings. Filled with values after the rest of the code is initialized.
  * @memberof beta-game-functions
  */
+// eslint-disable-next-line prefer-const
 let settings = {}
 
 /**
@@ -54,6 +55,7 @@ let settings = {}
  * @type {runtimePort?}
  * @memberof beta-game-functions
  */
+// eslint-disable-next-line prefer-const
 let port = null
 
 /**
@@ -665,7 +667,7 @@ const calendar = {
 		await eventListeners.waitFor("roa-ws:page:event_calendar")
 
 		if ($(".calendar-day.current-day a.event_view").length === 0) {
-			$('.calendar-day.current-day').append('<a class="event_view betabot-hidden" data-id="156">Advent Calendar</a>')
+			$(".calendar-day.current-day").append('<a class="event_view betabot-hidden" data-id="156">Advent Calendar</a>')
 		}
 		$(".calendar-day.current-day a.event_view")[0].click()
 

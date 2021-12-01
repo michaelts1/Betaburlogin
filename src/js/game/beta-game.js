@@ -162,7 +162,7 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 		 */
 		ports[0].onmessage = ({data}) => {
 			for (const item of data) {
-				let etype = "roa-ws:" + (item.type ?? "general")
+				const etype = "roa-ws:" + (item.type ?? "general")
 				if (item.type === "page" && typeof item.page === "string") {
 					$(document).trigger(etype + ":" + item.page, item)
 				}
