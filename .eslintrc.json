@@ -1,19 +1,19 @@
 {
 	"env": {
+		"browser": true,
 		"es2020": true,
 		"jquery": true,
-		"browser": true,
 		"webextensions": true
 	},
+
 	"extends": "eslint:recommended",
-	"parserOptions": {
-		"ecmaVersion": 2021
-	},
+
 	"globals": {
 		"helpers": "readonly",
 		"delay": "readonly",
 		"log": "readonly"
 	},
+
 	"rules": {
 		"comma-dangle" : [
 			"error",
@@ -26,7 +26,7 @@
 		"eqeqeq": "error",
 		"indent": [
 			"error",
-			"tab",
+			4,
 			{
 				"SwitchCase" : 1
 			}
@@ -39,6 +39,13 @@
 			"error",
 			"unix"
 		],
+		"keyword-spacing": "error",
+		"no-constant-condition": [
+			"error",
+			{
+				"checkLoops": false
+			}
+		],
 		"no-eval": "error",
 		"no-implied-eval": "error",
 		"no-inner-declarations": "off",
@@ -49,6 +56,7 @@
 			}
 		],
 		"no-prototype-builtins": "off",
+		"no-sequences": "error",
 		"no-trailing-spaces": "error",
 		"no-unsafe-optional-chaining" : "error",
 		"no-use-before-define": [
@@ -60,6 +68,7 @@
 			}
 		],
 		"no-var": "error",
+		"prefer-const": "error",
 		"quotes": [
 			"error",
 			"double",
