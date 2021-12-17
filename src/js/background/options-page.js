@@ -130,7 +130,7 @@ class Setting {
 				break
 			case "number":
 				// Don't abbreviate the Event Channel ID field:
-				this.loadValue = function() {this.input.value = this.input.id === "event-channel-id" ? this.value : abbreviateNumber(this.value)}
+				this.loadValue = function() {this.input.value = this.input.type === "number" ? this.value : abbreviateNumber(this.value)}
 				this.updateValue = function() {const value = deabbreviateNumber(this.input.value); this.value = isNaN(value) ? this.value : value}
 				break
 			default:
