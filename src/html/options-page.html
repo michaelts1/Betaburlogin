@@ -326,10 +326,18 @@
 			</tr>
 			<tr>
 				<td>
-					<label for="attack-at" data-info="When automatically joining event, switch to battle when this number of minutes are left.&#10;&#10;For example, if you type 5, you will automatically attack the event boss when there are only 5 minutes left.&#10;&#10;0 to disable.">Attack At</label>
+					<label for="attack-at-main" data-info="When automatically joining events, the main account will switch to battle when this number of minutes are left.&#10;&#10;For example, if you type 3, your main account will automatically attack the event boss when there are only 3 minutes left.&#10;&#10;0 to disable.">Main Attack At</label>
 				</td>
 				<td>
-					<input id="attack-at" type="number" min="0" max="15" placeholder="Minutes" size="6" data-setting="attackAt"> Minutes Left
+					<input id="attack-at-main" type="number" min="0" max="15" placeholder="Minutes" size="6" data-setting="attackAt.main"> Minutes Left
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="attack-at-alt" data-info="When automatically joining events, alt accounts will switch to battle when this number of minutes are left.&#10;&#10;For example, if you type 2, your alt accounts will automatically attack the event boss when there are only 2 minutes left.&#10;&#10;0 to disable.">Alts Attack At</label>
+				</td>
+				<td>
+					<input id="attack-at-alt" type="number" min="0" max="15" placeholder="Minutes" size="6" data-setting="attackAt.alt"> Minutes Left
 				</td>
 			</tr>
 			<tr>

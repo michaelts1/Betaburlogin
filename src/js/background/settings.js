@@ -17,7 +17,7 @@
  * @type {number}
  * @memberof settings
  */
-const SETTINGS_VERSION = 24
+const SETTINGS_VERSION = 25
 
 /**
  * - CSS code for Betaburlogin interface changes
@@ -222,7 +222,6 @@ function updateSettings() {
 			settings.addCustomBuild = true
 			settings.addUsername = true
 		case 9:
-			settings.attackAt = 3
 			settings.eventChannelID = 3262
 			settings.addOpenTabs = true
 			settings.addLoginAlts = false
@@ -318,6 +317,13 @@ function updateSettings() {
 			}
 		case 22:
 			deleteSettings("addSpawnGems")
+		case 24:
+			// Use different settings for alts and mains:
+			settings.attackAt = {
+				main: settings.attackAt ?? 3,
+				alt: (settings.attackAt-1) ?? 2,
+			}
+
 		default:
 			// Update internal CSS:
 			if (settings.css.addon !== ADDON_CSS) {

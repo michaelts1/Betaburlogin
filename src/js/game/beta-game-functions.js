@@ -413,7 +413,7 @@ const gauntlet = {
 		if (data.carvingTier > 2500 && !gauntlet.gauntVars.mainGauntlet) {
 			if (settings.verbose) log("Attacking gauntlet boss (carving tier)")
 			gauntlet.BUTTONS.battle.click()
-		} else if (data.time_remaining < settings.attackAt * 60) {
+		} else if (data.time_remaining < settings.attackAt[username.isAlt() ? "alt" : "main"] * 60) {
 			if (!username.isAlt() || !gauntlet.gauntVars.mainGauntlet) {
 				if (settings.verbose) log("Attacking gauntlet boss (time)")
 				gauntlet.BUTTONS.battle.click()
