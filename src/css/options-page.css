@@ -103,8 +103,8 @@ footer p {
 /* Form Contents */
 
 #settings {
-	max-height: 75.15vh;
-	margin: var(--settings-margin-top) auto auto;
+	max-height: calc(100vh - 200px);
+	margin: var(--settings-margin-top) auto 40px;
 	overflow-y: auto;
 	width: var(--settings-width);
 }
