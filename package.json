@@ -9,10 +9,10 @@
 	"repository": "github:michaelts1/Betaburlogin",
 	"scripts": {
 		"generate-jsdoc": "jsdoc src/js/ -p -r",
-		"test-addon": "eslint --ignore-pattern *.min.js --ignore-pattern /out/ ./ && (C:/\"Program Files\"/7-Zip/7z.exe a betaburlogin.xpi license manifest.json src && addons-linter --self-hosted betaburlogin.xpi & del betaburlogin.xpi) && echo Tests finished",
+		"test-addon": "eslint --ignore-pattern *.min.js --ignore-pattern /out/ ./ && (npm run export-addon && addons-linter --self-hosted betaburlogin.xpi & del betaburlogin.xpi) && echo Tests finished",
 		"bump-hotfix": "node ./bump-version 3",
 		"bump-minor": "node ./bump-version 2",
-		"export-addon": "C:/\"Program Files\"/7-Zip/7z.exe a ../betaburlogin.xpi license manifest.json src"
+		"export-addon": "C:/\"Program Files\"/7-Zip/7z.exe a betaburlogin.xpi license manifest.json src"
 	},
 	"devDependencies": {
 		"@types/firefox-webext-browser": "^94.0.0",
