@@ -83,7 +83,7 @@ class Setting {
 		this.input = input
 		this.name = input.dataset.setting
 		this.path = input.dataset.setting.split(".") /** @todo Is this really needed? its almost equivalent to `this.name` */
-		const {settingType, settingValue} = Setting.getSettingByName(this.name)
+		const { settingType, settingValue } = Setting.getSettingByName(this.name)
 		this.type = settingType
 		this.value = settingValue
 		this.lastChanged = new Date().getTime()

@@ -24,7 +24,7 @@
 /* eslint-disable no-use-before-define */ // Functions here will only run after all other functions and objects were initialized
 
 // Shorthand:
-const {eventListeners} = helpers
+const { eventListeners } = helpers
 
 /**
  * Stores variables and constants to avoid polluting the global space
@@ -143,7 +143,7 @@ const house = {
 		if ($("#allHouseUpgrades")[0]) {
 			$("#allHouseUpgrades")[0].click()
 
-			const {data: {q_b}} = await eventListeners.waitFor("roa-ws:page:house_all_builds")
+			const { data: { q_b } } = await eventListeners.waitFor("roa-ws:page:house_all_builds")
 			const items = []
 			// Filter duplicates (https://stackoverflow.com/a/53543804):
 			q_b.map(el1 => items.filter(el2 => el2.i === el1.i).length > 0 ? null : items.push(el1))
@@ -269,7 +269,7 @@ const house = {
 		completeTask()
 
 		// If we somehow tried to queue an item when there are more than 30 minutes left, cancel the queue (`s` stands for success):
-		const {data: {s}} = await eventListeners.waitFor("roa-ws:page:house_room_item_upgrade_tier roa-ws:page:house_room_item_upgrade_level")
+		const { data: { s } } = await eventListeners.waitFor("roa-ws:page:house_room_item_upgrade_tier roa-ws:page:house_room_item_upgrade_level")
 		if (s === 0) {
 			// Click "No" after the confirmation window shows up:
 			setTimeout(() => {
@@ -497,7 +497,7 @@ const gems = {
 			$("#socketThisGem").click()
 
 			// Wait for `roa-ws:page:gem_socket_to_item` event:
-			const {data} = await eventListeners.waitFor("roa-ws:page:gem_socket_to_item")
+			const { data } = await eventListeners.waitFor("roa-ws:page:gem_socket_to_item")
 
 			/* If this is the first gem socketed, assign `firstGemName` the name of this gem.
 			   Since `data.m` contains a very long html string, we need to extract the gem name.
@@ -1141,7 +1141,7 @@ const mobClimbing = {
 			mobClimbing.finishClimbing()
 		}
 
-		const {winRate, numberOfActions} = mobClimbing.getCurrentWinRate()
+		const { winRate, numberOfActions } = mobClimbing.getCurrentWinRate()
 
 		// If we are severely losing, climb down:
 		if (numberOfActions > 5 && winRate < 75) {
