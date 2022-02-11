@@ -19,7 +19,6 @@
 		{
 			"matches": [
 				"https://*.avabur.com/",
-				"https://*.avabur.com/?expired=1",
 				"https://beta.avabur.com/game"
 			],
 			"js": [
@@ -29,8 +28,8 @@
 		},
 		{
 			"matches": [
-				"https://www.avabur.com/",
-				"https://www.avabur.com/?expired=1"
+				"https://avabur.com/",
+				"https://www.avabur.com/"
 			],
 			"js": [
 				"src/js/login/live-login.js"
@@ -38,7 +37,6 @@
 		},
 		{
 			"matches": [
-				"https://beta.avabur.com/?expired=1",
 				"https://beta.avabur.com/"
 			],
 			"js": [
