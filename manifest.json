@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Betaburlogin",
-	"version": "1.0.4.1",
+	"version": "1.0.4.2",
 	"description": "Helps logging in with all the alts on beta.avabur.com",
 	"author": "Michael T",
 	"homepage_url": "https://www.github.com/michaelts1/Betaburlogin",
@@ -18,20 +18,12 @@
 	"content_scripts": [
 		{
 			"matches": [
-				"https://*.avabur.com/",
-				"https://beta.avabur.com/game"
-			],
-			"js": [
-				"src/js/jquery-3.6.0.min.js",
-				"src/js/helpers.js"
-			]
-		},
-		{
-			"matches": [
 				"https://avabur.com/",
 				"https://www.avabur.com/"
 			],
 			"js": [
+				"src/js/jquery-3.6.0.min.js",
+				"src/js/helpers.js",
 				"src/js/login/live-login.js"
 			]
 		},
@@ -40,6 +32,8 @@
 				"https://beta.avabur.com/"
 			],
 			"js": [
+				"src/js/jquery-3.6.0.min.js",
+				"src/js/helpers.js",
 				"src/js/login/beta-login.js"
 			]
 		},
@@ -48,6 +42,8 @@
 				"https://beta.avabur.com/game"
 			],
 			"js": [
+				"src/js/jquery-3.6.0.min.js",
+				"src/js/helpers.js",
 				"src/js/game/beta-game-functions.js",
 				"src/js/game/beta-game.js"
 			]

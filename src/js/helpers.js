@@ -272,9 +272,3 @@ const helpers = {
 		return str
 	},
 }
-
-/* Respond to messages from the backround script asking if we are alive */
-browser.runtime.onMessage.addListener((message, _, sendResponse) => {
-	if (message === "Content script running?") sendResponse(true)
-	console.log("Message received")
-})

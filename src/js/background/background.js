@@ -210,22 +210,6 @@ function sendMessage(message, users=[...ports.alt, ports.main]) {
 	}
 }
 
-/** Give the browser time to load to tabs, then contact each betabur tab to see if the content
- * scripts are running on that tab, and inject them where they doesn't already run */
-setTimeout(async () => {
-	for (const { id } of await browser.tabs.query({ url: "https://beta.avabur.com/game" })) {
-		console.log(`Asked tab #${id}.`)
-		if (await browser.tabs.sendMessage(id, "Content script running?") !== true) {
-			console.log(`This tab was dead, so let's inject our scripts`)
-			for (const script of ["jquery-3.6.0.min", "helpers", "game/beta-game-functions", "game/beta-game"]) {
-				browser.tabs.executeScript(id, { file: "/src/js/" + script + ".js" })
-			}
-		} else {
-			console.log(`This tab was alive! no need to inject anything`)
-		}
-	}
-}, 5000)
-
 getSettings()
 
 log("background script finished evaluating")
