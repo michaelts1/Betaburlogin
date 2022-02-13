@@ -123,7 +123,7 @@ browser.storage.onChanged.addListener(refreshSettings)
 browser.storage.sync.get().then(result => {
 	settings = result
 
-	port = browser.runtime.connect({name: username.name + " " + (username.isAlt() ? "alt" : "main")})
+	port = browser.runtime.connect({ name: username.name + " " + (username.isAlt() ? "alt" : "main") })
 	port.onMessage.addListener(message => {
 		if (settings.verbose) log("Received message:", message)
 

@@ -936,7 +936,9 @@ const betabot = {
 		// Construction:
 		if (settings.autoHouse) {
 			switch (true) {
-				case data?.house_timers[0]?.next < 1800 && !house.houseItemQueued:
+				case house.houseItemQueued:
+					break
+				case data?.house_timers[0]?.next < 1800:
 					if (settings.verbose) log("House timer less than 30 minutes, queuing another item")
 					// Fall through
 				case data?.can_build_house:
