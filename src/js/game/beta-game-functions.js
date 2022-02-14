@@ -493,7 +493,7 @@ const gems = {
 		let firstGemName = null
 
 		// Until there are no more empty slots, or until the user closes the modal:
-		while ($("#socketableGems option").eq(0).is(":visible")) {
+		while ($("#socketableGems option").length > 0 && $("#socketableGems").is(":visible")) {
 			$("#socketThisGem").click()
 
 			// Wait for `roa-ws:page:gem_socket_to_item` event:
