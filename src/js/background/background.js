@@ -42,7 +42,6 @@ class Port {
 		this.role = role
 
 		// Define properties and methods:
-		this.originalPortObject = runtimePort
 		this.postMessage = runtimePort.postMessage
 		this.cookieStoreId = runtimePort.sender.tab.cookieStoreId
 
@@ -63,7 +62,7 @@ class Port {
 		 * @param {function} handler A function that will run when triggered
 		 */
 		this.listen = (trigger, handler) => {
-			this.originalPortObject.onMessage.addListener(message => {
+			runtimePort.onMessage.addListener(message => {
 				if (message.text === trigger) handler()
 			})
 		}
@@ -105,7 +104,7 @@ class Port {
 		}
 
 		// Disconnect event handler:
-		this.originalPortObject.onDisconnect.addListener(() => {
+		runtimePort.onDisconnect.addListener(() => {
 			// When a port disconnects, forget it:
 			if (Array.isArray(ports[role])) {
 				const index = ports[role].indexOf(this)
@@ -133,19 +132,9 @@ browser.runtime.onConnect.addListener(runtimePort => {
  * @memberof background
  * @returns {Promise<Array>} A promise that resolves to an array of {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/contextualIdentities/ContextualIdentity|Contextual Identities}
  */
-async function getContainers() {
-	return new Promise(resolve => {
-		if (settings.containers.useAll) {
-			// Return the default container and all other containers:
-			browser.contextualIdentities.query({}).then(containers => {
-				resolve(["firefox-default", ...containers.map(e=>e.cookieStoreId)])
-			})
-		} else {
-			// Return the selected containers only:
-			resolve(settings.containers.list)
-		}
-	})
-}
+const getContainers = async () => settings.containers.useAll
+	? ["firefox-default", ...(await browser.contextualIdentities.query({})).map(e => e.cookieStoreId)] // Return default + all other containers
+	: settings.containers.list // Return selected containers only
 
 /**
  * Opens Beta Login tabs according to the amount of alts
@@ -205,9 +194,7 @@ async function login() {
  * @memberof background
  */
 function sendMessage(message, users=[...ports.alt, ports.main]) {
-	for (const user of users) {
-		user.postMessage(message)
-	}
+	for (const user of users) user.postMessage(message)
 }
 
 getSettings()
