@@ -30,9 +30,7 @@
  * @param {...any} msg Zero or more objects of any type that will be logged
  * @memberof helpers
  */
-function log(...msg) {
-	console.log(`[${new Date().toLocaleString().replace(",", "")}] Betaburlogin:`, ...msg)
-}
+const log = (...msg) => console.log(`[${new Date().toLocaleString().replace(",", "")}] Betaburlogin:`, ...msg)
 
 /**
  * - Returns a promise that is resolved after some time.
@@ -41,11 +39,7 @@ function log(...msg) {
  * @param {number} ms Amount of milliseconds to wait before resolving the promise
  * @memberof helpers
  */
-function delay(ms) {
-	return new Promise(resolve => {
-		setTimeout(resolve, ms)
-	})
-}
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 /**
  * @const helpers
@@ -78,21 +72,11 @@ const helpers = {
 		 * @memberof helpers
 		 * */
 		toggle(eventName, handler, turnOn) {
-			if (typeof eventName !== "string") throw new TypeError(`Parameter eventName ${eventName} must be a string`)
-			if (typeof handler !== "function") throw new TypeError(`Parameter handler ${handler} must be function`)
-			if (typeof turnOn !== "boolean") throw new TypeError(`Parameter turnOn ${turnOn} must be boolean`)
-
-			if (this[eventName] === undefined) {
-				this[eventName] = []
-			}
-
 			// Shorter identifier:
 			const prop = this[eventName]
 
-			// Turn off the previous event handler to avoid duplicates:
-			if (prop.includes(handler) && turnOn) {
-				$(document).off(eventName, handler)
-			}
+			// Avoid duplicates:
+			if (turnOn && prop.includes(handler)) return
 
 			// If turnOn is true, $(document).on(...), if false, $(document).off(...):
 			$(document)[turnOn ? "on" : "off"](eventName, handler)
@@ -119,20 +103,16 @@ const helpers = {
 		 * @returns {Promise<waitForEvent>} A Promise that will be fulfilled with an object, containing an `event` object and an `data` object, after `eventName` is triggered
 		 * @memberof helpers
 		 */
-		waitFor(eventName) {
-			if (typeof eventName !== "string") throw new TypeError(`Parameter eventName ${eventName} must be a string`)
+		waitFor: eventName => new Promise(resolve => {
+			function resolved(event, data) {
+				// Remove the listener and resolve the promise:
+				helpers.eventListeners.toggle(eventName, resolved, false)
+				resolve({event, data})
+			}
 
-			return new Promise(resolve => {
-				function resolved(event, data) {
-					// Remove the listener and resolve the promise:
-					helpers.eventListeners.toggle(eventName, resolved, false)
-					resolve({event, data})
-				}
-
-				// Add a listener that will call resolved() when the event is triggered:
-				helpers.eventListeners.toggle(eventName, resolved, true)
-			})
-		},
+			// Add a listener that will call resolved() when the event is triggered:
+			helpers.eventListeners.toggle(eventName, resolved, true)
+		}),
 	},
 
 	/**
@@ -154,10 +134,6 @@ const helpers = {
 		 * @memberof helpers
 		 */
 		async _insecureCrypt(str, key, decrypt) {
-			if (typeof str !== "string") throw new TypeError("Parameter \"str\" must be a string")
-			if (typeof key !== "string") throw new TypeError("Parameter \"key\" must be a string")
-			if (typeof decrypt !== "boolean") throw new TypeError("Parameter \"decrypt\" must be a boolean")
-
 			// Hash the key:
 			key = await crypto.subtle.digest("SHA-512", new TextEncoder("utf-8").encode(key))
 			key = new Uint8Array(key)
@@ -190,7 +166,7 @@ const helpers = {
 		 * @returns {Promise<string>} A promise that is resolved with a string containing the encrypted message
 		 * @memberof helpers
 		 */
-		async encrypt(str, key) { return await this._insecureCrypt(str, key, false) },
+		encrypt: async (str, key) => await this._insecureCrypt(str, key, false),
 
 		/**
 		 * **vulnerable** Decrypt a string using another string as a key
@@ -201,7 +177,7 @@ const helpers = {
 		 * @returns {Promise<string>} A promise that is resolved with a string containing the decrypted message
 		 * @memberof helpers
 		 */
-		async decrypt(str, key) { return await this._insecureCrypt(str, key, true) },
+		decrypt: async (str, key) => await this._insecureCrypt(str, key, true),
 	},
 
 	/**
@@ -235,9 +211,7 @@ const helpers = {
 	 * @returns {string}
 	 * @memberof helpers
 	 */
-	capitalize(str) {
-		return str[0].toUpperCase() + str.substring(1)
-	},
+	capitalize: str => str[0].toUpperCase() + str.substring(1),
 
 	/**
 	 * Converts a Latin numeral to Roman numeral
@@ -264,9 +238,9 @@ const helpers = {
 		}
 
 		let str = ""
-		for (const key of Object.keys(roman)) {
-			const q = Math.floor(num / roman[key])
-			num -= q * roman[key]
+		for (const [key, value] of Object.entries(roman)) {
+			const q = Math.floor(num / value)
+			num -= q * value
 			str += key.repeat(q)
 		}
 		return str
