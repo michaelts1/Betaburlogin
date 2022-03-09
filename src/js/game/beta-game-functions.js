@@ -943,8 +943,8 @@ const betabot = {
 					// Fall through
 				case data?.can_build_house:
 					house.houseItemQueued = true
-					// Falsify after 30 minutes, or after 1 minute if house is available:
-					setTimeout(() => house.houseItemQueued = false, data?.can_build_house ? 1 : 30 * 60_000)
+					// Falsify after 1 minute, or after 15 minutes, queuing item
+					setTimeout(() => house.houseItemQueued = false, (data?.can_build_house ? 1 : 15) * 60_000)
 
 					vars.actionsPending = true
 					$("li#housing").click()
