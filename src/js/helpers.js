@@ -72,6 +72,8 @@ const helpers = {
 		 * @memberof helpers
 		 * */
 		toggle(eventName, handler, turnOn) {
+			this[eventName] ??= []
+
 			// Shorter identifier:
 			const prop = this[eventName]
 

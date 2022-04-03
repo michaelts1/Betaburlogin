@@ -67,7 +67,7 @@ async function toggleInterfaceChanges(refresh) {
 	}
 
 	// Option to build a specific item:
-	if (settings.addCustomBuild && !$("#betabot-custom-build")[0] && $("#housing").is(":visible") && refresh) {
+	if (settings.addCustomBuild && !$("#betabot-custom-build")[0] && $("#housing").is(":visible") && $("#house_level").text() !== "None" && refresh) {
 		house.addCustomBuild()
 	} else if (!settings.addCustomBuild && $("#betabot-custom-build")[0]) {
 		$("#betabot-custom-build").remove()
@@ -190,14 +190,18 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 		eventListeners.toggle("roa-ws:message", gauntlet.checkGauntletMessage, settings.joinGauntlets)
 
 		// Hide the interface:
-		$("#modalBackground, #modalWrapper, #modal2Wrapper").addClass("betabot-hidden")
+		$("#modalBackground, #modalWrapper").addClass("betabot-hidden")
 
-		// Option to build a specific item:
-		await house.addCustomBuild()
+		// Option to build a specific item (if the player has a house):
+		if ($("#housing").is(":visible") && $("#house_level").text() !== "None") {
+			$("#modal2Wrapper").addClass("betabot-hidden")
 
-		// Reshow some of the interface:
-		await delay(999)
-		$("#modal2Wrapper").removeClass("betabot-hidden")
+			await house.addCustomBuild()
+
+			// Reshow some of the interface:
+			await delay(999)
+			$("#modal2Wrapper").removeClass("betabot-hidden")
+		}
 
 		// Daily Crystals:
 		await betabot.buyCrys()

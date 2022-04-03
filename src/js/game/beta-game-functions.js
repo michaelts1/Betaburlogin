@@ -133,8 +133,6 @@ const house = {
 	 * @memberof beta-game-functions
 	 */
 	async addCustomBuild() {
-		if ($("#house_level").text() === "None") return
-
 		vars.actionsPending = true
 		// Hide the interface for the duration of this function:
 
@@ -172,7 +170,6 @@ const house = {
 	 * @memberof beta-game-functions
 	 */
 	async selectBuild() {
-		if ($("#house_level").text() === "None") return
 		const itemId = parseInt($("#betabot-select-build").val())
 		await delay(vars.startActionsDelay)
 
