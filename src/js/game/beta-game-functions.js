@@ -823,14 +823,16 @@ const betabot = {
 	 * @async
 	 * @function betabot.startQuest
 	 * @param {string} type Quest type
+	 * @param {number} [mobNumber] Mob number, defaults to current mob
 	 * @memberof beta-game-functions
 	 */
-	async startQuest(type) {
+	async startQuest(type, mobNumber) {
 		$("a.questCenter")[0].click()
 		await eventListeners.waitFor("roa-ws:page:quests")
 		await delay(vars.buttonDelay)
 
 		if (settings.verbose) log(`Starting a ${type} quest`)
+		if (type === "kill" && mobNumber) $("#quest_enemy_list").val(mobNumber)
 		$(`.questRequest[data-questtype=${type}]`).click()
 		await eventListeners.waitFor("roa-ws:page:quest_request")
 
@@ -968,6 +970,7 @@ const betabot = {
  * Mob climbing related functions and variables
  * @const mobClimbing
  * @property {boolean} climbing Tracks current climbing status
+ * @property {number} currentMob Tracks current mob
  * @property {function} getCurrentWinRate Returns an object containing winrate and number of actions tracked
  * @property {function} checkClimbing Checks to see if we should climb
  * @property {function} move Climbs/descends mobs
@@ -978,6 +981,7 @@ const betabot = {
  */
 const mobClimbing = {
 	climbing: false,
+	currentMob: 1,
 
 	/**
 	 * Returns an object containing the win rate (in percentages), and the number of actions tracked so far
@@ -1050,6 +1054,7 @@ const mobClimbing = {
 				$("#autoSelectedEnemy").click()
 
 				// Stop here:
+				mobClimbing.currentMob = nextMob
 				mobClimbing.finalizeMove(direction)
 				return
 			} else {
@@ -1074,6 +1079,7 @@ const mobClimbing = {
 		await delay(vars.buttonDelay)
 		$("#autoEnemy").click()
 
+		mobClimbing.currentMob = nextMob
 		mobClimbing.finalizeMove(direction)
 	},
 
@@ -1185,7 +1191,7 @@ const mobClimbing = {
 		eventListeners.toggle("roa-ws:battle", mobClimbing.checkStability, false)
 
 		if (settings.autoQuests) {
-			betabot.startQuest("kill")
+			betabot.startQuest("kill", mobClimbing.currentMob)
 		} else {
 			vars.actionsPending = false
 		}
