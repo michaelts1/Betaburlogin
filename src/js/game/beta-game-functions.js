@@ -831,8 +831,12 @@ const betabot = {
 		await eventListeners.waitFor("roa-ws:page:quests")
 		await delay(vars.buttonDelay)
 
-		if (settings.verbose) log(`Starting a ${type} quest`)
-		if (type === "kill" && mobNumber) $("#quest_enemy_list").val(mobNumber)
+		if (settings.verbose) log(`Starting a ${type} quest ${mobNumber ? ` (mob #${mobNumber})` : ""}`)
+
+		if (type === "kill" && mobNumber) {
+			$("#quest_enemy_list").val(mobNumber)
+			await delay(vars.buttonDelay)
+		}
 		$(`.questRequest[data-questtype=${type}]`).click()
 		await eventListeners.waitFor("roa-ws:page:quest_request")
 
@@ -981,7 +985,7 @@ const betabot = {
  */
 const mobClimbing = {
 	climbing: false,
-	currentMob: 1,
+	currentMob: null,
 
 	/**
 	 * Returns an object containing the win rate (in percentages), and the number of actions tracked so far
@@ -1010,11 +1014,11 @@ const mobClimbing = {
 	 * @param {object} data.results.p
 	 * @memberof beta-game-functions
 	 */
-	checkClimbing(_, {results: {p}}) {
-		// Pseudo-code: If (quest active/cancelled by user, or in middle of climbing, or actions are pending), then return
-		if (p.bq_info2?.a === 0 || betabot.questCooldown || mobClimbing.climbing || vars.actionsPending) return
-
-		mobClimbing.checkStability()
+	checkClimbing(_, { results: { p } }) {
+		const isQuestActive = p.bq_info2?.a === 0
+		if (!(isQuestActive || betabot.questCooldown || mobClimbing.climbing || vars.actionsPending)) {
+			mobClimbing.checkStability()
+		}
 	},
 
 	/**
@@ -1025,6 +1029,8 @@ const mobClimbing = {
 	 * @memberof beta-game-functions
 	 */
 	async move(direction) {
+		if (vars.actionsPending) return
+
 		vars.actionsPending = true
 
 		await delay(vars.startActionsDelay)
@@ -1147,6 +1153,7 @@ const mobClimbing = {
 		// Allow the user to stop climbing manually:
 		if (!settings.autoClimb.climb) {
 			mobClimbing.finishClimbing()
+			return
 		}
 
 		const { winRate, numberOfActions } = mobClimbing.getCurrentWinRate()
