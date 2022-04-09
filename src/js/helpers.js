@@ -168,7 +168,7 @@ const helpers = {
 		 * @returns {Promise<string>} A promise that is resolved with a string containing the encrypted message
 		 * @memberof helpers
 		 */
-		encrypt: async (str, key) => await this._insecureCrypt(str, key, false),
+		encrypt: async (str, key) => await helpers.insecureCrypt._insecureCrypt(str, key, false),
 
 		/**
 		 * **vulnerable** Decrypt a string using another string as a key
@@ -179,7 +179,7 @@ const helpers = {
 		 * @returns {Promise<string>} A promise that is resolved with a string containing the decrypted message
 		 * @memberof helpers
 		 */
-		decrypt: async (str, key) => await this._insecureCrypt(str, key, true),
+		decrypt: async (str, key) => await helpers.insecureCrypt._insecureCrypt(str, key, true),
 	},
 
 	/**
