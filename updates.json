@@ -166,6 +166,11 @@
 					"version": "1.0.5.4",
 					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v1.0.5.4/betaburlogin-1.0.5.4-fx.xpi",
 					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v1.0.5.4"
+				},
+				{
+					"version": "1.0.5.5",
+					"update_link": "https://github.com/michaelts1/Betaburlogin/releases/download/v1.0.5.5/betaburlogin-1.0.5.5-fx.xpi",
+					"update_info_url": "https://github.com/michaelts1/Betaburlogin/releases/tag/v1.0.5.5"
 				}
 			]
 		}

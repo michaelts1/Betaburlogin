@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Betaburlogin",
-	"version": "1.0.5.4",
+	"version": "1.0.5.5",
 	"description": "Helps logging in with all the alts on beta.avabur.com",
 	"author": "Michael T",
 	"homepage_url": "https://www.github.com/michaelts1/Betaburlogin",
