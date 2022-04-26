@@ -439,37 +439,11 @@ const gauntlet = {
 /**
  * Gems related functions
  * @const gems
- * @property {function} addAltsSpawn Adds a "Spawn For All Alts" button
  * @property {function} addSocket5Button Adds a "Socket Gem x5" button
  * @property {function} socketGems Sockets gems
  * @memberof beta-game-functions
  */
 const gems = {
-	/**
-	 * Creates a "Spawn For All Alts" button on the Spawn Gems interface
-	 * @function gems.addAltsSpawn
-	 * @param {Event} _ Placeholder parameter
-	 * @param {object} data Event data
-	 * @memberof beta-game-functions
-	 */
-	addAltsSpawn(_, data) {
-		if (data.title === "Spawn Gems") {
-			$("#gemSpawnConfirm").after(`<input id="betabot-spawn-gem" class="betabot" type="button" style="padding:6.5px; margin: 0 -.5em 0 .5em;" value="Spawn For All Alts">`)
-
-			$("#betabot-spawn-gem").click(() => {
-				const msg = {
-					text  : "spawnGem",
-					tier  : parseInt($("#spawnGemLevel").val()),
-					type  : parseInt($("#gemSpawnType").val()),
-					splice: parseInt($("#gemSpawnSpliceType").val()),
-					amount: parseInt($("#gemSpawnCount").val()),
-				}
-				port.postMessage(msg)
-				if (settings.verbose) log(`Requested to spawn ${msg.amount} tier ${msg.tier} gems with type value of ${msg.type} and splice value of ${msg.splice}`)
-			})
-		}
-	},
-
 	/**
 	 * Adds a "Socket Gem x5" button to the Item Options interface
 	 * @function gems.addSocket5Button
