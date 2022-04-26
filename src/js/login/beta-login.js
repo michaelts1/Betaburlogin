@@ -55,7 +55,7 @@ async function betaLogin() {
 		})
 
 		$("#login_notification").html(`<button id="login-alts">Login All Alts</button>`)
-		$("#login-alts").click(() => { port.postMessage({text: "requesting login"}) })
+		$("#login-alts").click(() => browser.runtime.sendMessage({text: "requesting login"}))
 	}
 }
 

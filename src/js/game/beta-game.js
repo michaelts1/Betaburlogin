@@ -177,8 +177,8 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 		$("#username").after(`<span id="betabot-next-to-name" class="betabot"></span>`)
 		$("#betabot-next-to-name").append(`<button id="betabot-request-button" class="betabot"><a>Request Currency</a></button>`)
 		$("#betabot-next-to-name").append(`<button id="betabot-spread-button" class="betabot"><a>Spread Currency</a></button>`)
-		$("#betabot-request-button").click(() => port.postMessage({text: "requesting currency"}) )
-		$("#betabot-spread-button").click(() => port.postMessage({text: "requesting a list of active alts"}) )
+		$("#betabot-request-button").click(() => browser.runtime.sendMessage({text: "requesting currency"}))
+		$("#betabot-spread-button").click(() => browser.runtime.sendMessage({text: "requesting a list of active alts"}))
 	}
 
 	// Start up auto wire:
@@ -213,7 +213,7 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 	// On click, close banners on all alts:
 	$("#close_general_notification").click(event => {
 		// Don't run due to closeBanner():
-		if (event.originalEvent.isTrusted && settings.removeBanner) port.postMessage({text: "banner closed"})
+		if (event.originalEvent.isTrusted && settings.removeBanner) browser.runtime.sendMessage({text: "banner closed"})
 	})
 
 	/* Event listeners that are currently always on (might change in the future) are

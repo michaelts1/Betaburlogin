@@ -621,7 +621,7 @@ const calendar = {
 		/* eslint-disable-next-line eqeqeq */ // `data.month` can be either a `Number` or a `String` containing a number, so can't use strict equality here:
 		if (data.month == 11 && !$("#betabot-collect-advent")[0]) {
 			$("#eventCalendarWrapper .mt10.center").append(` <button id="betabot-collect-advent" class="betabot"><a>Receive Your Prize</a></button>`)
-			$("#betabot-collect-advent").click(() => port.postMessage({ text: "receive advent calendar awards" }))
+			$("#betabot-collect-advent").click(() => browser.runtime.sendMessage({ text: "receive advent calendar awards" }))
 		}
 	},
 

@@ -56,52 +56,10 @@ class Port {
 			})
 		}
 
-		/**
-		 * Listens for a message from the runtime port and triggers the handler when the message is received
-		 * @param {string} trigger A String that will trigger the handler when received from the runtime port
-		 * @param {function} handler A function that will run when triggered
-		 */
-		this.listen = (trigger, handler) => {
-			runtimePort.onMessage.addListener(message => {
-				if (message.text === trigger) handler()
-			})
-		}
-
 		// Store port inside `ports`:
 		Array.isArray(ports[role])
 			? ports[role].push(this)
 			: ports[role] = this
-
-		// Attach listeners:
-		switch (role) {
-			case "live":
-				this.listen("open alt tabs", openTabs)
-				break
-			case "login":
-				this.listen("requesting login", login)
-				break
-			case "main":
-				// Fall through
-			case "alt":
-				this.listen("banner closed", () => {
-					sendMessage({text: "close banners"})
-				})
-
-				this.listen("requesting currency", () => {
-					sendMessage({text: "send currency", recipient: this.name})
-				})
-
-				this.listen("receive advent calendar awards", () => {
-					sendMessage({text: "open advent calendar"})
-				})
-
-				this.listen("requesting a list of active alts", () => {
-					this.postMessage({
-						text: "list of active alts",
-						alts: [ports.main.name, ...ports.alt.map(alt => alt.name)],
-					})
-				})
-		}
 
 		// Disconnect event handler:
 		runtimePort.onDisconnect.addListener(() => {
@@ -123,6 +81,36 @@ class Port {
 browser.runtime.onConnect.addListener(runtimePort => {
 	const port = new Port(runtimePort)
 	log(`${port.role}${port.name ? ` (${port.name})` : ""} connected`)
+})
+
+browser.runtime.onMessage.addListener(({ text }, _, sendResponse) => {
+	switch (text) {
+		case "open alt tabs":
+			openTabs()
+			break
+
+		case "requesting login":
+			login()
+			break
+
+		case "banner closed":
+			sendMessage({text: "close banners"})
+			break
+
+		case "requesting currency":
+			sendMessage({text: "send currency", recipient: this.name})
+			break
+
+		case "receive advent calendar awards":
+			sendMessage({text: "open advent calendar"})
+			break
+
+		case "requesting a list of active alts":
+			sendResponse({
+				text: "list of active alts",
+				alts: [ports.main.name, ...ports.alt.map(alt => alt.name)],
+			})
+	}
 })
 
 /**
