@@ -55,14 +55,13 @@ const helpers = {
 	 * @const eventListeners
 	 * @property {function} toggle Toggles an event listener on/off
 	 * @property {function} waitFor Allows asynchronously waiting for events
-	 * @property {...function[]}
-	 * - One or more properties using the following format:
-	 * - `string: function[]`
-	 * - Where `string` is the name of the event (e.g. "roa-ws:all"), and `function[]` is an array of functions that will be called when the event is triggered
-	 * - Example: `eventListeners["roa-ws:page"] = [onPage, getPage, log]` will call onPage(), getPage(), and log() every time "roa-ws:page" is triggered
+	 * @property {Map<string, function[]>} activeListeners A map of functions where The key is the name of the event
+	 * e.g. "roa-ws:all"), and the value is an array of functions that will be called when that event is triggered
 	 * @memberof helpers
 	 */
 	eventListeners: {
+		activeListeners: new Map(),
+
 		/**
 		 * Attaches/deattaches handlers to document events, while avoiding having duplicate listeners
 		 * @method toggle
@@ -72,23 +71,23 @@ const helpers = {
 		 * @memberof helpers
 		 * */
 		toggle(eventName, handler, turnOn) {
-			this[eventName] ??= []
-
-			// Shorter identifier:
-			const prop = this[eventName]
+			const { activeListeners } = helpers.eventListeners
+			const currentListeners = activeListeners.get(eventName)
 
 			// Avoid duplicates:
-			if (turnOn && prop.includes(handler)) return
+			if (turnOn && currentListeners.includes(handler)) return
 
 			// If turnOn is true, $(document).on(...), if false, $(document).off(...):
 			$(document)[turnOn ? "on" : "off"](eventName, handler)
 
 			// Push/pop the handler from the handlers array:
-			if (prop.includes(handler) && !turnOn) {
-				prop.splice(prop.indexOf(handler), 1)
+			if (currentListeners.includes(handler) && !turnOn) {
+				currentListeners.splice(currentListeners.indexOf(handler), 1)
 			} else if (turnOn) {
-				prop.push(handler)
+				currentListeners.push(handler)
 			}
+
+			activeListeners.set(eventName, currentListeners)
 		},
 
 		/**
