@@ -78,41 +78,6 @@ class Port {
 	}
 }
 
-browser.runtime.onConnect.addListener(runtimePort => {
-	const port = new Port(runtimePort)
-	log(`${port.role}${port.name ? ` (${port.name})` : ""} connected`)
-})
-
-browser.runtime.onMessage.addListener(({ text }, _, sendResponse) => {
-	switch (text) {
-		case "open alt tabs":
-			openTabs()
-			break
-
-		case "requesting login":
-			login()
-			break
-
-		case "banner closed":
-			sendMessage({text: "close banners"})
-			break
-
-		case "requesting currency":
-			sendMessage({text: "send currency", recipient: this.name})
-			break
-
-		case "receive advent calendar awards":
-			sendMessage({text: "open advent calendar"})
-			break
-
-		case "requesting a list of active alts":
-			sendResponse({
-				text: "list of active alts",
-				alts: [ports.main.name, ...ports.alt.map(alt => alt.name)],
-			})
-	}
-})
-
 /**
  * Returns a list of containers for use by Betaburlogin
  * @async
@@ -184,6 +149,41 @@ async function login() {
 function sendMessage(message, users=[...ports.alt, ports.main]) {
 	for (const user of users) user.postMessage(message)
 }
+
+browser.runtime.onConnect.addListener(runtimePort => {
+	const port = new Port(runtimePort)
+	log(`${port.role}${port.name ? ` (${port.name})` : ""} connected`)
+})
+
+browser.runtime.onMessage.addListener(({ text }, _, sendResponse) => {
+	switch (text) {
+		case "open alt tabs":
+			openTabs()
+			break
+
+		case "requesting login":
+			login()
+			break
+
+		case "banner closed":
+			sendMessage({text: "close banners"})
+			break
+
+		case "requesting currency":
+			sendMessage({text: "send currency", recipient: this.name})
+			break
+
+		case "receive advent calendar awards":
+			sendMessage({text: "open advent calendar"})
+			break
+
+		case "requesting a list of active alts":
+			sendResponse({
+				text: "list of active alts",
+				alts: [ports.main.name, ...ports.alt.map(alt => alt.name)],
+			})
+	}
+})
 
 getSettings()
 
