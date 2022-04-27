@@ -128,7 +128,6 @@ browser.storage.sync.get().then(result => {
 		if (settings.verbose) log("Received message:", message)
 
 		if (message.text === "close banners") closeBanner()
-		if (message.text === "list of active alts") wiring.spreadCurrency(message.alts)
 		if (message.text === "open advent calendar") calendar.receiveAdventCalendar()
 		if (message.text === "send currency") wiring.wire(message.recipient)
 	})
@@ -178,7 +177,7 @@ $(document).on("roa-ws:all", (_, data) => betabotChannel.port1.postMessage(JSON.
 		$("#betabot-next-to-name").append(`<button id="betabot-request-button" class="betabot"><a>Request Currency</a></button>`)
 		$("#betabot-next-to-name").append(`<button id="betabot-spread-button" class="betabot"><a>Spread Currency</a></button>`)
 		$("#betabot-request-button").click(() => browser.runtime.sendMessage({text: "requesting currency"}))
-		$("#betabot-spread-button").click(() => browser.runtime.sendMessage({text: "requesting a list of active alts"}))
+		$("#betabot-spread-button").click(() => browser.runtime.sendMessage({text: "requesting a list of active alts"})).then(wiring.spreadCurrency)
 	}
 
 	// Start up auto wire:
