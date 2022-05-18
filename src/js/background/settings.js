@@ -222,7 +222,7 @@ function updateSettings() {
 			settings.addCustomBuild = true
 			settings.addUsername = true
 		case 9:
-			settings.eventChannelID = 3262
+			settings.eventChannelID = 3307
 			settings.addOpenTabs = true
 			settings.addLoginAlts = false
 			settings.removeEffects = false
